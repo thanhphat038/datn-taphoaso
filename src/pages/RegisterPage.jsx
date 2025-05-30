@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const LoginPage = () => {
+const RegisterPage = () => {
     const [formData, setFormData] = useState({
+        name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
 
     const handleChange = (e) => {
@@ -17,8 +19,8 @@ const LoginPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // TODO: Implement login logic
-        console.log('Login attempt with:', formData);
+        // TODO: Implement registration logic
+        console.log('Register attempt with:', formData);
     };
 
     return (
@@ -27,17 +29,33 @@ const LoginPage = () => {
             <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
                 <img
                     src="/images/logo_ngang.png"
-                    alt="Login Banner"
+                    alt="Register Banner"
                     className="max-w-md w-full h-auto object-contain"
                 />
             </div>
 
-            {/* Right side - Login Form */}
+            {/* Right side - Register Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center px-8">
                 <div className="max-w-md w-full">
-                    <h2 className="text-3xl font-bold text-center mb-8">Đăng nhập</h2>
+                    <h2 className="text-3xl font-bold text-center mb-8">Đăng ký</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                Họ và tên
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                placeholder="Nhập họ và tên của bạn"
+                            />
+                        </div>
+
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email
@@ -70,24 +88,20 @@ const LoginPage = () => {
                             />
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-cyan-400 focus:ring-cyan-400 border-cyan-400 rounded"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                                    Ghi nhớ đăng nhập
-                                </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <a href="#" className="font-medium text-cyan-400 hover:text-cyan-500">
-                                    Quên mật khẩu?
-                                </a>
-                            </div>
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                                Xác nhận mật khẩu
+                            </label>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                placeholder="Nhập lại mật khẩu"
+                            />
                         </div>
 
                         <div className="space-y-4">
@@ -95,14 +109,14 @@ const LoginPage = () => {
                                 type="submit"
                                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-400 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
                             >
-                                Đăng nhập
+                                Đăng ký
                             </button>
 
                             <Link 
-                                to="/register" 
+                                to="/login" 
                                 className="w-full flex justify-center py-2 px-4 border border-cyan-400 rounded-md shadow-sm text-sm font-medium text-cyan-400 bg-white hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
                             >
-                                Đăng ký
+                                Đã có tài khoản? Đăng nhập
                             </Link>
                         </div>
                     </form>
@@ -112,4 +126,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage;
