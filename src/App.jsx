@@ -6,6 +6,9 @@ import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import CartPage from './pages/CartPage';
+import ProfilePage from './pages/ProfilePage';
+
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        
         </Routes>
         <Footer></Footer>
       </div>
