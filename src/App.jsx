@@ -11,12 +11,10 @@ function App() {
     <Router>
       <div className="App w-full">
         <Header></Header>
-        {/* <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes> */}
+        </Routes>
       </div>
     </Router>
   );
