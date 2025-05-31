@@ -4,46 +4,38 @@ import { useProductData } from '../controller/Product.controller';
 const ProductsPage = () => {
     // State cho phân trang
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 20;
-    const totalProducts = 100; // Giả sử có 100 sản phẩm
+    const productsPerPage = 8;
+
+    const totalProducts = useProductData().length;
+
     const totalPages = Math.ceil(totalProducts / productsPerPage);
 
-    // Hàm xử lý chuyển trang
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    const currentProducts = useProductData().slice(startIndex, endIndex);
+
     const handlePageChange = (pageNumber) => {
-        if (pageNumber >= 1 && pageNumber <= totalPages) {
-            setCurrentPage(pageNumber);
-        }
+        if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
     };
 
-    // Tạo mảng các số trang để hiển thị
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 5;
-        
-        if (totalPages <= maxVisiblePages) {
-            // Nếu tổng số trang <= 5, hiển thị tất cả
-            for (let i = 1; i <= totalPages; i++) {
-                pageNumbers.push(i);
-            }
-        } else {
-            // Nếu tổng số trang > 5, hiển thị có logic
-            if (currentPage <= 3) {
-                // Nếu đang ở trang đầu
-                for (let i = 1; i <= 5; i++) {
-                    pageNumbers.push(i);
-                }
-            } else if (currentPage >= totalPages - 2) {
-                // Nếu đang ở trang cuối
-                for (let i = totalPages - 4; i <= totalPages; i++) {
-                    pageNumbers.push(i);
-                }
-            } else {
-                // Nếu đang ở giữa
-                for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-                    pageNumbers.push(i);
-                }
-            }
+
+        if (totalPages <= maxVisiblePages)
+            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+
+        else {
+            if (currentPage <= 3)
+                for (let i = 1; i <= 5; i++)  pageNumbers.push(i);
+
+            else if (currentPage >= totalPages - 2)
+                for (let i = totalPages - 4; i <= totalPages; i++) pageNumbers.push(i);
+
+            else
+                for (let i = currentPage - 2; i <= currentPage + 2; i++) pageNumbers.push(i);
         }
+
         return pageNumbers;
     };
 
@@ -52,7 +44,7 @@ const ProductsPage = () => {
             <div className='w-[1240px] m-auto py-10'>
                 <div className='flex gap-5'>
 
-                    <div className='w-[30%] flex flex-col gap-4 sticky top-4 h-fit'>
+                    <div className='w-[350px] flex flex-col gap-4 sticky top-4 h-fit'>
                         <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
                             <h2 className='text-xl font-bold mb-4'>Danh mục</h2>
                             <div className='flex flex-col gap-2'>
@@ -97,17 +89,15 @@ const ProductsPage = () => {
                             </div>
                         </div>
                     </div>
-                    
-                    <div className='w-[70%]'>
+
+                    <div className='w-full'>
                         <div className='px-3 pb-5 rounded-[5px]'>
                             <div className='grid grid-cols-4 gap-3'>
-                                {useProductData(productsPerPage)}
+                                {currentProducts}
                             </div>
-                            
-                            {/* Phân trang */}
+
                             <div className='flex justify-center items-center gap-2 mt-8'>
-                                {/* Nút Previous */}
-                                <button 
+                                <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
                                     className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 
@@ -118,22 +108,20 @@ const ProductsPage = () => {
                                     </svg>
                                 </button>
 
-                                {/* Các số trang */}
                                 {getPageNumbers().map((pageNum) => (
                                     <button
                                         key={pageNum}
                                         onClick={() => handlePageChange(pageNum)}
                                         className={`w-10 h-10 flex items-center justify-center rounded-lg border 
-                                        ${currentPage === pageNum 
-                                            ? 'bg-blue-500 text-white border-blue-500' 
-                                            : 'border-gray-300 hover:bg-gray-100'}`}
+                                        ${currentPage === pageNum
+                                                ? 'bg-blue-500 text-white border-blue-500'
+                                                : 'border-gray-300 hover:bg-gray-100'}`}
                                     >
                                         {pageNum}
                                     </button>
                                 ))}
 
-                                {/* Nút Next */}
-                                <button 
+                                <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
                                     className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 
