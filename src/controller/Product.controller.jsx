@@ -27,18 +27,10 @@ export const useProductDetailData = (id) => {
 
     useEffect(() => {
         const fetchProductDetail = async () => {
-            try {
-                const response = await dataProductDetail(id);
-                setProduct(response.data);
-            } catch (error) {
-                console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
-                setProduct(null);
-            }
+            const item = await dataProductDetail(id);
+            setProduct(item.data);
         };
-        
-        if (id) {
-            fetchProductDetail();
-        }
+        fetchProductDetail();
     }, [id]);
 
     return product;

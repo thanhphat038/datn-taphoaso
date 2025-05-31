@@ -1,14 +1,15 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 const Product = (data) => {
-    
+
     const product = data.data;
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND',
-        }).format(value).replace('₫','₫');
+        }).format(value).replace('₫', '₫');
     };
 
     return (
@@ -17,7 +18,7 @@ const Product = (data) => {
                 <img className='w-[155px] h-[155px] m-auto' src={product.image} alt="" />
             </div>
             <div>
-                <a href=""><span className='text-[18px]'> {product.title} </span></a>
+                <Link to={`/product/${product.id}`}><span className='text-[18px]'> {product.title} </span></Link>
                 <p>
                     <span className='text-[18px] text-[#FF0000]'> {formatCurrency(product.price)} </span>
                     <del className='text-[14px] text-[#B2B2B2]'> {formatCurrency(product.price)} </del>
