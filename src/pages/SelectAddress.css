@@ -1,0 +1,219 @@
+.select-address-bg {
+  background: #f4f5f9;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+.select-address-container {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+  margin-top: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.select-address-header {
+  border-radius: 14px 14px 0 0;
+  background: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+  border-bottom: 1.5px solid #e0e0e0;
+}
+
+.select-address-title {
+  flex: 1;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+}
+
+.select-address-back {
+  background: none;
+  border: none;
+  color: #222;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.select-address-section {
+  padding: 18px 20px 14px 20px;
+}
+
+.select-address-label {
+  font-size: 15px;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.select-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.select-address-item {
+  display: flex;
+  align-items: center;
+  background: #f6f8fb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #222;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.18s, border 0.18s;
+}
+.select-address-item.selected {
+  background: #f1f6fd;
+  border: 2px solid #2196f3;
+}
+.select-address-item:hover {
+  background: #eaf2fa;
+}
+
+.select-address-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.select-address-detail {
+  font-size: 14px;
+  color: #555;
+}
+
+.select-address-radio {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+.select-address-radio-checked {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2196f3;
+  border: 1px solid #2196f3;
+  position: relative;
+}
+.select-address-radio-checked:after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+.select-address-radio-unchecked {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #bfc9d8;
+  background: #fff;
+}
+
+.select-address-radio-icon {
+  font-size: 22px;
+  color: #bfc9d8;
+  margin-left: 0;
+  margin-right: 0;
+  vertical-align: middle;
+  transition: color 0.18s;
+}
+.select-address-radio-icon.checked {
+  color: #2196f3;
+}
+
+.select-address-add {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #bfc9d8;
+  color: #2196f3;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.18s, border 0.18s;
+}
+.select-address-add:hover {
+  background: #f1f6fd;
+  border: 1.5px solid #2196f3;
+}
+
+.select-address-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #2196f3;
+  color: #2196f3;
+  margin-right: 10px;
+  font-size: 16px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.select-address-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+  z-index: 20;
+}
+
+.select-address-confirm {
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(90deg, #6ddcff 0%, #2196f3 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 0;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(33,150,243,0.08);
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.select-address-confirm:hover {
+  background: linear-gradient(90deg, #2196f3 0%, #6ddcff 100%);
+}
+
+@media (max-width: 600px) {
+  .select-address-container {
+    border-radius: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+  .select-address-header {
+    font-size: 18px;
+    padding: 12px 8px 8px 8px;
+  }
+  .select-address-section {
+    padding: 10px 8px 10px 8px;
+  }
+  .select-address-footer-sticky {
+    padding-bottom: 6px;
+  }
+} 
