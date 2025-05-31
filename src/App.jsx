@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailPage from './pages/BlogDetailPage';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/blog" element={<BlogPage/>} />
           <Route path="/blog/:id" element={<BlogDetailPage />} />
         </Routes>
+        <Footer></Footer>
       </div>
     </Router>
   );
