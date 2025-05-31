@@ -9,6 +9,10 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const navigate = useNavigate();
 
+  const handleOrder = () => {
+    navigate('/payment-success');
+  };
+
   return (
     <div className="checkout-bg min-h-screen flex flex-col items-center">
       <div className="checkout-grid-container grid grid-cols-12 w-full max-w-5xl mx-auto">
@@ -80,7 +84,7 @@ const Checkout = () => {
               <span className="font-medium text-lg">Tổng tiền tạm tính:</span>
               <span className="checkout-total">379.000 đ</span>
             </div>
-            <button className="checkout-btn-order w-full">Đặt ngay</button>
+            <button className="checkout-btn-order w-full" onClick={handleOrder}>Đặt ngay</button>
           </div>
           
           <PaymentMethodModal

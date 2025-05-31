@@ -6,6 +6,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
 import Checkout from './pages/Checkout';
 import SelectAddress from './pages/SelectAddress';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/select-address" element={<SelectAddress />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
