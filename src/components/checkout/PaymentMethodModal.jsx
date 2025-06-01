@@ -6,7 +6,7 @@ const paymentMethods = [
   {
     key: 'cod',
     label: 'Tiền mặt khi nhận hàng',
-    icon: <FaWallet size={28} style={{ marginRight: 12 }} />,
+    icon: <FaWallet size={24} style={{ marginRight: 12 }} />,
   },
   {
     key: 'vnpay',

@@ -4,9 +4,9 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
-import Checkout from './pages/Checkout';
-import SelectAddress from './pages/SelectAddress';
-import PaymentSuccess from './pages/PaymentSuccess';
+import Checkout from './pages/checkout/Checkout';
+import SelectAddress from './pages/checkout/SelectAddress';
+import PaymentSuccess from './pages/checkout/PaymentSuccess';
 
 function App() {
   return (

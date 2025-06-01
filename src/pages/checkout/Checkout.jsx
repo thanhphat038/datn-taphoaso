@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit } from 'react-icons/fa';
 import './Checkout.css';
-import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
+import PaymentMethodModal from '../../components/checkout/PaymentMethodModal';
 
 const Checkout = () => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
@@ -16,9 +16,9 @@ const Checkout = () => {
   return (
     <div className="checkout-bg min-h-screen flex flex-col items-center">
       <div className="checkout-grid-container grid grid-cols-12 w-full max-w-5xl mx-auto">
-        <div className="col-span-12 md:col-span-8 md:col-start-3 flex flex-col relative">
+        <div className="checkout-main col-span-8 col-start-3 flex flex-col relative">
           {/* Địa chỉ + thanh toán */}
-          <div className="checkout-main-box">
+          <div className="checkout-main-box px-4 md:px-6 lg:px-8">
             <h2 className="checkout-title text-center">Thanh toán</h2>
             <div className="checkout-section checkout-address-section">
               <div className="flex justify-between items-center mb-2">
@@ -59,12 +59,14 @@ const Checkout = () => {
             {/* Phương thức thanh toán */}
             <div className="checkout-section">
               <div className="checkout-label mb-2">Phương thức thanh toán( tiền mặt, thẻ, chuyển khoản, ví...)</div>
-              <div className="flex items-center bg-green-50 rounded-lg p-3 justify-between">
-                <span className="text-green-700 font-medium">
-                  {paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán qua VNPAY'}
-                </span>
-                <button className="checkout-btn-edit text-xs text-blue-500" onClick={() => setOpenPaymentModal(true)}>Thay đổi <FaEdit className="ml-1" /></button>
-              </div>
+            
+                <div className="checkout-payment-method flex items-center bg-green-50 rounded-lg p-3 justify-between">
+                  <span className="text-green-700 font-medium">
+                    {paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán qua VNPAY'}
+                  </span>
+                  <button className="checkout-btn-edit text-xs text-blue-500" onClick={() => setOpenPaymentModal(true)}>Thay đổi <FaEdit className="ml-1" /></button>
+                </div>
+              
             </div>
             {/* Mã giảm giá */}
             <div className="checkout-section">

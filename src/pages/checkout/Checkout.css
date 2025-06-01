@@ -25,6 +25,11 @@
   font-family: var(--checkout-font);
   font-size: var(--checkout-title-size);
   font-weight: 700;
+  background-color: #fff;
+  padding: 12px 12px;
+  border-radius:0 0 12px 12px ;
+  font-size: 22px;
+  color: #222;
 }
 
 .checkout-label {
@@ -32,14 +37,6 @@
   font-size: var(--checkout-label-size);
   font-family: var(--checkout-font);
   font-weight: 500;
-}
-
-.checkout-section {
-  background: #fff;
-  color: #222;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 20px 20px;
 }
 
 .checkout-btn-edit {
@@ -129,20 +126,18 @@
 }
 
 /* Checkout main box */
-
-.checkout-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 24px;
+.checkout-main {
+  background: #f3f5f9;
+  /* padding: 20px 20px; */
   font-family: var(--checkout-font);
 }
 
 .checkout-section {
   background: #fff;
+  color: #222;
   border-radius: 12px;
-  padding: 18px 20px 14px 20px;
-  margin-bottom: 20px;
+  padding: 1rem;
+  margin: 20px 20px;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
 }
 
@@ -167,14 +162,14 @@
   border-radius: 10px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.07);
 }
 .checkout-product:last-child {
   margin-bottom: 0;
 }
 .checkout-product img {
   border-radius: 8px;
-  width: 56px;
+  width: 80px;
   height: 56px;
   object-fit: cover;
   margin-right: 12px;
@@ -255,9 +250,9 @@
 }
 
 .checkout-grid-container {
+  background-color: #E8EDF0;
   min-height: 100vh;
   align-items: flex-start;
-  padding-top: 32px;
 }
 
 .checkout-address-section {
@@ -287,17 +282,25 @@
   }
 }
 
+.checkout-payment-method{
+  background-color: #F5FFF3;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #000000;
+  font-size: 15px;
+  border: 0.5px solid #959595;
+  transition: background 0.2s;
+}
+
 .checkout-total-box-sticky {
   background: #fff;
   color: black;
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 -2px 8px 0 rgba(0,0,0,0.04);
+  border-radius: 12px 12px 0 0 ;
   padding: 20px 20px;
   position: sticky;
   bottom: 0;
   left: 0;
   z-index: 30;
-  border-top: 2.5px solid #e0e0e0;
   width: 100%;
   margin-top: 0;
 }
