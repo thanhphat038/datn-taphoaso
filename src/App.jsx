@@ -4,6 +4,10 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
+import Checkout from './pages/checkout/Checkout';
+import SelectAddress from './pages/checkout/SelectAddress';
+import PaymentSuccess from './pages/checkout/PaymentSuccess';
+
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -22,6 +26,10 @@ function App() {
           <Route path="/product" element={<ProductsPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/select-address" element={<SelectAddress />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="*" element={<NotFoundPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage/>} />
           <Route path="/blog" element={<BlogPage/>} />
