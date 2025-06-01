@@ -14,8 +14,14 @@ import RegisterPage from './pages/RegisterPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import Footer from './components/Footer';
+
+import CartPage from './pages/CartPage';
+import ProfilePage from './pages/ProfilePage';
+
+
 import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
+
 function App() {
   return (
     <Router>
@@ -26,6 +32,9 @@ function App() {
           <Route path="/product" element={<ProductsPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/select-address" element={<SelectAddress />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
