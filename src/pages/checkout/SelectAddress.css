@@ -1,0 +1,220 @@
+.select-address-wrapper {
+  background: #F3F5F9;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.select-address-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.select-address-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 12px 16px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  border-radius: 0 0 10px 10px;
+}
+
+.select-address-title {
+  flex: 1;
+  text-align: center;
+}
+
+.select-address-back {
+  background: none;
+  border: none;
+  color: #222;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.select-address-placeholder {
+  width: 24px;
+}
+
+.select-address-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.select-address-section {
+  border-radius: 10px;
+  background: #fff;
+  padding: 20px;
+}
+
+.select-address-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.select-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.select-address-item {
+  display: flex;
+  align-items: center;
+  background: #f6f8fb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #222;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.18s, border 0.18s;
+}
+.select-address-item.selected {
+  background: #f1f6fd;
+  border: 2px solid #2196f3;
+}
+.select-address-item:hover {
+  background: #eaf2fa;
+}
+
+.select-address-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.select-address-detail {
+  font-size: 14px;
+  color: #555;
+}
+
+.select-address-radio {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.select-address-radio-checked,
+.select-address-radio-unchecked {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  position: relative;
+}
+.select-address-radio-checked {
+  background: #2196f3;
+  border: 1px solid #2196f3;
+}
+.select-address-radio-checked::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+.select-address-radio-unchecked {
+  border: 1px solid #bfc9d8;
+  background: #fff;
+}
+
+.select-address-add {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #bfc9d8;
+  color: #2196f3;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.select-address-add:hover {
+  background: #f1f6fd;
+  border-color: #2196f3;
+}
+
+.select-address-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #2196f3;
+  color: #2196f3;
+  margin-right: 10px;
+  font-size: 16px;
+  background: #fff;
+}
+
+.select-address-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 12px 16px;
+  z-index: 20;
+  border-radius: 12px 12px 0 0 ;
+}
+
+.select-address-confirm {
+  width: 100%;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 0;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.08);
+  cursor: pointer;
+  background: linear-gradient(90deg, #6ddcff, #2196f3); /* fallback nếu không có class hiệu ứng */
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Hiệu ứng gradient mượt */
+.gradient-slide-effect::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, #2196f3, #6ddcff);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.gradient-slide-effect:hover::before {
+  opacity: 1;
+}
+
+.gradient-slide-effect > * {
+  position: relative;
+  z-index: 2;
+}
+
+.select-address-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
