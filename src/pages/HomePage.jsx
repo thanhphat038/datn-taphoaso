@@ -17,11 +17,11 @@ const HomePage = () => {
 
         <div className='bg-[#ffe283a1] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center'>Sản phẩm</p>
+            <p className='text-[20px] w-full text-center capitalize'>mì ăn liền</p>
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("men's clothing", 5)}
+            {useProductData("mì ăn liền", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -31,11 +31,11 @@ const HomePage = () => {
 
         <div className='bg-[#05ac5ba5] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center'>Sản phẩm</p>
+            <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("women's clothing", 5)}
+            {useProductData("nước uống", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -49,11 +49,11 @@ const HomePage = () => {
 
         <div className='bg-[#f2f2f29e] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center'>Sản phẩm</p>
+            <p className='text-[20px] w-full text-center capitalize'>mì ăn liền</p>
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("electronics", 5)}
+            {useProductData("mì ăn liền", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -63,11 +63,11 @@ const HomePage = () => {
 
         <div className='bg-[#f2f2f29e] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center'>Sản phẩm</p>
+            <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("jewelery", 5)}
+            {useProductData("nước uống", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>

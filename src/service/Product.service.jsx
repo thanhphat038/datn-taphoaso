@@ -1,10 +1,11 @@
 import axios from "axios";
 
 export const dataProduct = () => {
-    return axios.get("https://fakestoreapi.com/products");
+    return axios.get("http://localhost:3001/products");
 };
+
 export const dataProductDetail = (id) => {
-    return axios.get(`https://fakestoreapi.com/products/${id}`);
+    return axios.get(`http://localhost:3001/products?id=${id}`);
 };
 
 // export const updatedata = (id, content) => {

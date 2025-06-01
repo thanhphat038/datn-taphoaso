@@ -7,7 +7,7 @@ const Header = () => {
             <div className='w-[1240px] h-full m-auto flex place-content-between place-items-center gap-20'>
 
                 <div>
-                    <img className='w-[185px]' src="./images/logo_ngang.png" alt="Logo" />
+                    <img className='w-[185px]' src="/images/logo_ngang.png" alt="Logo" />
                 </div>
 
                 <Navbar />
