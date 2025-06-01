@@ -4,17 +4,22 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
-
+import Header from './components/Header';
+import Footer from './components/Footer';
+import ProductsPage from './pages/products';
+import ProductDetail from './pages/ProductDetail';
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Navbar />
+      <div className="App w-full">
+        <Header></Header>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/product" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        <Footer></Footer>
       </div>
     </Router>
   );
