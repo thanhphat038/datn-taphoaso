@@ -8,19 +8,34 @@ import Checkout from './pages/checkout/Checkout';
 import SelectAddress from './pages/checkout/SelectAddress';
 import PaymentSuccess from './pages/checkout/PaymentSuccess';
 
+import Header from './components/Header';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import BlogPage from './pages/BlogPage';
+import BlogDetailPage from './pages/BlogDetailPage';
+import Footer from './components/Footer';
+import ProductsPage from './pages/products';
+import ProductDetail from './pages/ProductDetail';
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Navbar />
+      <div className="App w-full">
+        <Header></Header>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/product" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/select-address" element={<SelectAddress />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage/>} />
+          <Route path="/blog" element={<BlogPage/>} />
+          <Route path="/blog/:id" element={<BlogDetailPage />} />
         </Routes>
+        <Footer></Footer>
       </div>
     </Router>
   );
