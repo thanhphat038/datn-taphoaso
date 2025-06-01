@@ -84,10 +84,10 @@ const SelectAddress = () => {
         {/* Sticky Footer */}
         <div className="select-address-footer-sticky">
           <button
-            className="select-address-confirm"
+            className="select-address-confirm gradient-slide-effect"
             onClick={() => navigate('/checkout')}
           >
-            Xác nhận
+            <span>Xác nhận</span>
           </button>
         </div>
       </div>
