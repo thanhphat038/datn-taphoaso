@@ -8,6 +8,7 @@ dist/
 .vite/
 
 # System files
+.qodo
 .DS_Store
 Thumbs.db
 

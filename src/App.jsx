@@ -4,6 +4,9 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
+import Checkout from './pages/checkout/Checkout';
+import SelectAddress from './pages/checkout/SelectAddress';
+import PaymentSuccess from './pages/checkout/PaymentSuccess';
 
 function App() {
   return (
@@ -13,6 +16,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/select-address" element={<SelectAddress />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

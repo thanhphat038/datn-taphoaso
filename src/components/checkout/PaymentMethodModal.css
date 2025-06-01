@@ -1,0 +1,183 @@
+.pm-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-modal-box {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
+  min-width: 420px;
+  max-width: 96vw;
+  padding: 0 0 24px 0;
+  animation: pmModalFadeIn 0.18s;
+}
+
+@keyframes pmModalFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: none; }
+}
+
+.pm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px 12px 28px;
+}
+
+.pm-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+}
+
+.pm-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.pm-modal-list {
+  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pm-modal-item {
+  display: flex;
+  align-items: center;
+  background: #f6f8fb;
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  border: 2px solid transparent;
+}
+.pm-modal-item.selected {
+  background: #f1f6fd;
+  border: 2px solid #2196f3;
+}
+.pm-modal-item:hover {
+  background: #eaf2fa;
+}
+
+.pm-modal-radio {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+}
+.pm-modal-radio-checked {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2196f3;
+  border: 2px solid #2196f3;
+  margin-right: 8px;
+  position: relative;
+}
+.pm-modal-radio-checked:after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+.pm-modal-radio-unchecked {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid #bfc9d8;
+  background: #fff;
+  margin-right: 8px;
+}
+
+.pm-modal-label {
+  font-size: 18px;
+  font-weight: 500;
+  color: #222;
+  display: flex;
+  align-items: center;
+}
+
+.pm-modal-radio-icon {
+  font-size: 22px;
+  color: #bfc9d8;
+  margin-left: 0;
+  margin-right: 12px;
+  vertical-align: middle;
+  transition: color 0.18s;
+}
+.pm-modal-radio-icon.checked {
+  color: #2196f3;
+}
+
+.pm-modal-vnpay-img {
+  width: 64px;
+  height: 28px;
+  object-fit: contain;
+  margin-right: 12px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.pm-modal-radio-native {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid #bfc9d8;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 16px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.pm-modal-radio-native:checked {
+  border: 2px solid #2196f3;
+  box-shadow: 0 0 0 2px #e3f1fd;
+}
+.pm-modal-radio-native:checked::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: #2196f3;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+@media (max-width: 600px) {
+  .pm-modal-box {
+    min-width: 90vw;
+    padding: 0 0 18px 0;
+  }
+  .pm-modal-header, .pm-modal-list {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+} 
