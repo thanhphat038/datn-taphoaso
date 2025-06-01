@@ -10,6 +10,9 @@ const Header = () => {
                 <Link to="/">
                     <img className='w-[185px] hover:opacity-90 transition-opacity' src="./images/logo_ngang.png" alt="Logo" />
                 </Link>
+                <div>
+                    <img className='w-[185px]' src="/images/logo_ngang.png" alt="Logo" />
+                </div>
 
                 <Navbar />
 

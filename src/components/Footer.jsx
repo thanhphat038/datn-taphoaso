@@ -6,7 +6,7 @@ const Footer = () => {
       <div className='w-[1240px] h-full m-auto flex place-content-between place-items-center gap-20'>
 
         <div>
-          <img className='w-[250px] h-[250px]' src="./images/logo_vuong.png" alt="Logo" />
+          <img className='w-[250px] h-[250px]' src="/images/logo_vuong.png" alt="Logo" />
         </div>
 
         <div className='h-[180px]'>
@@ -47,10 +47,10 @@ const Footer = () => {
           </div>
 
           <div className='flex gap-7'>
-            <a href=""><img src="./images/image 20.png" alt="" /></a>
-            <a href=""><img src="./images/image 17.png" alt="" /></a>
-            <a href=""><img src="./images/image 18.png" alt="" /></a>
-            <a href=""><img src="./images/image 19.png" alt="" /></a>
+            <a href=""><img src="/images/image 20.png" alt="" /></a>
+            <a href=""><img src="/images/image 17.png" alt="" /></a>
+            <a href=""><img src="/images/image 18.png" alt="" /></a>
+            <a href=""><img src="/images/image 19.png" alt="" /></a>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ const Footer = () => {
             </p>
           </div>
           <div>
-            <img className='w-[160px]' src="./images/image 16.png" alt="" />
+            <img className='w-[160px]' src="/images/image 16.png" alt="" />
           </div>
         </div>
       </div>
