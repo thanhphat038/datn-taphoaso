@@ -17,6 +17,7 @@ import Footer from './components/Footer';
 
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 
 import ProductsPage from './pages/products';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/order/:id" element={<OrderDetailPage />} />
         
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/select-address" element={<SelectAddress />} />
