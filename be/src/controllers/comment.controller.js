@@ -1,0 +1,129 @@
+import { commentService } from '../services/index.js';
+import { AppError, ERROR_CODES } from '../utils/error.js';
+
+// Create new comment
+export const createComment = async (req, res, next) => {
+  try {
+    const { product_id } = req.params;
+    const comment = await commentService.createComment(req.user._id, product_id, req.body);
+    res.status(201).json({
+      success: true,
+      data: comment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get all comments
+export const getComments = async (req, res, next) => {
+  try {
+    const { user_id, product_id } = req.query;
+    const filters = {};
+    if (user_id) filters.user_id = user_id;
+    if (product_id) filters.product_id = product_id;
+
+    const comments = await commentService.findAll(filters, {
+      populate: [
+        { path: 'user_id', select: 'name email' },
+        { path: 'product_id', select: 'name' }
+      ]
+    });
+    res.json({
+      success: true,
+      data: comments
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get comment by id
+export const getCommentById = async (req, res, next) => {
+  try {
+    const comment = await commentService.findById(req.params.id, {
+      populate: [
+        { path: 'user_id', select: 'name email' },
+        { path: 'product_id', select: 'name' }
+      ]
+    });
+    if (!comment) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Comment not found');
+    }
+    res.json({
+      success: true,
+      data: comment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update comment
+export const updateComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const comment = await commentService.updateComment(commentId, req.user._id, req.body);
+    res.json({
+      success: true,
+      data: comment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete comment
+export const deleteComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    await commentService.deleteComment(commentId, req.user._id);
+    res.json({
+      success: true,
+      message: 'Comment deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductComments = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const { page, limit, sort } = req.query;
+    const comments = await commentService.getProductComments(productId, { page, limit, sort });
+    res.json({
+      success: true,
+      data: comments
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserComments = async (req, res, next) => {
+  try {
+    const { page, limit, sort } = req.query;
+    const comments = await commentService.getUserComments(req.user._id, { page, limit, sort });
+    res.json({
+      success: true,
+      data: comments
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCommentReplies = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const { page, limit, sort } = req.query;
+    const replies = await commentService.getCommentReplies(commentId, { page, limit, sort });
+    res.json({
+      success: true,
+      data: replies
+    });
+  } catch (error) {
+    next(error);
+  }
+}; 
