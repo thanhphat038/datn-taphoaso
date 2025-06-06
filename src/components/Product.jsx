@@ -21,7 +21,7 @@ const Product = (data) => {
                 <Link to={`/product/${product.id}`}><span className='text-[18px]'> {product.name} </span></Link>
                 <p>
                     <span className='text-[18px] text-[#FF0000]'> {formatCurrency(product.price)} </span>
-                    <del className='text-[14px] text-[#B2B2B2]'> {formatCurrency(product.price)} </del>
+                    <del className='text-[14px] text-[#B2B2B2]'> {formatCurrency(product.original_price)} </del>
                 </p>
                 <p className='flex'>
                     {[...Array(Math.floor(product.rating.rate || 0))].map((_, i) => (
