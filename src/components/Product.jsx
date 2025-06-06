@@ -15,7 +15,7 @@ const Product = (data) => {
     return (
         <div className='drop-shadow-lg bg-white p-4 rounded-[15px] flex flex-col place-content-between gap-5'>
             <div className='w-full mt-2'>
-                <img className='w-[155px] h-[155px] m-auto' src={product.images[0]} alt="" />
+                <img className='w-[200px] h-[150px] m-auto' src={product.images[0]} alt="" />
             </div>
             <div className='w-full'>
                 <Link to={`/product/${product.id}`}><span className='text-[18px]'> {product.name} </span></Link>
@@ -34,9 +34,9 @@ const Product = (data) => {
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                         </svg>
                     ))}
-                    <span className='text-[14px] ms-2'> {product.rating.rate}/5</span>
+                    <span className='text-[14px] ms-2'> {product.rating.rate}</span>
                 </p>
-                <p className='text-[14px]'> {product.rating.count} đánh giá</p>
+                {/* <p className='text-[14px]'> {product.rating.count} đánh giá</p> */}
             </div>
             <div className='w-full flex gap-4'>
                 <button className='h-[40px] text-[18px] border-1 border-[#06AEF4] rounded-[10px] p-1 w-full hover:bg-[#06AEF4] hover:text-white cursor-pointer'>Mua ngay</button>
