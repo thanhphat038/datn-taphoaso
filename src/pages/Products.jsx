@@ -5,9 +5,28 @@ const ProductsPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-    const productsPerPage = 16  ;
+    const productsPerPage = 16;
 
     const allProducts = useProductData();
+
+
+    const getCategoryCount = (categoryId) => {
+        return allProducts.filter(product => product.category_id === categoryId).length;
+    };
+
+
+    const getPriceRangeCount = (range) => {
+        return allProducts.filter(product => {
+            const price = product.price;
+            switch (range) {
+                case 'under-200': return price < 200000;
+                case '200-500': return price >= 200000 && price <= 500000;
+                case '500-1000': return price > 500000 && price <= 1000000;
+                case 'over-1000': return price > 1000000;
+                default: return true;
+            }
+        }).length;
+    };
 
     const filterProducts = (products) => {
         let result = products;
@@ -73,83 +92,159 @@ const ProductsPage = () => {
 
                     <div className='w-[350px] flex flex-col gap-4 sticky top-4 h-fit'>
                         <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
-                            <h2 className='text-xl font-bold mb-4'>Danh mục</h2>
+                            <div className='flex justify-between items-center mb-4'>
+                                <h2 className='text-xl font-bold'>Danh mục</h2>
+                                {selectedCategoryId && (
+                                    <button 
+                                        onClick={() => setSelectedCategoryId(null)}
+                                        className='text-sm text-blue-500 hover:text-blue-700'
+                                    >
+                                        Xóa bộ lọc
+                                    </button>
+                                )}
+                            </div>
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input
-                                        type="radio"
-                                        id="1"
-                                        className='w-4 h-4'
-                                        name="category"
-                                        onChange={() => setSelectedCategoryId(1)}
-                                    />
-                                    <label htmlFor="category1">Mì ăn liền</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedCategoryId === 1 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedCategoryId(1)}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="1"
+                                            className='w-4 h-4'
+                                            name="category"
+                                            checked={selectedCategoryId === 1}
+                                            onChange={() => setSelectedCategoryId(1)}
+                                        />
+                                        <label htmlFor="1">Mì ăn liền</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getCategoryCount(1)})</span>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input
-                                        type="radio"
-                                        id="2"
-                                        className='w-4 h-4'
-                                        name="category"
-                                        onChange={() => setSelectedCategoryId(2)}
-                                    />
-                                    <label htmlFor="category2">Nước ngọt</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedCategoryId === 2 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedCategoryId(2)}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="2"
+                                            className='w-4 h-4'
+                                            name="category"
+                                            checked={selectedCategoryId === 2}
+                                            onChange={() => setSelectedCategoryId(2)}
+                                        />
+                                        <label htmlFor="2">Nước uống</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getCategoryCount(2)})</span>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input
-                                        type="radio"
-                                        id="categoryAll"
-                                        className='w-4 h-4'
-                                        name="category"
-                                        onChange={() => setSelectedCategoryId(null)}
-                                    />
-                                    <label htmlFor="categoryAll">Tất cả</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedCategoryId === null ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedCategoryId(null)}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="categoryAll"
+                                            className='w-4 h-4'
+                                            name="category"
+                                            checked={selectedCategoryId === null}
+                                            onChange={() => setSelectedCategoryId(null)}
+                                        />
+                                        <label htmlFor="categoryAll">Tất cả</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({allProducts.length})</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
-                            <h2 className='text-xl font-bold mb-4'>Khoảng giá</h2>
-                            <div className='flex flex-col gap-4'>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input
-                                        type="radio"
-                                        id="price1"
-                                        className='w-4 h-4'
-                                        name="price"
-                                        onChange={() => setSelectedPriceRange('under-200')}
-                                    />
-                                    <label htmlFor="price1">Dưới 200.000đ</label>
+                            <div className='flex justify-between items-center mb-4'>
+                                <h2 className='text-xl font-bold'>Khoảng giá</h2>
+                                {selectedPriceRange && (
+                                    <button 
+                                        onClick={() => setSelectedPriceRange(null)}
+                                        className='text-sm text-blue-500 hover:text-blue-700'
+                                    >
+                                        Xóa bộ lọc
+                                    </button>
+                                )}
+                            </div>
+                            <div className='flex flex-col gap-2'>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedPriceRange === 'under-200' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedPriceRange('under-200')}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="price1"
+                                            className='w-4 h-4'
+                                            name="price"
+                                            checked={selectedPriceRange === 'under-200'}
+                                            onChange={() => setSelectedPriceRange('under-200')}
+                                        />
+                                        <label htmlFor="price1">Dưới 200.000đ</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('under-200')})</span>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input
-                                        type="radio"
-                                        id="price2"
-                                        className='w-4 h-4'
-                                        name="price"
-                                        onChange={() => setSelectedPriceRange('200-500')}
-                                    />
-                                    <label htmlFor="price2">200.000đ - 500.000đ</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedPriceRange === '200-500' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedPriceRange('200-500')}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="price2"
+                                            className='w-4 h-4'
+                                            name="price"
+                                            checked={selectedPriceRange === '200-500'}
+                                            onChange={() => setSelectedPriceRange('200-500')}
+                                        />
+                                        <label htmlFor="price2">200.000đ - 500.000đ</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('200-500')})</span>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input
-                                        type="radio"
-                                        id="price3"
-                                        className='w-4 h-4'
-                                        name="price"
-                                        onChange={() => setSelectedPriceRange('500-1000')}
-                                    />
-                                    <label htmlFor="price3">500.000đ - 1.000.000đ</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedPriceRange === '500-1000' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedPriceRange('500-1000')}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="price3"
+                                            className='w-4 h-4'
+                                            name="price"
+                                            checked={selectedPriceRange === '500-1000'}
+                                            onChange={() => setSelectedPriceRange('500-1000')}
+                                        />
+                                        <label htmlFor="price3">500.000đ - 1.000.000đ</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('500-1000')})</span>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input
-                                        type="radio"
-                                        id="price4"
-                                        className='w-4 h-4'
-                                        name="price"
-                                        onChange={() => setSelectedPriceRange('over-1000')}
-                                    />
-                                    <label htmlFor="price4">Trên 1.000.000đ</label>
+                                <div 
+                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedPriceRange === 'over-1000' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                    onClick={() => setSelectedPriceRange('over-1000')}
+                                >
+                                    <div className='flex items-center gap-2'>
+                                        <input
+                                            type="radio"
+                                            id="price4"
+                                            className='w-4 h-4'
+                                            name="price"
+                                            checked={selectedPriceRange === 'over-1000'}
+                                            onChange={() => setSelectedPriceRange('over-1000')}
+                                        />
+                                        <label htmlFor="price4">Trên 1.000.000đ</label>
+                                    </div>
+                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('over-1000')})</span>
                                 </div>
                             </div>
                         </div>
