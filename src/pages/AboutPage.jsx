@@ -6,7 +6,7 @@ const AboutPage = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % 3);
-    }, 15000);
+    }, 3000);
 
     return () => clearInterval(timer);
   }, []);
