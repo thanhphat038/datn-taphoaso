@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useProductDetailData, useProductData } from '../controller/Product.controller';
+import { useProductDetailData } from '../controller/Product.controller';
 import { useParams } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
 
@@ -109,9 +109,7 @@ const ProductDetail = () => {
 
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                     <h2 className="text-2xl font-bold mb-4">Sản phẩm liên quan</h2>
-                    <div className='grid grid-cols-5 gap-3'>
-                        {useProductData("nước uống", 5)}
-                    </div>
+
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8 w-[60%]">
