@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { loginUser } from '../service/UserService';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -17,8 +18,14 @@ const LoginPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // TODO: Implement login logic
-        console.log('Login attempt with:', formData);
+        try {
+            const user = loginUser(formData);
+            alert('Đăng nhập thành công! Chào mừng ' + user.name);
+            // Redirect or update UI here, e.g., navigate to home page
+            window.location.href = '/';
+        } catch (error) {
+            alert('Đăng nhập thất bại: ' + error.message);
+        }
     };
 
     return (
@@ -49,7 +56,7 @@ const LoginPage = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                                 placeholder="Nhập email của bạn"
                             />
                         </div>
@@ -65,7 +72,7 @@ const LoginPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                                 placeholder="Nhập mật khẩu"
                             />
                         </div>
@@ -76,7 +83,7 @@ const LoginPage = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-cyan-400 focus:ring-cyan-400 border-cyan-400 rounded"
+                                className="h-4 w-4 text-[#06AEF4] focus:ring-[#06AEF4] border-[#06AEF4] rounded"
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                                     Ghi nhớ đăng nhập
@@ -84,7 +91,7 @@ const LoginPage = () => {
                             </div>
 
                             <div className="text-sm">
-                                <a href="#" className="font-medium text-cyan-400 hover:text-cyan-500">
+                                <a href="#" className="font-medium text-[#06AEF4] hover:text-[#06AEF4]">
                                     Quên mật khẩu?
                                 </a>
                             </div>
@@ -93,14 +100,14 @@ const LoginPage = () => {
                         <div className="space-y-4">
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-400 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#06AEF4] hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
                             >
                                 Đăng nhập
                             </button>
 
                             <Link 
                                 to="/register" 
-                                className="w-full flex justify-center py-2 px-4 border border-cyan-400 rounded-md shadow-sm text-sm font-medium text-cyan-400 bg-white hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
+                                className="w-full flex justify-center py-2 px-4 border border-[#06AEF4] rounded-md shadow-sm text-sm font-medium text-[#06AEF4] bg-white hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
                             >
                                 Đăng ký
                             </Link>

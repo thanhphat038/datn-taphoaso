@@ -21,6 +21,9 @@ import ProfilePage from './pages/ProfilePage';
 
 import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
+import AdminUser from './pages/admin/AdminUser';
+import AdminProduct from './pages/admin/AdminProduct';
+import AdminCategory from './pages/admin/AdminCategory';
 
 function App() {
   return (
@@ -43,6 +46,9 @@ function App() {
           <Route path="/register" element={<RegisterPage/>} />
           <Route path="/blog" element={<BlogPage/>} />
           <Route path="/blog/:id" element={<BlogDetailPage />} />
+          <Route path="/admin/user" element={<AdminUser/>} />
+          <Route path="/admin/product" element={<AdminProduct/>} />
+          <Route path="/admin/category" element={<AdminCategory/>} />
         </Routes>
         <Footer></Footer>
       </div>
