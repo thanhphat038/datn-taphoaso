@@ -16,11 +16,11 @@ const LoginPage = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const user = loginUser(formData);
-            alert('Đăng nhập thành công! Chào mừng ' + user.name);
+            const user = await loginUser(formData);
+            alert('Đăng nhập thành công! Chào mừng ' + user.user.name);
             // Redirect or update UI here, e.g., navigate to home page
             window.location.href = '/';
         } catch (error) {

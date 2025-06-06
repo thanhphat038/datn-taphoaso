@@ -1,34 +1,21 @@
-const USER_STORAGE_KEY = 'users';
+import axios from 'axios';
 
-function getUsers() {
-    const usersJson = localStorage.getItem(USER_STORAGE_KEY);
-    if (usersJson) {
-        return JSON.parse(usersJson);
+const API_URL = 'http://localhost:3001/users';
+
+export async function registerUser({ name, email, password }) {
+    try {
+        const response = await axios.post(`${API_URL}`, { name, email, password });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Đăng ký thất bại');
     }
-    return [];
 }
 
-function saveUsers(users) {
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
-}
-
-export function registerUser({ name, email, password }) {
-    const users = getUsers();
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-        throw new Error('Email đã được đăng ký');
+export async function loginUser({ email, password }) {
+    try {
+        const response = await axios.post(`${API_URL}/login`, { email, password });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Đăng nhập thất bại');
     }
-    const newUser = { name, email, password };
-    users.push(newUser);
-    saveUsers(users);
-    return newUser;
-}
-
-export function loginUser({ email, password }) {
-    const users = getUsers();
-    const user = users.find(user => user.email === email && user.password === password);
-    if (!user) {
-        throw new Error('Email hoặc mật khẩu không đúng');
-    }
-    return user;
 }

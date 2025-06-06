@@ -10,18 +10,55 @@ const RegisterPage = () => {
         confirmPassword: ''
     });
 
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+    const validatePassword = (password) => {
+        if (password.length < 8) {
+            return 'Mật khẩu phải có ít nhất 8 ký tự';
+        }
+        if (!/[A-Z]/.test(password)) {
+            return 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa';
+        }
+        return '';
+    };
+
+    const validateConfirmPassword = (password, confirmPassword) => {
+        if (password !== confirmPassword) {
+            return 'Mật khẩu xác nhận không khớp';
+        }
+        return '';
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        if (name === 'password') {
+            const error = validatePassword(value);
+            setPasswordError(error);
+            // Also validate confirm password if it has value
+            if (formData.confirmPassword) {
+                const confirmError = validateConfirmPassword(value, formData.confirmPassword);
+                setConfirmPasswordError(confirmError);
+            }
+        } else if (name === 'confirmPassword') {
+            const confirmError = validateConfirmPassword(formData.password, value);
+            setConfirmPasswordError(confirmError);
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
             alert('Mật khẩu và xác nhận mật khẩu không khớp!');
+            return;
+        }
+        if (passwordError) {
+            alert(passwordError);
             return;
         }
         try {
@@ -98,9 +135,12 @@ const RegisterPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4] ${passwordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-[#06AEF4]'}`}
                                 placeholder="Nhập mật khẩu"
                             />
+                            {passwordError && (
+                                <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                            )}
                         </div>
 
                         <div>
@@ -114,9 +154,12 @@ const RegisterPage = () => {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4] ${confirmPasswordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-[#06AEF4]'}`}
                                 placeholder="Nhập lại mật khẩu"
                             />
+                            {confirmPasswordError && (
+                                <p className="mt-1 text-sm text-red-600">{confirmPasswordError}</p>
+                            )}
                         </div>
 
                         <div className="space-y-4">
