@@ -1,18 +1,48 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useProductData } from '../controller/Product.controller';
 
 const ProductsPage = () => {
-    // State cho phân trang
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 8;
+    const [selectedPriceRange, setSelectedPriceRange] = useState(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const productsPerPage = 16  ;
 
-    const totalProducts = useProductData().length;
+    const allProducts = useProductData();
 
+    const filterProducts = (products) => {
+        let result = products;
+
+        if (selectedCategoryId !== null) {
+            result = result.filter(product => product.category_id === selectedCategoryId);
+        }
+
+        if (selectedPriceRange) {
+            result = result.filter(product => {
+                const price = product.price;
+                switch (selectedPriceRange) {
+                    case 'under-200': return price < 200000;
+                    case '200-500': return price >= 200000 && price <= 500000;
+                    case '500-1000': return price > 500000 && price <= 1000000;
+                    case 'over-1000': return price > 1000000;
+                    default: return true;
+                }
+            });
+        }
+
+        return result;
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedPriceRange, selectedCategoryId]);
+
+    const filteredProducts = filterProducts(allProducts);
+    const totalProducts = filteredProducts.length;
     const totalPages = Math.ceil(totalProducts / productsPerPage);
 
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
-    const currentProducts = useProductData().slice(startIndex, endIndex);
+    const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
     const handlePageChange = (pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
@@ -24,14 +54,11 @@ const ProductsPage = () => {
 
         if (totalPages <= maxVisiblePages)
             for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
-
         else {
             if (currentPage <= 3)
-                for (let i = 1; i <= 5; i++)  pageNumbers.push(i);
-
+                for (let i = 1; i <= 5; i++) pageNumbers.push(i);
             else if (currentPage >= totalPages - 2)
                 for (let i = totalPages - 4; i <= totalPages; i++) pageNumbers.push(i);
-
             else
                 for (let i = currentPage - 2; i <= currentPage + 2; i++) pageNumbers.push(i);
         }
@@ -48,21 +75,35 @@ const ProductsPage = () => {
                         <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
                             <h2 className='text-xl font-bold mb-4'>Danh mục</h2>
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="ao" className='w-4 h-4' />
-                                    <label htmlFor="ao">Áo</label>
+                                <div className='flex items-center gap-2 cursor-pointer py-2'>
+                                    <input
+                                        type="radio"
+                                        id="1"
+                                        className='w-4 h-4'
+                                        name="category"
+                                        onChange={() => setSelectedCategoryId(1)}
+                                    />
+                                    <label htmlFor="category1">Mì ăn liền</label>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="quan" className='w-4 h-4' />
-                                    <label htmlFor="quan">Quần</label>
+                                <div className='flex items-center gap-2 cursor-pointer py-2'>
+                                    <input
+                                        type="radio"
+                                        id="2"
+                                        className='w-4 h-4'
+                                        name="category"
+                                        onChange={() => setSelectedCategoryId(2)}
+                                    />
+                                    <label htmlFor="category2">Nước ngọt</label>
                                 </div>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="vay" className='w-4 h-4' />
-                                    <label htmlFor="vay">Váy</label>
-                                </div>
-                                <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="phukien" className='w-4 h-4' />
-                                    <label htmlFor="phukien">Phụ kiện</label>
+                                <div className='flex items-center gap-2 cursor-pointer py-2'>
+                                    <input
+                                        type="radio"
+                                        id="categoryAll"
+                                        className='w-4 h-4'
+                                        name="category"
+                                        onChange={() => setSelectedCategoryId(null)}
+                                    />
+                                    <label htmlFor="categoryAll">Tất cả</label>
                                 </div>
                             </div>
                         </div>
@@ -71,19 +112,43 @@ const ProductsPage = () => {
                             <h2 className='text-xl font-bold mb-4'>Khoảng giá</h2>
                             <div className='flex flex-col gap-4'>
                                 <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="price1" className='w-4 h-4' />
+                                    <input
+                                        type="radio"
+                                        id="price1"
+                                        className='w-4 h-4'
+                                        name="price"
+                                        onChange={() => setSelectedPriceRange('under-200')}
+                                    />
                                     <label htmlFor="price1">Dưới 200.000đ</label>
                                 </div>
                                 <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input type="radio" id="price2" className='w-4 h-4' />
+                                    <input
+                                        type="radio"
+                                        id="price2"
+                                        className='w-4 h-4'
+                                        name="price"
+                                        onChange={() => setSelectedPriceRange('200-500')}
+                                    />
                                     <label htmlFor="price2">200.000đ - 500.000đ</label>
                                 </div>
                                 <div className='flex items-center gap-2 cursor-pointer  py-2'>
-                                    <input type="radio" id="price3" className='w-4 h-4' />
+                                    <input
+                                        type="radio"
+                                        id="price3"
+                                        className='w-4 h-4'
+                                        name="price"
+                                        onChange={() => setSelectedPriceRange('500-1000')}
+                                    />
                                     <label htmlFor="price3">500.000đ - 1.000.000đ</label>
                                 </div>
                                 <div className='flex items-center gap-2 cursor-pointer py-2'>
-                                    <input type="radio" id="price4" className='w-4 h-4' />
+                                    <input
+                                        type="radio"
+                                        id="price4"
+                                        className='w-4 h-4'
+                                        name="price"
+                                        onChange={() => setSelectedPriceRange('over-1000')}
+                                    />
                                     <label htmlFor="price4">Trên 1.000.000đ</label>
                                 </div>
                             </div>
