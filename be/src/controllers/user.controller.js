@@ -50,7 +50,10 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = req.query;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Missing email or password' });
+    }
     const db = readDb();
     const user = db.users.find(user => user.email === email && user.password === password);
     if (!user) {

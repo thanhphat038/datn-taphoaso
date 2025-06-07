@@ -16,17 +16,20 @@ const LoginPage = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const user = await loginUser(formData);
-            alert('Đăng nhập thành công! Chào mừng ' + user.user.name);
-            // Redirect or update UI here, e.g., navigate to home page
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await loginUser(formData);
+        if (response && response.user && response.user.name) {
+            alert('Đăng nhập thành công! Chào mừng ' + response.user.name);
             window.location.href = '/';
-        } catch (error) {
-            alert('Đăng nhập thất bại: ' + error.message);
+        } else {
+            alert('Đăng nhập thất bại: Dữ liệu người dùng không hợp lệ');
         }
-    };
+    } catch (error) {
+        alert('Đăng nhập thất bại: ' + error.message);
+    }
+};
 
     return (
         <div className="min-h-screen flex">
