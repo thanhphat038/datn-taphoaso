@@ -175,17 +175,31 @@ const BlogDetailPage = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-                <div className="mb-8">
-                    <img src={blogDetail.image} alt={blogDetail.title} className="w-full max-w-3xl mx-auto rounded-lg shadow-md" style={{ maxHeight: '300px', objectFit: 'cover' }} />
-                    <h1 className="text-3xl font-bold mt-6 mb-2">{blogDetail.title}</h1>
-                    <div className="text-gray-600 mb-4">
-                        <span>{blogDetail.date}</span> | <span>{blogDetail.author}</span>
-                    </div>
-                    <div
-                        className="blog-content prose max-w-none"
-                        dangerouslySetInnerHTML={{ __html: blogDetail.content }}
-                    />
+            <div className="mb-4">
+                <button
+                    onClick={() => window.history.back()}
+                    className="flex items-center space-x-1 font-medium"
+                    style={{ color: '#06AEF4' }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#0284c7'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#06AEF4'}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Quay lại trang blog</span>
+                </button>
+            </div>
+            <div className="mb-8">
+                <img src={blogDetail.image} alt={blogDetail.title} className="w-full max-w-3xl mx-auto rounded-lg shadow-md" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+                <h1 className="text-3xl font-bold mt-6 mb-2">{blogDetail.title}</h1>
+                <div className="text-gray-600 mb-4">
+                    <span>{blogDetail.date}</span> | <span>{blogDetail.author}</span>
                 </div>
+                <div
+                    className="blog-content prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: blogDetail.content }}
+                />
+            </div>
 
             <div>
                 <h2 className="text-2xl font-semibold mb-4">Bài viết liên quan</h2>
