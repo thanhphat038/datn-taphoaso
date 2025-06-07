@@ -1,0 +1,436 @@
+@baseUrl = http://localhost:3000/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NDMzZjdiNWI0ZDA5ODUxODA1NmJmMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ5MjM3NjI3LCJleHAiOjE3NDk4NDI0Mjd9.m5_1EPM94P-r8vOFo8uiROwyfNmr2KN3VvRkPypLKaI
+
+### Variables
+@userId = 1
+@productId = 1
+@categoryId = 1
+@orderId = 1
+@voucherId = 1
+
+### Authentication ###
+
+# Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "full_name": "Test User",
+  "phone": "0123456789"
+}
+###
+
+# Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+### Get Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Change Password
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123"
+}
+
+### Users ###
+
+### Get all users (Admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{authToken}}
+
+### Get user by ID
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+### Update user
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "full_name": "Updated Name",
+  "phone": "0987654321"
+}
+
+### Delete user
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+### Categories ###
+
+### Get all categories
+GET {{baseUrl}}/categories
+
+### Get category by ID
+GET {{baseUrl}}/categories/{{categoryId}}
+
+### Create category (Admin only)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "New Category",
+  "description": "Description for new category",
+  "status": "active"
+}
+
+### Update category (Admin only)
+PUT {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Category",
+  "description": "Updated description"
+}
+
+### Delete category (Admin only)
+DELETE {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+
+### Products ###
+
+### Get all products
+GET {{baseUrl}}/products
+?page=1
+&limit=10
+&sort=price
+&order=asc
+
+### Get product by ID
+GET {{baseUrl}}/products/{{productId}}
+
+### Create product (Admin only)
+POST {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Product",
+  "description": "Test Description",
+  "price": 100000,
+  "stock": 100,
+  "category_id": "{{categoryId}}",
+  "images": ["image1.jpg", "image2.jpg"]
+}
+
+### Update product (Admin only)
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Product",
+  "price": 150000
+}
+
+### Delete product (Admin only)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Search products
+GET {{baseUrl}}/products/search
+?q=test
+&page=1
+&limit=10
+
+### Get products by category
+GET {{baseUrl}}/products/category/{{categoryId}}
+?page=1
+&limit=10
+
+### Get top rated products
+GET {{baseUrl}}/products/top-rated
+?limit=10
+
+### Get new arrivals
+GET {{baseUrl}}/products/new-arrivals
+?limit=10
+
+### Get related products
+GET {{baseUrl}}/products/{{productId}}/related
+?limit=4
+
+### Orders ###
+
+### Get all orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+
+### Get order by ID
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{authToken}}
+
+### Create order
+POST {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "address_id": "123",
+  "voucher_code": "SUMMER2024",
+  "items": [
+    {
+      "product_id": "{{productId}}",
+      "quantity": 2
+    }
+  ],
+  "payment_method": "cod",
+  "note": "Please deliver in the morning"
+}
+
+### Update order status (Admin only)
+PUT {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "processing"
+}
+
+### Get order stats (Admin only)
+GET {{baseUrl}}/orders/stats
+Authorization: Bearer {{authToken}}
+
+### Get recent orders (Admin only)
+GET {{baseUrl}}/orders/recent
+Authorization: Bearer {{authToken}}
+?limit=10
+
+### Addresses ###
+
+### Get all addresses
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{authToken}}
+
+### Get address by ID
+GET {{baseUrl}}/addresses/1
+Authorization: Bearer {{authToken}}
+
+### Create address
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "full_name": "Test User",
+  "phone": "0123456789",
+  "address": "123 Street",
+  "city": "City",
+  "district": "District",
+  "ward": "Ward",
+  "is_default": true
+}
+
+### Update address
+PUT {{baseUrl}}/addresses/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "address": "456 New Street"
+}
+
+### Delete address
+DELETE {{baseUrl}}/addresses/1
+Authorization: Bearer {{authToken}}
+
+### Reviews ###
+
+### Get all reviews
+GET {{baseUrl}}/reviews
+
+### Get review by ID
+GET {{baseUrl}}/reviews/1
+
+### Create review
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "rating": 5,
+  "content": "Great product!"
+}
+
+### Get product reviews
+GET {{baseUrl}}/products/{{productId}}/reviews
+?page=1
+&limit=10
+
+### Update review
+PUT {{baseUrl}}/reviews/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "content": "Updated review"
+}
+
+### Delete review
+DELETE {{baseUrl}}/reviews/1
+Authorization: Bearer {{authToken}}
+
+### Comments ###
+
+### Get all comments
+GET {{baseUrl}}/comments
+
+### Get comment by ID
+GET {{baseUrl}}/comments/1
+
+### Create comment
+POST {{baseUrl}}/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "content": "This is a comment"
+}
+
+### Get product comments
+GET {{baseUrl}}/products/{{productId}}/comments
+?page=1
+&limit=10
+
+### Update comment
+PUT {{baseUrl}}/comments/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "content": "Updated comment"
+}
+
+### Delete comment
+DELETE {{baseUrl}}/comments/1
+Authorization: Bearer {{authToken}}
+
+### Favorites ###
+
+### Get all favorites
+GET {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+
+### Add to favorites
+POST {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
+
+### Remove from favorites
+DELETE {{baseUrl}}/favorites/1
+Authorization: Bearer {{authToken}}
+
+### Cart ###
+
+### Get cart
+GET {{baseUrl}}/carts
+Authorization: Bearer {{authToken}}
+
+### Add item to cart
+POST {{baseUrl}}/carts/items
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "quantity": 2
+}
+
+### Update cart item
+PUT {{baseUrl}}/carts/items/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+### Remove item from cart
+DELETE {{baseUrl}}/carts/items/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Clear cart
+DELETE {{baseUrl}}/carts
+Authorization: Bearer {{authToken}}
+
+### Calculate cart total
+GET {{baseUrl}}/carts/total
+Authorization: Bearer {{authToken}}
+
+### Vouchers ###
+
+### Get all vouchers
+GET {{baseUrl}}/vouchers
+
+### Get voucher by ID
+GET {{baseUrl}}/vouchers/{{voucherId}}
+
+### Create voucher (Admin only)
+POST {{baseUrl}}/vouchers
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "NEWVOUCHER",
+  "discount_type": "percentage",
+  "discount_value": 15,
+  "max_discount": 100000,
+  "min_order_value": 300000,
+  "start_date": "2024-03-20",
+  "end_date": "2024-04-20",
+  "status": "active"
+}
+
+### Update voucher (Admin only)
+PUT {{baseUrl}}/vouchers/{{voucherId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "discount_value": 20,
+  "max_discount": 150000
+}
+
+### Delete voucher (Admin only)
+DELETE {{baseUrl}}/vouchers/{{voucherId}}
+Authorization: Bearer {{authToken}}
+
+### Get active vouchers
+GET {{baseUrl}}/vouchers/active
+
+### Apply voucher
+POST {{baseUrl}}/vouchers/apply
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "SUMMER2024",
+  "total_amount": 1000000
+}
+
+### Get voucher stats (Admin only)
+GET {{baseUrl}}/vouchers/stats
+Authorization: Bearer {{authToken}} 

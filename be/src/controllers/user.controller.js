@@ -1,63 +1,78 @@
-const fs = require('fs');
-const path = require('path');
+import { userService } from '../services/index.js';
+import bcrypt from 'bcrypt';
 
-const dbFilePath = path.join(__dirname, '../../src/data/db.json');
+// Create new user
+export const createUser = async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
 
-function readDb() {
-    const data = fs.readFileSync(dbFilePath, 'utf-8');
-    return JSON.parse(data);
-}
-
-function writeDb(data) {
-    try {
-        fs.writeFileSync(dbFilePath, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
-        console.error('Error writing to db.json:', error);
-        throw error;
-    }
-}
-
-exports.register = (req, res) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-        return res.status(400).json({ message: 'Missing required fields' });
+    // Check if user exists
+    const existingUser = await userService.findAll({ $or: [{ email }, { username }] });
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    const db = readDb();
-    const existingUser = db.users.find(user => user.email === email);
-    if (existingUser) {
-        return res.status(400).json({ message: 'Email đã được đăng ký' });
-    }
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Password validation
-    if (password.length < 8) {
-        return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 8 ký tự' });
-    }
-    if (!/[A-Z]/.test(password)) {
-        return res.status(400).json({ message: 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa' });
-    }
+    const user = await userService.create({
+      ...req.body,
+      password: hashedPassword
+    });
 
-    const newUser = {
-        id: db.users.length + 1,
-        name,
-        email,
-        password
-    };
-    db.users.push(newUser);
-    writeDb(db);
-
-    res.status(201).json({ message: 'Đăng ký thành công', user: newUser });
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
-exports.login = (req, res) => {
-    const { email, password } = req.query;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Missing email or password' });
+// Get all users
+export const getUsers = async (req, res) => {
+  try {
+    const users = await userService.findAll({}, { select: '-password' });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get user by id
+export const getUserById = async (req, res) => {
+  try {
+    const user = await userService.findById(req.params.id, { select: '-password' });
+    res.json(user);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+// Update user
+export const updateUser = async (req, res) => {
+  try {
+    const { password, ...updateData } = req.body;
+    let updateFields = updateData;
+
+    // If password is provided, hash it
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updateFields = { ...updateData, password: hashedPassword };
     }
-    const db = readDb();
-    const user = db.users.find(user => user.email === email && user.password === password);
-    if (!user) {
-        return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
-    }
-    res.status(200).json({ message: 'Đăng nhập thành công', user });
+
+    const user = await userService.update(req.params.id, updateFields);
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Delete user
+export const deleteUser = async (req, res) => {
+  try {
+    await userService.delete(req.params.id);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };

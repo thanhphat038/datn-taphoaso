@@ -1,8 +1,91 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
+  const [addresses, setAddresses] = useState([
+    {
+      id: 1,
+      name: 'Tên người nhận',
+      phone: 'Số điện thoại',
+      address: '29-31 Vườn Lài, Phường An Phú Đông, Quận 12, Thành phố Hồ Chí Minh, Việt Nam',
+      isDefault: true
+    }
+  ]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    name: '',
+    phone: '',
+    address: ''
+  });
+
+  const [orders, setOrders] = useState([
+    {
+      id: '#123',
+      date: 'Mua lúc 06/06, 2024',
+      address: '29-31 Vườn Lài, Phường An Phú Đông, Quận 12, Thành phố Hồ Chí Minh, Việt Nam',
+      status: 'Giao hàng thành công',
+      products: [
+        {
+          id: 1,
+          name: 'Rau củ quả tươi',
+          image: '/images/about-12.jpg',
+          quantity: 2,
+          price: 100000
+        },
+        {
+          id: 2,
+          name: 'Sữa tươi',
+          image: '/images/about-11.jpg',
+          quantity: 1,
+          price: 50000
+        }
+      ],
+      total: 100000,
+      originalTotal: 100000
+    }
+  ]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
+
+  const handleDeleteAddress = (id) => {
+    setAddresses(addresses.filter(address => address.id !== id));
+  };
+
+  const handleAddAddress = () => {
+    if (newAddress.name && newAddress.phone && newAddress.address) {
+      setAddresses([...addresses, { ...newAddress, id: Date.now(), isDefault: false }]);
+      setShowAddForm(false);
+      setNewAddress({ name: '', phone: '', address: '' });
+    }
+  };
+
+  const handleReorder = (orderId) => {
+    console.log('Reorder:', orderId);
+  };
+
+  const handleQuantityChange = (orderId, productId, newQuantity) => {
+    setOrders(orders.map(order => 
+      order.id === orderId 
+        ? {
+            ...order,
+            products: order.products.map(product =>
+              product.id === productId 
+                ? { ...product, quantity: Math.max(1, newQuantity) }
+                : product
+            )
+          }
+        : order
+    ));
+  };
+
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -72,117 +155,324 @@ const ProfilePage = () => {
 
         {/* Right Content */}
         <div className="flex-grow">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            {/* Profile Picture Section */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="relative mb-4">
-              <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden border-4 border-white ring-2 ring-gray-100">
-                  <img
-                    src="/images/avata.jpg"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+          {activeTab === 'profile' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              {/* Profile Picture Section */}
+              <div className="flex flex-col items-center mb-8">
+                <div className="relative mb-6">
+                  <div className="w-32 h-32 rounded-full bg-yellow-100 overflow-hidden border-4 border-white shadow-lg">
+                    <img
+                      src="/images/avata.jpg"
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="absolute bottom-0 right-0">
+                    <label className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all hover:scale-110 shadow-lg border-2 border-white">
+                      <input type="file" className="hidden" accept="image/*" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </label>
+                  </div>
                 </div>
-                <div className="absolute bottom-0 right-0">
-                  <label className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all hover:scale-110 shadow-lg border-2 border-white">
-                    <input type="file" className="hidden" accept="image/*" />
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
+
+                {/* Gender Selection */}
+                <div className="flex gap-6 mb-8">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={gender === 'male'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Anh</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={gender === 'female'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Chị</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="other"
+                      checked={gender === 'other'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Khác</span>
                   </label>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+
+              {/* Profile Form */}
+              <div className="space-y-6 max-w-lg mx-auto">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Tên tài khoản
+                  </label>
                   <input
-                    type="radio"
-                    name="gender"
-                    value="male"
-                    checked={gender === 'male'}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="text-blue-500 focus:ring-blue-500"
+                    type="text"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập tên tài khoản"
                   />
-                  <span>Anh</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Mật khẩu
+                  </label>
                   <input
-                    type="radio"
-                    name="gender"
-                    value="female"
-                    checked={gender === 'female'}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="text-blue-500 focus:ring-blue-500"
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập mật khẩu"
                   />
-                  <span>Chị</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Số điện thoại
+                  </label>
                   <input
-                    type="radio"
-                    name="gender"
-                    value="other"
-                    checked={gender === 'other'}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="text-blue-500 focus:ring-blue-500"
+                    type="tel"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập số điện thoại"
                   />
-                  <span>Khác</span>
-                </label>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Gmail
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập địa chỉ email"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-6">
+                  <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
+                    Cập nhật
+                  </button>
+                  <button className="flex-1 px-6 py-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-medium">
+                    Lưu
+                  </button>
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Form Fields */}
-            <div className="space-y-4 max-w-md mx-auto">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tên tài khoản
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Nhập tên tài khoản"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mật khẩu
-                </label>
-                <input
-                  type="password"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Nhập mật khẩu"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Số điện thoại
-                </label>
-                <input
-                  type="tel"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Nhập số điện thoại"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gmail
-                </label>
-                <input
-                  type="email"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Nhập địa chỉ email"
-                />
+          {activeTab === 'address' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
+              
+              {/* Address List */}
+              <div className="space-y-4">
+                {addresses.map((address) => (
+                  <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-4 mb-2">
+                          <span className="font-medium">{address.name}</span>
+                          <span className="text-gray-600">{address.phone}</span>
+                        </div>
+                        <p className="text-gray-600">{address.address}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="text-blue-500 hover:text-blue-600">Sửa</button>
+                        <button 
+                          onClick={() => handleDeleteAddress(address.id)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
-                  Cập nhật
-                </button>
-                <button className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors">
-                  Lưu
-                </button>
+              {/* Add New Address Button */}
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="mt-4 flex items-center gap-2 text-blue-500 hover:text-blue-600"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Thêm địa chỉ mới
+              </button>
+
+              {/* Add New Address Form */}
+              {showAddForm && (
+                <div className="mt-4 border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-lg font-medium mb-4">Thêm địa chỉ mới</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tên người nhận
+                      </label>
+                      <input
+                        type="text"
+                        value={newAddress.name}
+                        onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="Nhập tên người nhận"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Số điện thoại
+                      </label>
+                      <input
+                        type="tel"
+                        value={newAddress.phone}
+                        onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="Nhập số điện thoại"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Địa chỉ
+                      </label>
+                      <input
+                        type="text"
+                        value={newAddress.address}
+                        onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="Nhập địa chỉ"
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={handleAddAddress}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Lưu
+                      </button>
+                      <button
+                        onClick={() => setShowAddForm(false)}
+                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'orders' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="space-y-6">
+                {currentOrders.map((order) => (
+                  <div key={order.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-200 transition-all">
+                    {/* Order Header */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="flex items-center gap-4 mb-2">
+                          <span className="font-medium text-lg">Đơn hàng {order.id}</span>
+                          <span className="text-gray-600">{order.date}</span>
+                          <span 
+                            onClick={() => navigate(`/order/${order.id.replace('#', '')}`)}
+                            className="text-blue-500 text-sm cursor-pointer hover:underline"
+                          >
+                            Xem chi tiết
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-1">{order.address}</p>
+                        <p className="text-green-600 font-medium">{order.status}</p>
+                      </div>
+                    </div>
+
+                    {/* Products List */}
+                    <div className="space-y-3 mb-4">
+                      {order.products.map((product) => (
+                        <div key={product.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                          <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          
+                          <div className="flex-grow min-w-0">
+                            <h4 className="font-medium text-gray-800 mb-1 truncate">{product.name}</h4>
+                            <p className="text-red-500 font-medium">{product.price.toLocaleString()}đ</p>
+                          </div>
+
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <button 
+                              onClick={() => handleQuantityChange(order.id, product.id, product.quantity - 1)}
+                              className="w-8 h-8 rounded-full bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors border border-gray-200"
+                            >
+                              -
+                            </button>
+                            <span className="w-8 text-center font-medium">{product.quantity}</span>
+                            <button 
+                              onClick={() => handleQuantityChange(order.id, product.id, product.quantity + 1)}
+                              className="w-8 h-8 rounded-full bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors border border-gray-200"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="text-right flex-shrink-0 w-24">
+                            <div className="font-semibold text-gray-800">
+                              {(product.price * product.quantity).toLocaleString()}đ
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Order Summary */}
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="text-center">
+                          <p className="text-gray-600 mb-1">Tổng tiền</p>
+                          <p className="font-semibold text-gray-800">{order.total.toLocaleString()}đ</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                          <p className="font-semibold text-green-600">{order.originalTotal.toLocaleString()}đ</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
+                          <p className="font-semibold text-red-600">0đ</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Order Actions */}
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => handleReorder(order.id)}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-full transition-colors"
+                      >
+                        Mua lại đơn hàng
+                      </button>
+                      <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-full transition-colors">
+                        Liên hệ hỗ trợ
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
