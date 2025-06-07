@@ -3,8 +3,8 @@
     {
       "id": 1,
       "name": "Mì Hảo Hảo Tôm Chua Cay",
-      "price": 3500,
-      "original_price": 4500,
+      "price": 350000,
+      "original_price": 450000,
       "description": "Mì gói Hảo Hảo vị tôm chua cay thơm ngon, cay nồng đậm đà. Mỗi gói 65g đủ cho một bữa ăn nhanh.",
       "category": "mì ăn liền",
       "category_id": 1,
@@ -69,8 +69,8 @@
     {
       "id": 4,
       "name": "Pepsi Chai 1.5L",
-      "price": 15000,
-      "original_price": 19000,
+      "price": 1500000,
+      "original_price": 1900000,
       "description": "Nước ngọt Pepsi chai 1.5L, vị ngọt đặc trưng. Thích hợp cho gia đình và các buổi tiệc.",
       "category": "nước uống",
       "category_id": 2,
