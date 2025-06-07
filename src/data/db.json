@@ -45,12 +45,7 @@
       }
     },
  
-    {
-      "id": "1",
-      "name": "Nguyen Van A",
-      "email": "nguyenvana@example.com",
-      "password": "password123"
-    },
+    
     {
       "id": 3,
       "name": "Mì Omachi Lẩu Thái",
@@ -535,7 +530,8 @@
         "count": 330
       }
     }
-  ],"users": [
+  ],
+  "users": [
     {
       "id": "1",
       "name": "Nguyen Van A",
