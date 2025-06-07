@@ -3,7 +3,8 @@
     {
       "id": "1",
       "name": "Mì Hảo Hảo Tôm Chua Cay",
-      "price": 3500,
+      "price": 350000,
+      "original_price": 450000,
       "description": "Mì gói Hảo Hảo vị tôm chua cay thơm ngon, cay nồng đậm đà. Mỗi gói 65g đủ cho một bữa ăn nhanh.",
       "category": "mì ăn liền",
       "category_id": 1,
@@ -25,6 +26,7 @@
       "id": "2",
       "name": "Coca Cola Lon 320ml",
       "price": 8000,
+      "original_price": 10000,
       "description": "Nước ngọt Coca Cola lon 320ml, vị ngọt đặc trưng, sảng khoái. Thích hợp cho các buổi tiệc và giải khát.",
       "category": "nước uống",
       "category_id": 2,
@@ -41,9 +43,499 @@
         "rate": 4.8,
         "count": 500
       }
+    },
+ 
+    {
+      "id": "1",
+      "name": "Nguyen Van A",
+      "email": "nguyenvana@example.com",
+      "password": "password123"
+    },
+    {
+      "id": 3,
+      "name": "Mì Omachi Lẩu Thái",
+      "price": 4500,
+      "original_price": 5800,
+      "description": "Mì Omachi vị lẩu Thái cay nồng, thơm ngon với nước súp đậm đà. Mỗi gói 75g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/289590/bhx/mi-khoai-tay-omachi-tom-chua-cay-thai-ly-111g-co-cay-thit-that-202209201010355752.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/289590/bhx/mi-khoai-tay-omachi-tom-chua-cay-thai-ly-111g-co-cay-thit-that-202209201010355752.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/289590/bhx/mi-khoai-tay-omachi-tom-chua-cay-thai-ly-111g-co-cay-thit-that-202209201010355752.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/289590/bhx/mi-khoai-tay-omachi-tom-chua-cay-thai-ly-111g-co-cay-thit-that-202209201010355752.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/289590/bhx/mi-khoai-tay-omachi-tom-chua-cay-thai-ly-111g-co-cay-thit-that-202209201010355752.jpg"
+      ],
+      "rating": {
+        "rate": 4.3,
+        "count": 180
+      }
+    },
+    {
+      "id": 4,
+      "name": "Pepsi Chai 1.5L",
+      "price": 1500000,
+      "original_price": 1900000,
+      "description": "Nước ngọt Pepsi chai 1.5L, vị ngọt đặc trưng. Thích hợp cho gia đình và các buổi tiệc.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2443/76465/bhx/nuoc-ngot-pepsi-cola-chai-15-lit-202407081352122675.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76465/bhx/nuoc-ngot-pepsi-cola-chai-15-lit-202407081352122675.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76465/bhx/nuoc-ngot-pepsi-cola-chai-15-lit-202407081352122675.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76465/bhx/nuoc-ngot-pepsi-cola-chai-15-lit-202407081352122675.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76465/bhx/nuoc-ngot-pepsi-cola-chai-15-lit-202407081352122675.jpg"
+      ],
+      "rating": {
+        "rate": 4.6,
+        "count": 320
+      }
+    },
+    {
+      "id": 5,
+      "name": "Mì Cung Đình Xào Hải Sản",
+      "price": 5000,
+      "original_price": 6500,
+      "description": "Mì Cung Đình vị xào hải sản thơm ngon, sợi mì dai giòn. Mỗi gói 80g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/214650/bhx/mi-tron-cung-dinh-kool-spaghetti-goi-105g-co-goi-xot-bo-bam-202407021351430698.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/214650/bhx/mi-tron-cung-dinh-kool-spaghetti-goi-105g-co-goi-xot-bo-bam-202407021351430698.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/214650/bhx/mi-tron-cung-dinh-kool-spaghetti-goi-105g-co-goi-xot-bo-bam-202407021351430698.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/214650/bhx/mi-tron-cung-dinh-kool-spaghetti-goi-105g-co-goi-xot-bo-bam-202407021351430698.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/214650/bhx/mi-tron-cung-dinh-kool-spaghetti-goi-105g-co-goi-xot-bo-bam-202407021351430698.jpg"
+      ],
+      "rating": {
+        "rate": 4.4,
+        "count": 150
+      }
+    },
+    {
+      "id": 6,
+      "name": "7Up Lon 330ml",
+      "price": 8000,
+      "original_price": 10000,
+      "description": "Nước ngọt 7Up lon 330ml, vị chanh tươi mát. Giải khát tuyệt vời trong ngày hè.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2443/76446/bhx/nuoc-ngot-7-up-lon-330ml-202312252102017018.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76446/bhx/nuoc-ngot-7-up-lon-330ml-202312252102017018.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76446/bhx/nuoc-ngot-7-up-lon-330ml-202312252102017018.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76446/bhx/nuoc-ngot-7-up-lon-330ml-202312252102017018.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/76446/bhx/nuoc-ngot-7-up-lon-330ml-202312252102017018.jpg"
+      ],
+      "rating": {
+        "rate": 4.7,
+        "count": 280
+      }
+    },
+    {
+      "id": 7,
+      "name": "Mì Kokomi Tôm Cay",
+      "price": 4000,
+      "original_price": 5200,
+      "description": "Mì Kokomi vị tôm cay thơm ngon, cay nồng vừa phải. Mỗi gói 70g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/212759/bhx/mi-kokomi-90-tom-chua-cay-goi-90g_202504011313272490.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/212759/bhx/mi-kokomi-90-tom-chua-cay-goi-90g_202504011313272490.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/212759/bhx/mi-kokomi-90-tom-chua-cay-goi-90g_202504011313272490.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/212759/bhx/mi-kokomi-90-tom-chua-cay-goi-90g_202504011313272490.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/212759/bhx/mi-kokomi-90-tom-chua-cay-goi-90g_202504011313272490.jpg"
+      ],
+      "rating": {
+        "rate": 4.2,
+        "count": 200
+      }
+    },
+    {
+      "id": 8,
+      "name": "Sting Dâu Chai 330ml",
+      "price": 9000,
+      "original_price": 11500,
+      "description": "Nước tăng lực Sting vị dâu chai 330ml, cung cấp năng lượng tức thì.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/3226/76519/bhx/nuoc-tang-luc-sting-sleek-huong-dau-320ml-202111061723498584.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76519/bhx/nuoc-tang-luc-sting-sleek-huong-dau-320ml-202111061723498584.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76519/bhx/nuoc-tang-luc-sting-sleek-huong-dau-320ml-202111061723498584.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76519/bhx/nuoc-tang-luc-sting-sleek-huong-dau-320ml-202111061723498584.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76519/bhx/nuoc-tang-luc-sting-sleek-huong-dau-320ml-202111061723498584.jpg"
+      ],
+      "rating": {
+        "rate": 4.5,
+        "count": 350
+      }
+    },
+    {
+      "id": 9,
+      "name": "Mì Miliket Xào Bò",
+      "price": 5500,
+      "original_price": 7200,
+      "description": "Mì Miliket vị xào bò thơm ngon, sợi mì dai giòn. Mỗi gói 85g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/77670/bhx/mi-sa-te-75g-2-700x467.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/77670/bhx/mi-sa-te-75g-2-700x467.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/77670/bhx/mi-sa-te-75g-2-700x467.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/77670/bhx/mi-sa-te-75g-2-700x467.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/77670/bhx/mi-sa-te-75g-2-700x467.jpg"
+      ],
+      "rating": {
+        "rate": 4.6,
+        "count": 220
+      }
+    },
+    {
+      "id": 10,
+      "name": "Redbull Lon 250ml",
+      "price": 12000,
+      "original_price": 15000,
+      "description": "Nước tăng lực Redbull lon 250ml, cung cấp năng lượng tức thì cho cơ thể.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/3226/76513/bhx/nuoc-tang-luc-redbull-lon-250ml-15112018162747.JPG",
+        "https://cdn.tgdd.vn/Products/Images/3226/76513/bhx/nuoc-tang-luc-redbull-lon-250ml-15112018162747.JPG",
+        "https://cdn.tgdd.vn/Products/Images/3226/76513/bhx/nuoc-tang-luc-redbull-lon-250ml-15112018162747.JPG",
+        "https://cdn.tgdd.vn/Products/Images/3226/76513/bhx/nuoc-tang-luc-redbull-lon-250ml-15112018162747.JPG",
+        "https://cdn.tgdd.vn/Products/Images/3226/76513/bhx/nuoc-tang-luc-redbull-lon-250ml-15112018162747.JPG"
+      ],
+      "rating": {
+        "rate": 4.8,
+        "count": 400
+      }
+    },
+    {
+      "id": 11,
+      "name": "Mì Hảo Hảo Gà Cay",
+      "price": 3500,
+      "original_price": 4500,
+      "description": "Mì gói Hảo Hảo vị gà cay thơm ngon, cay nồng đậm đà. Mỗi gói 65g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77619/bhx/slide_202410151521446289.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77619/bhx/slide_202410151521446289.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77619/bhx/slide_202410151521446289.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77619/bhx/slide_202410151521446289.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77619/bhx/slide_202410151521446289.jpg"
+      ],
+      "rating": {
+        "rate": 4.4,
+        "count": 280
+      }
+    },
+    {
+      "id": 12,
+      "name": "Number One Chai 330ml",
+      "price": 9000,
+      "original_price": 11500,
+      "description": "Nước tăng lực Number One chai 330ml, cung cấp năng lượng tức thì.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3226/87336/bhx/cdntgddvnproductsimages322687336bhxthung-24-chai-nuoc-tang-luc-number1-330ml-202004291021541821_202410140927184757.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3226/87336/bhx/cdntgddvnproductsimages322687336bhxthung-24-chai-nuoc-tang-luc-number1-330ml-202004291021541821_202410140927184757.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3226/87336/bhx/cdntgddvnproductsimages322687336bhxthung-24-chai-nuoc-tang-luc-number1-330ml-202004291021541821_202410140927184757.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3226/87336/bhx/cdntgddvnproductsimages322687336bhxthung-24-chai-nuoc-tang-luc-number1-330ml-202004291021541821_202410140927184757.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3226/87336/bhx/cdntgddvnproductsimages322687336bhxthung-24-chai-nuoc-tang-luc-number1-330ml-202004291021541821_202410140927184757.jpg"
+      ],
+      "rating": {
+        "rate": 4.3,
+        "count": 250
+      }
+    },
+    {
+      "id": 13,
+      "name": "Mì Omachi Gà Cay",
+      "price": 4500,
+      "original_price": 5800,
+      "description": "Mì Omachi vị gà cay thơm ngon, cay nồng vừa phải. Mỗi gói 75g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/321790/bhx/mi-omachi-diamond-bap-bo-ham-dua-chua-goi-121g-202406040909526712.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/321790/bhx/mi-omachi-diamond-bap-bo-ham-dua-chua-goi-121g-202406040909526712.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/321790/bhx/mi-omachi-diamond-bap-bo-ham-dua-chua-goi-121g-202406040909526712.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/321790/bhx/mi-omachi-diamond-bap-bo-ham-dua-chua-goi-121g-202406040909526712.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/321790/bhx/mi-omachi-diamond-bap-bo-ham-dua-chua-goi-121g-202406040909526712.jpg"
+      ],
+      "rating": {
+        "rate": 4.5,
+        "count": 190
+      }
+    },
+    {
+      "id": 14,
+      "name": "Fanta Cam Lon 330ml",
+      "price": 8000,
+      "original_price": 10000,
+      "description": "Nước ngọt Fanta vị cam lon 330ml, vị cam tươi mát. Giải khát tuyệt vời.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2443/91176/bhx/z-2_202411041457065358.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2443/91176/bhx/z-2_202411041457065358.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2443/91176/bhx/z-2_202411041457065358.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2443/91176/bhx/z-2_202411041457065358.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2443/91176/bhx/z-2_202411041457065358.jpg"
+      ],
+      "rating": {
+        "rate": 4.6,
+        "count": 300
+      }
+    },
+    {
+      "id": 15,
+      "name": "Mì Cung Đình Xào Gà",
+      "price": 5000,
+      "original_price": 6500,
+      "description": "Mì Cung Đình vị xào gà thơm ngon, sợi mì dai giòn. Mỗi gói 80g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77651/bhx/cdntgddvnproductsimages256577651bhx-202310131123453698_202412051027262253.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77651/bhx/cdntgddvnproductsimages256577651bhx-202310131123453698_202412051027262253.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77651/bhx/cdntgddvnproductsimages256577651bhx-202310131123453698_202412051027262253.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77651/bhx/cdntgddvnproductsimages256577651bhx-202310131123453698_202412051027262253.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/77651/bhx/cdntgddvnproductsimages256577651bhx-202310131123453698_202412051027262253.jpg"
+      ],
+      "rating": {
+        "rate": 4.4,
+        "count": 170
+      }
+    },
+    {
+      "id": 16,
+      "name": "Sprite Lon 330ml",
+      "price": 8000,
+      "original_price": 10000,
+      "description": "Nước ngọt Sprite lon 330ml, vị chanh tươi mát. Giải khát tuyệt vời.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2443/85146/bhx/nuoc-ngot-sprite-huong-chanh-lon-320ml-202306200909131864.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/85146/bhx/nuoc-ngot-sprite-huong-chanh-lon-320ml-202306200909131864.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/85146/bhx/nuoc-ngot-sprite-huong-chanh-lon-320ml-202306200909131864.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/85146/bhx/nuoc-ngot-sprite-huong-chanh-lon-320ml-202306200909131864.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/85146/bhx/nuoc-ngot-sprite-huong-chanh-lon-320ml-202306200909131864.jpg"
+      ],
+      "rating": {
+        "rate": 4.7,
+        "count": 320
+      }
+    },
+    {
+      "id": 17,
+      "name": "Mì xào 3 Miền Gold Hành phi tương tỏi gói 75g",
+      "price": 5400,
+      "original_price": 7000,
+      "description": "Mì xào 3 Miền là thương hiệu mì xào chất lượng được nhiều người lựa chọn thưởng thức.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/334869/bhx/mi-xao-3-mien-gold-hanh-phi-tuong-toi-goi-75g_202502200941399502.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/334869/bhx/mi-xao-3-mien-gold-hanh-phi-tuong-toi-goi-75g_202502200941399502.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/334869/bhx/mi-xao-3-mien-gold-hanh-phi-tuong-toi-goi-75g_202502200941399502.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/334869/bhx/mi-xao-3-mien-gold-hanh-phi-tuong-toi-goi-75g_202502200941399502.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/334869/bhx/mi-xao-3-mien-gold-hanh-phi-tuong-toi-goi-75g_202502200941399502.jpg"
+      ],
+      "rating": {
+        "rate": 4.3,
+        "count": 210
+      }
+    },
+    {
+      "id": 18,
+      "name": "Sting Vàng Chai 330ml",
+      "price": 9000,
+      "original_price": 11500,
+      "description": "Nước tăng lực Sting vị vàng chai 330ml, cung cấp năng lượng tức thì.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/3226/76522/bhx/nuoc-tang-luc-sting-gold-chai-330ml-201912021713292469.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76522/bhx/nuoc-tang-luc-sting-gold-chai-330ml-201912021713292469.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76522/bhx/nuoc-tang-luc-sting-gold-chai-330ml-201912021713292469.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76522/bhx/nuoc-tang-luc-sting-gold-chai-330ml-201912021713292469.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/76522/bhx/nuoc-tang-luc-sting-gold-chai-330ml-201912021713292469.jpg"
+      ],
+      "rating": {
+        "rate": 4.6,
+        "count": 380
+      }
+    },
+    {
+      "id": 19,
+      "name": "Mì Miliket Xào Gà",
+      "price": 5500,
+      "original_price": 7200,
+      "description": "Mì Miliket vị xào gà thơm ngon, sợi mì dai giòn. Mỗi gói 85g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/331459/bhx/slide-1_202410281024460228.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/331459/bhx/slide-1_202410281024460228.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/331459/bhx/slide-1_202410281024460228.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/331459/bhx/slide-1_202410281024460228.jpg",
+        "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2565/331459/bhx/slide-1_202410281024460228.jpg"
+      ],
+      "rating": {
+        "rate": 4.5,
+        "count": 240
+      }
+    },
+    {
+      "id": 20,
+      "name": "Revive Chai 330ml",
+      "price": 10000,
+      "original_price": 13000,
+      "description": "Nước tăng lực Revive chai 330ml, cung cấp năng lượng tức thì.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/3226/83581/bhx/nuoc-ngot-revive-vi-muoi-khoang-chai-500ml-201812060918208543.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/83581/bhx/nuoc-ngot-revive-vi-muoi-khoang-chai-500ml-201812060918208543.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/83581/bhx/nuoc-ngot-revive-vi-muoi-khoang-chai-500ml-201812060918208543.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/83581/bhx/nuoc-ngot-revive-vi-muoi-khoang-chai-500ml-201812060918208543.jpg",
+        "https://cdn.tgdd.vn/Products/Images/3226/83581/bhx/nuoc-ngot-revive-vi-muoi-khoang-chai-500ml-201812060918208543.jpg"
+      ],
+      "rating": {
+        "rate": 4.4,
+        "count": 290
+      }
+    },
+    {
+      "id": 21,
+      "name": "Mì Hảo Hảo Bò Cay",
+      "price": 3500,
+      "original_price": 4500,
+      "description": "Mì gói Hảo Hảo vị bò cay thơm ngon, cay nồng đậm đà. Mỗi gói 65g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/275941/bhx/mi-handy-hao-hao-tomyum-ly-67g-202204130937209327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/275941/bhx/mi-handy-hao-hao-tomyum-ly-67g-202204130937209327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/275941/bhx/mi-handy-hao-hao-tomyum-ly-67g-202204130937209327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/275941/bhx/mi-handy-hao-hao-tomyum-ly-67g-202204130937209327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/275941/bhx/mi-handy-hao-hao-tomyum-ly-67g-202204130937209327.jpg"
+      ],
+      "rating": {
+        "rate": 4.6,
+        "count": 260
+      }
+    },
+    {
+      "id": 22,
+      "name": "Mirinda Cam Lon 330ml",
+      "price": 8000,
+      "original_price": 10000,
+      "description": "Nước ngọt Mirinda vị cam lon 330ml, vị cam tươi mát. Giải khát tuyệt vời.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2443/79140/bhx/nuoc-ngot-mirinda-huong-cam-lon-320ml-202312252142544474.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/79140/bhx/nuoc-ngot-mirinda-huong-cam-lon-320ml-202312252142544474.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/79140/bhx/nuoc-ngot-mirinda-huong-cam-lon-320ml-202312252142544474.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/79140/bhx/nuoc-ngot-mirinda-huong-cam-lon-320ml-202312252142544474.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2443/79140/bhx/nuoc-ngot-mirinda-huong-cam-lon-320ml-202312252142544474.jpg"
+      ],
+      "rating": {
+        "rate": 4.5,
+        "count": 270
+      }
+    },
+    {
+      "id": 23,
+      "name": "Mì Omachi Bò Cay",
+      "price": 4500,
+      "original_price": 5800,
+      "description": "Mì Omachi vị bò cay thơm ngon, cay nồng vừa phải. Mỗi gói 75g.",
+      "category": "mì ăn liền",
+      "category_id": 1,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/2565/89295/bhx/thung-30-goi-mi-3-mien-gold-bo-ham-rau-thom-75g-202004181113091327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/89295/bhx/thung-30-goi-mi-3-mien-gold-bo-ham-rau-thom-75g-202004181113091327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/89295/bhx/thung-30-goi-mi-3-mien-gold-bo-ham-rau-thom-75g-202004181113091327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/89295/bhx/thung-30-goi-mi-3-mien-gold-bo-ham-rau-thom-75g-202004181113091327.jpg",
+        "https://cdn.tgdd.vn/Products/Images/2565/89295/bhx/thung-30-goi-mi-3-mien-gold-bo-ham-rau-thom-75g-202004181113091327.jpg"
+      ],
+      "rating": {
+        "rate": 4.4,
+        "count": 200
+      }
+    },
+    {
+      "id": 24,
+      "name": "C2 Chai 500ml",
+      "price": 12000,
+      "original_price": 15000,
+      "description": "Trà xanh C2 chai 500ml, vị trà xanh tươi mát. Giải khát lành mạnh.",
+      "category": "nước uống",
+      "category_id": 2,
+      "status": "active",
+      "created_at": "2024-03-20T08:00:00Z",
+      "images": [
+        "https://cdn.tgdd.vn/Products/Images/8938/322495/bhx/tra-xanh-c2-oi-hong-chanh-day-455ml-202403301439172072.jpg",
+        "https://cdn.tgdd.vn/Products/Images/8938/322495/bhx/tra-xanh-c2-oi-hong-chanh-day-455ml-202403301439172072.jpg",
+        "https://cdn.tgdd.vn/Products/Images/8938/322495/bhx/tra-xanh-c2-oi-hong-chanh-day-455ml-202403301439172072.jpg",
+        "https://cdn.tgdd.vn/Products/Images/8938/322495/bhx/tra-xanh-c2-oi-hong-chanh-day-455ml-202403301439172072.jpg",
+        "https://cdn.tgdd.vn/Products/Images/8938/322495/bhx/tra-xanh-c2-oi-hong-chanh-day-455ml-202403301439172072.jpg"
+      ],
+      "rating": {
+        "rate": 4.7,
+        "count": 330
+      }
     }
-  ],
-  "users": [
+  ],"users": [
     {
       "id": "1",
       "name": "Nguyen Van A",

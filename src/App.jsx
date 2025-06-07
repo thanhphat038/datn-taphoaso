@@ -18,12 +18,12 @@ import Footer from './components/Footer';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
 
-
 import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
+import ProductsSearch from './pages/ProductsSearch';
 
 function App() {
   return (
@@ -33,6 +33,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/product" element={<ProductsPage />} />
+          <Route path="/search/:value" element={<ProductsSearch />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/cart" element={<CartPage />} />

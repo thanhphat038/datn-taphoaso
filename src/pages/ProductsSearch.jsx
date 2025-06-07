@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useProductData } from '../controller/Product.controller';
+import { useParams } from 'react-router-dom';
 import { dataProduct } from '../service/Product.service';
 import Product from '../components/Product';
 
-const ProductsPage = () => {
+const ProductsSearch = () => {
 
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const productsPerPage = 16;
+
+    const { value } = useParams();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -19,13 +22,17 @@ const ProductsPage = () => {
         fetchProduct();
     }, []);
 
+    const filteredProductsSearch = products.filter((product) =>
+        product.name.toLowerCase().includes(value.toLowerCase())
+    );
+
     const getCategoryCount = (categoryId) => {
-        return products.filter(product => product.category_id === categoryId).length;
+        return filteredProductsSearch.filter(product => product.category_id === categoryId).length;
     };
 
 
     const getPriceRangeCount = (range) => {
-        return products.filter(product => {
+        return filteredProductsSearch.filter(product => {
             const price = product.price;
             switch (range) {
                 case 'under-200': return price < 200000;
@@ -64,7 +71,8 @@ const ProductsPage = () => {
         setCurrentPage(1);
     }, [selectedPriceRange, selectedCategoryId]);
 
-    const filteredProducts = filterProducts(products);
+    const filteredProducts = filterProducts(filteredProductsSearch);
+
     const totalProducts = filteredProducts.length;
     const totalPages = Math.ceil(totalProducts / productsPerPage);
 
@@ -73,6 +81,7 @@ const ProductsPage = () => {
     const currentProducts = filteredProducts.slice(startIndex, endIndex).map((element, index) => (
         <Product key={index} data={element} />
     ));
+
 
     const handlePageChange = (pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
@@ -95,6 +104,11 @@ const ProductsPage = () => {
 
         return pageNumbers;
     };
+
+
+
+
+
 
     return (
         <main className='w-full'>
@@ -167,7 +181,7 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="categoryAll">Tất cả</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({products.length})</span>
+                                    <span className='text-sm text-gray-500'>({filteredProducts.length})</span>
                                 </div>
                             </div>
                         </div>
@@ -263,9 +277,12 @@ const ProductsPage = () => {
 
                     <div className='w-full'>
                         <div className='px-3 pb-5 rounded-[5px]'>
-                            <div className='grid grid-cols-4 gap-3'>
-                                {currentProducts}
-                            </div>
+                            {
+                                currentProducts.length === 0 ?
+                                    <p className='text-xl text-center'>Không tìm thấy sản phẩm!</p>
+                                    :
+                                    <div className='grid grid-cols-4 gap-3'>{currentProducts}</div>
+                            }
 
                             <div className='flex justify-center items-center gap-2 mt-8'>
                                 <button
@@ -311,4 +328,4 @@ const ProductsPage = () => {
     );
 };
 
-export default ProductsPage;
+export default ProductsSearch;
