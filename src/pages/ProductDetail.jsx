@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useProductDetailData } from '../controller/Product.controller';
 import { useParams } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
+import { CartContext } from '../context/CartContext';
 
 const ProductDetail = () => {
 
     const [mainImage, setMainImage] = useState('');
     const [quantity, setQuantity] = useState(1);
+
+    const { addProduct } = useContext(CartContext);
 
     const handleQuantityChange = (delta) => {
         setQuantity((prev) => {
@@ -20,6 +23,18 @@ const ProductDetail = () => {
     const { id } = useParams();
     const pd = useProductDetailData(id) || [];
     const product = pd[0] || {};
+
+    const handleAddToCart = () => {
+        if (product) {
+            addProduct({ 
+                id: product.id,
+                name: product.name,
+                image: product.images && product.images.length > 0 ? product.images[0] : '',
+                price: product.price,
+                quantity: quantity
+            });
+        }
+    };
 
     if (product.images) return (
         <main className="container mx-auto py-10 px-4">
@@ -92,7 +107,10 @@ const ProductDetail = () => {
                     </div>
 
                     <div className="flex gap-4">
-                        <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                        <button 
+                            onClick={handleAddToCart}
+                            className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+                        >
                             Thêm vào giỏ hàng
                         </button>
                         <button className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-lg shadow-md hover:bg-blue-500 hover:text-white transition duration-300">
@@ -191,5 +209,4 @@ const ProductDetail = () => {
         </main>
     );
 };
-
 export default ProductDetail;
