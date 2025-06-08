@@ -2,15 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const BlogCard = ({ id, image, title, description, date }) => (
-    <Link to={`/blog/${id}`} className="block">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="h-80 flex items-center justify-center">
-            <img src={image} alt={title} className="w-full h-full object-contain" />
+    <Link to={`/blog/${id}`} className="block h-full">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+        <div className="h-72 flex items-center justify-center overflow-hidden">
+            <img src={image} alt={title} className="w-full h-full object-cover" />
         </div>
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            <p className="text-gray-600 text-sm mb-2">{description}</p>
-            <p className="text-gray-500 text-xs">{date}</p>
+            <p className="text-gray-600 text-sm mb-2 flex-grow">{description}</p>
+            <p className="text-gray-500 text-xs mt-auto">{date}</p>
         </div>
         </div>
     </Link>
@@ -45,19 +45,33 @@ const BlogPage = () => {
             title: "Nguồn Protein Thực Vật Tốt Cho Sức Khỏe",
             description: "Tìm hiểu về các nguồn protein thực vật phong phú và cách đưa chúng vào thực đơn hàng ngày.",
             date: "17/01/2024"
+        },
+        {
+            id: 5,
+            image: "/images/blog5.jpg",
+            title: "Lợi Ích Của Việc Uống Nước Đúng Cách Mỗi Ngày",
+            description: "Khám phá những lợi ích sức khỏe khi bạn duy trì thói quen uống nước đúng cách hàng ngày.",
+            date: "16/01/2024"
+        },
+        {
+            id: 6,
+            image: "/images/blog6.jpg",
+            title: "Các Bài Tập Thể Dục Giúp Tăng Cường Sức Khỏe Tim Mạch",
+            description: "Tổng hợp các bài tập thể dục hiệu quả giúp cải thiện sức khỏe tim mạch và tăng cường thể lực.",
+            date: "15/01/2024"
         }
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen  bg-gray-50">
             {/* Banner Section */}
-            <div className="bg-blue-50 pt-4">
-                <div className="container mx-auto">
+            <div className="bg-blue-50  pt-4">
+            <div className="container mx-auto w-[1240px]">
                     <div className="flex justify-center h-96">
                         <img 
                             src="/images/banner1.jpg" 
                             alt="Shopping Banner" 
-                            className="w-full h-full object-cover"
+                            className="max-w-full max-h-96 object-contain rounded-lg "
                         />
                     </div>
                     <h1 className="text-2xl font-bold text-center mt-6 mb-8 text-cyan-600">
@@ -67,8 +81,8 @@ const BlogPage = () => {
             </div>
 
             {/* Blog Grid */}
-            <div className="max-w-5xl mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="w-[1240px] mx-auto px-4 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {blogPosts.map((post, index) => (
                         <BlogCard key={post.id} {...post} />
                     ))}

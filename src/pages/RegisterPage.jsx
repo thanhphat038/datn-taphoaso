@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { registerUser } from '../service/UserService';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -9,18 +10,69 @@ const RegisterPage = () => {
         confirmPassword: ''
     });
 
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+    const validatePassword = (password) => {
+        if (password.length < 8) {
+            return 'Mật khẩu phải có ít nhất 8 ký tự';
+        }
+        if (!/[A-Z]/.test(password)) {
+            return 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa';
+        }
+        return '';
+    };
+
+    const validateConfirmPassword = (password, confirmPassword) => {
+        if (password !== confirmPassword) {
+            return 'Mật khẩu xác nhận không khớp';
+        }
+        return '';
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        if (name === 'password') {
+            const error = validatePassword(value);
+            setPasswordError(error);
+            // Also validate confirm password if it has value
+            if (formData.confirmPassword) {
+                const confirmError = validateConfirmPassword(value, formData.confirmPassword);
+                setConfirmPasswordError(confirmError);
+            }
+        } else if (name === 'confirmPassword') {
+            const confirmError = validateConfirmPassword(formData.password, value);
+            setConfirmPasswordError(confirmError);
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // TODO: Implement registration logic
-        console.log('Register attempt with:', formData);
+        if (formData.password !== formData.confirmPassword) {
+            alert('Mật khẩu và xác nhận mật khẩu không khớp!');
+            return;
+        }
+        if (passwordError) {
+            alert(passwordError);
+            return;
+        }
+        try {
+            registerUser({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+            });
+            alert('Đăng ký thành công! Vui lòng đăng nhập.');
+            // Redirect to login page
+            window.location.href = '/login';
+        } catch (error) {
+            alert('Đăng ký thất bại: ' + error.message);
+        }
     };
 
     return (
@@ -51,7 +103,7 @@ const RegisterPage = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                                 placeholder="Nhập họ và tên của bạn"
                             />
                         </div>
@@ -67,7 +119,7 @@ const RegisterPage = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                                 placeholder="Nhập email của bạn"
                             />
                         </div>
@@ -83,9 +135,12 @@ const RegisterPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4] ${passwordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-[#06AEF4]'}`}
                                 placeholder="Nhập mật khẩu"
                             />
+                            {passwordError && (
+                                <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                            )}
                         </div>
 
                         <div>
@@ -99,22 +154,25 @@ const RegisterPage = () => {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-cyan-400 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400"
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4] ${confirmPasswordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-[#06AEF4]'}`}
                                 placeholder="Nhập lại mật khẩu"
                             />
+                            {confirmPasswordError && (
+                                <p className="mt-1 text-sm text-red-600">{confirmPasswordError}</p>
+                            )}
                         </div>
 
                         <div className="space-y-4">
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-400 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#06AEF4] hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
                             >
                                 Đăng ký
                             </button>
 
                             <Link 
                                 to="/login" 
-                                className="w-full flex justify-center py-2 px-4 border border-cyan-400 rounded-md shadow-sm text-sm font-medium text-cyan-400 bg-white hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400"
+                                className="w-full flex justify-center py-2 px-4 border border-[#06AEF4] rounded-md shadow-sm text-sm font-medium text-[#06AEF4] bg-white hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
                             >
                                 Đã có tài khoản? Đăng nhập
                             </Link>

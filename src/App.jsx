@@ -23,39 +23,43 @@ import OrderDetailPage from './pages/OrderDetailPage';
 
 import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
+import AdminUser from './pages/admin/AdminUser';
+import AdminProduct from './pages/admin/AdminProduct';
+import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
+    <Router>
+      <div className="App w-full">
+        <Header></Header>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/product" element={<ProductsPage />} />
+          <Route path="/search/:value" element={<ProductsSearch />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/order/:id" element={<OrderDetailPage />} />
 
-    <CartProvider>
-      <Router>
-        <div className="App w-full">
-          <Header></Header>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/product" element={<ProductsPage />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/order/:id" element={<OrderDetailPage />} />
-          
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/select-address" element={<SelectAddress />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="*" element={<NotFoundPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage/>} />
-            <Route path="/blog" element={<BlogPage/>} />
-            <Route path="/blog/:id" element={<BlogDetailPage />} />
-          </Routes>
-          <Footer></Footer>
-        </div>
-      </Router>
-    </CartProvider>
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/select-address" element={<SelectAddress />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:id" element={<BlogDetailPage />} />
+          <Route path="/admin/user" element={<AdminUser />} />
+          <Route path="/admin/product" element={<AdminProduct />} />
+          <Route path="/admin/category" element={<AdminCategory />} />
+        </Routes>
+        <Footer></Footer>
+      </div>
+    </Router>
   );
 }
 
