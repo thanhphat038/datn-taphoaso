@@ -263,7 +263,7 @@ const ProfilePage = () => {
                   <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
                     Cập nhật
                   </button>
-                  <button className="flex-1 px-6 py-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-medium">
+                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
                     Lưu
                   </button>
                 </div>
@@ -414,19 +414,7 @@ const ProfilePage = () => {
                           </div>
 
                           <div className="flex items-center gap-3 flex-shrink-0">
-                            <button 
-                              onClick={() => handleQuantityChange(order.id, product.id, product.quantity - 1)}
-                              className="w-8 h-8 rounded-full bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors border border-gray-200"
-                            >
-                              -
-                            </button>
                             <span className="w-8 text-center font-medium">{product.quantity}</span>
-                            <button 
-                              onClick={() => handleQuantityChange(order.id, product.id, product.quantity + 1)}
-                              className="w-8 h-8 rounded-full bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors border border-gray-200"
-                            >
-                              +
-                            </button>
                           </div>
 
                           <div className="text-right flex-shrink-0 w-24">
@@ -458,12 +446,6 @@ const ProfilePage = () => {
 
                     {/* Order Actions */}
                     <div className="flex gap-3">
-                      <button 
-                        onClick={() => handleReorder(order.id)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-full transition-colors"
-                      >
-                        Mua lại đơn hàng
-                      </button>
                       <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-full transition-colors">
                         Liên hệ hỗ trợ
                       </button>

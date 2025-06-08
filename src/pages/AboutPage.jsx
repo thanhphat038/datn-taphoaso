@@ -14,7 +14,7 @@ const AboutPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
       {/* Top Welcome Section with pink background */}
-      <section className="bg-pink-50 rounded-2xl p-8 mb-16">
+      <section className="bg-sky-50 rounded-2xl p-8 mb-16">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left Large Image */}
           <div className="md:w-1/2">
@@ -251,7 +251,7 @@ const AboutPage = () => {
       </section>
 
       {/* "Hiệu suất của chúng tôi" Section */}
-      <section className="bg-pink-50 rounded-2xl p-8 mb-16">
+      <section className="bg-sky-50 rounded-2xl p-8 mb-16">
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {/* Left Image */}
           <div className="md:w-1/3">
