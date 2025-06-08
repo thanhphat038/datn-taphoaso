@@ -4,7 +4,7 @@ import { loginUser } from '../service/UserService';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',
         password: ''
     });
 
@@ -20,8 +20,8 @@ const handleSubmit = async (e) => {
     e.preventDefault();
     try {
         const response = await loginUser(formData);
-        if (response && response.user && response.user.name) {
-            alert('Đăng nhập thành công! Chào mừng ' + response.user.name);
+        if (response && response.data && response.data.user && response.data.user.username) {
+            alert('Đăng nhập thành công! Chào mừng ' + response.data.user.username);
             window.location.href = '/';
         } else {
             alert('Đăng nhập thất bại: Dữ liệu người dùng không hợp lệ');
