@@ -32,19 +32,9 @@ const OrderDetailPage = () => {
     deliveryMethod: 'Giao hàng nhanh',
     timeline: [
       {
-        status: 'Đã giao hàng',
-        date: '08/06/2024 15:30',
-        description: 'Đơn hàng đã được giao thành công'
-      },
-      {
-        status: 'Đang giao hàng',
-        date: '08/06/2024 09:15',
-        description: 'Đơn hàng đang được giao đến địa chỉ người nhận'
-      },
-      {
-        status: 'Đang vận chuyển',
-        date: '07/06/2024 14:20',
-        description: 'Đơn hàng đang được vận chuyển'
+        status: 'Đã đặt hàng',
+        date: '06/06/2024 16:30',
+        description: 'Đơn hàng đã được đặt thành công'
       },
       {
         status: 'Đã xác nhận',
@@ -52,9 +42,19 @@ const OrderDetailPage = () => {
         description: 'Đơn hàng đã được xác nhận'
       },
       {
-        status: 'Đã đặt hàng',
-        date: '06/06/2024 16:30',
-        description: 'Đơn hàng đã được đặt thành công'
+        status: 'Đang vận chuyển',
+        date: '07/06/2024 14:20',
+        description: 'Đơn hàng đang được vận chuyển'
+      },
+      {
+        status: 'Đang giao hàng',
+        date: '08/06/2024 09:15',
+        description: 'Đơn hàng đang được giao đến địa chỉ người nhận'
+      },
+      {
+        status: 'Đã giao hàng',
+        date: '08/06/2024 15:30',
+        description: 'Đơn hàng đã được giao thành công'
       }
     ]
   };
@@ -184,7 +184,7 @@ const OrderDetailPage = () => {
 
           {/* Actions */}
           <div className="flex gap-4">
-            <button className="flex-1 bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700 transition-colors font-medium">
+            <button className="flex-1 bg-[#06AEF4] text-white py-3 rounded-full hover:bg-blue-700 transition-colors font-medium">
               Mua lại
             </button>
             <button className="flex-1 border border-gray-300 py-3 rounded-full hover:bg-gray-50 transition-colors font-medium">
