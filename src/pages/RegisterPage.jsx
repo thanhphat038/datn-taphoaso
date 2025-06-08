@@ -4,8 +4,10 @@ import { registerUser } from '../service/UserService';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
-        name: '',
+        username: '',
         email: '',
+        full_name: '',
+        phone: '',
         password: '',
         confirmPassword: ''
     });
@@ -51,7 +53,7 @@ const RegisterPage = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
             alert('Mật khẩu và xác nhận mật khẩu không khớp!');
@@ -62,9 +64,11 @@ const RegisterPage = () => {
             return;
         }
         try {
-            registerUser({
-                name: formData.name,
+            const response = await registerUser({
+                username: formData.username,
                 email: formData.email,
+                full_name: formData.full_name,
+                phone: formData.phone,
                 password: formData.password,
             });
             alert('Đăng ký thành công! Vui lòng đăng nhập.');
