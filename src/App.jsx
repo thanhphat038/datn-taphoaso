@@ -17,15 +17,19 @@ import Footer from './components/Footer';
 
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
+
 import OrderDetailPage from './pages/OrderDetailPage';
+
 
 import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
+import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
+
     <CartProvider>
       <Router>
         <div className="App w-full">
