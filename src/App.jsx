@@ -28,6 +28,7 @@ import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider } from './context/CartContext';
+import HeaderAdmin from './components/HeaderAdmin';
 
 function Layout() {
   const isAdminRoute = useLocation().pathname.startsWith('/admin');
@@ -35,6 +36,7 @@ function Layout() {
   return (
     <div className="App w-full">
       {!isAdminRoute && <Header />}
+      {isAdminRoute && <HeaderAdmin />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/product" element={<ProductsPage />} />
