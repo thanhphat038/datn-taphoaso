@@ -3,6 +3,7 @@ import { useProductDetailData } from '../controller/Product.controller';
 import { useParams } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
 import { CartContext } from '../context/CartContext';
+import { Link } from 'react-router-dom';
 
 const ProductDetail = () => {
 
@@ -109,13 +110,13 @@ const ProductDetail = () => {
                     <div className="flex gap-4">
                         <button 
                             onClick={handleAddToCart}
-                            className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+                            className="bg-[#06AEF4] text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
                         >
                             Thêm vào giỏ hàng
                         </button>
-                        <button className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-lg shadow-md hover:bg-blue-500 hover:text-white transition duration-300">
+                        <Link to={`/checkout`}><button className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-lg shadow-md hover:bg-[#06AEF4] hover:text-white transition duration-300">
                             Mua Ngay
-                        </button>
+                        </button></Link>
                     </div>
                 </div>
             </div>
