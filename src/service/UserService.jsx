@@ -11,9 +11,9 @@ export async function registerUser({ username, email, password, full_name, phone
   }
 }
 
-export async function loginUser({ email, password }) {
+export async function loginUser({ identifier, password }) {
   try {
-    const response = await axios.get(`${API_URL}`, { params: { email, password } });
+    const response = await axios.post(`${API_URL}/login`, { identifier, password });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
