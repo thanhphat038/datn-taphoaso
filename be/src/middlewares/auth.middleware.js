@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/index.js';
+import { userService } from '../services/index.js';
 
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -12,7 +13,19 @@ export const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    
+    // Check if user exists and is active
+    const user = await userService.findById(decoded.id);
+    if (!user || user.status !== 'active') {
+      return res.status(401).json({
+        message: 'User not found or inactive.'
+      });
+    }
+
+    req.user = {
+      id: user._id,
+      role: user.role
+    };
     next();
   } catch (error) {
     return res.status(401).json({

@@ -43,7 +43,8 @@ npm start
 
 ## API Documentation
 
-Xem chi tiết API tại [API.md](./docs/API.md)
+Cài đặt [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) trong Visual Studio Code.
+Xem chi tiết API và cách sử dụng API tại [api.http](./docs/api.http)
 
 ## Cấu trúc thư mục
 

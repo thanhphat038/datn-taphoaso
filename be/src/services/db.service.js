@@ -1,4 +1,5 @@
 import { AppError, ERROR_CODES } from '../utils/error.js';
+import { validateObjectId } from '../utils/validators.js';
 
 class DBService {
   constructor(model) {
@@ -17,18 +18,40 @@ class DBService {
     }
   }
 
-  async findById(id) {
+  async findById(id, options = {}) {
     try {
-      const item = await this.model.findById(id);
+      const validationError = validateObjectId(id, 'Resource ID');
+      if (validationError) {
+        throw new AppError(validationError.code, validationError.message);
+      }
+
+      let query = this.model.findById(id);
+      
+      // If select option is provided, use it
+      if (options.select) {
+        query = query.select(options.select);
+      } else {
+        // Default behavior: exclude password
+        query = query.select('-password');
+      }
+
+      const item = await query;
       if (!item) {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Resource not found');
       }
       return item;
     } catch (error) {
-      if (error.name === 'CastError') {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+      if (!(error instanceof AppError)) {
+        console.error('Database error in findById:', {
+          error: error.message,
+          code: error.code,
+          stack: error.stack
+        });
       }
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(ERROR_CODES.DB_ERROR, 'Database error occurred');
     }
   }
 
@@ -52,6 +75,11 @@ class DBService {
 
   async update(id, data) {
     try {
+      const validationError = validateObjectId(id, 'Resource ID');
+      if (validationError) {
+        throw new AppError(validationError.code, validationError.message);
+      }
+
       const item = await this.model.findByIdAndUpdate(
         id,
         { $set: data },
@@ -59,33 +87,49 @@ class DBService {
       );
       
       if (!item) {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Resource not found');
       }
       
       return item;
     } catch (error) {
-      if (error.name === 'ValidationError') {
-        throw new AppError(ERROR_CODES.DB_VALIDATION_ERROR, error.message);
+      if (!(error instanceof AppError)) {
+        console.error('Database error in update:', {
+          error: error.message,
+          code: error.code,
+          stack: error.stack
+        });
       }
-      if (error.name === 'CastError') {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+      if (error instanceof AppError) {
+        throw error;
       }
-      throw error;
+      throw new AppError(ERROR_CODES.DB_ERROR, 'Database error occurred');
     }
   }
 
   async delete(id) {
     try {
+      const validationError = validateObjectId(id, 'Resource ID');
+      if (validationError) {
+        throw new AppError(validationError.code, validationError.message);
+      }
+
       const item = await this.model.findByIdAndDelete(id);
       if (!item) {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Resource not found');
       }
       return item;
     } catch (error) {
-      if (error.name === 'CastError') {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND);
+      if (!(error instanceof AppError)) {
+        console.error('Database error in delete:', {
+          error: error.message,
+          code: error.code,
+          stack: error.stack
+        });
       }
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(ERROR_CODES.DB_ERROR, 'Database error occurred');
     }
   }
 

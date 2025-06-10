@@ -3,7 +3,22 @@ import mongoose from 'mongoose';
 const addressSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'User'
+  },
+  full_name: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  city: {
+    type: String,
     required: true
   },
   district: {
@@ -14,17 +29,9 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  chitlet: {
-    type: String,
-    required: true
-  },
-  sdt: {
-    type: String,
-    required: true
-  },
-  ten_nguoi_nhan: {
-    type: String,
-    required: true
+  is_default: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: {

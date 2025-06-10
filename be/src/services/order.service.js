@@ -1,7 +1,10 @@
 import DBService from './db.service.js';
 import Order from '../models/order.model.js';
+import OrderDetail from '../models/orderDetail.model.js';
 import { AppError, ERROR_CODES } from '../utils/error.js';
 import productService from './product.service.js';
+import addressService from './address.service.js';
+import voucherService from './voucher.service.js';
 
 class OrderService extends DBService {
   constructor() {
@@ -9,16 +12,65 @@ class OrderService extends DBService {
   }
 
   async createOrder(userId, orderData) {
-    // Check and update product stock
-    for (const item of orderData.items) {
-      await productService.updateStock(item.product_id, item.quantity, 'decrease');
+    const { address_id, items, voucher_code, payment_method, note } = orderData;
+
+    // Get address information
+    const address = await addressService.findById(address_id);
+    if (!address) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Address not found');
     }
 
+    // Calculate total amount
+    let total_amount = 0;
+    for (const item of items) {
+      const product = await productService.findById(item.product_id);
+      if (!product) {
+        throw new AppError(ERROR_CODES.DB_NOT_FOUND, `Product ${item.product_id} not found`);
+      }
+      if (product.stock < item.quantity) {
+        throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
+      }
+      total_amount += product.price * item.quantity;
+    }
+
+    // Apply voucher if provided
+    let voucher_id = null;
+    if (voucher_code) {
+      const voucher = await voucherService.validateVoucher(voucher_code, userId, total_amount);
+      if (voucher) {
+        voucher_id = voucher._id;
+        const discountAmount = voucher.discount_type === 'percentage' 
+          ? (total_amount * voucher.discount_value / 100)
+          : voucher.discount_value;
+        total_amount -= Math.min(discountAmount, voucher.max_discount || discountAmount);
+      }
+    }
+
+    // Create order
     const order = await this.create({
       user_id: userId,
-      ...orderData,
-      status: 'pending'
+      voucher_id,
+      total_amount,
+      payment_method,
+      address: `${address.chitlet}, ${address.ward}, ${address.district}`,
+      receiver: address.ten_nguoi_nhan,
+      sdt: address.sdt,
+      note,
+      order_status: 'pending'
     });
+
+    // Create order details
+    for (const item of items) {
+      const product = await productService.findById(item.product_id);
+      await OrderDetail.create({
+        order_id: order._id,
+        product_id: item.product_id,
+        qty: item.quantity,
+        cur_price: product.price
+      });
+      // Update product stock
+      await productService.updateStock(item.product_id, item.quantity, 'decrease');
+    }
 
     return order;
   }

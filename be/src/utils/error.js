@@ -151,11 +151,15 @@ export const ERROR_DESCRIPTIONS = {
 // Custom Error Class
 export class AppError extends Error {
   constructor(code, message = null, status = HTTP_STATUS.BAD_REQUEST) {
-    super(message || ERROR_MESSAGES[code] || 'Unknown error');
+    const isProduction = process.env.NODE_ENV === 'production';
+    const errorMessage = message || ERROR_MESSAGES[code] || 'Unknown error';
+    
+    super(isProduction ? 'An error occurred' : errorMessage);
     this.code = code;
     this.status = status;
     this.name = 'AppError';
     this.description = ERROR_DESCRIPTIONS[code] || 'Có lỗi xảy ra, vui lòng thử lại sau';
+    this.internalMessage = errorMessage; // Lưu message gốc để log
   }
 }
 
