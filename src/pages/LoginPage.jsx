@@ -4,7 +4,7 @@ import { loginUser } from '../service/UserService';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
-        username: '',
+        identifier: '',
         password: ''
     });
 
@@ -49,18 +49,18 @@ const handleSubmit = async (e) => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email
+                            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+                                Email hoặc Tên người dùng
                             </label>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
+                                type="text"
+                                id="identifier"
+                                name="identifier"
+                                value={formData.identifier}
                                 onChange={handleChange}
                                 required
                                 className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
-                                placeholder="Nhập email của bạn"
+                                placeholder="Nhập email hoặc tên người dùng của bạn"
                             />
                         </div>
 

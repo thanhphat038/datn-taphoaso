@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 import { MdDashboard, MdPeople, MdShoppingCart, MdCategory, MdSettings, MdReceipt } from 'react-icons/md';
 import { NavLink } from 'react-router-dom';
+import data from '../../data/db.json';
 
 const AdminProduct = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const sidebarItems = [
     { icon: MdDashboard, text: 'Tổng quát', path: '/admin/dashboard' },
@@ -15,53 +18,24 @@ const AdminProduct = () => {
     { icon: MdReceipt, text: 'Đơn hàng', path: '/admin/orders' },
   ];
 
-  const mockData = [
-    {
-      id: 1,
-      name: 'Đùi gà đông lạnh 500g',
-      description: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-      price: '100.000 đ',
-      image: '/images/avata.jpg',
-    },
-    {
-      id: 2,
-      name: 'Đùi gà đông lạnh 500g',
-      description: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-      price: '100.000 đ',
-      image: '/images/avata.jpg',
-    },
-    {
-      id: 3,
-      name: 'Đùi gà đông lạnh 500g',
-      description: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-      price: '100.000 đ',
-      image: '/images/avata.jpg',
-    },
-    {
-      id: 4,
-      name: 'Đùi gà đông lạnh 500g',
-      description: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-      price: '100.000 đ',
-      image: '/images/avata.jpg',
-    },
-    {
-      id: 5,
-      name: 'Đùi gà đông lạnh 500g',
-      description: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-      price: '100.000 đ',
-      image: '/images/avata.jpg',
-    },
-  ];
+  const products = data.products;
+
+  const totalProducts = products.length;
+  const totalPages = Math.ceil(totalProducts / pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalProducts);
+  const currentProducts = products.slice(startIndex, endIndex);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -148,7 +122,7 @@ const AdminProduct = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockData.map((product) => (
+                {currentProducts.map((product) => (
                   <tr key={product.id} className="border-b border-gray-200">
                     <td className="px-6 py-4 text-center">
                       <input type="checkbox" className="rounded border-gray-300" />
@@ -156,7 +130,7 @@ const AdminProduct = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <img
-                          src={product.image}
+                          src={product.images[0]}
                           alt={product.name}
                           className="w-10 h-10 rounded-full mr-3 object-cover"
                         />
@@ -166,14 +140,14 @@ const AdminProduct = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{product.date}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{new Date(product.created_at).toLocaleDateString('vi-VN')}</td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-full">
                         <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                        {product.status}
+                        {product.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{product.price}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{product.price.toLocaleString('vi-VN')} đ</td>
                     <td className="px-6 py-4">
                       <button className="text-gray-400 hover:text-gray-600">
                         <FaEllipsisV />
@@ -189,18 +163,32 @@ const AdminProduct = () => {
           <div className="flex items-center justify-end px-6 py-4 border-t border-gray-200">
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <span>Số lượng hiển thị</span>
-              <select className="px-2 py-1 border border-gray-200 rounded">
+              <select
+                className="px-2 py-1 border border-gray-200 rounded"
+                value={pageSize}
+                onChange={handlePageSizeChange}
+              >
                 <option>5</option>
                 <option>10</option>
                 <option>15</option>
               </select>
-              <span>1-5 trong 12 sản phẩm</span>
+              <span>
+                {startIndex + 1}-{endIndex} trong {totalProducts} sản phẩm
+              </span>
               <div className="flex gap-1">
-                <button className="p-2 hover:bg-gray-50 rounded">
+                <button
+                  className="p-2 hover:bg-gray-50 rounded"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
                   <span className="sr-only">Previous</span>
                   &#60;
                 </button>
-                <button className="p-2 hover:bg-gray-50 rounded">
+                <button
+                  className="p-2 hover:bg-gray-50 rounded"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
                   <span className="sr-only">Next</span>
                   &#62;
                 </button>
