@@ -6,7 +6,7 @@ const RegisterPage = () => {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
-        full_name: '',
+        name: '',
         phone: '',
         password: '',
         confirmPassword: ''

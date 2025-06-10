@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import routes from './routes/index.js';
 import { connectDB } from './config/database.js';
+import expressListEndpoints from 'express-list-endpoints';
 
 const app = express();
 
@@ -19,8 +20,12 @@ app.use(morgan('dev')); // Logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+
 // Routes
 app.use('/api', routes);
+
+// List endpoints
+console.log(expressListEndpoints(app));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
