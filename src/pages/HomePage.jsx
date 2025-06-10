@@ -8,7 +8,7 @@ const HomePage = () => {
       <div className='w-[1240px] m-auto py-10 grid gap-15'>
 
         <div className='flex gap-5 mb-5'>
-          <img className='grow-2 rounded-[30px]' src="./images/banner_1.png" alt="" />
+          <img className='grow-2 rounded-[30px] w-[80%] max-w-[800px] mx-auto' src="./images/banner_taphoaso.png" alt="" />
           <div className='grow-1 grid gap-5'>
             <img className='rounded-[30px]' src="./images/banner_2.png" alt="" />
             <img className='rounded-[30px]' src="./images/banner_3.png" alt="" />
@@ -29,7 +29,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className='bg-[#05ac5ba5] px-3 pb-5 rounded-[5px]'>
+        <div className='bg-[#06adf492] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
             <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
           </div>
@@ -63,7 +63,7 @@ const HomePage = () => {
 
         <div className='grid grid-cols-3 gap-5'>
 
-          <img className='rounded-[5px] h-full object-cover' src="./images/banner_1.png" alt="" />
+          <img className='rounded-[5px] w-[400px] h-[500px] object-cover' src="./images/banner_nuocngot.png" alt="" />
 
           <div className='bg-[#f2f2f29e] px-3 pb-5 rounded-[5px] col-span-2'>
             <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
