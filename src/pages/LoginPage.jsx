@@ -19,7 +19,7 @@ const LoginPage = () => {
 const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await loginUser(formData);
+        const response = await loginUser({username: formData.username, password: formData.password});
         if (response && response.data && response.data.user && response.data.user.username) {
             alert('Đăng nhập thành công! Chào mừng ' + response.data.user.username);
             window.location.href = '/';

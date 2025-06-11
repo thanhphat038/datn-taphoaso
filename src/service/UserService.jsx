@@ -13,7 +13,7 @@ export async function registerUser({ username, email, password }) {
 
 export async function loginUser({ username, password }) {
   try {
-    const response = await axios.post(`${API_URL}/login`, { username, password });
+    const response = await axios.post(`${API_URL}/login`, { username: username, password: password });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
