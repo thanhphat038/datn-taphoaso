@@ -99,7 +99,7 @@ const RegisterPage = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Đăng ký</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            {/* <div>
               <label
                 htmlFor="full_name"
                 className="block text-sm font-medium text-gray-700"
@@ -135,7 +135,7 @@ const RegisterPage = () => {
                 className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                 placeholder="Nhập số điện thoại của bạn"
               />
-            </div>
+            </div> */}
 
             <div>
               <label

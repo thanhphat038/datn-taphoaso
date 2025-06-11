@@ -18,11 +18,9 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser11",
-  "full_name":"test11",
-  "phone":"12345689",
+  "username": "testuser11111",
   "password": "password123",
-  "email": "testuser11@gmail.com"
+  "email": "testuser1111@gmail.com"
 }
 
 ### Login

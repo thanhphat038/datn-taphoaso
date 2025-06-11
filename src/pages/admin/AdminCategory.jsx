@@ -1,19 +1,10 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
-import { MdDashboard, MdPeople, MdShoppingCart, MdCategory, MdSettings, MdReceipt } from 'react-icons/md';
 import { NavLink } from 'react-router-dom';
+import HeaderAdmin from '../../components/HeaderAdmin';
 
 const AdminCategory = () => {
   const [searchQuery, setSearchQuery] = useState('');
-
-  const sidebarItems = [
-    { icon: MdDashboard, text: 'Tổng quát', path: '/admin/dashboard' },
-    { icon: MdPeople, text: 'Khách hàng', path: '/admin/user' },
-    { icon: MdShoppingCart, text: 'Sản phẩm', path: '/admin/product' },
-    { icon: MdCategory, text: 'Danh mục', path: '/admin/category' },
-    { icon: MdSettings, text: 'Thuộc tính', path: '/admin/attributes' },
-    { icon: MdReceipt, text: 'Đơn hàng', path: '/admin/orders' },
-  ];
 
   const mockData = [
     {
@@ -39,32 +30,7 @@ const AdminCategory = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md">
-        <div className="p-4 flex justify-center">
-          <img src="/images/logo_ngang.png" alt="Logo" className="h-8 mb-8" />
-        </div>
-        <nav className="px-4">
-          {sidebarItems.map((item, index) => {
-            const IconComponent = item.icon;
-            return (
-              <NavLink
-                key={index}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-3 mb-1 rounded-lg cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`
-                }
-              >
-                <IconComponent className="w-5 h-5 mr-3" />
-                <span className="text-sm font-medium">{item.text}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+      <HeaderAdmin />
 
       {/* Main Content */}
       <div className="flex-1 p-8">
@@ -72,7 +38,7 @@ const AdminCategory = () => {
           <h1 className="text-2xl font-semibold text-gray-800">Danh Mục</h1>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700">
             
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 0 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
           </button>
