@@ -5,6 +5,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
+  const [user, setUser] = useState(null);
   const [addresses, setAddresses] = useState([
     {
       id: 1,
@@ -100,7 +101,7 @@ const ProfilePage = () => {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="font-medium">Tên</span>
+              <span className="font-medium">{user ? user.username : 'Tên'}</span>
             </div>
 
             {/* Navigation Menu */}
@@ -178,41 +179,43 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Gender Selection */}
-                <div className="flex gap-6 mb-8">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={gender === 'male'}
-                      onChange={(e) => setGender(e.target.value)}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Anh</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={gender === 'female'}
-                      onChange={(e) => setGender(e.target.value)}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Chị</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="other"
-                      checked={gender === 'other'}
-                      onChange={(e) => setGender(e.target.value)}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Khác</span>
-                  </label>
-                </div>
+                {user && (
+                  <div className="flex gap-6 mb-8">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        checked={gender === 'male'}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-gray-700">Anh</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        checked={gender === 'female'}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-gray-700">Chị</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="other"
+                        checked={gender === 'other'}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-gray-700">Khác</span>
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Profile Form */}
@@ -225,6 +228,8 @@ const ProfilePage = () => {
                     type="text"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập tên tài khoản"
+                    value={user ? user.username : ''}
+                    readOnly
                   />
                 </div>
                 <div>
@@ -235,6 +240,8 @@ const ProfilePage = () => {
                     type="password"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập mật khẩu"
+                    value={user ? '********' : ''}
+                    readOnly
                   />
                 </div>
                 <div>
@@ -245,6 +252,7 @@ const ProfilePage = () => {
                     type="tel"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập số điện thoại"
+                    value={user ? user.phone : ''}
                   />
                 </div>
                 <div>
@@ -255,18 +263,21 @@ const ProfilePage = () => {
                     type="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập địa chỉ email"
+                    value={user ? user.email : ''}
                   />
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-4 pt-6">
-                  <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
-                    Cập nhật
-                  </button>
-                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
-                    Lưu
-                  </button>
-                </div>
+                {user && (
+                  <div className="flex gap-4 pt-6">
+                    <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
+                      Cập nhật
+                    </button>
+                    <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
+                      Lưu
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -307,7 +318,7 @@ const ProfilePage = () => {
                 className="mt-4 flex items-center gap-2 text-blue-500 hover:text-blue-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
                 Thêm địa chỉ mới
               </button>
