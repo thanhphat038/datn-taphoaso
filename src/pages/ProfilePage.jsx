@@ -5,7 +5,6 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
-  const [user, setUser] = useState(null);
   const [addresses, setAddresses] = useState([
     {
       id: 1,
@@ -101,7 +100,7 @@ const ProfilePage = () => {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="font-medium">{user ? user.username : 'Tên'}</span>
+              <span className="font-medium">Tên</span>
             </div>
 
             {/* Navigation Menu */}
@@ -179,43 +178,41 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Gender Selection */}
-                {user && (
-                  <div className="flex gap-6 mb-8">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="male"
-                        checked={gender === 'male'}
-                        onChange={(e) => setGender(e.target.value)}
-                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-700">Anh</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="female"
-                        checked={gender === 'female'}
-                        onChange={(e) => setGender(e.target.value)}
-                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-700">Chị</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="other"
-                        checked={gender === 'other'}
-                        onChange={(e) => setGender(e.target.value)}
-                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-700">Khác</span>
-                    </label>
-                  </div>
-                )}
+                <div className="flex gap-6 mb-8">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={gender === 'male'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Anh</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={gender === 'female'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Chị</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="other"
+                      checked={gender === 'other'}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700">Khác</span>
+                  </label>
+                </div>
               </div>
 
               {/* Profile Form */}
@@ -228,8 +225,6 @@ const ProfilePage = () => {
                     type="text"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập tên tài khoản"
-                    value={user ? user.username : ''}
-                    readOnly
                   />
                 </div>
                 <div>
@@ -240,8 +235,6 @@ const ProfilePage = () => {
                     type="password"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập mật khẩu"
-                    value={user ? '********' : ''}
-                    readOnly
                   />
                 </div>
                 <div>
@@ -252,7 +245,6 @@ const ProfilePage = () => {
                     type="tel"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập số điện thoại"
-                    value={user ? user.phone : ''}
                   />
                 </div>
                 <div>
@@ -263,21 +255,18 @@ const ProfilePage = () => {
                     type="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập địa chỉ email"
-                    value={user ? user.email : ''}
                   />
                 </div>
 
                 {/* Action Buttons */}
-                {user && (
-                  <div className="flex gap-4 pt-6">
-                    <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
-                      Cập nhật
-                    </button>
-                    <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
-                      Lưu
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-4 pt-6">
+                  <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
+                    Cập nhật
+                  </button>
+                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
+                    Lưu
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -318,7 +307,7 @@ const ProfilePage = () => {
                 className="mt-4 flex items-center gap-2 text-blue-500 hover:text-blue-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 011-1z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
                 Thêm địa chỉ mới
               </button>
@@ -383,6 +372,7 @@ const ProfilePage = () => {
               )}
             </div>
           )}
+
 
           {activeTab === 'orders' && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -463,6 +453,85 @@ const ProfilePage = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'favorites' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold mb-4">Sản phẩm yêu thích</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {/* Example favorite product cards */}
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src="/images/image_product.png"
+                      alt="Sản phẩm 1"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 1</h3>
+                  <p className="text-red-500 font-semibold mb-3">100,000đ</p>
+                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Xóa
+                  </button>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src="/images/image_product.png"
+                      alt="Sản phẩm 2"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 2</h3>
+                  <p className="text-red-500 font-semibold mb-3">150,000đ</p>
+                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Xóa
+                  </button>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src="/images/image_product.png"
+                      alt="Sản phẩm 3"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 3</h3>
+                  <p className="text-red-500 font-semibold mb-3">200,000đ</p>
+                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Xóa
+                  </button>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src="/images/image_product.png"
+                      alt="Sản phẩm 4"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 4</h3>
+                  <p className="text-red-500 font-semibold mb-3">250,000đ</p>
+                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Xóa
+                  </button>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src="/images/image_product.png"
+                      alt="Sản phẩm 5"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 5</h3>
+                  <p className="text-red-500 font-semibold mb-3">300,000đ</p>
+                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Xóa
+                  </button>
+                </div>
               </div>
             </div>
           )}
