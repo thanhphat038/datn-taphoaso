@@ -1,10 +1,13 @@
 @baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NDMzZjdiNWI0ZDA5ODUxODA1NmJmMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ5MjM3NjI3LCJleHAiOjE3NDk4NDI0Mjd9.m5_1EPM94P-r8vOFo8uiROwyfNmr2KN3VvRkPypLKaI
-
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NDdmNTI5ZjdkNmY1Y2ExZGZkY2YyZCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ5NTQ2NjY4LCJleHAiOjE3NTAxNTE0Njh9.7i5UIKbWIVJ_BvcL2uQGop31ohCwNrfe9wCL36vj-zk
 ### Variables
-@userId = 1
-@productId = 1
-@categoryId = 1
+@userId = 6847f3b818e1b8e1fbab2794
+
+@addressId = 684692e68e9d25aa73ff03d5
+@productId = 68445008100dfcb4c691c0f3
+@categoryId = 68444ff7100dfcb4c691c0f1
+
+# chưa làm 
 @orderId = 1
 @voucherId = 1
 
@@ -15,20 +18,19 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "email": "test@example.com",
+  "username": "testuser11",
+  "full_name":"test11",
+  "phone":"12345689",
   "password": "password123",
-  "full_name": "Test User",
-  "phone": "0123456789"
+  "email": "testuser11@gmail.com"
 }
-###
 
-# Login
+### Login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "username": "testuser",
+  "username": "testuser1",
   "password": "password123"
 }
 
@@ -42,8 +44,8 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "currentPassword": "password123",
-  "newPassword": "newpassword123"
+  "currentPassword": "newpassword123",
+  "newPassword": "password123"
 }
 
 ### Users ###
@@ -62,12 +64,17 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "full_name": "Updated Name",
-  "phone": "0987654321"
+  "full_name": "1241241",
+  "phone": "0987654321",
+  "email": "test@example.com"
 }
 
 ### Delete user
 DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+### Deactivate user
+PATCH {{baseUrl}}/users/{{userId}}/deactivate
 Authorization: Bearer {{authToken}}
 
 ### Categories ###
@@ -141,6 +148,10 @@ Content-Type: application/json
 
 ### Delete product (Admin only)
 DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Deactivate product (Admin only)
+PATCH {{baseUrl}}/products/{{productId}}/deactivate
 Authorization: Bearer {{authToken}}
 
 ### Search products
@@ -219,7 +230,7 @@ GET {{baseUrl}}/addresses
 Authorization: Bearer {{authToken}}
 
 ### Get address by ID
-GET {{baseUrl}}/addresses/1
+GET {{baseUrl}}/addresses/{{addressId}}
 Authorization: Bearer {{authToken}}
 
 ### Create address
@@ -238,7 +249,7 @@ Content-Type: application/json
 }
 
 ### Update address
-PUT {{baseUrl}}/addresses/1
+PUT {{baseUrl}}/addresses/{{addressId}}
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
@@ -247,7 +258,7 @@ Content-Type: application/json
 }
 
 ### Delete address
-DELETE {{baseUrl}}/addresses/1
+DELETE {{baseUrl}}/addresses/{{addressId}}
 Authorization: Bearer {{authToken}}
 
 ### Reviews ###

@@ -8,11 +8,27 @@ class ProductService extends DBService {
   }
 
   async findByCategory(categoryId, options = {}) {
-    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
+    const { 
+      page = 1, 
+      limit = 10, 
+      sort = { created_at: -1 },
+      excludeId = null 
+    } = options;
+    
     const skip = (page - 1) * limit;
+    
+    const query = { 
+      category_id: categoryId, 
+      status: 'active' 
+    };
+
+    // Exclude current product if specified
+    if (excludeId) {
+      query._id = { $ne: excludeId };
+    }
 
     return await this.model
-      .find({ category_id: categoryId, status: 'active' })
+      .find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -75,6 +91,13 @@ class ProductService extends DBService {
         status: 'active'
       })
       .limit(limit);
+  }
+
+  async updateStatus(id, status) {
+    if (!['active', 'inactive'].includes(status)) {
+      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid status');
+    }
+    return await this.update(id, { status });
   }
 }
 

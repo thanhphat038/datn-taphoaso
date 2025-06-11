@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Mì Hảo Hảo Tôm Chua Cay",
       "price": 350000,
       "original_price": 450000,
@@ -23,7 +23,7 @@
       }
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Coca Cola Lon 320ml",
       "price": 8000,
       "original_price": 10000,
@@ -44,6 +44,8 @@
         "count": 500
       }
     },
+ 
+    
     {
       "id": 3,
       "name": "Mì Omachi Lẩu Thái",
@@ -528,5 +530,25 @@
         "count": 330
       }
     }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "name": "Nguyen Van A",
+      "email": "nguyenvana@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "2",
+      "name": "Tran Thi B",
+      "email": "tranthib@example.com",
+      "password": "password456"
+    },
+    {
+      "id": "3561",
+      "name": "aaaaa",
+      "email": "bin0931142237@gmail.com",
+      "password": "123456789"
+    }
   ]
-} 
+}

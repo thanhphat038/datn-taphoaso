@@ -17,16 +17,11 @@ class UserService extends DBService {
   }
 
   async create(data) {
-    // Check if email or username already exists
-    const existingUser = await this.model.findOne({
-      $or: [
-        { email: data.email },
-        { username: data.username }
-      ]
-    });
+    // Check if username already exists
+    const existingUser = await this.model.findOne({ username: data.username });
 
     if (existingUser) {
-      throw new AppError(ERROR_CODES.DB_DUPLICATE_KEY, 'Email or username already exists');
+      throw new AppError(ERROR_CODES.DB_DUPLICATE_KEY, 'Username already exists');
     }
 
     // Hash password
@@ -37,17 +32,18 @@ class UserService extends DBService {
   }
 
   async update(id, data) {
-    // If updating password, hash it
-    if (data.password) {
+    // If updating password and it's not already hashed (no $2b$ prefix)
+    if (data.password && !data.password.startsWith('$2b$')) {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
     }
 
-    return await super.update(id, data);
+    // Use Mongoose's findByIdAndUpdate to update and exclude password
+    return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
   async changePassword(id, oldPassword, newPassword) {
-    const user = await this.findById(id);
+    const user = await this.findById(id, { select: '+password' });
     
     // Verify old password
     const isMatch = await bcrypt.compare(oldPassword, user.password);

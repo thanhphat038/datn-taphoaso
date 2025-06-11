@@ -61,17 +61,22 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className='bg-[#f2f2f29e] px-3 pb-5 rounded-[5px]'>
-          <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
-          </div>
+        <div className='grid grid-cols-3 gap-5'>
 
-          <div className='grid grid-cols-5 gap-3'>
-            {useProductData("nước uống", 5)}
-          </div>
+          <img className='rounded-[5px] h-full object-cover' src="./images/banner_1.png" alt="" />
 
-          <div className='mt-5 flex place-content-center'>
-            <a href="" className='text-[18px]'>Xem thêm</a>
+          <div className='bg-[#f2f2f29e] px-3 pb-5 rounded-[5px] col-span-2'>
+            <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
+              <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
+            </div>
+
+            <div className='grid grid-cols-3 gap-3'>
+              {useProductData("nước uống", 3)}
+            </div>
+
+            <div className='mt-5 flex place-content-center'>
+              <a href="" className='text-[18px]'>Xem thêm</a>
+            </div>
           </div>
         </div>
 
