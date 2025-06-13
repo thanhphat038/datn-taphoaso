@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEdit } from 'react-icons/fa';
 import './Checkout.css';
 import PaymentMethodModal from '../../components/checkout/PaymentMethodModal';
+import { CartContext } from '../../context/CartContext';
 
 const Checkout = () => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const navigate = useNavigate();
+  const location = useLocation();
+  const { cartItems } = useContext(CartContext);
+
+  // Check if a product is passed via navigation state
+  const productFromState = location.state?.product;
+
+  // If productFromState exists, display only that product, else display cart items
+  const productsToDisplay = productFromState ? [productFromState] : cartItems;
 
   const handleOrder = () => {
     navigate('/payment-success');
@@ -33,28 +42,23 @@ const Checkout = () => {
             {/* Thông tin đơn hàng */}
             <div className="checkout-section">
               <div className="checkout-label mb-2">Thông tin đơn hàng</div>
-              <div className="checkout-product flex items-center mb-2">
-                <img src="/img/pd_img.png" alt="Sữa chua Nutimilk" />
-                <div className="flex-1">
-                  <div className="font-medium">Lốc 4 hộp sữa chua có đường Nutimilk 100g</div>
-                  <div className="text-xs text-gray-500">Số lượng: 1</div>
-                </div>
-                <div className="text-right">
-                  <div className="checkout-price">25.500 đ</div>
-                  <div className="text-xs text-gray-400">(7.000 đ/Hộp)</div>
-                </div>
-              </div>
-              <div className="checkout-product flex items-center">
-                <img src="/img/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419459272 1.png" alt="Sữa tươi Vinamilk" />
-                <div className="flex-1">
-                  <div className="font-medium">Thùng 48 hộp sữa tươi tiệt trùng ít đường Vinamilk 100% Sữa tươi 180ml</div>
-                  <div className="text-xs text-gray-500">Số lượng: 1</div>
-                </div>
-                <div className="text-right">
-                  <div className="checkout-price">353.500 đ</div>
-                  <div className="text-xs text-gray-400">(7.354 đ/Hộp)</div>
-                </div>
-              </div>
+              {productsToDisplay.length === 0 ? (
+                <div>Không có sản phẩm trong giỏ hàng.</div>
+              ) : (
+                productsToDisplay.map((item) => (
+                  <div key={item.id} className="checkout-product flex items-center mb-2">
+                    <img src={item.image || '/img/pd_img.png'} alt={item.name} />
+                    <div className="flex-1">
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-xs text-gray-500">Số lượng: {item.quantity}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="checkout-price">{(item.price * item.quantity).toLocaleString()} đ</div>
+                      <div className="text-xs text-gray-400">({(item.price).toLocaleString()} đ/Hộp)</div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             {/* Phương thức thanh toán */}
             <div className="checkout-section">
@@ -82,9 +86,13 @@ const Checkout = () => {
           </div>
           {/* Tổng tiền và đặt hàng sticky bottom */}
           <div className="checkout-total-box-sticky">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-medium text-lg">Phí vận chuyển:</span>
+              <span className="checkout-shipping-fee">15.000 đ</span>
+            </div>
             <div className="flex justify-between items-center mb-4">
               <span className="font-medium text-lg">Tổng tiền tạm tính:</span>
-              <span className="checkout-total">379.000 đ</span>
+              <span className="checkout-total">{(productsToDisplay.reduce((total, item) => total + item.price * item.quantity, 0) + 15000).toLocaleString()} đ</span>
             </div>
             <button className="checkout-btn-order w-full" onClick={handleOrder}>Đặt ngay</button>
           </div>
@@ -101,4 +109,5 @@ const Checkout = () => {
   );
 };
 
-export default Checkout; 
+export default Checkout;
+
