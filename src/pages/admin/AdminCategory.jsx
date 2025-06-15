@@ -5,6 +5,8 @@ import HeaderAdmin from '../../components/HeaderAdmin';
 
 const AdminCategory = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const mockData = [
     {
@@ -27,21 +29,74 @@ const AdminCategory = () => {
     },
   ];
 
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    // TODO: Add logic to save new category
+    alert(`Danh mục "${newCategoryName}" đã được thêm.`);
+    setNewCategoryName('');
+    setShowModal(false);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <HeaderAdmin />
 
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-800">Danh Mục</h1>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 0 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+          <button
+            className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
+            onClick={() => setShowModal(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
+            Thêm danh mục
           </button>
+          {showModal && (
+            <>
+              <div className="fixed inset-0  backdrop-combined backdrop-blur-xs z-40" onClick={() => setShowModal(false)}></div>
+              <div className="fixed inset-0 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-96 shadow-lg relative">
+                  <button
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowModal(false)}
+                  >
+                    &#x2715;
+                  </button>
+                  <h2 className="text-lg font-semibold mb-4">Thêm danh mục</h2>
+                  <form onSubmit={handleAddCategory}>
+                    <label className="block mb-2 font-medium" htmlFor="categoryName">Tên danh mục</label>
+                    <input
+                      id="categoryName"
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Tên danh mục bạn muốn đặt"
+                      className="w-full border border-gray-300 rounded px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-[#06AEF4]"
+                      required
+                    />
+                    <div className="flex justify-end gap-4">
+                      <button
+                        type="submit"
+                        className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
+                      >
+                        Lưu thay đổi
+                      </button>
+                      <button
+                        type="button"
+                        className="bg-red-300 text-white px-4 py-2 rounded hover:bg-red-400"
+                        onClick={() => setShowModal(false)}
+                      >
+                        Hủy bỏ
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Search Bar */}

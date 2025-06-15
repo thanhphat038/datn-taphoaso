@@ -47,7 +47,6 @@ const AdminUser = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <HeaderAdmin />
 
       {/* Main Content */}
       <div className="flex-1 p-8">
