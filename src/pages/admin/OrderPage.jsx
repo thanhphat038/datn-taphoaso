@@ -1,11 +1,29 @@
-
 import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
+import { FaFilter } from 'react-icons/fa';
+import { useEffect, useRef } from 'react';
 
 const OrderPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('All');
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowStatusDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
 
   const orders = [
     { id: '#12345', customer: 'John Doe', date: '2024-03-20', status: 'Hoàn thành', price: '99.99', details: [
@@ -16,7 +34,10 @@ const OrderPage = () => {
     ], shippingFee: 'Miễn phí', discount: 4500, total: 100000, paid: 100000, paymentMethod: 'Tiền mặt' },
     { id: '#12346', customer: 'Jane Smith', date: '2024-03-19', status: 'Chưa giải quyết', price: '149.99', details: [], shippingFee: '', discount: 0, total: 0, paid: 0, paymentMethod: '' },
     { id: '#12347', customer: 'Bob Johnson', date: '2024-03-18', status: 'Đang xử lý', price: '79.99', details: [], shippingFee: '', discount: 0, total: 0, paid: 0, paymentMethod: '' },
+    { id: '#12348', customer: 'Alice Brown', date: '2024-03-17', status: 'Bị hủy', price: '$59.99', details: [], shippingFee: '', discount: 0, total: 0, paid: 0, paymentMethod: '' },
+    { id: '#12349', customer: 'Tom White', date: '2024-03-16', status: 'Bị hủy', price: '$89.99', details: [], shippingFee: '', discount: 0, total: 0, paid: 0, paymentMethod: '' },
   ];
+
 
   const canceledOrders = [
     { id: '#12348', customer: 'Alice Brown', date: '2024-03-17', status: 'Bị hủy', price: '$59.99' },
@@ -45,17 +66,22 @@ const OrderPage = () => {
   };
 
   const handleStatusUpdate = () => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === currentEditOrderId ? { ...order, status: editStatus } : order
-      )
-    );
+    // Since orders is a constant array, this function currently does not update state.
+    // You may want to convert orders to state if you want to update it dynamically.
+    // For now, just close the modal.
+    setShowEditModal(false);
   };
 
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, orders.length);
 
-  const paginatedOrders = orders.slice(startIndex, endIndex);
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.customer.toLowerCase().includes(searchQuery.toLowerCase()) || order.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = selectedStatus === 'All' || order.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -65,7 +91,7 @@ const OrderPage = () => {
           {/* Add Order button can be added here if needed */}
         </div>
 
-        {/* Search Bar */}
+        {/* Search and Filter Bar */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -76,6 +102,75 @@ const OrderPage = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
             />
+          </div>
+          {/* Filter icon button */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+              className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+              aria-label="Filter orders by status"
+            >
+              <FaFilter className="text-gray-600" />
+            </button>
+            {showStatusDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-10">
+                <button
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                    selectedStatus === 'All' ? 'font-semibold bg-gray-100' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedStatus('All');
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  Tất cả trạng thái
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                    selectedStatus === 'Hoàn thành' ? 'font-semibold bg-gray-100' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedStatus('Hoàn thành');
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  Hoàn thành
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                    selectedStatus === 'Chưa giải quyết' ? 'font-semibold bg-gray-100' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedStatus('Chưa giải quyết');
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  Chưa giải quyết
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                    selectedStatus === 'Đang xử lý' ? 'font-semibold bg-gray-100' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedStatus('Đang xử lý');
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  Đang xử lý
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                    selectedStatus === 'Bị hủy' ? 'font-semibold bg-gray-100' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedStatus('Bị hủy');
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  Bị hủy
+                </button>
+              </div>
+            )}
           </div>
           <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
             <FaSearch className="text-gray-600" />
@@ -241,7 +336,7 @@ const OrderPage = () => {
           </div>
         )}
 
-        <section className="bg-white rounded-lg shadow-sm mb-6">
+        {/* <section className="bg-white rounded-lg shadow-sm mb-6">
           <h2 className="text-lg font-semibold mb-4">Đơn Hàng Bị Hủy</h2>
           <table className="w-full">
             <thead>
@@ -307,10 +402,10 @@ const OrderPage = () => {
               ))}
             </tbody>
           </table>
-        </section>
+        </section> */}
       </div>
     </div>
   );
 };
 
-
+export default OrderPage;
