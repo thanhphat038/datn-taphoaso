@@ -3,6 +3,8 @@ import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 
 const VoucherPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [dateFilter, setDateFilter] = useState('None');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -12,9 +14,22 @@ const VoucherPage = () => {
     { id: 3, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hoạt động' },
   ];
 
-  const filteredVouchers = vouchers.filter(voucher =>
-    voucher.code.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter vouchers by search query and status
+  let filteredVouchers = vouchers.filter(voucher =>
+    voucher.code.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (statusFilter === 'All' || voucher.status === statusFilter)
   );
+
+  // Sort vouchers by date filter
+  if (dateFilter === 'StartDateAsc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  } else if (dateFilter === 'StartDateDesc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  } else if (dateFilter === 'EndDateAsc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+  } else if (dateFilter === 'EndDateDesc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+  }
 
   const totalVouchers = filteredVouchers.length;
   const totalPages = Math.ceil(totalVouchers / pageSize);
@@ -47,7 +62,7 @@ const VoucherPage = () => {
           </a>
         </div>
 
-        {/* Search Bar */}
+        {/* Search and Filter Bar */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -62,6 +77,26 @@ const VoucherPage = () => {
           <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
             <FaSearch className="text-gray-600" />
           </button>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">Tất cả trạng thái</option>
+            <option value="Hoạt động">Hoạt động</option>
+            <option value="Hết hạn">Hết hạn</option>
+          </select>
+          <select
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="None">Sắp xếp ngày</option>
+            <option value="StartDateAsc">Ngày bắt đầu ↑</option>
+            <option value="StartDateDesc">Ngày bắt đầu ↓</option>
+            <option value="EndDateAsc">Ngày kết thúc ↑</option>
+            <option value="EndDateDesc">Ngày kết thúc ↓</option>
+          </select>
         </div>
 
         {/* Table */}

@@ -7,10 +7,31 @@ const AdminProduct = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [priceFilter, setPriceFilter] = useState('All');
+  const [sortOrder, setSortOrder] = useState('None');
 
   const products = data.products;
 
-  const totalProducts = products.length;
+  // Apply search filter
+  let filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Apply price filter
+  if (priceFilter === 'LowToHigh') {
+    filteredProducts = filteredProducts.sort((a, b) => a.price - b.price);
+  } else if (priceFilter === 'HighToLow') {
+    filteredProducts = filteredProducts.sort((a, b) => b.price - a.price);
+  }
+
+  // Apply alphabetical sort
+  if (sortOrder === 'AtoZ') {
+    filteredProducts = filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortOrder === 'ZtoA') {
+    filteredProducts = filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
+  const totalProducts = filteredProducts.length;
   const totalPages = Math.ceil(totalProducts / pageSize);
 
   const handlePageChange = (newPage) => {
@@ -25,11 +46,11 @@ const AdminProduct = () => {
 
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalProducts);
-  const currentProducts = products.slice(startIndex, endIndex);
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}-
+      {/* Sidebar */}
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
@@ -42,7 +63,7 @@ const AdminProduct = () => {
           </NavLink>
         </div>
 
-        {/* Search Bar */}
+        {/* Search and Filter Bar */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -57,6 +78,24 @@ const AdminProduct = () => {
           <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
             <FaSearch className="text-gray-600" />
           </button>
+          <select
+            value={priceFilter}
+            onChange={(e) => setPriceFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">Giá: Tất cả</option>
+            <option value="LowToHigh">Giá: Thấp đến cao</option>
+            <option value="HighToLow">Giá: Cao đến thấp</option>
+          </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="None">Sắp xếp: Mặc định</option>
+            <option value="AtoZ">Sắp xếp: A-Z</option>
+            <option value="ZtoA">Sắp xếp: Z-A</option>
+          </select>
         </div>
 
         {/* Table */}
