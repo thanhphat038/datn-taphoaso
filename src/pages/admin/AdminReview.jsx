@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 
-const AdminComment = () => {
+const AdminReview = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const mockComments = [
+  const mockReviews = [
     {
       id: 1,
       user: 'Nguyễn Văn A',
       product: 'Sản phẩm 1',
-      comment: 'Sản phẩm rất tốt, tôi rất hài lòng!',
+      rating: 5,
       date: '2024-04-01',
       status: 'Hiển thị',
     },
@@ -17,7 +17,7 @@ const AdminComment = () => {
       id: 2,
       user: 'Trần Thị B',
       product: 'Sản phẩm 2',
-      comment: 'Chất lượng trung bình, giao hàng chậm.',
+      rating: 3,
       date: '2024-03-28',
       status: 'Ẩn',
     },
@@ -25,7 +25,7 @@ const AdminComment = () => {
       id: 3,
       user: 'Lê Văn C',
       product: 'Sản phẩm 3',
-      comment: 'Tốt, nhưng đóng gói chưa chắc chắn.',
+      rating: 4,
       date: '2024-03-25',
       status: 'Hiển thị',
     },
@@ -36,7 +36,7 @@ const AdminComment = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-800">Quản Lý Bình Luận</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Quản Lý Đánh Giá</h1>
         </div>
 
         {/* Search Bar */}
@@ -45,7 +45,7 @@ const AdminComment = () => {
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo người dùng, sản phẩm hoặc nội dung"
+              placeholder="Tìm kiếm theo người dùng hoặc sản phẩm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
@@ -56,7 +56,7 @@ const AdminComment = () => {
           </button>
         </div>
 
-        {/* Comments Table */}
+        {/* Reviews Table */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -67,38 +67,39 @@ const AdminComment = () => {
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Người Dùng</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Sản Phẩm</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Bình Luận</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Đánh Giá</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Ngày</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Trạng Thái</th>
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
               <tbody>
-                {mockComments
+                {mockReviews
                   .filter(
-                    (comment) =>
-                      comment.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      comment.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      comment.comment.toLowerCase().includes(searchQuery.toLowerCase())
+                    (review) =>
+                      review.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      review.product.toLowerCase().includes(searchQuery.toLowerCase())
                   )
-                  .map((comment) => (
-                    <tr key={comment.id} className="border-b border-gray-200">
+                  .map((review) => (
+                    <tr key={review.id} className="border-b border-gray-200">
                       <td className="px-6 py-4 text-center">
                         <input type="checkbox" className="rounded border-gray-300" />
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{comment.user}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{comment.product}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{comment.comment}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{comment.date}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{review.user}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{review.product}</td>
+                      <td className="px-6 py-4 text-sm text-yellow-500">
+                        {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{review.date}</td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 text-xs font-medium rounded-full ${
-                            comment.status === 'Hiển thị'
+                            review.status === 'Hiển thị'
                               ? 'text-green-700 bg-green-50'
                               : 'text-red-700 bg-red-50'
                           }`}
                         >
-                          {comment.status}
+                          {review.status}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -121,7 +122,7 @@ const AdminComment = () => {
                 <option>10</option>
                 <option>15</option>
               </select>
-              <span>1-5 trong 12 bình luận</span>
+              <span>1-5 trong 12 đánh giá</span>
               <div className="flex gap-1">
                 <button className="p-2 hover:bg-gray-50 rounded">
                   <span className="sr-only">Previous</span>
@@ -139,4 +140,5 @@ const AdminComment = () => {
     </div>
   );
 };
-export default AdminComment;
+
+export default AdminReview;

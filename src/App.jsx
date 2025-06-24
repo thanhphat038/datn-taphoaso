@@ -35,7 +35,10 @@ import AddVoucherPage from './pages/admin/AddVoucherPage';
 import OrderPage from './pages/admin/OrderPage';
 import AdminBlogPage from './pages/admin/AdminBlogPage';
 import AddBlog from './pages/admin/AddBlog';
+import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
+import AdminReview from './pages/admin/AdminReview';
+import DetailProduct from './pages/admin/DetailProduct';
 
 function Layout() {
   const isAdminRoute = useLocation().pathname.startsWith('/admin');
@@ -72,7 +75,10 @@ function Layout() {
           <Route path="/admin/order" element={<OrderPage />} />
           <Route path="/admin/blog" element={<AdminBlogPage />} />
           <Route path="/admin/addblog" element={<AddBlog />} />
+          <Route path="/admin/blog/detail/:id" element={<AdminBlogDetail />} />
           <Route path="/admin/comment" element={<AdminComment />} />
+          <Route path="/admin/review" element={<AdminReview />} />
+          <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
         </Routes>
         {!isAdminRoute && <Footer />}
       </div>

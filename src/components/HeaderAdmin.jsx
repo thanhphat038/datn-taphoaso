@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { MdDashboard, MdPeople, MdShoppingCart, MdCategory, MdSettings, MdReceipt, MdCardGiftcard, MdDescription } from 'react-icons/md';
+import { FaComments, FaStar } from 'react-icons/fa';
 
 const HeaderAdmin = () => {
   const sidebarItems = [
@@ -11,6 +12,8 @@ const HeaderAdmin = () => {
     { icon: MdCardGiftcard, text: 'Voucher', path: '/admin/voucher' },
     { icon: MdReceipt, text: 'Đơn hàng', path: '/admin/order' },
     { icon: MdDescription, text: 'Blog', path: '/admin/blog' },
+    { icon: FaComments, text: 'Bình luận', path: '/admin/comment' },
+    { icon: FaStar, text: 'Đánh giá', path: '/admin/review' },
   ];
 
   return (

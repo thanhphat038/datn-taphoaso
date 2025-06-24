@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import data from '../../data/db.json';
 
 const AdminProduct = () => {
@@ -9,6 +9,9 @@ const AdminProduct = () => {
   const [pageSize, setPageSize] = useState(5);
   const [priceFilter, setPriceFilter] = useState('All');
   const [sortOrder, setSortOrder] = useState('None');
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  const navigate = useNavigate();
 
   const products = data.products;
 
@@ -149,10 +152,53 @@ const AdminProduct = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{product.price.toLocaleString('vi-VN')} đ</td>
-                    <td className="px-6 py-4">
-                      <button className="text-gray-400 hover:text-gray-600">
+                    <td className="px-6 py-4 relative">
+                      <button
+                        className="text-gray-400 hover:text-gray-600"
+                        onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}
+                      >
                         <FaEllipsisV />
                       </button>
+                      {openMenuId === product.id && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-10">
+                          <button
+                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-blue-600 font-medium"
+                            onClick={() => {
+                              navigate(`/admin/detailproduct/${product.id}`);
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Xem chi tiết
+                          </button>
+                          <button
+                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 font-medium"
+                            onClick={() => {
+                              alert('Xóa sản phẩm: ' + product.name);
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Xóa sản phẩm
+                          </button>
+                          <button
+                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-600 font-medium"
+                            onClick={() => {
+                              alert('Ẩn sản phẩm: ' + product.name);
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.042.16-2.046.46-3.003m1.68-1.68A9.969 9.969 0 0112 5c5.523 0 10 4.477 10 10 0 1.042-.16 2.046-.46 3.003m-1.68 1.68L4.5 4.5" />
+                            </svg>
+                            Ẩn sản phẩm
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

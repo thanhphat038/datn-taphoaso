@@ -9,7 +9,18 @@ const OrderPage = () => {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
+  const handlePageChange = (newPage) => {
+    const totalPages = Math.ceil(filteredOrders.length / pageSize);
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
   const dropdownRef = useRef(null);
 
   useEffect(() => {
