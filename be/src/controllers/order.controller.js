@@ -1,45 +1,45 @@
 import { orderService } from '../services/index.js';
 import OrderDetail from '../models/orderDetail.model.js';
 import { AppError, ERROR_CODES } from '../utils/error.js';
+import mongoose from 'mongoose';
+import {
+  created,
+  badRequest,
+  notFound,
+  ok,
+  serverError,
+  noContent,
+  unprocessableEntity
+} from '../utils/response.js';
 
 // Create new order
 export const createOrder = async (req, res, next) => {
   try {
-    const { orderDetails, ...orderData } = req.body;
-    
-    // Create order
-    const order = await orderService.create(orderData);
+    const userId = req.user._id;
+    const orderData = req.body;
 
-    // Create order details
-    if (orderDetails && orderDetails.length > 0) {
-      const details = orderDetails.map(detail => ({
-        ...detail,
-        order_id: order._id
-      }));
-      await OrderDetail.insertMany(details);
+    if (!orderData.address_id || !orderData.items || !orderData.payment_method) {
+      return badRequest(res, 'Missing required fields: address_id, items, payment_method');
     }
 
-    // Get complete order with details
-    const completeOrder = await orderService.findById(order._id, {
-      populate: [
-        { path: 'user_id', select: 'name email' },
-        { path: 'address_id' },
-        { path: 'voucher_id' }
-      ]
-    });
+    if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
+      return badRequest(res, 'Items must be a non-empty array');
+    }
 
-    const orderDetailsList = await OrderDetail.find({ order_id: order._id })
-      .populate('product_id');
-
-    res.status(201).json({
-      success: true,
-      data: {
-        ...completeOrder.toObject(),
-        orderDetails: orderDetailsList
+    for (const item of orderData.items) {
+      if (!item.product_id || !item.quantity || item.quantity < 1) {
+        return unprocessableEntity(res, 'Each item must have product_id and quantity (minimum 1)');
       }
-    });
+    }
+
+    const order = await orderService.createOrder(userId, orderData);
+    
+    return created(res, order, 'Order created successfully');
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      return badRequest(res, error.message);
+    }
+    return serverError(res, 'Error creating order', error);
   }
 };
 
@@ -64,25 +64,34 @@ export const getOrders = async (req, res) => {
         { path: 'voucher_id' }
       ]
     });
-    res.json(orders);
+
+    if (orders.length === 0) {
+      return ok(res, [], 'No orders found');
+    }
+
+    return ok(res, orders, 'Orders retrieved successfully');
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return serverError(res, 'Error retrieving orders', error);
   }
 };
 
 // Get order by id
 export const getOrderById = async (req, res, next) => {
   try {
-    const order = await orderService.getOrderDetails(req.params.id);
-    if (!order) {
-      throw new AppError(ERROR_CODES.NOT_FOUND, 'Order not found');
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return badRequest(res, 'Invalid order ID format');
     }
-    res.json({
-      success: true,
-      data: order
-    });
+
+    const order = await orderService.getOrderDetails(id);
+    if (!order) {
+      return notFound(res, 'Order not found');
+    }
+
+    return ok(res, order, 'Order retrieved successfully');
   } catch (error) {
-    next(error);
+    return serverError(res, 'Error retrieving order', error);
   }
 };
 
@@ -97,23 +106,20 @@ export const updateOrder = async (req, res) => {
     if (shipping_status) updateData.shipping_status = shipping_status;
 
     const order = await orderService.update(req.params.id, updateData);
-    res.json(order);
+    return ok(res, order, 'Order updated successfully');
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return badRequest(res, error.message);
   }
 };
 
 // Delete order
 export const deleteOrder = async (req, res) => {
   try {
-    // Delete order details first
     await OrderDetail.deleteMany({ order_id: req.params.id });
-    
-    // Then delete order
     await orderService.delete(req.params.id);
-    res.json({ message: 'Order deleted successfully' });
+    return noContent(res);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return badRequest(res, error.message);
   }
 };
 
@@ -121,10 +127,7 @@ export const deleteOrder = async (req, res) => {
 export const getUserOrders = async (req, res, next) => {
   try {
     const orders = await orderService.getUserOrders(req.user._id);
-    res.json({
-      success: true,
-      data: orders
-    });
+    return ok(res, orders);
   } catch (error) {
     next(error);
   }
@@ -136,10 +139,7 @@ export const updateOrderStatus = async (req, res, next) => {
     const { orderId } = req.params;
     const { status } = req.body;
     const order = await orderService.updateOrderStatus(orderId, status);
-    res.json({
-      success: true,
-      data: order
-    });
+    return ok(res, order, 'Order status updated successfully');
   } catch (error) {
     next(error);
   }
@@ -149,10 +149,7 @@ export const updateOrderStatus = async (req, res, next) => {
 export const getOrderStats = async (req, res, next) => {
   try {
     const stats = await orderService.calculateOrderStats();
-    res.json({
-      success: true,
-      data: stats
-    });
+    return ok(res, stats);
   } catch (error) {
     next(error);
   }
@@ -163,10 +160,7 @@ export const getRecentOrders = async (req, res, next) => {
   try {
     const { limit } = req.query;
     const orders = await orderService.getRecentOrders(limit);
-    res.json({
-      success: true,
-      data: orders
-    });
+    return ok(res, orders);
   } catch (error) {
     next(error);
   }

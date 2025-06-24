@@ -15,8 +15,8 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className='bg-[#ffe283a1] px-3 pb-5 rounded-[5px]'>
-          <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
+<div className=' px-3 pb-5 rounded-[5px] shadow bg-cyan-100'>
+          <div className='bg-stone-100 rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
             <p className='text-[20px] w-full text-center capitalize'>mì ăn liền</p>
           </div>
 

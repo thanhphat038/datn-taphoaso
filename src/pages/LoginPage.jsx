@@ -8,6 +8,8 @@ const LoginPage = () => {
         password: ''
     });
 
+    const [loginError, setLoginError] = useState('');
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -19,15 +21,17 @@ const LoginPage = () => {
 const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await loginUser(formData);
+        const response = await loginUser({username: formData.username, password: formData.password});
         if (response && response.data && response.data.user && response.data.user.username) {
             alert('Đăng nhập thành công! Chào mừng ' + response.data.user.username);
+            // Store user information in local storage
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             window.location.href = '/';
         } else {
-            alert('Đăng nhập thất bại: Dữ liệu người dùng không hợp lệ');
+            setLoginError('Tên đăng nhập hoặc mật khẩu không đúng');
         }
     } catch (error) {
-        alert('Đăng nhập thất bại: ' + error.message);
+        setLoginError('Đăng nhập thất bại: ' + error.message);
     }
 };
 
@@ -49,18 +53,18 @@ const handleSubmit = async (e) => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                                Email hoặc Tên người dùng
                             </label>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
+                                type="text"
+                                id="username"
+                                name="username"
+                                value={formData.username}
                                 onChange={handleChange}
                                 required
                                 className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
-                                placeholder="Nhập email của bạn"
+                                placeholder="Nhập email hoặc tên người dùng của bạn"
                             />
                         </div>
 
@@ -78,6 +82,9 @@ const handleSubmit = async (e) => {
                                 className="mt-1 block w-full px-3 py-2 border border-[#06AEF4] rounded-md shadow-sm focus:outline-none focus:ring-[#06AEF4] focus:border-[#06AEF4]"
                                 placeholder="Nhập mật khẩu"
                             />
+                            {loginError && (
+                                <p className="mt-1 text-sm text-red-600">{loginError}</p>
+                            )}
                         </div>
 
                         <div className="flex items-center justify-between">

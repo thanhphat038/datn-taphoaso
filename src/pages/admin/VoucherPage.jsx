@@ -1,38 +1,38 @@
 import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
-import data from '../../data/db.json';
 
-const AdminProduct = () => {
+const VoucherPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [dateFilter, setDateFilter] = useState('None');
   const [pageSize, setPageSize] = useState(5);
-  const [priceFilter, setPriceFilter] = useState('All');
-  const [sortOrder, setSortOrder] = useState('None');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const products = data.products;
+  const vouchers = [
+    { id: 1, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hoạt động' },
+    { id: 2, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hết hạn' },
+    { id: 3, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hoạt động' },
+  ];
 
-  // Apply search filter
-  let filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter vouchers by search query and status
+  let filteredVouchers = vouchers.filter(voucher =>
+    voucher.code.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (statusFilter === 'All' || voucher.status === statusFilter)
   );
 
-  // Apply price filter
-  if (priceFilter === 'LowToHigh') {
-    filteredProducts = filteredProducts.sort((a, b) => a.price - b.price);
-  } else if (priceFilter === 'HighToLow') {
-    filteredProducts = filteredProducts.sort((a, b) => b.price - a.price);
+  // Sort vouchers by date filter
+  if (dateFilter === 'StartDateAsc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  } else if (dateFilter === 'StartDateDesc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  } else if (dateFilter === 'EndDateAsc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+  } else if (dateFilter === 'EndDateDesc') {
+    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
   }
 
-  // Apply alphabetical sort
-  if (sortOrder === 'AtoZ') {
-    filteredProducts = filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortOrder === 'ZtoA') {
-    filteredProducts = filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
-  }
-
-  const totalProducts = filteredProducts.length;
-  const totalPages = Math.ceil(totalProducts / pageSize);
+  const totalVouchers = filteredVouchers.length;
+  const totalPages = Math.ceil(totalVouchers / pageSize);
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -45,22 +45,21 @@ const AdminProduct = () => {
   };
 
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalProducts);
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + pageSize, totalVouchers);
+  const currentVouchers = filteredVouchers.slice(startIndex, endIndex);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-800">Danh Sách Sản Phẩm</h1>
-          <NavLink to="/admin/addproduct" className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Thêm sản phẩm
-          </NavLink>
+          <h1 className="text-2xl font-semibold text-gray-800">Danh Sách Voucher</h1>
+          <a
+            href="/admin/addvoucher"
+            className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
+          >
+            Thêm voucher
+          </a>
         </div>
 
         {/* Search and Filter Bar */}
@@ -79,22 +78,24 @@ const AdminProduct = () => {
             <FaSearch className="text-gray-600" />
           </button>
           <select
-            value={priceFilter}
-            onChange={(e) => setPriceFilter(e.target.value)}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
             className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="All">Giá: Tất cả</option>
-            <option value="LowToHigh">Giá: Thấp đến cao</option>
-            <option value="HighToLow">Giá: Cao đến thấp</option>
+            <option value="All">Tất cả trạng thái</option>
+            <option value="Hoạt động">Hoạt động</option>
+            <option value="Hết hạn">Hết hạn</option>
           </select>
           <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
             className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="None">Sắp xếp: Mặc định</option>
-            <option value="AtoZ">Sắp xếp: A-Z</option>
-            <option value="ZtoA">Sắp xếp: Z-A</option>
+            <option value="None">Sắp xếp ngày</option>
+            <option value="StartDateAsc">Ngày bắt đầu ↑</option>
+            <option value="StartDateDesc">Ngày bắt đầu ↓</option>
+            <option value="EndDateAsc">Ngày kết thúc ↑</option>
+            <option value="EndDateDesc">Ngày kết thúc ↓</option>
           </select>
         </div>
 
@@ -108,48 +109,37 @@ const AdminProduct = () => {
                     <input type="checkbox" className="rounded border-gray-300" />
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Tên sản phẩm
+                    Mã Voucher
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Ngày tạo
+                    Ngày bắt đầu
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                    Ngày kết thúc
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                     Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Giá
                   </th>
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
               <tbody>
-                {currentProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-200">
+                {currentVouchers.map((voucher) => (
+                  <tr key={voucher.id} className="border-b border-gray-200">
                     <td className="px-6 py-4 text-center">
                       <input type="checkbox" className="rounded border-gray-300" />
                     </td>
+                    <td className="px-6 py-4 font-medium text-gray-700">{voucher.code}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{voucher.startDate}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{voucher.endDate}</td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-10 h-10 rounded-full mr-3 object-cover"
-                        />
-                        <div>
-                          <div className="text-sm font-medium text-gray-700">{product.name}</div>
-                          <div className="text-xs text-gray-500">{product.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{new Date(product.created_at).toLocaleDateString('vi-VN')}</td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-full">
-                        <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                        {product.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                      <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full ${
+                        voucher.status === 'Hoạt động' ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'
+                      }`}>
+                        {voucher.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{product.price.toLocaleString('vi-VN')} đ</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <button className="text-gray-400 hover:text-gray-600">
                         <FaEllipsisV />
                       </button>
@@ -171,10 +161,10 @@ const AdminProduct = () => {
               >
                 <option>5</option>
                 <option>10</option>
-                <option>15</option>
+                <option>20</option>
               </select>
               <span>
-                {startIndex + 1}-{endIndex} trong {totalProducts} sản phẩm
+                {startIndex + 1}-{endIndex} trong {totalVouchers} danh mục
               </span>
               <div className="flex gap-1">
                 <button
@@ -202,4 +192,4 @@ const AdminProduct = () => {
   );
 };
 
-export default AdminProduct;
+export default VoucherPage;

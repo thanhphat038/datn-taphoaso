@@ -1,14 +1,19 @@
 import { productService } from '../services/index.js';
 import { AppError, ERROR_CODES } from '../utils/error.js';
+import {
+  created,
+  badRequest,
+  notFound,
+  ok,
+  serverError,
+  noContent
+} from '../utils/response.js';
 
 // Create new product
 export const createProduct = async (req, res, next) => {
   try {
     const product = await productService.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: product
-    });
+    return created(res, product, 'Product created successfully');
   } catch (error) {
     next(error);
   }
@@ -22,10 +27,7 @@ export const getProducts = async (req, res, next) => {
       { category, search },
       { sort, page, limit }
     );
-    res.json({
-      success: true,
-      data: products
-    });
+    return ok(res, products);
   } catch (error) {
     next(error);
   }
@@ -36,13 +38,13 @@ export const getProductById = async (req, res, next) => {
   try {
     const product = await productService.findById(req.params.id);
     if (!product) {
-      throw new AppError(ERROR_CODES.NOT_FOUND, 'Product not found');
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
     }
-    res.json({
-      success: true,
-      data: product
-    });
+    return ok(res, product);
   } catch (error) {
+    if (error instanceof AppError) {
+      return notFound(res, error.message);
+    }
     next(error);
   }
 };
@@ -51,11 +53,14 @@ export const getProductById = async (req, res, next) => {
 export const updateProduct = async (req, res, next) => {
   try {
     const product = await productService.update(req.params.id, req.body);
-    res.json({
-      success: true,
-      data: product
-    });
+    if (!product) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
+    }
+    return ok(res, product, 'Product updated successfully');
   } catch (error) {
+    if (error instanceof AppError) {
+      return notFound(res, error.message);
+    }
     next(error);
   }
 };
@@ -63,12 +68,15 @@ export const updateProduct = async (req, res, next) => {
 // Delete product
 export const deleteProduct = async (req, res, next) => {
   try {
-    await productService.delete(req.params.id);
-    res.json({
-      success: true,
-      message: 'Product deleted successfully'
-    });
+    const product = await productService.delete(req.params.id);
+    if (!product) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
+    }
+    return noContent(res);
   } catch (error) {
+    if (error instanceof AppError) {
+      return notFound(res, error.message);
+    }
     next(error);
   }
 };
@@ -79,10 +87,7 @@ export const getProductsByCategory = async (req, res, next) => {
     const { categoryId } = req.params;
     const { page, limit, sort } = req.query;
     const products = await productService.findByCategory(categoryId, { page, limit, sort });
-    res.json({
-      success: true,
-      data: products
-    });
+    return ok(res, products);
   } catch (error) {
     next(error);
   }
@@ -93,10 +98,7 @@ export const searchProducts = async (req, res, next) => {
   try {
     const { query } = req.query;
     const products = await productService.searchProducts(query);
-    res.json({
-      success: true,
-      data: products
-    });
+    return ok(res, products);
   } catch (error) {
     next(error);
   }
@@ -107,10 +109,7 @@ export const getTopRatedProducts = async (req, res, next) => {
   try {
     const { limit } = req.query;
     const products = await productService.getTopRated(limit);
-    res.json({
-      success: true,
-      data: products
-    });
+    return ok(res, products);
   } catch (error) {
     next(error);
   }
@@ -121,10 +120,7 @@ export const getNewArrivals = async (req, res, next) => {
   try {
     const { limit } = req.query;
     const products = await productService.getNewArrivals(limit);
-    res.json({
-      success: true,
-      data: products
-    });
+    return ok(res, products);
   } catch (error) {
     next(error);
   }
@@ -133,14 +129,47 @@ export const getNewArrivals = async (req, res, next) => {
 // Get related products
 export const getRelatedProducts = async (req, res, next) => {
   try {
-    const { productId } = req.params;
-    const { limit } = req.query;
-    const products = await productService.getRelatedProducts(productId, limit);
-    res.json({
-      success: true,
-      data: products
-    });
+    const { id } = req.params;
+    const { limit = 4 } = req.query;
+    
+    const currentProduct = await productService.findById(id);
+    if (!currentProduct) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
+    }
+
+    const relatedProducts = await productService.findByCategory(
+      currentProduct.category_id,
+      { 
+        limit: parseInt(limit),
+        excludeId: id
+      }
+    );
+
+    if (relatedProducts.length === 0) {
+      return ok(res, [], 'No related products found in this category');
+    }
+
+    return ok(res, relatedProducts, 'Related products retrieved successfully');
   } catch (error) {
+    if (error instanceof AppError) {
+      return notFound(res, error.message);
+    }
+    next(error);
+  }
+};
+
+// Deactivate product
+export const deactivateProduct = async (req, res, next) => {
+  try {
+    const product = await productService.updateStatus(req.params.id, 'inactive');
+    if (!product) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
+    }
+    return ok(res, product, 'Product deactivated successfully');
+  } catch (error) {
+    if (error instanceof AppError) {
+      return notFound(res, error.message);
+    }
     next(error);
   }
 };
