@@ -114,7 +114,7 @@ const CartPage = () => {
               {(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) + 15000).toLocaleString()}đ
             </span>
           </div>
-          <Link to={`/checkout`}><button className="w-full bg-[#06AEF4] hover:bg-blue-700 text-white font-medium py-3 rounded-full transition-colors">
+          <Link to={`/checkout`}><button className="w-full bg-[#c4c4c47d] hover:bg-[#06AEF4] text-white font-medium py-3 rounded-lg transition-colors">
             Tiến hành thanh toán
           </button></Link>
         </div>

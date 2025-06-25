@@ -447,7 +447,7 @@ const ProfilePage = () => {
 
                     {/* Order Actions */}
                     <div className="flex gap-3">
-                      <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-full transition-colors">
+                      <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors">
                         Liên hệ hỗ trợ
                       </button>
                     </div>
