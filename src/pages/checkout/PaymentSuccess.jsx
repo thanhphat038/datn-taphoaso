@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ background: '#fff', minHeight: '100vh' }} className="flex flex-col items-center justify-center">
+    <div style={{ background: '#fff', minHeight: '100vh' }} className="flex flex-col items-center">
       <img
         src="/img/success.png"
         alt="success"
-        style={{ width: 400, height: 400, objectFit: 'contain', display: 'block', margin: '0 auto 32px auto' }}
+        style={{ width: 400, height: 400, objectFit: 'contain', display: 'block', margin: '0 auto -72px auto' }}
       />
       <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12, color: '#222', textAlign: 'center' }}>Thanh toán thành công</h2>
       <div style={{ color: '#666', fontSize: 18, marginBottom: 32, textAlign: 'center' }}>
