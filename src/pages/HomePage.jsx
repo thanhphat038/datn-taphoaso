@@ -21,18 +21,18 @@ const HomePage = () => {
               modules={[Autoplay]}
             >
               <SwiperSlide>
-                <img className='rounded-[30px] w-full' src="./images/banner_taphoaso.png" alt="Banner 1" />
+                <img className='rounded-[30px] w-full h-[560px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full' src="./images/banner_2.png" alt="Banner 2" />
+                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full' src="./images/banner_3.png" alt="Banner 3" />
+                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
               </SwiperSlide>
             </Swiper>
           </div>
           <div className='grow-1 grid gap-5'>
-            <img className='rounded-[30px]' src="./images/banner_2.png" alt="" />
+            <img className='rounded-[30px]' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
             <img className='rounded-[30px]' src="./images/banner_3.png" alt="" />
           </div>
         </div>
@@ -75,13 +75,13 @@ const HomePage = () => {
             modules={[Autoplay]}
           >
             <SwiperSlide>
-              <img className='rounded-[30px] w-full' src="./images/banner_4.png" alt="Banner 4" />
+              <img className='rounded-[30px] w-full h-[400px] object-cover' src="./images/banner_4.png" alt="Banner 4" />
             </SwiperSlide>
             <SwiperSlide>
-              <img className='rounded-[30px] w-full' src="./images/banner_4.png" alt="Banner 4" />
+              <img className='rounded-[30px] w-full h-[400px] object-cover' src="https://blog.strawberrycstore.com/wp-content/uploads/2019/06/Cocacola1.jpg" alt="Banner 4" />
             </SwiperSlide>
             <SwiperSlide>
-              <img className='rounded-[30px] w-full' src="./images/banner_4.png" alt="Banner 4" />
+              <img className='rounded-[30px] w-full h-[400px] object-cover' src="https://athgroup.vn/upload/blocks/thumb_1920x0/ATH-thiết-kế-bộ-nhận-diện-mới-logo-Pepsi-22.jpg" alt="Banner 4" />
             </SwiperSlide>
           </Swiper>
         </div>
