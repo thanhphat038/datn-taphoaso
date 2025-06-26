@@ -38,7 +38,12 @@ import AddBlog from './pages/admin/AddBlog';
 import AdminComment from './pages/admin/AdminComment';
 
 function Layout() {
-  const isAdminRoute = useLocation().pathname.startsWith('/admin');
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  const noFooterRoutes = ['/checkout', '/select-address'];
+
+  const showFooter = !isAdminRoute && !noFooterRoutes.includes(location.pathname);
 
   return (
     <div className="App w-full flex">
@@ -74,7 +79,7 @@ function Layout() {
           <Route path="/admin/addblog" element={<AddBlog />} />
           <Route path="/admin/comment" element={<AdminComment />} />
         </Routes>
-        {!isAdminRoute && <Footer />}
+        {showFooter && <Footer />}
       </div>
     </div>
   );
