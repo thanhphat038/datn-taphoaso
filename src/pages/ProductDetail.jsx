@@ -63,9 +63,9 @@ const ProductDetail = () => {
                     <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
 
                     <div className="mb-4">
-                        <span className="text-2xl font-semibold text-red-600 mr-2">{formatCurrency(product.price * quantity)}</span>
+                        <span className="text-2xl font-semibold text-red-600 mr-2">{formatCurrency(product.price )}</span>
                         {product.price && (
-                            <span className="text-gray-500 line-through">{formatCurrency(product.price * quantity)}</span>
+                            <span className="text-gray-500 line-through">{formatCurrency(product.price )}</span>
                         )}
                     </div>
 
