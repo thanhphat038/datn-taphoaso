@@ -263,7 +263,7 @@ const ProfilePage = () => {
                   <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
                     Cập nhật
                   </button>
-                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-600 transition-colors font-medium">
+                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium">
                     Lưu
                   </button>
                 </div>
@@ -356,7 +356,7 @@ const ProfilePage = () => {
                     <div className="flex gap-4">
                       <button
                         onClick={handleAddAddress}
-                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        className="px-6 py-2 bg-blue-200 text-white rounded-lg hover:bg-blue-300 transition-colors"
                       >
                         Lưu
                       </button>
