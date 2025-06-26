@@ -42,6 +42,9 @@ const AdminBlogPage = () => {
             href="/admin/addblog"
             className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
             Thêm bài viết
           </a>
         </div>
@@ -119,8 +122,11 @@ const AdminBlogPage = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{blog.summary}</td>
                     <td className="px-6 py-4">
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <FaEllipsisV />
+                      <button
+                        className="text-blue-600 hover:text-blue-800 font-semibold"
+                        onClick={() => window.location.href = `/admin/blog/detail/${blog.id}`}
+                      >
+                        Xem chi tiết
                       </button>
                     </td>
                   </tr>

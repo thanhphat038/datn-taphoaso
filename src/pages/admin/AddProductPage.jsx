@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import data from '../../data/db.json';
 
 const AddProductPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [productName, setProductName] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]);
@@ -11,6 +16,23 @@ const AddProductPage = () => {
   const [category, setCategory] = useState('Thịt');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  useEffect(() => {
+    if (id) {
+      const product = data.products.find((p) => p.id === parseInt(id));
+      if (product) {
+        setProductName(product.name);
+        setDescription(product.description);
+        setImages(product.images || []);
+        setPrice(product.price);
+        setStatus(product.status);
+        setCategory(product.category);
+        // Assuming discount info is available in product.discountType and product.discountValue
+        setDiscountType(product.discountType || 'none');
+        setDiscountValue(product.discountValue || '');
+      }
+    }
+  }, [id]);
 
   const handleAddCategory = (e) => {
     e.preventDefault();
@@ -30,18 +52,20 @@ const AddProductPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: handle form submission logic
-    alert('Lưu thay đổi thành công!');
+    alert(`Sản phẩm ${id ? 'đã được cập nhật' : 'đã được lưu'} (giả lập)`);
+    navigate('/admin/product');
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     // TODO: handle cancel logic, e.g., navigate back or reset form
     alert('Hủy bỏ');
+    navigate('/admin/product');
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-xl font-semibold mb-6">Thêm Sản Phẩm</h1>
+      <h1 className="text-xl font-semibold mb-6">{id ? 'Chỉnh sửa sản phẩm' : 'Thêm Sản Phẩm'}</h1>
       <form onSubmit={handleSubmit} className="flex gap-6">
         {/* Left side - Overview */}
         <div className="flex-1 space-y-6">

@@ -45,10 +45,10 @@ const AdminCategory = () => {
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-800">Danh Mục</h1>
-          <button
-            className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
-            onClick={() => setShowModal(true)}
-          >
+<button
+  className="bg-[#06AEF4] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300"
+  onClick={() => setShowModal(true)}
+>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -78,19 +78,19 @@ const AdminCategory = () => {
                       required
                     />
                     <div className="flex justify-end gap-4">
-                      <button
-                        type="submit"
-                        className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
-                      >
-                        Lưu thay đổi
-                      </button>
-                      <button
-                        type="button"
-                        className="bg-red-300 text-white px-4 py-2 rounded hover:bg-red-400"
-                        onClick={() => setShowModal(false)}
-                      >
-                        Hủy bỏ
-                      </button>
+<button
+  type="submit"
+  className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
+>
+  Lưu thay đổi
+</button>
+<button
+  type="button"
+  className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
+  onClick={() => setShowModal(false)}
+>
+  Hủy bỏ
+</button>
                     </div>
                   </form>
                 </div>
