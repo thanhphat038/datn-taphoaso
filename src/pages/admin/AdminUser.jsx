@@ -66,9 +66,9 @@ const AdminUser = () => {
               className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
             />
           </div>
-          <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-            <FaSearch className="text-gray-600" />
-          </button>
+<button className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300">
+  <FaSearch className="text-white" />
+</button>
         </div>
 
         {/* Table */}
