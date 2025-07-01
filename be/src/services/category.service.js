@@ -1,6 +1,7 @@
 import DBService from './db.service.js';
 import Category from '../models/category.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class CategoryService extends DBService {
   constructor() {

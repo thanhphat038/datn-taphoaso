@@ -8,11 +8,21 @@ const productSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   price: {
     type: Number,
     required: true
+  },
+  original_price: {
+    type: Number,
+    required: true
+  },
+  in_stock: {
+    type: Number,
+    required: true,
+    min: 0
   },
   status: {
     type: String,
@@ -30,9 +40,7 @@ const productSchema = new mongoose.Schema({
     count: { type: Number, default: 0 }
   }
 }, {
-  timestamps: {
-    createdAt: 'create_at'
-  }
+  timestamps: { createdAt: 'create_at', updatedAt: 'update_at' }
 });
 
 const Product = mongoose.model('Product', productSchema);

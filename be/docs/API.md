@@ -201,7 +201,7 @@ Content-Type: application/json
   "orderDetails": [
     {
       "product_id": "string",
-      "quantity": number,
+      "qty": number,
       "current_price": number
     }
   ]
@@ -382,15 +382,15 @@ Content-Type: application/json
 {
   "cart_id": "string",
   "product_id": "string",
-  "quantity": number
+  "qty": number
 }
 
-# Update cart item quantity
+# Update cart item qty
 PUT /carts/items/:id
 Content-Type: application/json
 
 {
-  "quantity": number
+  "qty": number
 }
 
 # Remove item from cart
@@ -417,7 +417,7 @@ Content-Type: application/json
 {
   "cart_id": "string",
   "product_id": "string",
-  "quantity": number
+  "qty": number
 }
 
 # Update cart item
@@ -425,7 +425,7 @@ PUT /cart-items/:id
 Content-Type: application/json
 
 {
-  "quantity": number
+  "qty": number
 }
 
 # Delete cart item
@@ -508,5 +508,5 @@ Tất cả các response đều có format như sau:
 ## Notes
 1. Tất cả các ID đều là MongoDB ObjectId
 2. Các date format nên sử dụng ISO 8601
-3. Các số tiền nên được gửi dưới dạng số nguyên (đơn vị nhỏ nhất, ví dụ: cent cho USD)
+3. Các số tiền nên được gửi dưới dạng số nguyên
 4. Các file ảnh nên được upload trước và sử dụng URL trong request 

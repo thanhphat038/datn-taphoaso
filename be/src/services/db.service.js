@@ -1,9 +1,34 @@
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 import { validateObjectId } from '../utils/validators.js';
+
+import mongoose from 'mongoose';
 
 class DBService {
   constructor(model) {
     this.model = model;
+  }
+
+  /**
+   * Ép kiểu ObjectId an toàn
+   * @param {string} id 
+   * @returns {mongoose.Types.ObjectId}
+   */
+  toObjectId(id) {
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id)) {
+    console.log('Check id:', id, typeof id);
+    throw new AppError(ERROR_CODES.INVALID_ID, 'Invalid ObjectId format');
+  }
+  return new mongoose.Types.ObjectId(id);
+}
+
+  /**
+   * Check ObjectId hợp lệ
+   * @param {string} id 
+   * @returns {boolean}
+   */
+  isValidObjectId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
   }
 
   async create(data) {
@@ -30,8 +55,7 @@ class DBService {
       // If select option is provided, use it
       if (options.select) {
         query = query.select(options.select);
-      } else {
-        // Default behavior: exclude password
+      } else if (this.model.modelName === 'User') {
         query = query.select('-password');
       }
 

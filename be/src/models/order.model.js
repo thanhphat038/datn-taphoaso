@@ -18,27 +18,17 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  address: {
-    type: String,
-    required: true
-  },
+  address: { type: String, required: true },
+  receiver: { type: String, required: true },
+  sdt: { type: String, required: true },
+  note: { type: String },
   order_status: {
     type: String,
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
-  },
-  receiver: {
-    type: String,
-    required: true
-  },
-  sdt: {
-    type: String,
-    required: true
   }
 }, {
-  timestamps: {
-    createdAt: 'create_at'
-  }
+  timestamps: { createdAt: 'create_at' }
 });
 
 const Order = mongoose.model('Order', orderSchema);

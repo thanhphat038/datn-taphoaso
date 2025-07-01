@@ -1,6 +1,6 @@
 import DBService from './db.service.js';
 import Favorite from '../models/favorite.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import mongoose from 'mongoose';
 
 class FavoriteService extends DBService {
   constructor() {
@@ -21,20 +21,26 @@ class FavoriteService extends DBService {
 
   async addToFavorites(userId, productId) {
     const existing = await this.model.findOne({ user_id: userId, product_id: productId });
-    if (existing) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Product already in favorites');
-    }
-    return await this.create({ user_id: userId, product_id: productId });
+    if (existing) return null;
+    return this.model.create({ user_id: userId, product_id: productId });
   }
 
   async removeFromFavorites(userId, productId) {
-    return await this.model.findOneAndDelete({ user_id: userId, product_id: productId });
+    const deleted = await this.model.findOneAndDelete({
+      user_id: new mongoose.Types.ObjectId(userId),
+      product_id: new mongoose.Types.ObjectId(productId)
+    });
+
+    if (!deleted) return null;
+
+    return deleted;
   }
 
   async isFavorite(userId, productId) {
     const favorite = await this.model.findOne({ user_id: userId, product_id: productId });
     return !!favorite;
   }
+  
 }
 
 export default FavoriteService; 

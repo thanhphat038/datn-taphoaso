@@ -1,27 +1,41 @@
 import express from 'express';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
 import {
   createOrder,
   getOrders,
   getOrderById,
-  updateOrder,
+  getUserOrders,
+  updateOrderStatus,
+  getOrderStats,
+  getRecentOrders,
   deleteOrder
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
+router.use(authMiddleware);
 
-// Create new order
+// Create order (User)
 router.post('/', createOrder);
 
-// Get all orders
+// Get all orders (Admin)
 router.get('/', getOrders);
 
-// Get order by id
-router.get('/:id', getOrderById);
+// Get my orders (User)
+router.get('/my', getUserOrders);
 
-// Update order
-router.put('/:id', updateOrder);
+// Get order stats (Admin)
+router.get('/stats', getOrderStats);
 
-// Delete order
-router.delete('/:id', deleteOrder);
+// Get recent orders (Admin)
+router.get('/recent', getRecentOrders);
+
+// Update order status (Admin)
+router.put('/:orderId/status', updateOrderStatus);
+
+// Get order by ID (Admin)
+router.get('/:orderId', getOrderById);
+
+// Delete order (Admin)
+router.delete('/:orderId', deleteOrder);
 
 export default router;

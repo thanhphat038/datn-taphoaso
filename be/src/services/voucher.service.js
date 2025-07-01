@@ -1,6 +1,7 @@
 import DBService from './db.service.js';
 import Voucher from '../models/voucher.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class VoucherService extends DBService {
   constructor() {
@@ -19,7 +20,7 @@ class VoucherService extends DBService {
       throw new AppError(ERROR_CODES.BUSINESS_VOUCHER_EXPIRED);
     }
 
-    if (voucher.quantity <= 0) {
+    if (voucher.qty <= 0) {
       throw new AppError(ERROR_CODES.BUSINESS_VOUCHER_OUT_OF_STOCK);
     }
 
@@ -57,7 +58,7 @@ class VoucherService extends DBService {
 
     // Update voucher usage
     await this.model.findByIdAndUpdate(voucher._id, {
-      $inc: { quantity: -1 },
+      $inc: { qty: -1 },
       $push: {
         usage_history: {
           user_id: userId,
@@ -79,7 +80,7 @@ class VoucherService extends DBService {
     return await this.model.find({
       start_date: { $lte: now },
       end_date: { $gte: now },
-      quantity: { $gt: 0 }
+      qty: { $gt: 0 }
     });
   }
 
