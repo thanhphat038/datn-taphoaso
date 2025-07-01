@@ -4,19 +4,22 @@ import {
   login,
   getProfile,
   updateProfile,
-  changePassword
+  changePassword,
+  resetPassword,
+  forgotPassword
 } from '../controllers/auth.controller.js';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Public routes
 router.post('/register', register);
 router.post('/login', login);
 
-// Protected routes
-router.get('/profile', verifyToken, getProfile);
-router.put('/profile', verifyToken, updateProfile);
-router.put('/change-password', verifyToken, changePassword);
+router.get('/profile', authMiddleware, getProfile);
+router.put('/profile', authMiddleware, updateProfile);
+
+router.put('/change-password', authMiddleware, changePassword);
+router.post('/reset-password', resetPassword);
+router.post('/forgot-password', forgotPassword);
 
 export default router; 

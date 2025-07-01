@@ -2,7 +2,8 @@ import { userService } from './index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/index.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class AuthService {
   async login(username, password) {

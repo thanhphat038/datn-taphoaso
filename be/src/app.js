@@ -6,6 +6,7 @@ import compression from 'compression';
 import routes from './routes/index.js';
 import { connectDB } from './config/database.js';
 
+import { globalErrorHandler } from './middlewares/error.middleware.js';
 const app = express();
 
 // Connect to MongoDB
@@ -37,5 +38,7 @@ app.use((err, req, res, next) => {
 //     message: 'Not Found'
 //   });
 // });
+
+app.use(globalErrorHandler);
 
 export default app;

@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  avatar: { String },
   full_name: {
     type: String
   },
@@ -31,7 +32,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'inactive'],
     default: 'active'
-  }
+  },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 }, {
   timestamps: {
     createdAt: 'create_at',

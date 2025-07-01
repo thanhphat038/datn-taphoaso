@@ -12,10 +12,10 @@ const favoriteSchema = new mongoose.Schema({
     required: true
   }
 }, {
-  timestamps: {
-    createdAt: 'create_at'
-  }
+  timestamps: { createdAt: 'create_at', updatedAt: 'update_at' }
 });
+
+favoriteSchema.index({ user_id: 1, product_id: 1 }, { unique: true });
 
 const Favorite = mongoose.model('Favorite', favoriteSchema);
 export default Favorite; 

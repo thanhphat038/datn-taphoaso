@@ -1,6 +1,7 @@
 import DBService from './db.service.js';
 import Address from '../models/address.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class AddressService extends DBService {
   constructor() {

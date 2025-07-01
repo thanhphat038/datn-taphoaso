@@ -1,10 +1,22 @@
 import DBService from './db.service.js';
 import Product from '../models/product.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class ProductService extends DBService {
   constructor() {
     super(Product);
+  }
+
+  async findById(productId, options = {}) {
+    const objectId = this.toObjectId(productId);
+    const item = await this.model.findById(objectId);
+
+    if (!item) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Product not found');
+    }
+
+    return item;
   }
 
   async findByCategory(categoryId, options = {}) {
@@ -53,16 +65,16 @@ class ProductService extends DBService {
       .limit(limit);
   }
 
-  async updateStock(productId, quantity, operation = 'decrease') {
+  async updateStock(productId, qty, operation = 'decrease') {
     const product = await this.findById(productId);
     
-    if (operation === 'decrease' && product.stock < quantity) {
+    if (operation === 'decrease' && product.stock < qty) {
       throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
     }
 
     const newStock = operation === 'decrease' 
-      ? product.stock - quantity 
-      : product.stock + quantity;
+      ? product.stock - qty 
+      : product.stock + qty;
 
     return await this.update(productId, { stock: newStock });
   }

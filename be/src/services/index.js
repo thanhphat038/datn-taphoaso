@@ -8,7 +8,6 @@ import CommentService from './comment.service.js';
 import FavoriteService from './favorite.service.js';
 import CategoryService from './category.service.js';
 import AddressService from './address.service.js';
-import CartItemService from './cartItem.service.js';
 import AuthService from './auth.service.js';
 
 // Create instances
@@ -22,7 +21,6 @@ const commentService = new CommentService();
 const favoriteService = new FavoriteService();
 const categoryService = new CategoryService();
 const addressService = new AddressService();
-const cartItemService = new CartItemService();
 const authService = new AuthService();
 
 // Export instances
@@ -37,6 +35,5 @@ export {
   favoriteService,
   categoryService,
   addressService,
-  cartItemService,
   authService
 }; 
