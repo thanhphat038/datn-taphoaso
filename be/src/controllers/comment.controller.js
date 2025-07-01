@@ -1,11 +1,12 @@
 import { commentService } from '../services/index.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 // Create new comment
 export const createComment = async (req, res, next) => {
   try {
     const { product_id } = req.params;
-    const comment = await commentService.createComment(req.user._id, product_id, req.body);
+    const comment = await commentService.createComment(req.user.id, product_id, req.body);
     res.status(201).json({
       success: true,
       data: comment
@@ -63,7 +64,7 @@ export const getCommentById = async (req, res, next) => {
 export const updateComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
-    const comment = await commentService.updateComment(commentId, req.user._id, req.body);
+    const comment = await commentService.updateComment(commentId, req.user.id, req.body);
     res.json({
       success: true,
       data: comment
@@ -77,7 +78,7 @@ export const updateComment = async (req, res, next) => {
 export const deleteComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
-    await commentService.deleteComment(commentId, req.user._id);
+    await commentService.deleteComment(commentId, req.user.id);
     res.json({
       success: true,
       message: 'Comment deleted successfully'
@@ -104,7 +105,7 @@ export const getProductComments = async (req, res, next) => {
 export const getUserComments = async (req, res, next) => {
   try {
     const { page, limit, sort } = req.query;
-    const comments = await commentService.getUserComments(req.user._id, { page, limit, sort });
+    const comments = await commentService.getUserComments(req.user.id, { page, limit, sort });
     res.json({
       success: true,
       data: comments

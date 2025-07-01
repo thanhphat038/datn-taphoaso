@@ -10,7 +10,8 @@ import {
   noContent,
   unprocessableEntity
 } from '../utils/response.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 import { validateObjectId } from '../utils/validators.js';
 
 // Create new user

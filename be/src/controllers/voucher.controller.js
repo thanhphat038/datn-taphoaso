@@ -1,5 +1,6 @@
 import { voucherService } from '../services/index.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 // Create new voucher
 export const createVoucher = async (req, res, next) => {

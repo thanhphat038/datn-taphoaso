@@ -1,167 +1,137 @@
-import { orderService } from '../services/index.js';
-import OrderDetail from '../models/orderDetail.model.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
-import mongoose from 'mongoose';
-import {
-  created,
-  badRequest,
-  notFound,
-  ok,
-  serverError,
-  noContent,
-  unprocessableEntity
-} from '../utils/response.js';
+// order.controller.js
+import OrderService from '../services/order.service.js';
+import CartService from '../services/cart.service.js';
 
-// Create new order
+import ProductService from '../services/product.service.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
+
+const orderService = new OrderService();
+const cartService = new CartService();
+const productService = new ProductService();
+
 export const createOrder = async (req, res, next) => {
   try {
-    const userId = req.user._id;
-    const orderData = req.body;
+    const { address, receiver, sdt, items, payment_method, note } = req.body;
 
-    if (!orderData.address_id || !orderData.items || !orderData.payment_method) {
-      return badRequest(res, 'Missing required fields: address_id, items, payment_method');
+    if (!address || !receiver || !sdt || !payment_method) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
+    } 
+    console.log('REQ ITEMS:', items);  
+    const userId = req.user.id;
+    const cart = await cartService.getCart(userId);
+
+    if (!cart || !cart.items?.length) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
     }
 
-    if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
-      return badRequest(res, 'Items must be a non-empty array');
+    for (const item of items) {
+      console.log('Item:', item);   // Thêm log
+      console.log('Product ID:', item.product_id);   // Thêm log
+
+      const product = await productService.findById(item.product_id);
     }
 
-    for (const item of orderData.items) {
-      if (!item.product_id || !item.quantity || item.quantity < 1) {
-        return unprocessableEntity(res, 'Each item must have product_id and quantity (minimum 1)');
-      }
-    }
-
-    const order = await orderService.createOrder(userId, orderData);
-    
-    return created(res, order, 'Order created successfully');
-  } catch (error) {
-    if (error instanceof AppError) {
-      return badRequest(res, error.message);
-    }
-    return serverError(res, 'Error creating order', error);
-  }
-};
-
-// Get all orders
-export const getOrders = async (req, res) => {
-  try {
-    const { user_id, status, from_date, to_date } = req.query;
-    const filters = {};
-
-    if (user_id) filters.user_id = user_id;
-    if (status) filters.status = status;
-    if (from_date || to_date) {
-      filters.create_at = {};
-      if (from_date) filters.create_at.$gte = new Date(from_date);
-      if (to_date) filters.create_at.$lte = new Date(to_date);
-    }
-
-    const orders = await orderService.findAll(filters, {
-      populate: [
-        { path: 'user_id', select: 'name email' },
-        { path: 'address_id' },
-        { path: 'voucher_id' }
-      ]
+    const order = await orderService.createOrder({
+      user_id: userId,
+      address,
+      receiver,
+      sdt,
+      payment_method,
+      note,
+      items: items
     });
 
-    if (orders.length === 0) {
-      return ok(res, [], 'No orders found');
+    await cartService.clearCart(userId);
+
+    res.json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getOrderHistory = async (req, res, next) => {
+  try {
+    const orders = await orderService.getOrdersByUser(req.user.id);
+    res.json({ success: true, data: orders });
+  } catch (err) { next(err); }
+};
+
+export const getOrderDetails = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.getOrderById(orderId);
+
+    if (!order || order.user_id.toString() !== req.user.id) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    return ok(res, orders, 'Orders retrieved successfully');
-  } catch (error) {
-    return serverError(res, 'Error retrieving orders', error);
+    res.json({ success: true, data: order });
+  } catch (err) {
+    next(err);
   }
 };
 
-// Get order by id
-export const getOrderById = async (req, res, next) => {
+export const getOrders = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return badRequest(res, 'Invalid order ID format');
-    }
-
-    const order = await orderService.getOrderDetails(id);
-    if (!order) {
-      return notFound(res, 'Order not found');
-    }
-
-    return ok(res, order, 'Order retrieved successfully');
-  } catch (error) {
-    return serverError(res, 'Error retrieving order', error);
-  }
+    const orders = await orderService.getAllOrders();
+    res.json({ success: true, data: orders });
+  } catch (err) { next(err); }
 };
 
-// Update order
-export const updateOrder = async (req, res) => {
-  try {
-    const { status, payment_status, shipping_status } = req.body;
-    const updateData = {};
-    
-    if (status) updateData.status = status;
-    if (payment_status) updateData.payment_status = payment_status;
-    if (shipping_status) updateData.shipping_status = shipping_status;
-
-    const order = await orderService.update(req.params.id, updateData);
-    return ok(res, order, 'Order updated successfully');
-  } catch (error) {
-    return badRequest(res, error.message);
-  }
-};
-
-// Delete order
-export const deleteOrder = async (req, res) => {
-  try {
-    await OrderDetail.deleteMany({ order_id: req.params.id });
-    await orderService.delete(req.params.id);
-    return noContent(res);
-  } catch (error) {
-    return badRequest(res, error.message);
-  }
-};
-
-// Get user orders
 export const getUserOrders = async (req, res, next) => {
   try {
-    const orders = await orderService.getUserOrders(req.user._id);
-    return ok(res, orders);
-  } catch (error) {
-    next(error);
-  }
+    const orders = await orderService.getOrdersByUser(req.user.id);
+    res.json({ success: true, data: orders });
+  } catch (err) { next(err); }
 };
 
-// Update order status
+export const getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.getOrderById(orderId);
+
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    res.json({ success: true, data: order });
+  } catch (err) { next(err); }
+};
+
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    const order = await orderService.updateOrderStatus(orderId, status);
-    return ok(res, order, 'Order status updated successfully');
-  } catch (error) {
-    next(error);
-  }
+
+    const order = await orderService.updateStatus(orderId, status);
+    res.json({ success: true, data: order });
+  } catch (err) { next(err); }
 };
 
-// Get order statistics
 export const getOrderStats = async (req, res, next) => {
   try {
-    const stats = await orderService.calculateOrderStats();
-    return ok(res, stats);
-  } catch (error) {
-    next(error);
-  }
+    const stats = await orderService.getOrderStatistics();
+    res.json({ success: true, data: stats });
+  } catch (err) { next(err); }
 };
 
-// Get recent orders
 export const getRecentOrders = async (req, res, next) => {
   try {
-    const { limit } = req.query;
-    const orders = await orderService.getRecentOrders(limit);
-    return ok(res, orders);
-  } catch (error) {
-    next(error);
-  }
+    const orders = await orderService.getRecentOrders();
+    res.json({ success: true, data: orders });
+  } catch (err) { next(err); }
+};
+
+export const deleteOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const deleted = await orderService.delete(orderId);
+
+    if (!deleted) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (err) { next(err); }
 };

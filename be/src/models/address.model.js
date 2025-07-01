@@ -3,9 +3,10 @@ import mongoose from 'mongoose';
 const addressSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
-  full_name: {
+  receiver: {    // Chuẩn tên field: người nhận
     type: String,
     required: true
   },
@@ -13,11 +14,11 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  address: {
+  address_detail: {   // Chi tiết địa chỉ (số nhà, tên đường)
     type: String,
     required: true
   },
-  city: {
+  ward: {
     type: String,
     required: true
   },
@@ -25,7 +26,7 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  ward: {
+  city: {
     type: String,
     required: true
   },
@@ -41,4 +42,4 @@ const addressSchema = new mongoose.Schema({
 });
 
 const Address = mongoose.model('Address', addressSchema);
-export default Address; 
+export default Address;

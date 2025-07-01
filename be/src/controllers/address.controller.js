@@ -1,5 +1,6 @@
 import { addressService } from '../services/index.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 import mongoose from 'mongoose';
 
 // Create new address
@@ -179,7 +180,7 @@ export const deleteAddress = async (req, res, next) => {
     if (!existingAddress) {
       return res.status(404).json({
         success: false,
-        message: 'Address not found'
+        message: 'Không tìm thấy địa chỉ nây'
       });
     }
 
@@ -188,12 +189,12 @@ export const deleteAddress = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Address deleted successfully'
+      message: 'Xoá địa chỉ thành công'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error deleting address',
+      message: 'Có lỗi xảy ra khi xoá địa chỉ',
       error: error.message
     });
   }
@@ -202,7 +203,7 @@ export const deleteAddress = async (req, res, next) => {
 export const setDefaultAddress = async (req, res, next) => {
   try {
     const { addressId } = req.params;
-    const address = await addressService.setDefaultAddress(addressId, req.user._id);
+    const address = await addressService.setDefaultAddress(addressId, req.user.id);
     res.json({
       success: true,
       data: address
@@ -214,7 +215,7 @@ export const setDefaultAddress = async (req, res, next) => {
 
 export const getUserAddresses = async (req, res, next) => {
   try {
-    const addresses = await addressService.getUserAddresses(req.user._id);
+    const addresses = await addressService.getUserAddresses(req.user.id);
     res.json({
       success: true,
       data: addresses
@@ -226,7 +227,7 @@ export const getUserAddresses = async (req, res, next) => {
 
 export const getDefaultAddress = async (req, res, next) => {
   try {
-    const address = await addressService.getDefaultAddress(req.user._id);
+    const address = await addressService.getDefaultAddress(req.user.id);
     res.json({
       success: true,
       data: address

@@ -1,18 +1,6 @@
 import { favoriteService } from '../services/index.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
-
-// Create new favorite
-export const createFavorite = async (req, res, next) => {
-  try {
-    const favorite = await favoriteService.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: favorite
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 // Get all favorites
 export const getFavorites = async (req, res, next) => {
@@ -57,39 +45,42 @@ export const getFavoriteById = async (req, res, next) => {
   }
 };
 
-// Delete favorite
-export const deleteFavorite = async (req, res, next) => {
+// Add Product to favorite
+export const addToFavorite = async (req, res, next) => {
   try {
-    await favoriteService.delete(req.params.id);
-    res.json({
-      success: true,
-      message: 'Favorite deleted successfully'
-    });
+    const userId = req.user.id;
+    const { product_id } = req.body;
+
+    const favorite = await favoriteService.addToFavorites(userId, product_id);
+
+    if (favorite) {
+      return res.status(201).json({ success: true, data: favorite });
+    } 
+
+    return res.status(200).json({ success: true, message: 'Sản phẩm đã nằm trong mục yêu thích' });
+
   } catch (error) {
-    next(error);
+    next(error); 
   }
 };
 
-export const addToFavorites = async (req, res, next) => {
+export const removeFromFavorite = async (req, res, next) => {
   try {
-    const { product_id } = req.params;
-    const favorite = await favoriteService.addToFavorites(req.user._id, product_id);
-    res.status(201).json({
-      success: true,
-      data: favorite
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+    const userId = req.user.id;
+    const productId = req.params.id;
 
-export const removeFromFavorites = async (req, res, next) => {
-  try {
-    const { product_id } = req.params;
-    await favoriteService.removeFromFavorites(req.user._id, product_id);
+    const deleted = await favoriteService.removeFromFavorites(userId, productId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sản phẩm chưa nằm trong mục yêu thích'
+      });
+    }
+
     res.json({
       success: true,
-      message: 'Product removed from favorites'
+      message: 'Sản phẩm đã được xóa khỏi mục yêu thích'
     });
   } catch (error) {
     next(error);
@@ -99,7 +90,7 @@ export const removeFromFavorites = async (req, res, next) => {
 export const getUserFavorites = async (req, res, next) => {
   try {
     const { page, limit, sort } = req.query;
-    const favorites = await favoriteService.getUserFavorites(req.user._id, { page, limit, sort });
+    const favorites = await favoriteService.getUserFavorites(req.user.id, { page, limit, sort });
     res.json({
       success: true,
       data: favorites
@@ -112,7 +103,7 @@ export const getUserFavorites = async (req, res, next) => {
 export const checkFavoriteStatus = async (req, res, next) => {
   try {
     const { product_id } = req.params;
-    const isFavorite = await favoriteService.checkFavoriteStatus(req.user._id, product_id);
+    const isFavorite = await favoriteService.checkFavoriteStatus(req.user.id, product_id);
     res.json({
       success: true,
       data: { isFavorite }

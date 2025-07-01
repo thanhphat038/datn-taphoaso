@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 export const isValidUsername = (username) => {
   const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;

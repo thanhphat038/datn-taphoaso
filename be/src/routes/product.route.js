@@ -5,8 +5,12 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  activateProduct,
   deactivateProduct,
   getProductsByCategory,
+  searchProducts,
+  getTopRatedProducts,
+  getNewArrivals,
   getRelatedProducts
 } from '../controllers/product.controller.js';
 
@@ -15,11 +19,20 @@ const router = express.Router();
 // Create new product
 router.post('/', createProduct);
 
-// Get all products
+// Get all products (hỗ trợ filter, search, sort, pagination)
 router.get('/', getProducts);
+
+// Search products
+router.get('/search', searchProducts);
 
 // Get products by category
 router.get('/category/:categoryId', getProductsByCategory);
+
+// Get top rated products
+router.get('/top-rated', getTopRatedProducts);
+
+// Get new arrivals
+router.get('/new-arrivals', getNewArrivals);
 
 // Get related products
 router.get('/:id/related', getRelatedProducts);
@@ -32,6 +45,9 @@ router.put('/:id', updateProduct);
 
 // Delete product
 router.delete('/:id', deleteProduct);
+
+// Activate product
+router.patch('/:id/activate', activateProduct);
 
 // Deactivate product
 router.patch('/:id/deactivate', deactivateProduct);

@@ -1,9 +1,14 @@
 import jwt from 'jsonwebtoken';
+
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/index.js';
 import { userService, authService } from '../services/index.js';
+import { sendForgotPasswordEmail } from '../services/mailler/emailService.js';
 
 import { isValidFullName, isValidPhone, isValidEmail } from '../utils/validators.js';
-import { AppError, ERROR_CODES } from '../utils/error.js';
+import { hashPassword } from '../utils/hash.js'; 
+
+import { AppError } from '../errors/AppError.js';
+import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 import { 
   created, 
@@ -14,6 +19,8 @@ import {
   serverError,
   unprocessableEntity 
 } from '../utils/response.js';
+
+const BASE_URL = 'http://localhost:3000'; 
 
 export const register = async (req, res) => {
   try {
@@ -247,4 +254,93 @@ export const changePassword = async (req, res) => {
     }
     return serverError(res, 'Error changing password', error);
   }
-}; 
+};
+
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return badRequest(res, 'Token and new password are required');
+    }
+
+    if (typeof newPassword !== 'string' || newPassword.length < 6) {
+      return badRequest(res, 'New password must be at least 6 characters long');
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return badRequest(res, 'Invalid or expired token');
+    }
+
+    const user = await userService.findById(payload.id);
+    if (!user) {
+      return notFound(res, 'User not found');
+    }
+
+    // Nếu lưu resetPasswordToken vào DB, kiểm tra khớp token:
+    if (user.resetPasswordToken !== token || user.resetPasswordExpires < Date.now()) {
+      return badRequest(res, 'Token is invalid or expired');
+    }
+
+    const hashedPassword = hashPassword(newPassword);
+
+    await userService.update(user._id, {
+      password: hashedPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpires: undefined
+    });
+
+    return ok(res, null, 'Password has been reset successfully');
+
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    return serverError(res, 'Error resetting password', error);
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return badRequest(res, 'Email is required');
+    }
+
+    if (!isValidEmail(email)) {
+      return badRequest(res, 'Invalid email format');
+    }
+
+    const user = await userService.findOne({ email });
+    if (!user) {
+      return notFound(res, 'No user found with this email');
+    }
+
+    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
+
+    // Lưu token vào DB (tuỳ hệ thống, có thể skip bước này nếu chỉ kiểm tra token trực tiếp)
+    await userService.update(user._id, {
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: Date.now() + 15 * 60 * 1000 // 15 phút
+    });
+
+    // Tạo link reset
+    const resetLink = `${BASE_URL}/reset-password?token=${resetToken}`;
+
+    // Gửi email
+    await sendForgotPasswordEmail({
+      to: email,
+      name: user.name || '',
+      resetLink
+    });
+
+    return ok(res, null, 'Password reset link has been sent to your email');
+    
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return serverError(res, 'Error processing forgot password', error);
+  }
+};
