@@ -69,7 +69,7 @@ const AdminReview = () => {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Sản Phẩm</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Đánh Giá</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Ngày</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Trạng Thái</th>
+                  {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Trạng Thái</th> */}
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
@@ -91,7 +91,7 @@ const AdminReview = () => {
                         {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{review.date}</td>
-                      <td className="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 text-xs font-medium rounded-full ${
                             review.status === 'Hiển thị'
@@ -101,7 +101,7 @@ const AdminReview = () => {
                         >
                           {review.status}
                         </span>
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4">
                         <button className="text-gray-400 hover:text-gray-600">
                           <FaEllipsisV />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 import data from '../../data/blog.json';
+import { NavLink } from 'react-router-dom';
 
 const AdminBlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,15 +39,12 @@ const AdminBlogPage = () => {
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-800">Danh Sách Blog</h1>
-          <a
-            href="/admin/addblog"
-            className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          <NavLink to="/admin/addblog" className="bg-[#06AEF4] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Thêm bài viết
-          </a>
+          </NavLink>
         </div>
 
         {/* Search Bar */}

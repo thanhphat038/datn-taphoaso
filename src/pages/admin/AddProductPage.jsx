@@ -13,9 +13,12 @@ const AddProductPage = () => {
   const [discountType, setDiscountType] = useState('none');
   const [discountValue, setDiscountValue] = useState('');
   const [status, setStatus] = useState('Đang bán');
-  const [category, setCategory] = useState('Thịt');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -27,16 +30,33 @@ const AddProductPage = () => {
         setPrice(product.price);
         setStatus(product.status);
         setCategory(product.category);
-        // Assuming discount info is available in product.discountType and product.discountValue
         setDiscountType(product.discountType || 'none');
         setDiscountValue(product.discountValue || '');
       }
     }
   }, [id]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        const data = await response.json();
+        setCategories(data);
+        if (!category && data.length > 0) {
+          setCategory(data[0].name);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const handleAddCategory = (e) => {
     e.preventDefault();
-    // TODO: Add logic to save new category
     alert(`Danh mục "${newCategoryName}" đã được thêm.`);
     setNewCategoryName('');
     setShowCategoryModal(false);
@@ -49,16 +69,47 @@ const AddProductPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: handle form submission logic
-    alert(`Sản phẩm ${id ? 'đã được cập nhật' : 'đã được lưu'} (giả lập)`);
-    navigate('/admin/product');
+    setLoading(true);
+    setError(null);
+
+    const productData = {
+      name: productName,
+      description,
+      images,
+      price: Number(price),
+      discountType,
+      discountValue: discountType === 'none' ? null : discountValue,
+      status,
+      category,
+    };
+
+    try {
+      const response = await fetch('/api/products', {
+        method: id ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save product');
+      }
+
+      alert(`Sản phẩm ${id ? 'đã được cập nhật' : 'đã được lưu'} thành công`);
+      navigate('/admin/product');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    // TODO: handle cancel logic, e.g., navigate back or reset form
     alert('Hủy bỏ');
     navigate('/admin/product');
   };
@@ -67,7 +118,6 @@ const AddProductPage = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-xl font-semibold mb-6">{id ? 'Chỉnh sửa sản phẩm' : 'Thêm Sản Phẩm'}</h1>
       <form onSubmit={handleSubmit} className="flex gap-6">
-        {/* Left side - Overview */}
         <div className="flex-1 space-y-6">
           <div className="bg-white p-4 rounded shadow">
             <h2 className="font-semibold mb-4">Tổng quan</h2>
@@ -211,7 +261,6 @@ const AddProductPage = () => {
           </div>
         </div>
 
-        {/* Right side - Status and Category */}
         <div className="w-64 space-y-6">
           <div className="bg-white p-4 rounded shadow">
             <h2 className="font-semibold mb-4">Trạng thái</h2>
@@ -235,14 +284,15 @@ const AddProductPage = () => {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              <option>Thịt</option>
-              <option>Rau củ</option>
-              <option>Đồ uống</option>
-              <option>Đồ khô</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
             <button
               type="button"
-              className="mt-2 w-full bg-[#06AEF4] text-white py-2 rounded hover:bg-blue-500"
+              className="mt-2 w-full bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
               onClick={() => setShowCategoryModal(true)}
             >
               + Tạo danh mục mới
@@ -274,13 +324,13 @@ const AddProductPage = () => {
                       <div className="flex justify-end gap-4">
                         <button
                           type="submit"
-                          className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
+                          className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
                         >
                           Lưu thay đổi
                         </button>
                         <button
                           type="button"
-                          className="bg-red-300 text-white px-4 py-2 rounded hover:bg-red-400"
+                          className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
                           onClick={() => setShowCategoryModal(false)}
                         >
                           Hủy bỏ
@@ -296,22 +346,25 @@ const AddProductPage = () => {
       </form>
 
       <div className="flex justify-end gap-4 mt-6">
-      <button
-        type="submit"
-        form="addProductForm"
-        className="bg-[#06AEF4] text-white px-6 py-2 rounded hover:bg-blue-500"
-        onClick={handleSubmit}
-      >
-        Lưu thay đổi
-      </button>
-      <button
-        type="button"
-        className="bg-red-300 text-white px-6 py-2 rounded hover:bg-red-400"
-        onClick={handleCancel}
-      >
-        Hủy bỏ
-      </button>
+        <button
+          type="submit"
+          form="addProductForm"
+          className="bg-[#06AEF4] text-white px-6 py-2 rounded hover:bg-blue-500"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+        </button>
+        <button
+          type="button"
+          className="bg-red-300 text-white px-6 py-2 rounded hover:bg-red-400"
+          onClick={handleCancel}
+          disabled={loading}
+        >
+          Hủy bỏ
+        </button>
       </div>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };

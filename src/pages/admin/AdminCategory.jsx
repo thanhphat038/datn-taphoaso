@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import HeaderAdmin from '../../components/HeaderAdmin';
@@ -7,34 +7,53 @@ const AdminCategory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const mockData = [
-    {
-      id: 1,
-      name: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-    },
-    {
-      id: 2,
-      name: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-    },
-    {
-      id: 3,
-      name: 'Thịt gà, vịt, chim',
-      date: 'Ngày 15 tháng 5 năm 2025',
-      status: 'Hoạt động',
-    },
-  ];
+  const fetchCategories = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      setCategories(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleAddCategory = (e) => {
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async (e) => {
     e.preventDefault();
-    // TODO: Add logic to save new category
-    alert(`Danh mục "${newCategoryName}" đã được thêm.`);
-    setNewCategoryName('');
-    setShowModal(false);
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryName }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add category');
+      }
+      setNewCategoryName('');
+      setShowModal(false);
+      fetchCategories();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,10 +64,10 @@ const AdminCategory = () => {
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-800">Danh Mục</h1>
-<button
-  className="bg-[#06AEF4] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300"
-  onClick={() => setShowModal(true)}
->
+          <button
+            className="bg-[#06AEF4] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300"
+            onClick={() => setShowModal(true)}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -78,20 +97,23 @@ const AdminCategory = () => {
                       required
                     />
                     <div className="flex justify-end gap-4">
-<button
-  type="submit"
-  className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
->
-  Lưu thay đổi
-</button>
-<button
-  type="button"
-  className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
-  onClick={() => setShowModal(false)}
->
-  Hủy bỏ
-</button>
+                      <button
+                        type="submit"
+                        className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
+                        disabled={loading}
+                      >
+                        Lưu thay đổi
+                      </button>
+                      <button
+                        type="button"
+                        className="bg-[#06AEF4] text-white px-4 py-2 rounded-full hover:bg-[#0590d8] transition-colors duration-300"
+                        onClick={() => setShowModal(false)}
+                        disabled={loading}
+                      >
+                        Hủy bỏ
+                      </button>
                     </div>
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
                   </form>
                 </div>
               </div>
@@ -138,32 +160,40 @@ const AdminCategory = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockData.map((category) => (
-                  <tr key={category.id} className="border-b border-gray-200">
-                    <td className="px-6 py-4 text-center">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-700">{category.name}</div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{category.date}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full ${
-                        category.status === 'Hoạt động' ? 'text-green-700 bg-green-50' : 'text-gray-700 bg-gray-100'
-                      }`}>
-                        <span className={`w-2 h-2 rounded-full inline-block ${
-                          category.status === 'Hoạt động' ? 'bg-green-500' : 'bg-gray-400'
-                        }`}></span>
-                        {category.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <FaEllipsisV />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {categories
+                  .filter((category) =>
+                    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((category) => (
+                    <tr key={category.id} className="border-b border-gray-200">
+                      <td className="px-6 py-4 text-center">
+                        <input type="checkbox" className="rounded border-gray-300" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-700">{category.name}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{new Date(category.createdAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full ${
+                            category.status === 'active' ? 'text-green-700 bg-green-50' : 'text-gray-700 bg-gray-100'
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full inline-block ${
+                              category.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+                            }`}
+                          ></span>
+                          {category.status === 'active' ? 'Hoạt động' : 'Ngừng hoạt động'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <FaEllipsisV />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -177,7 +207,7 @@ const AdminCategory = () => {
                 <option>10</option>
                 <option>15</option>
               </select>
-              <span>1-5 trong 12 danh mục</span>
+              <span>{categories.length} danh mục</span>
               <div className="flex gap-1">
                 <button className="p-2 hover:bg-gray-50 rounded">
                   <span className="sr-only">Previous</span>
