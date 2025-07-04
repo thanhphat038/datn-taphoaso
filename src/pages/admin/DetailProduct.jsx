@@ -1,235 +1,358 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import data from '../../data/db.json';
+import { FaEdit, FaTrash, FaArrowLeft, FaBox, FaTag, FaCalendarAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import AdminLayout from '../../components/admin/AdminLayout';
+import AdminCard from '../../components/admin/AdminCard';
+import { ModalButton } from '../../components/admin/AdminModal';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const DetailProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [product, setProduct] = useState(null);
 
-  const [productName, setProductName] = useState('');
-  const [description, setDescription] = useState('');
-  const [images, setImages] = useState([]);
-  const [price, setPrice] = useState('');
-  const [discountType, setDiscountType] = useState('none');
-  const [discountValue, setDiscountValue] = useState('');
-  const [status, setStatus] = useState('Đang bán');
-  const [category, setCategory] = useState('Thịt');
-  const [isEditing, setIsEditing] = useState(false);
-
+  // Fetch product data
   useEffect(() => {
-    const product = data.products.find((p) => p.id.toString() === id.toString());
-    if (product) {
-      setProductName(product.name);
-      setDescription(product.description);
-      setImages(product.images || []);
-      setPrice(product.price);
-      setStatus(product.status === 'active' ? 'Đang bán' : 'Ngừng bán');
-      setCategory(product.category || 'Thịt');
-      setDiscountType(product.discountType || 'none');
-      setDiscountValue(product.discountValue || '');
-    } else {
-      alert('Sản phẩm không tồn tại');
-      navigate('/admin/product');
-    }
-  }, [id, navigate]);
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/products/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch product');
+        }
+        const result = await response.json();
+        setProduct(result.data);
+      } catch (error) {
+        setError('Không thể tải thông tin sản phẩm: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
-  const handleSave = () => {
-    // TODO: Implement save logic (e.g., API call)
-    alert('Lưu thay đổi thành công (giả lập)');
-    setIsEditing(false);
+  // Handle delete product
+  const handleDeleteProduct = async () => {
+    const confirmMessage = `Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?\n\nHành động này không thể hoàn tác!`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete product');
+      }
+
+      navigate('/admin/product');
+    } catch (error) {
+      alert('Lỗi khi xóa sản phẩm: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Handle toggle product status
+  const handleToggleStatus = async () => {
+    if (!product) return;
+
+    const newStatus = product.status === 'active' ? 'inactive' : 'active';
+    const actionText = product.status === 'active' ? 'ẩn' : 'hiện';
+    
+    const confirmMessage = `Bạn có chắc chắn muốn ${actionText} sản phẩm này?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/products/${id}/${newStatus === 'active' ? 'activate' : 'deactivate'}`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update product status');
+      }
+
+      setProduct(prev => ({ ...prev, status: newStatus }));
+    } catch (error) {
+      alert(`Lỗi khi ${actionText} sản phẩm: ` + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount || 0);
+  };
+
+  // Get product status info
+  const getProductStatusInfo = (status) => {
+    if (status === 'active') {
+      return {
+        label: 'Đang bán',
+        color: 'bg-green-100 text-green-800 border-green-200',
+        dotColor: 'bg-green-500'
+      };
+    } else {
+      return {
+        label: 'Ngừng bán',
+        color: 'bg-red-100 text-red-800 border-red-200',
+        dotColor: 'bg-red-500'
+      };
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center text-gray-500">Đang tải dữ liệu...</div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center text-red-500">{error}</div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center text-gray-500">Không tìm thấy sản phẩm</div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const statusInfo = getProductStatusInfo(product.status);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-xl font-semibold mb-6">Chi tiết sản phẩm</h1>
-      <form className="flex gap-6" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-        {/* Left side - Overview */}
-        <div className="flex-1 space-y-6">
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Tổng quan</h2>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium" htmlFor="productName">Tên sản phẩm</label>
-              <input
-                id="productName"
-                type="text"
-                value={productName}
-                disabled={!isEditing}
-                onChange={(e) => setProductName(e.target.value)}
-                className={`w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium" htmlFor="description">Mô tả sản phẩm</label>
-              <textarea
-                id="description"
-                value={description}
-                disabled={!isEditing}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={6}
-                className={`w-full border border-gray-300 rounded px-3 py-2 resize-none ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Hình ảnh</h2>
-            <div className="block w-full min-h-[6rem] bg-blue-200 rounded flex items-center justify-center text-gray-700">
-              {images.length > 0 ? (
-                <div className="flex gap-2 overflow-x-auto">
-                  {images.map((imgSrc, index) => (
-                    <img key={index} src={imgSrc} alt={`Preview ${index}`} className="h-24 object-contain rounded" />
-                  ))}
-                </div>
-              ) : (
-                'Không có hình ảnh'
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded shadow space-y-4">
-            <h2 className="font-semibold mb-4">Giá sản phẩm</h2>
-            <div>
-              <label className="block mb-1 font-medium" htmlFor="price">Giá gốc</label>
-              <input
-                id="price"
-                type="number"
-                value={price}
-                disabled={!isEditing}
-                onChange={(e) => setPrice(e.target.value)}
-                className={`w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-              />
-            </div>
-            <div>
-              <span className="block mb-1 font-medium">Loại giảm giá</span>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="discountType"
-                    value="none"
-                    checked={discountType === 'none'}
-                    disabled={!isEditing}
-                    onChange={() => setDiscountType('none')}
-                  />
-                  Không giảm giá
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="discountType"
-                    value="percent"
-                    checked={discountType === 'percent'}
-                    disabled={!isEditing}
-                    onChange={() => setDiscountType('percent')}
-                  />
-                  Giảm theo %
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="discountType"
-                    value="fixed"
-                    checked={discountType === 'fixed'}
-                    disabled={!isEditing}
-                    onChange={() => setDiscountType('fixed')}
-                  />
-                  Giá cố định
-                </label>
-              </div>
-              {discountType === 'percent' && (
-                <input
-                  type="number"
-                  value={discountValue}
-                  disabled={!isEditing}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                  className={`mt-2 w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-                />
-              )}
-              {discountType === 'fixed' && (
-                <input
-                  type="number"
-                  value={discountValue}
-                  disabled={!isEditing}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                  className={`mt-2 w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right side - Status and Category */}
-        <div className="w-64 space-y-6">
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Trạng thái</h2>
-            <select
-              value={status}
-              disabled={!isEditing}
-              onChange={(e) => setStatus(e.target.value)}
-              className={`w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-            >
-              <option>Đang bán</option>
-              <option>Ngừng bán</option>
-            </select>
-          </div>
-
-          <div className="bg-white p-4 rounded shadow space-y-4">
-            <h2 className="font-semibold mb-4">Chi tiết sản phẩm</h2>
-            <label className="block mb-2 font-medium" htmlFor="category">Thể loại</label>
-            <select
-              id="category"
-              value={category}
-              disabled={!isEditing}
-              onChange={(e) => setCategory(e.target.value)}
-              className={`w-full border border-gray-300 rounded px-3 py-2 ${isEditing ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'}`}
-            >
-              <option>Thịt</option>
-              <option>Rau củ</option>
-              <option>Đồ uống</option>
-              <option>Đồ khô</option>
-            </select>
-          </div>
-        </div>
-      </form>
-
-      <div className="flex justify-start gap-4 mt-6">
-        {!isEditing ? (
-          <>
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <button
-              type="button"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-              onClick={() => setIsEditing(true)}
-            >
-              Chỉnh sửa
-            </button>
-            <button
-              type="button"
-              className="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400"
               onClick={() => navigate('/admin/product')}
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              Quay lại
+              <FaArrowLeft className="w-5 h-5" />
             </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-              onClick={handleSave}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Chi tiết sản phẩm</h1>
+              <p className="text-gray-600 mt-1">Xem thông tin chi tiết sản phẩm</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <ModalButton
+              variant={product.status === 'active' ? 'warning' : 'success'}
+              onClick={handleToggleStatus}
+              disabled={loading}
             >
-              Lưu
-            </button>
-            <button
-              type="button"
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
-              onClick={() => setIsEditing(false)}
+              {product.status === 'active' ? (
+                <>
+                  <FaEyeSlash className="w-4 h-4" />
+                  <span>Ẩn sản phẩm</span>
+                </>
+              ) : (
+                <>
+                  <FaEye className="w-4 h-4" />
+                  <span>Hiện sản phẩm</span>
+                </>
+              )}
+            </ModalButton>
+            <ModalButton
+              onClick={() => navigate(`/admin/addproduct/${id}`)}
+              disabled={loading}
             >
-              Hủy bỏ
-            </button>
-          </>
-        )}
+              <FaEdit className="w-4 h-4" />
+              <span>Chỉnh sửa</span>
+            </ModalButton>
+            <ModalButton
+              variant="danger"
+              onClick={handleDeleteProduct}
+              disabled={loading}
+            >
+              <FaTrash className="w-4 h-4" />
+              <span>Xóa sản phẩm</span>
+            </ModalButton>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Product Images */}
+            {product.images && product.images.length > 0 && (
+              <AdminCard title="Hình ảnh sản phẩm" noPadding>
+                <div className="p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {product.images.map((image, index) => (
+                      <div key={index} className="aspect-square">
+                        <img
+                          src={image}
+                          alt={`${product.name} ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg border border-gray-200"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </AdminCard>
+            )}
+
+            {/* Product Information */}
+            <AdminCard title="Thông tin sản phẩm">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full border ${statusInfo.color}`}>
+                      <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                </div>
+
+                {product.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Mô tả</h3>
+                    <p className="text-gray-600 leading-relaxed">{product.description}</p>
+                  </div>
+                )}
+              </div>
+            </AdminCard>
+
+            {/* Pricing Information */}
+            <AdminCard title="Thông tin giá cả">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-900">{formatCurrency(product.original_price)}</div>
+                  <div className="text-sm text-gray-600">Giá gốc</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{formatCurrency(product.price)}</div>
+                  <div className="text-sm text-gray-600">Giá bán</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {product.original_price && product.price 
+                      ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+                      : 0}%
+                  </div>
+                  <div className="text-sm text-gray-600">Giảm giá</div>
+                </div>
+              </div>
+            </AdminCard>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Stock Information */}
+            <AdminCard title="Kho hàng">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className={`text-3xl font-bold ${
+                  (product.stock || 0) > 10 ? 'text-green-600' : 
+                  (product.stock || 0) > 0 ? 'text-orange-600' : 'text-red-600'
+                }`}>
+                  {product.stock || 0}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {(product.stock || 0) > 10 ? 'Còn hàng' : 
+                   (product.stock || 0) > 0 ? 'Sắp hết hàng' : 'Hết hàng'}
+                </div>
+              </div>
+            </AdminCard>
+
+            {/* Category Information */}
+            <AdminCard title="Danh mục">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <div className="p-3 bg-[#06AEF4] bg-opacity-10 rounded-lg">
+                  <FaTag className="w-5 h-5 text-[#06AEF4]" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {product.category_id?.name || 'Chưa phân loại'}
+                  </div>
+                  {product.category_id?.description && (
+                    <div className="text-sm text-gray-500">{product.category_id.description}</div>
+                  )}
+                </div>
+              </div>
+            </AdminCard>
+
+            {/* Meta Information */}
+            <AdminCard title="Thông tin khác">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <FaCalendarAlt className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <div className="text-sm text-gray-600">Ngày tạo</div>
+                    <div className="font-medium">
+                      {new Date(product.createdAt).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <FaCalendarAlt className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <div className="text-sm text-gray-600">Cập nhật lần cuối</div>
+                    <div className="font-medium">
+                      {new Date(product.updatedAt || product.createdAt).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <FaBox className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <div className="text-sm text-gray-600">ID sản phẩm</div>
+                    <div className="font-medium font-mono text-sm">{product._id}</div>
+                  </div>
+                </div>
+              </div>
+            </AdminCard>
+          </div>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

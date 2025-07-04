@@ -1,212 +1,348 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaImage, FaUpload } from 'react-icons/fa';
+import AdminLayout from '../../components/admin/AdminLayout';
+import AdminCard from '../../components/admin/AdminCard';
+import { ModalButton } from '../../components/admin/AdminModal';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const AddBlog = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState('');
-  const [status, setStatus] = useState('Đang bán');
-  const [category, setCategory] = useState('Thịt');
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
+  const [formData, setFormData] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    image: '',
+    category: '',
+    status: 'draft'
+  });
+
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // Fetch blog data if editing
+  useEffect(() => {
+    if (id) {
+      const fetchBlog = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(`${API_BASE_URL}/blogs/${id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch blog');
+          }
+          const result = await response.json();
+          const blog = result.data;
+          
+          setFormData({
+            title: blog.title || '',
+            excerpt: blog.excerpt || '',
+            content: blog.content || '',
+            image: blog.image || '',
+            category: blog.category || '',
+            status: blog.status || 'draft'
+          });
+
+          if (blog.image) {
+            setImagePreview(blog.image);
+          }
+        } catch (error) {
+          setError('Không thể tải thông tin bài viết: ' + error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchBlog();
+    }
+  }, [id]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Vui lòng chọn file hình ảnh');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Kích thước file không được vượt quá 5MB');
+      return;
+    }
+
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload image
+      const formData = new FormData();
+      formData.append('image', file);
+
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const result = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        image: result.url
+      }));
+    } catch (error) {
+      setError('Lỗi khi tải lên hình ảnh: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddCategory = (e) => {
-    e.preventDefault();
-    // TODO: Add logic to save new category
-    alert(`Danh mục "${newCategoryName}" đã được thêm.`);
-    setNewCategoryName('');
-    setShowCategoryModal(false);
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      setError('Vui lòng nhập tiêu đề bài viết');
+      return false;
+    }
+
+    if (!formData.content.trim()) {
+      setError('Vui lòng nhập nội dung bài viết');
+      return false;
+    }
+
+    return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: handle form submission logic
-    alert('Lưu bài viết thành công!');
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
+      const method = id ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save blog');
+      }
+
+      navigate('/admin/blog');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancel = (e) => {
-    e.preventDefault();
-    // TODO: handle cancel logic, e.g., navigate back or reset form
-    alert('Hủy bỏ');
+  const handleCancel = () => {
+    const confirmMessage = 'Bạn có chắc chắn muốn hủy? Mọi thay đổi sẽ không được lưu.';
+    if (window.confirm(confirmMessage)) {
+      navigate('/admin/blog');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-xl font-semibold mb-6">Thêm Blog</h1>
-      <form onSubmit={handleSubmit} className="flex gap-6">
-        {/* Left side - Overview */}
-        <div className="flex-1 space-y-6">
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Tổng quan</h2>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium" htmlFor="title">Tiêu Đề</label>
-              <input
-                id="title"
-                type="text"
-                required
-                placeholder="Tiêu Đề"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <p className="text-sm text-gray-500 mt-1">Tên bài blog</p>
-            </div>
-            <div>
-              <label className="block mb-1 font-medium" htmlFor="description">Mô tả</label>
-              <div className="border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[120px]">
-                {/* Toolbar */}
-                <div className="flex gap-2 mb-2">
-                  <button type="button" className="font-bold">B</button>
-                  <button type="button" className="italic">I</button>
-                  <button type="button" className="underline">U</button>
-                  <button type="button">Link</button>
-                  <button type="button">List</button>
-                  <button type="button">T.</button>
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {id ? 'Chỉnh sửa bài viết' : 'Thêm bài viết mới'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {id ? 'Cập nhật thông tin bài viết' : 'Tạo bài viết mới cho blog'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Form */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Title and Excerpt */}
+            <AdminCard>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tiêu đề <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Nhập tiêu đề bài viết"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                  />
                 </div>
-                {/* Editable content area */}
-                <textarea
-                  id="description"
-                  placeholder="Mô tả sản phẩm"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={6}
-                  className="w-full border-none resize-none focus:outline-none"
-                />
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mô tả ngắn
+                  </label>
+                  <textarea
+                    name="excerpt"
+                    value={formData.excerpt}
+                    onChange={handleChange}
+                    placeholder="Nhập mô tả ngắn cho bài viết"
+                    rows="3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                  />
+                </div>
               </div>
-            </div>
-          </div>
+            </AdminCard>
 
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Hình ảnh</h2>
-            <label
-              htmlFor="imageUpload"
-              className="block w-full min-h-[6rem] bg-blue-200 rounded cursor-pointer flex items-center justify-center text-gray-700 hover:bg-blue-300"
-            >
-              {image ? (
-                <img src={image} alt="Preview" className="h-24 object-contain rounded" />
-              ) : (
-                'Thêm hình ảnh'
-              )}
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
+            {/* Content */}
+            <AdminCard title="Nội dung">
+              <textarea
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
+                placeholder="Nhập nội dung bài viết"
+                rows="20"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
               />
-            </label>
-          </div>
-        </div>
-
-        {/* Right side - Status and Category */}
-        <div className="w-64 space-y-6">
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold mb-4">Trạng thái</h2>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option>Đang bán</option>
-              <option>Ngừng bán</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">Chỉnh trạng thái sản phẩm</p>
+            </AdminCard>
           </div>
 
-          <div className="bg-white p-4 rounded shadow space-y-4">
-            <h2 className="font-semibold mb-4">Chi tiết sản phẩm</h2>
-            <label className="block mb-2 font-medium" htmlFor="category">Thể loại</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option>Thịt</option>
-              <option>Rau củ</option>
-              <option>Đồ uống</option>
-              <option>Đồ khô</option>
-            </select>
-            <button
-              type="button"
-              className="mt-2 w-full bg-[#06AEF4] text-white py-2 rounded hover:bg-blue-500"
-              onClick={() => setShowCategoryModal(true)}
-            >
-              + Tạo danh mục mới
-            </button>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Status */}
+            <AdminCard title="Trạng thái">
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+              >
+                <option value="draft">Bản nháp</option>
+                <option value="published">Xuất bản</option>
+              </select>
+              <p className="mt-2 text-sm text-gray-500">
+                {formData.status === 'published' 
+                  ? 'Bài viết sẽ được hiển thị công khai'
+                  : 'Bài viết sẽ được lưu dưới dạng bản nháp'}
+              </p>
+            </AdminCard>
 
-            {showCategoryModal && (
-              <>
-                <div className="fixed inset-0 backdrop-combined backdrop-blur-xs z-40" onClick={() => setShowCategoryModal(false)}></div>
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                  <div className="bg-white rounded-lg p-6 w-96 shadow-lg relative">
+            {/* Category */}
+            <AdminCard title="Danh mục">
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="Nhập danh mục"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+              />
+            </AdminCard>
+
+            {/* Featured Image */}
+            <AdminCard title="Hình ảnh">
+              <div className="space-y-4">
+                {imagePreview ? (
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
                     <button
-                      className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowCategoryModal(false)}
+                      onClick={() => {
+                        setImagePreview(null);
+                        setFormData(prev => ({ ...prev, image: '' }));
+                      }}
+                      className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                     >
-                      &#x2715;
+                      <FaTrash className="w-4 h-4" />
                     </button>
-                    <h2 className="text-lg font-semibold mb-4">Thêm danh mục</h2>
-                    <form onSubmit={handleAddCategory}>
-                      <label className="block mb-2 font-medium" htmlFor="categoryName">Tên danh mục</label>
-                      <input
-                        id="categoryName"
-                        type="text"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        placeholder="Tên danh mục bạn muốn đặt"
-                        className="w-full border border-gray-300 rounded px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-[#06AEF4]"
-                        required
-                      />
-                      <div className="flex justify-end gap-4">
-                        <button
-                          type="submit"
-                          className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
-                        >
-                          Lưu thay đổi
-                        </button>
-                        <button
-                          type="button"
-                          className="bg-red-300 text-white px-4 py-2 rounded hover:bg-red-400"
-                          onClick={() => setShowCategoryModal(false)}
-                        >
-                          Hủy bỏ
-                        </button>
-                      </div>
-                    </form>
                   </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FaImage className="w-8 h-8 text-gray-400" />
+                      <div className="text-sm text-gray-600">
+                        Kéo thả hoặc click để tải lên hình ảnh
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        PNG, JPG hoặc GIF (tối đa 5MB)
+                      </div>
+                      <button className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <FaUpload className="w-4 h-4" />
+                        Chọn file
+                      </button>
+                    </label>
+                  </div>
+                )}
+              </div>
+            </AdminCard>
+
+            {/* Actions */}
+            <AdminCard>
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {error}
                 </div>
-              </>
-            )}
+              )}
+              <div className="flex flex-col gap-3">
+                <ModalButton
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full justify-center"
+                >
+                  {loading ? 'Đang lưu...' : id ? 'Cập nhật bài viết' : 'Tạo bài viết'}
+                </ModalButton>
+                <ModalButton
+                  variant="secondary"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  className="w-full justify-center"
+                >
+                  Hủy bỏ
+                </ModalButton>
+              </div>
+            </AdminCard>
           </div>
         </div>
-      </form>
-
-      <div className="flex justify-start gap-4 mt-6">
-        <button
-          type="submit"
-          form="addBlogForm"
-          className="bg-[#06AEF4] text-white px-6 py-2 rounded hover:bg-blue-500"
-          onClick={handleSubmit}
-        >
-          Lưu thay đổi
-        </button>
-        <button
-          type="button"
-          className="bg-red-300 text-white px-6 py-2 rounded hover:bg-red-400"
-          onClick={handleCancel}
-        >
-          Hủy bỏ
-        </button>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
