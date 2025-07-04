@@ -31,7 +31,7 @@ const AdminLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
-      <div className="w-72 bg-white shadow-lg">
+      <div className="w-80 bg-white shadow-lg">
         {/* Logo */}
         <div className="h-20 flex items-center justify-center border-b border-gray-200">
           <img src="/images/logo_ngang.png" alt="Logo" className="h-10" />
@@ -45,7 +45,7 @@ const AdminLayout = ({ children }) => {
               to={item.path}
               end={item.path === '/admin'}
               className={({ isActive }) => `
-                flex items-center gap-4 px-5 py-4 rounded-xl transition-colors text-base
+                flex items-center gap-4 px-6 py-5 rounded-xl transition-colors text-base
                 ${isActive 
                   ? 'bg-[#06AEF4] text-white' 
                   : 'text-gray-600 hover:bg-gray-50'}

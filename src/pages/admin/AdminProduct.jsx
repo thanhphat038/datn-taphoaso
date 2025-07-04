@@ -158,30 +158,38 @@ const AdminProduct = () => {
     {
       title: 'Sản phẩm',
       key: 'product',
-      render: (product) => (
-        <div className=" flex items-center gap-3">
-          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-            {product.images && product.images[0] ? (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center" style={{ display: product.images && product.images[0] ? 'none' : 'flex' }}>
-              <FaImage className="w-4 h-4 text-gray-400" />
+      render: (product) => {
+        const truncateDescription = (desc, wordLimit = 5) => {
+          if (!desc) return 'Không có mô tả';
+          const words = desc.split(' ');
+          if (words.length <= wordLimit) return desc;
+          return words.slice(0, wordLimit).join(' ') + '...';
+        };
+        return (
+          <div className=" flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+              {product.images && product.images[0] ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center" style={{ display: product.images && product.images[0] ? 'none' : 'flex' }}>
+                <FaImage className="w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-gray-900 truncate">{product.name}</div>
+              <div className="text-sm text-gray-500 truncate">{truncateDescription(product.description)}</div>
             </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-gray-900 truncate">{product.name}</div>
-            <div className="text-sm text-gray-500 truncate">{product.description || 'Không có mô tả'}</div>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       title: 'Danh mục',

@@ -237,7 +237,7 @@ const AdminUser = () => {
       key: 'joinDate',
       render: (user) => (
         <div className="text-sm text-gray-600">
-          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN', {
+          {user.create_at ? new Date(user.create_at).toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'

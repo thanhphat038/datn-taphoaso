@@ -246,7 +246,7 @@ const AdminCategory = () => {
       key: 'createdAt',
       render: (category) => (
         <div className="text-sm text-gray-600">
-          {category.createdAt ? new Date(category.createdAt).toLocaleDateString('vi-VN', {
+          {category.create_at ? new Date(category.create_at).toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'

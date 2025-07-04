@@ -4,14 +4,33 @@ import { FaImage, FaUpload } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const AddBlog = () => {
+
+
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<p>Chào bạn! Đây là trình soạn thảo Tiptap ✨</p>',
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setFormData(prev => ({
+        ...prev,
+        content: html
+      }));
+    }
+  });
+
+
+
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
 
   const [formData, setFormData] = useState({
     title: '',
@@ -49,6 +68,9 @@ const AddBlog = () => {
           if (blog.image) {
             setImagePreview(blog.image);
           }
+          if (editor && blog.content) {
+            editor.commands.setContent(blog.content);
+          }
         } catch (error) {
           setError('Không thể tải thông tin bài viết: ' + error.message);
         } finally {
@@ -57,7 +79,7 @@ const AddBlog = () => {
       };
       fetchBlog();
     }
-  }, [id]);
+  }, [id, editor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -221,14 +243,8 @@ const AddBlog = () => {
 
             {/* Content */}
             <AdminCard title="Nội dung">
-              <textarea
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                placeholder="Nhập nội dung bài viết"
-                rows="20"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
-              />
+            <EditorContent editor={editor} />
+            {/* Removed textarea since content is handled by tiptap editor */}
             </AdminCard>
           </div>
 

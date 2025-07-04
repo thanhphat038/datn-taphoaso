@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
 
 const ProfilePage = () => {
+   const handleLogout = () => {
+    // Xoá token khỏi cookie
+    Cookies.remove("auth_token");
+    // Tuỳ bạn: có thể redirect về trang login
+    window.location.href = "/login";
+  };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
@@ -148,6 +155,10 @@ const ProfilePage = () => {
                   <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                 </svg>
                 Sản phẩm yêu thích
+              </button>
+              <button onClick={handleLogout}
+      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                Đăng xuất
               </button>
             </nav>
           </div>
