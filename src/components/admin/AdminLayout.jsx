@@ -65,7 +65,7 @@ const AdminLayout = ({ children }) => {
           <h1 className="text-2xl font-bold text-gray-800">
             {menuItems.find(item => 
               item.path === location.pathname || 
-              (item.path !== '/admin' && location.pathname.startsWith(item.path)))?.label || 'Tổng quan'}
+              (item.path !== '/admin' && location.pathname.startsWith(item.path)))?.label || ''}
           </h1>
           <div className="flex items-center gap-5">
             <button className="text-gray-600 hover:text-gray-800">

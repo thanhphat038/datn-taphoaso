@@ -19,6 +19,7 @@ const AddProductPage = () => {
     description: '',
     price: '',
     original_price: '',
+    discount_percent: '', // New discount percentage field
     stock: '0', // Default to '0' for in_stock field
     category_id: '',
     status: 'active',
@@ -251,6 +252,11 @@ const AddProductPage = () => {
       return false;
     }
 
+    if (formData.discount_percent !== '' && (Number(formData.discount_percent) < 0 || Number(formData.discount_percent) > 100)) {
+      setError('Phần trăm giảm giá phải từ 0 đến 100');
+      return false;
+    }
+
     if (!formData.stock || Number(formData.stock) < 0) {
       setError('Số lượng tồn kho không được âm');
       return false;
@@ -279,6 +285,7 @@ const AddProductPage = () => {
         description: formData.description.trim(),
         price: Number(formData.price),
         original_price: Number(formData.original_price),
+        discount_percent: formData.discount_percent === '' ? 0 : Number(formData.discount_percent),
         in_stock: Number(formData.stock),
         category_id: formData.category_id,
         status: formData.status,
@@ -469,23 +476,40 @@ const AddProductPage = () => {
                     <p className="text-xs text-gray-500 mt-1">Giá gốc của sản phẩm (VND)</p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Giá bán <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      placeholder="0"
-                      min="0"
-                      step="1000"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
-                      required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Giá bán cho khách hàng (VND)</p>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Giá bán <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  step="1000"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Giá bán cho khách hàng (VND)</p>
+              </div>
+              {/* <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Giảm giá (%) 
+                </label>
+                <input
+                  type="number"
+                  name="discount_percent"
+                  value={formData.discount_percent}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="1"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">Phần trăm giảm giá (0-100%)</p>
+              </div> */}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
