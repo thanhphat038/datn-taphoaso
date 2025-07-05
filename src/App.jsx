@@ -27,7 +27,6 @@ import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider } from './context/CartContext';
-import HeaderAdmin from './components/HeaderAdmin';
 import AddProductPage from './pages/admin/AddProductPage';
 import AdminPage from './pages/admin/AdminPage';
 import VoucherPage from './pages/admin/VoucherPage';
@@ -49,34 +48,45 @@ function Layout() {
   const showFooter = !isAdminRoute && !noFooterRoutes.includes(location.pathname);
 
   return (
-    <div className="App w-full flex">
-      {isAdminRoute && <HeaderAdmin />}
-      <div className="flex-1">
-        {!isAdminRoute && <Header />}
+    <div className="App w-full">
+      {!isAdminRoute && (
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/product" element={<ProductsPage />} />
+              <Route path="/search/:value" element={<ProductsSearch />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/order/:id" element={<OrderDetailPage />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/select-address" element={<SelectAddress />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="*" element={<NotFoundPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:id" element={<BlogDetailPage />} />
+            </Routes>
+          </div>
+          {showFooter && <Footer />}
+        </div>
+      )}
+      
+      {isAdminRoute && (
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/product" element={<ProductsPage />} />
-          <Route path="/search/:value" element={<ProductsSearch />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/order/:id" element={<OrderDetailPage />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/select-address" element={<SelectAddress />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="*" element={<NotFoundPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:id" element={<BlogDetailPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/user" element={<AdminUser />} />
           <Route path="/admin/product" element={<AdminProduct />} />
           <Route path="/admin/addproduct" element={<AddProductPage />} />
+          <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
           <Route path="/admin/category" element={<AdminCategory />} />
           <Route path="/admin/voucher" element={<VoucherPage />} />
           <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
+          <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />
           <Route path="/admin/order" element={<OrderPage />} />
           <Route path="/admin/blog" element={<AdminBlogPage />} />
           <Route path="/admin/addblog" element={<AddBlog />} />
@@ -85,8 +95,7 @@ function Layout() {
           <Route path="/admin/review" element={<AdminReview />} />
           <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
         </Routes>
-        {showFooter && <Footer />}
-      </div>
+      )}
     </div>
   );
 }

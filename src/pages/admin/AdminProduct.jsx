@@ -1,250 +1,418 @@
-import React, { useState } from 'react';
-import { FaSearch, FaEllipsisV } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEdit, FaTrash, FaPlus, FaBox, FaEye, FaEyeSlash, FaImage } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
-import data from '../../data/db.json';
+import AdminLayout from '../../components/admin/AdminLayout';
+import AdminCard from '../../components/admin/AdminCard';
+import AdminTable from '../../components/admin/AdminTable';
+import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
+import AdminPagination from '../../components/admin/AdminPagination';
+import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const AdminProduct = () => {
+  const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
   const [priceFilter, setPriceFilter] = useState('All');
-  const [sortOrder, setSortOrder] = useState('None');
-  const [openMenuId, setOpenMenuId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const navigate = useNavigate();
 
-  const products = data.products;
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/products`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const result = await response.json();
+        setProducts(result.data || []);
+      } catch (error) {
+        setError('Không thể tải danh sách sản phẩm: ' + error.message);
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  // Apply search filter
-  let filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Handle edit product
+  const handleEditProduct = (productId) => {
+    navigate(`/admin/addproduct/${productId}`);
+  };
 
-  // Apply price filter
+  // Handle delete product
+  const handleDeleteProduct = async (productId, productName) => {
+    const confirmMessage = `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete product');
+      }
+
+      setProducts(products.filter(p => p._id !== productId));
+    } catch (error) {
+      alert('Lỗi khi xóa sản phẩm: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle toggle product status
+  const handleToggleStatus = async (productId, currentStatus, productName) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const action = currentStatus === 'active' ? 'deactivate' : 'activate';
+    const actionText = currentStatus === 'active' ? 'ẩn' : 'hiện';
+    
+    const confirmMessage = `Bạn có chắc chắn muốn ${actionText} sản phẩm "${productName}"?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/products/${productId}/${action}`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to ${action} product`);
+      }
+
+      setProducts(products.map(p => 
+        p._id === productId ? { ...p, status: newStatus } : p
+      ));
+    } catch (error) {
+      alert(`Lỗi khi ${actionText} sản phẩm: ` + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter and sort products
+  let filteredProducts = products.filter(product => {
+    const matchesSearch = product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || product.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Apply price sorting
   if (priceFilter === 'LowToHigh') {
-    filteredProducts = filteredProducts.sort((a, b) => a.price - b.price);
+    filteredProducts = filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
   } else if (priceFilter === 'HighToLow') {
-    filteredProducts = filteredProducts.sort((a, b) => b.price - a.price);
-  }
-
-  // Apply alphabetical sort
-  if (sortOrder === 'AtoZ') {
-    filteredProducts = filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortOrder === 'ZtoA') {
-    filteredProducts = filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+    filteredProducts = filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
   }
 
   const totalProducts = filteredProducts.length;
   const totalPages = Math.ceil(totalProducts / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + pageSize);
 
-  const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setCurrentPage(newPage);
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount || 0);
   };
 
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
+  // Get product status info
+  const getProductStatusInfo = (status) => {
+    if (status === 'active') {
+      return {
+        label: 'Hoạt động',
+        color: 'bg-green-100 text-green-800 border-green-200',
+        dotColor: 'bg-green-500'
+      };
+    } else {
+      return {
+        label: 'Không hoạt động',
+        color: 'bg-red-100 text-red-800 border-red-200',
+        dotColor: 'bg-red-500'
+      };
+    }
+  };
+
+  // Table columns
+  const columns = [
+    {
+      title: 'Sản phẩm',
+      key: 'product',
+      render: (product) => {
+        const truncateDescription = (desc, wordLimit = 5) => {
+          if (!desc) return 'Không có mô tả';
+          const words = desc.split(' ');
+          if (words.length <= wordLimit) return desc;
+          return words.slice(0, wordLimit).join(' ') + '...';
+        };
+        return (
+          <div className=" flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+              {product.images && product.images[0] ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center" style={{ display: product.images && product.images[0] ? 'none' : 'flex' }}>
+                <FaImage className="w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-gray-900 truncate">{product.name}</div>
+              <div className="text-sm text-gray-500 truncate">{truncateDescription(product.description)}</div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      title: 'Danh mục',
+      key: 'category',
+      render: (product) => (
+        <div className="text-sm text-gray-600">
+          {product.category_id?.name || 'Chưa phân loại'}
+        </div>
+      )
+    },
+    {
+      title: 'Giá bán',
+      key: 'price',
+      render: (product) => (
+        <div className="text-right">
+          <div className="font-semibold text-gray-900">{formatCurrency(product.price)}</div>
+          {product.original_price && product.original_price > product.price && (
+            <div className="text-sm text-gray-500 line-through">{formatCurrency(product.original_price)}</div>
+          )}
+        </div>
+      )
+    },
+    {
+      title: 'Kho',
+      key: 'in_stock',
+      render: (product) => (
+        <div className="text-center">
+          <div className={`font-semibold ${
+            (product.in_stock || 0) > 10 ? 'text-green-600' : 
+            (product.in_stock || 0) > 0 ? 'text-orange-600' : 'text-red-600'
+          }`}>
+            {product.in_stock || 0}
+          </div>
+          <div className="text-xs text-gray-500">
+            {(product.in_stock || 0) > 10 ? 'Còn hàng' : 
+             (product.in_stock || 0) > 0 ? 'Sắp hết' : 'Hết hàng'}
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Ngày tạo',
+      key: 'created_at',
+      render: (product) => (
+        <div className="text-sm text-gray-600 text-center">
+          {(product.created_at || product.create_at) ? 
+            new Date(product.created_at || product.create_at).toLocaleDateString('vi-VN') : 'N/A'}
+        </div>
+      )
+    },
+    {
+      title: 'Trạng thái',
+      key: 'status',
+      render: (product) => {
+        const statusInfo = getProductStatusInfo(product.status);
+        return (
+          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
+            <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+            {statusInfo.label}
+          </span>
+        );
+      }
+    },
+    {
+      title: '',
+      key: 'actions',
+      render: (product) => (
+        <AdminActionDropdown
+          actions={[
+            {
+              label: 'Chỉnh sửa',
+              icon: FaEdit,
+              onClick: () => handleEditProduct(product._id)
+            },
+            {
+              label: product.status === 'active' ? 'Ẩn sản phẩm' : 'Hiện sản phẩm',
+              icon: product.status === 'active' ? FaEyeSlash : FaEye,
+              variant: product.status === 'active' ? 'warning' : 'success',
+              onClick: () => handleToggleStatus(product._id, product.status, product.name)
+            },
+            {
+              label: 'Xóa sản phẩm',
+              icon: FaTrash,
+              variant: 'danger',
+              onClick: () => handleDeleteProduct(product._id, product.name)
+            }
+          ]}
+          onActionClick={(action) => action.onClick()}
+        />
+      )
+    }
+  ];
+
+  // Filter options
+  const filterOptions = [
+    {
+      key: 'status',
+      label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
+             statusFilter === 'active' ? 'Hoạt động' : 'Không hoạt động',
+      value: statusFilter,
+      options: [
+        { value: 'All', label: 'Tất cả trạng thái' },
+        { value: 'active', label: 'Hoạt động' },
+        { value: 'inactive', label: 'Không hoạt động' }
+      ]
+    },
+    {
+      key: 'price',
+      label: priceFilter === 'All' ? 'Sắp xếp giá' :
+             priceFilter === 'LowToHigh' ? 'Giá: Thấp → Cao' : 'Giá: Cao → Thấp',
+      value: priceFilter,
+      options: [
+        { value: 'All', label: 'Sắp xếp giá' },
+        { value: 'LowToHigh', label: 'Giá: Thấp → Cao' },
+        { value: 'HighToLow', label: 'Giá: Cao → Thấp' }
+      ]
+    }
+  ];
+
+  const handleFilterChange = (key, value) => {
+    if (key === 'status') {
+      setStatusFilter(value);
+    } else if (key === 'price') {
+      setPriceFilter(value);
+    }
     setCurrentPage(1);
   };
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalProducts);
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  // Calculate statistics
+  const activeProducts = products.filter(p => p.status === 'active').length;
+  const inactiveProducts = products.filter(p => p.status === 'inactive').length;
+  const lowStockProducts = products.filter(p => (p.in_stock || 0) <= 10 && (p.in_stock || 0) > 0).length;
+  const outOfStockProducts = products.filter(p => (p.in_stock || 0) === 0).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-800">Danh Sách Sản Phẩm</h1>
-<NavLink to="/admin/addproduct" className="bg-[#06AEF4] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#0590d8] transition-colors duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý sản phẩm</h1>
+            <p className="text-gray-600 mt-1">Quản lý danh sách sản phẩm và thông tin chi tiết</p>
+          </div>
+          <NavLink 
+            to="/admin/addproduct" 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#06AEF4] text-white rounded-xl hover:bg-[#0590d8] transition-colors shadow-sm"
+          >
+            <FaPlus className="w-4 h-4" />
             Thêm sản phẩm
           </NavLink>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-          <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-            <FaSearch className="text-gray-600" />
-          </button>
-          <select
-            value={priceFilter}
-            onChange={(e) => setPriceFilter(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">Giá: Tất cả</option>
-            <option value="LowToHigh">Giá: Thấp đến cao</option>
-            <option value="HighToLow">Giá: Cao đến thấp</option>
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="None">Sắp xếp: Mặc định</option>
-            <option value="AtoZ">Sắp xếp: A-Z</option>
-            <option value="ZtoA">Sắp xếp: Z-A</option>
-          </select>
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-[#06AEF4]">{totalProducts}</div>
+            <div className="text-sm text-gray-600">Tổng sản phẩm</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-green-600">{activeProducts}</div>
+            <div className="text-sm text-gray-600">Đang bán</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-red-600">{inactiveProducts}</div>
+            <div className="text-sm text-gray-600">Ngừng bán</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-orange-600">{lowStockProducts}</div>
+            <div className="text-sm text-gray-600">Sắp hết hàng</div>
+            
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-gray-600">{outOfStockProducts}</div>
+            <div className="text-sm text-gray-600">Hết hàng</div>
+          </AdminCard>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="px-6 py-4 text-center">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Tên sản phẩm
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Ngày tạo
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Giá
-                  </th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-200">
-                    <td className="px-6 py-4 text-center">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-10 h-10 rounded-full mr-3 object-cover"
-                        />
-                        <div>
-                          <div className="text-sm font-medium text-gray-700">{product.name}</div>
-                          <div className="text-xs text-gray-500">{product.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{new Date(product.created_at).toLocaleDateString('vi-VN')}</td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-full">
-                        <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                        {product.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{product.price.toLocaleString('vi-VN')} đ</td>
-                    <td className="px-6 py-4 relative">
-                      <button
-                        className="text-gray-400 hover:text-gray-600"
-                        onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}
-                      >
-                        <FaEllipsisV />
-                      </button>
-                      {openMenuId === product.id && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-10">
-                          <button
-                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-blue-600 font-medium"
-                            onClick={() => {
-                              navigate(`/admin/detailproduct/${product.id}`);
-                              setOpenMenuId(null);
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Xem chi tiết
-                          </button>
-                          <button
-                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 font-medium"
-                            onClick={() => {
-                              alert('Xóa sản phẩm: ' + product.name);
-                              setOpenMenuId(null);
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Xóa sản phẩm
-                          </button>
-                          <button
-                            className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-600 font-medium"
-                            onClick={() => {
-                              alert('Ẩn sản phẩm: ' + product.name);
-                              setOpenMenuId(null);
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.042.16-2.046.46-3.003m1.68-1.68A9.969 9.969 0 0112 5c5.523 0 10 4.477 10 10 0 1.042-.16 2.046-.46 3.003m-1.68 1.68L4.5 4.5" />
-                            </svg>
-                            Ẩn sản phẩm
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Search and Filters */}
+        <AdminCard>
+          <AdminSearchFilter
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Tìm kiếm theo tên sản phẩm..."
+            filters={filterOptions}
+            onFilterChange={handleFilterChange}
+          />
+        </AdminCard>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-end px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>Số lượng hiển thị</span>
-              <select
-                className="px-2 py-1 border border-gray-200 rounded"
-                value={pageSize}
-                onChange={handlePageSizeChange}
-              >
-                <option>5</option>
-                <option>10</option>
-                <option>15</option>
-              </select>
-              <span>
-                {startIndex + 1}-{endIndex} trong {totalProducts} sản phẩm
-              </span>
-              <div className="flex gap-1">
-                <button
-                  className="p-2 hover:bg-gray-50 rounded"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <span className="sr-only">Previous</span>
-                  &#60;
-                </button>
-                <button
-                  className="p-2 hover:bg-gray-50 rounded"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <span className="sr-only">Next</span>
-                  &#62;
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Products Table */}
+        <AdminCard noPadding>
+          <AdminTable
+            columns={columns}
+            data={paginatedProducts}
+            loading={loading}
+            error={error}
+            emptyMessage="Không có sản phẩm nào"
+            selectable={true}
+            selectedIds={selectedIds}
+            onSelectAll={(checked) => {
+              setSelectedIds(checked ? paginatedProducts.map(product => product._id) : []);
+            }}
+            onSelectOne={(id, checked) => {
+              setSelectedIds(prev => 
+                checked ? [...prev, id] : prev.filter(selectedId => selectedId !== id)
+              );
+            }}
+          />
+          
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalProducts}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
+        </AdminCard>
+        
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

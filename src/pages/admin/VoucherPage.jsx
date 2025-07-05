@@ -1,197 +1,387 @@
-import React, { useState } from 'react';
-import { FaSearch, FaEllipsisV } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEdit, FaTrash, FaPlus, FaTicketAlt, FaPercent, FaDollarSign, FaCalendar } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+import AdminLayout from '../../components/admin/AdminLayout';
+import AdminCard from '../../components/admin/AdminCard';
+import AdminTable from '../../components/admin/AdminTable';
+import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
+import AdminPagination from '../../components/admin/AdminPagination';
+import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const VoucherPage = () => {
+  const [vouchers, setVouchers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [dateFilter, setDateFilter] = useState('None');
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  const vouchers = [
-    { id: 1, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hoạt động' },
-    { id: 2, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hết hạn' },
-    { id: 3, code: 'M7777', startDate: 'Ngày 15 tháng 5 năm 2025', endDate: 'Ngày 15 tháng 5 năm 2025', status: 'Hoạt động' },
-  ];
+  // Fetch vouchers
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/vouchers`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch vouchers');
+        }
+        const result = await response.json();
+        setVouchers(result.data || []);
+      } catch (error) {
+        setError('Không thể tải danh sách voucher: ' + error.message);
+        console.error('Error fetching vouchers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVouchers();
+  }, []);
 
-  // Filter vouchers by search query and status
-  let filteredVouchers = vouchers.filter(voucher =>
-    voucher.code.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (statusFilter === 'All' || voucher.status === statusFilter)
-  );
+  // Handle delete voucher
+  const handleDeleteVoucher = async (voucherId, voucherCode) => {
+    const confirmMessage = `Bạn có chắc chắn muốn xóa voucher "${voucherCode}"?\n\nHành động này không thể hoàn tác!`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
 
-  // Sort vouchers by date filter
-  if (dateFilter === 'StartDateAsc') {
-    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-  } else if (dateFilter === 'StartDateDesc') {
-    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-  } else if (dateFilter === 'EndDateAsc') {
-    filteredVouchers = filteredVouchers.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
-  } else if (dateFilter === 'EndDateDesc') {
-    filteredVouchers = filteredVouchers.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
-  }
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete voucher');
+      }
+
+      setVouchers(vouchers.filter(v => v._id !== voucherId));
+    } catch (error) {
+      alert('Lỗi khi xóa voucher: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle toggle voucher status
+  const handleToggleStatus = async (voucherId, currentStatus, voucherCode) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const actionText = currentStatus === 'active' ? 'vô hiệu hóa' : 'kích hoạt';
+    
+    const confirmMessage = `Bạn có chắc chắn muốn ${actionText} voucher "${voucherCode}"?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update voucher status');
+      }
+
+      setVouchers(vouchers.map(v => 
+        v._id === voucherId ? { ...v, status: newStatus } : v
+      ));
+    } catch (error) {
+      alert(`Lỗi khi ${actionText} voucher: ` + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter vouchers
+  const filteredVouchers = vouchers.filter(voucher => {
+    const matchesSearch = voucher.code && voucher.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || voucher.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const totalVouchers = filteredVouchers.length;
   const totalPages = Math.ceil(totalVouchers / pageSize);
-
-  const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setCurrentPage(newPage);
-  };
-
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalVouchers);
-  const currentVouchers = filteredVouchers.slice(startIndex, endIndex);
+  const paginatedVouchers = filteredVouchers.slice(startIndex, startIndex + pageSize);
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+  // Format discount value
+  const formatDiscount = (voucher) => {
+    if (voucher.discount_type === 'percentage') {
+      return `${voucher.discount_value}%`;
+    } else {
+      return formatCurrency(voucher.discount_value);
+    }
+  };
+
+  // Check if voucher is expired
+  const isExpired = (endDate) => {
+    return new Date(endDate) < new Date();
+  };
+
+  // Get voucher status info
+  const getVoucherStatusInfo = (voucher) => {
+    if (isExpired(voucher.end_date)) {
+      return {
+        label: 'Hết hạn',
+        color: 'bg-red-100 text-red-800 border-red-200',
+        dotColor: 'bg-red-500'
+      };
+    } else if (voucher.status === 'active') {
+      return {
+        label: 'Hoạt động',
+        color: 'bg-green-100 text-green-800 border-green-200',
+        dotColor: 'bg-green-500'
+      };
+    } else {
+      return {
+        label: 'Không hoạt động',
+        color: 'bg-gray-100 text-gray-800 border-gray-200',
+        dotColor: 'bg-gray-500'
+      };
+    }
+  };
+
+  // Table columns
+  const columns = [
+    {
+      title: 'Voucher',
+      key: 'code',
+      render: (voucher) => (
+        <div className="font-semibold text-gray-900">{voucher.code}</div>
+      )
+    },
+    {
+      title: 'Giảm giá',
+      key: 'discount',
+      render: (voucher) => (
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+            {voucher.discount_type === 'percentage' ? (
+              <FaPercent className="w-3 h-3 text-orange-600" />
+            ) : (
+              <FaDollarSign className="w-3 h-3 text-orange-600" />
+            )}
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{formatDiscount(voucher)}</div>
+            {voucher.max_discount && voucher.discount_type === 'percentage' && (
+              <div className="text-sm text-gray-500">Tối đa {formatCurrency(voucher.max_discount)}</div>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Đơn tối thiểu',
+      key: 'min_order',
+      render: (voucher) => (
+        <div className="text-center">
+          <div className="font-semibold text-gray-900">{formatCurrency(voucher.min_order_value)}</div>
+        </div>
+      )
+    },
+    {
+      title: 'Thời gian',
+      key: 'dates',
+      render: (voucher) => (
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm">
+            <FaCalendar className="w-3 h-3 text-gray-400" />
+            <span className="text-gray-600">
+              {new Date(voucher.start_date).toLocaleDateString('vi-VN')}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <FaCalendar className="w-3 h-3 text-gray-400" />
+            <span className="text-gray-600">
+              {new Date(voucher.end_date).toLocaleDateString('vi-VN')}
+            </span>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Trạng thái',
+      key: 'status',
+      render: (voucher) => {
+        const statusInfo = getVoucherStatusInfo(voucher);
+        return (
+          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
+            <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+            {statusInfo.label}
+          </span>
+        );
+      }
+    },
+    {
+      title: '',
+      key: 'actions',
+      render: (voucher) => {
+        const isVoucherExpired = isExpired(voucher.end_date);
+        const actions = [
+          {
+            label: 'Chỉnh sửa',
+            icon: FaEdit,
+            onClick: () => window.location.href = `/admin/addvoucher/${voucher._id}`
+          },
+          {
+            label: 'Xóa voucher',
+            icon: FaTrash,
+            variant: 'danger',
+            onClick: () => handleDeleteVoucher(voucher._id, voucher.code)
+          }
+        ];
+
+        if (!isVoucherExpired) {
+          actions.splice(1, 0, {
+            label: voucher.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt',
+            icon: voucher.status === 'active' ? FaTrash : FaEdit,
+            variant: voucher.status === 'active' ? 'warning' : 'success',
+            onClick: () => handleToggleStatus(voucher._id, voucher.status, voucher.code)
+          });
+        }
+
+        return (
+          <AdminActionDropdown
+            actions={actions}
+            onActionClick={(action) => action.onClick()}
+          />
+        );
+      }
+    }
+  ];
+
+  // Filter options
+  const filterOptions = [
+    {
+      key: 'status',
+      label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
+             statusFilter === 'active' ? 'Hoạt động' : 'Không hoạt động',
+      value: statusFilter,
+      options: [
+        { value: 'All', label: 'Tất cả trạng thái' },
+        { value: 'active', label: 'Hoạt động' },
+        { value: 'inactive', label: 'Không hoạt động' }
+      ]
+    }
+  ];
+
+  const handleFilterChange = (key, value) => {
+    if (key === 'status') {
+      setStatusFilter(value);
+      setCurrentPage(1);
+    }
+  };
+
+  // Calculate statistics
+  const activeVouchers = vouchers.filter(v => v.status === 'active' && !isExpired(v.end_date)).length;
+  const expiredVouchers = vouchers.filter(v => isExpired(v.end_date)).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-800">Danh Sách Voucher</h1>
-          <a
-            href="/admin/addvoucher"
-            className="bg-[#06AEF4] text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700"
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý voucher</h1>
+            <p className="text-gray-600 mt-1">Tạo và quản lý các mã giảm giá</p>
+          </div>
+          <NavLink 
+            to="/admin/addvoucher" 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#06AEF4] text-white rounded-xl hover:bg-[#0590d8] transition-colors shadow-sm"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
+            <FaPlus className="w-4 h-4" />
             Thêm voucher
-          </a>
+          </NavLink>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-          <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-            <FaSearch className="text-gray-600" />
-          </button>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">Tất cả trạng thái</option>
-            <option value="Hoạt động">Hoạt động</option>
-            <option value="Hết hạn">Hết hạn</option>
-          </select>
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="None">Sắp xếp ngày</option>
-            <option value="StartDateAsc">Ngày bắt đầu ↑</option>
-            <option value="StartDateDesc">Ngày bắt đầu ↓</option>
-            <option value="EndDateAsc">Ngày kết thúc ↑</option>
-            <option value="EndDateDesc">Ngày kết thúc ↓</option>
-          </select>
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-[#06AEF4]">{totalVouchers}</div>
+            <div className="text-sm text-gray-600">Tổng voucher</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-green-600">{activeVouchers}</div>
+            <div className="text-sm text-gray-600">Đang hoạt động</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-red-600">{expiredVouchers}</div>
+            <div className="text-sm text-gray-600">Đã hết hạn</div>
+          </AdminCard>
+          <AdminCard className="text-center">
+            <div className="text-2xl font-bold text-gray-600">{vouchers.filter(v => v.status === 'inactive').length}</div>
+            <div className="text-sm text-gray-600">Không hoạt động</div>
+          </AdminCard>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="px-6 py-4 text-center">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Mã Voucher
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Ngày bắt đầu
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Ngày kết thúc
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentVouchers.map((voucher) => (
-                  <tr key={voucher.id} className="border-b border-gray-200">
-                    <td className="px-6 py-4 text-center">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-700">{voucher.code}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{voucher.startDate}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{voucher.endDate}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full ${
-                        voucher.status === 'Hoạt động' ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'
-                      }`}>
-                        {voucher.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <FaEllipsisV />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Search and Filters */}
+        <AdminCard>
+          <AdminSearchFilter
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Tìm kiếm theo mã voucher..."
+            filters={filterOptions}
+            onFilterChange={handleFilterChange}
+          />
+        </AdminCard>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-end px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>Số lượng hiển thị</span>
-              <select
-                className="px-2 py-1 border border-gray-200 rounded"
-                value={pageSize}
-                onChange={handlePageSizeChange}
-              >
-                <option>5</option>
-                <option>10</option>
-                <option>20</option>
-              </select>
-              <span>
-                {startIndex + 1}-{endIndex} trong {totalVouchers} danh mục
-              </span>
-              <div className="flex gap-1">
-                <button
-                  className="p-2 hover:bg-gray-50 rounded"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <span className="sr-only">Previous</span>
-                  &#60;
-                </button>
-                <button
-                  className="p-2 hover:bg-gray-50 rounded"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <span className="sr-only">Next</span>
-                  &#62;
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Vouchers Table */}
+        <AdminCard noPadding>
+          <AdminTable
+            columns={columns}
+            data={paginatedVouchers}
+            loading={loading}
+            error={error}
+            emptyMessage="Không có voucher nào"
+            selectable={true}
+            selectedIds={selectedIds}
+            onSelectAll={(checked) => {
+              setSelectedIds(checked ? paginatedVouchers.map(voucher => voucher._id) : []);
+            }}
+            onSelectOne={(id, checked) => {
+              setSelectedIds(prev => 
+                checked ? [...prev, id] : prev.filter(selectedId => selectedId !== id)
+              );
+            }}
+          />
+          
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalVouchers}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
+        </AdminCard>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
