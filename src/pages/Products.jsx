@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useProductData } from '../controller/Product.controller';
-import { dataProduct } from '../service/Product.service';
 import Product from '../components/Product';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const ProductsPage = () => {
 
@@ -9,14 +9,29 @@ const ProductsPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const productsPerPage = 16;
 
+    // Fetch products từ API trực tiếp
     useEffect(() => {
-        const fetchProduct = async () => {
-            const item = await dataProduct();
-            setProducts(item.data);
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`${API_BASE_URL}/products`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch products');
+                }
+                const result = await response.json();
+                setProducts(result.data || []);
+            } catch (error) {
+                setError('Không thể tải danh sách sản phẩm: ' + error.message);
+                console.error('Error fetching products:', error);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchProduct();
+        fetchProducts();
     }, []);
 
     const getCategoryCount = (categoryId) => {
@@ -95,6 +110,45 @@ const ProductsPage = () => {
 
         return pageNumbers;
     };
+
+    // Hiển thị loading state
+    if (loading) {
+        return (
+            <main className='w-full'>
+                <div className='w-[1240px] m-auto py-10'>
+                    <div className='flex justify-center items-center h-64'>
+                        <div className='text-center'>
+                            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4'></div>
+                            <p className='text-gray-600'>Đang tải sản phẩm...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Hiển thị error state
+    if (error) {
+        return (
+            <main className='w-full'>
+                <div className='w-[1240px] m-auto py-10'>
+                    <div className='flex justify-center items-center h-64'>
+                        <div className='text-center'>
+                            <div className='text-red-500 text-xl mb-4'>⚠️</div>
+                            <p className='text-red-600 mb-2'>Lỗi tải dữ liệu</p>
+                            <p className='text-gray-600 text-sm'>{error}</p>
+                            <button 
+                                onClick={() => window.location.reload()} 
+                                className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
+                            >
+                                Thử lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className='w-full'>
