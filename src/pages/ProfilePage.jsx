@@ -1,9 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
+import { getProfile, updateProfile, changePassword } from '../service/UserService';
 
 const ProfilePage = () => {
-   const handleLogout = () => {
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [profileError, setProfileError] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
+  const [updateSuccess, setUpdateSuccess] = useState(null);
+  const [passwords, setPasswords] = useState({
+    currentPassword: '',
+    newPassword: ''
+  });
+  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+  const [changePasswordError, setChangePasswordError] = useState(null);
+  const [changePasswordSuccess, setChangePasswordSuccess] = useState(null);
+
+  const handleLogout = () => {
     // Xoá token khỏi cookie
     Cookies.remove("auth_token");
     // Tuỳ bạn: có thể redirect về trang login
@@ -12,6 +27,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
+
   const [addresses, setAddresses] = useState([
     {
       id: 1,
@@ -57,6 +73,24 @@ const ProfilePage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
+
+  useEffect(() => {
+    if (activeTab === 'profile') {
+      setLoadingProfile(true);
+      getProfile()
+        .then(data => {
+          setProfile(data);
+          if (data.gender) setGender(data.gender);
+          // You can set other profile fields here as needed
+          setLoadingProfile(false);
+          setProfileError(null);
+        })
+        .catch(error => {
+          setProfileError(error.message);
+          setLoadingProfile(false);
+        });
+    }
+  }, [activeTab]);
 
   const handleDeleteAddress = (id) => {
     setAddresses(addresses.filter(address => address.id !== id));
@@ -107,7 +141,7 @@ const ProfilePage = () => {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="font-medium">Tên</span>
+              <span className="font-medium">{profile ? profile.username : 'Tên'}</span>
             </div>
 
             {/* Navigation Menu */}
@@ -156,8 +190,10 @@ const ProfilePage = () => {
                 </svg>
                 Sản phẩm yêu thích
               </button>
-              <button onClick={handleLogout}
-      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-3 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+              >
                 Đăng xuất
               </button>
             </nav>
@@ -195,8 +231,8 @@ const ProfilePage = () => {
                       type="radio"
                       name="gender"
                       value="male"
-                      checked={gender === 'male'}
-                      onChange={(e) => setGender(e.target.value)}
+                      checked={profile?.gender === 'male'}
+                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
                       className="w-4 h-4 text-blue-500 focus:ring-blue-500"
                     />
                     <span className="text-gray-700">Anh</span>
@@ -206,8 +242,8 @@ const ProfilePage = () => {
                       type="radio"
                       name="gender"
                       value="female"
-                      checked={gender === 'female'}
-                      onChange={(e) => setGender(e.target.value)}
+                      checked={profile?.gender === 'female'}
+                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
                       className="w-4 h-4 text-blue-500 focus:ring-blue-500"
                     />
                     <span className="text-gray-700">Chị</span>
@@ -217,8 +253,8 @@ const ProfilePage = () => {
                       type="radio"
                       name="gender"
                       value="other"
-                      checked={gender === 'other'}
-                      onChange={(e) => setGender(e.target.value)}
+                      checked={profile?.gender === 'other'}
+                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
                       className="w-4 h-4 text-blue-500 focus:ring-blue-500"
                     />
                     <span className="text-gray-700">Khác</span>
@@ -232,40 +268,48 @@ const ProfilePage = () => {
                   <label className="block text-gray-700 font-medium mb-2">
                     Tên tài khoản
                   </label>
-                  <input
+                <input
                     type="text"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập tên tài khoản"
+                    value={profile?.username || ''}
+                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Mật khẩu
                   </label>
-                  <input
+                <input
                     type="password"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập mật khẩu"
+                    value={profile?.password || ''}
+                    onChange={(e) => setProfile({ ...profile, password: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Số điện thoại
                   </label>
-                  <input
+                <input
                     type="tel"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập số điện thoại"
+                    value={profile?.phone || ''}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Gmail
                   </label>
-                  <input
+                <input
                     type="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     placeholder="Nhập địa chỉ email"
+                    value={profile?.email || ''}
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   />
                 </div>
 
@@ -274,10 +318,101 @@ const ProfilePage = () => {
                   <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
                     Cập nhật
                   </button>
-                  <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium">
-                    Lưu
+                  <button
+                    className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
+                    onClick={async () => {
+                      setUpdateLoading(true);
+                      setUpdateError(null);
+                      setUpdateSuccess(null);
+                      try {
+                        await updateProfile(profile);
+                        setUpdateSuccess('Cập nhật thông tin thành công');
+                      } catch (error) {
+                        setUpdateError(error.message);
+                      } finally {
+                        setUpdateLoading(false);
+                      }
+                    }}
+                    disabled={updateLoading}
+                  >
+                    {updateLoading ? 'Đang lưu...' : 'Lưu'}
                   </button>
                 </div>
+              </div>
+              {updateError && (
+                <p className="text-red-500 mt-2 text-center">{updateError}</p>
+              )}
+              {updateSuccess && (
+                <p className="text-green-500 mt-2 text-center">{updateSuccess}</p>
+              )}
+            </div>
+          )}
+
+          {/* Add Change Password tab button */}
+          <button
+            onClick={() => setActiveTab('changePassword')}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              activeTab === 'changePassword' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Đổi mật khẩu
+          </button>
+
+          {activeTab === 'changePassword' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg mx-auto">
+              <h2 className="text-xl font-semibold mb-6">Đổi mật khẩu</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu hiện tại</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập mật khẩu hiện tại"
+                    value={passwords.currentPassword}
+                    onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu mới</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập mật khẩu mới"
+                    value={passwords.newPassword}
+                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                  />
+                </div>
+                <div className="flex gap-4 pt-6">
+                  <button
+                    className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
+                    onClick={async () => {
+                      setChangePasswordLoading(true);
+                      setChangePasswordError(null);
+                      setChangePasswordSuccess(null);
+                      try {
+                        await changePassword(passwords.currentPassword, passwords.newPassword);
+                        setChangePasswordSuccess('Đổi mật khẩu thành công');
+                        setPasswords({ currentPassword: '', newPassword: '' });
+                      } catch (error) {
+                        setChangePasswordError(error.message);
+                      } finally {
+                        setChangePasswordLoading(false);
+                      }
+                    }}
+                    disabled={changePasswordLoading}
+                  >
+                    {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                  </button>
+                </div>
+                {changePasswordError && (
+                  <p className="text-red-500 mt-2 text-center">{changePasswordError}</p>
+                )}
+                {changePasswordSuccess && (
+                  <p className="text-green-500 mt-2 text-center">{changePasswordSuccess}</p>
+                )}
               </div>
             </div>
           )}
