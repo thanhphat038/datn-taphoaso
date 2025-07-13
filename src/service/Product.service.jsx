@@ -1,13 +1,13 @@
 import axios from "axios";
 
-const api = "http://localhost:3001";
+const api = "http://localhost:3000/api";
 
 export const dataProduct = () => {
     return axios.get(`${api}/products`);
 };
 
-export const dataProductDetail = (id) => {
-    return axios.get(`${api}/products?id=${id}`);
+export const dataProductDetail = (_id) => {
+    return axios.get(`${api}/products/${_id}`);
 };
 
 // export const updatedata = (id, content) => {

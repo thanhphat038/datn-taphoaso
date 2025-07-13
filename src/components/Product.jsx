@@ -11,6 +11,7 @@ export const formatCurrency = (value) => {
 };
 
 const Product = ({ data: product }) => {
+  // console.log(product);
   const ratingValue = Math.floor(product?.rating?.rate || 0);
   const maxStars = 5;
   const imageUrl = product?.images?.[0] || '/placeholder.png';
@@ -40,7 +41,7 @@ const Product = ({ data: product }) => {
       </div>
 
       <div className='w-full'>
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product._id}`}>
           <span className='text-[18px] font-medium hover:underline line-clamp-2'>
             {product.name}
           </span>

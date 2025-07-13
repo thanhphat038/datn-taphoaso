@@ -20,10 +20,11 @@ const ProductDetail = () => {
             return newQuantity;
         });
     };
-
+    // console.log(useParams());
     const { id } = useParams();
     const pd = useProductDetailData(id) || [];
-    const product = pd[0] || {};
+    console.log(pd);
+    const product = pd.data || {};
 
     const handleAddToCart = () => {
         if (product) {

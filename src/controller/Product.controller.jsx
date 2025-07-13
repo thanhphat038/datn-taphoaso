@@ -23,6 +23,7 @@ export const useProductData = (category, limit) => {
 };
 
 export const useProductDetailData = (id) => {
+    // console.log(id);
     const [product, setProduct] = useState(null);
 
     useEffect(() => {
@@ -32,6 +33,6 @@ export const useProductDetailData = (id) => {
         };
         fetchProductDetail();
     }, [id]);
-
+    console.log(product);
     return product;
 };

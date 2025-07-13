@@ -23,10 +23,10 @@ const Header = () => {
         };
         fetchProduct();
     }, []);
-
-    const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(query.toLowerCase())
-    );
+// console.log(products.data[0]);
+    // const filteredProducts = products.filter((product) =>
+    //     product.data.name.toLowerCase().includes(query.toLowerCase())
+    // );
 
     const navigate = useNavigate();
 
