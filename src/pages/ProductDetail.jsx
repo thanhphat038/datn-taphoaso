@@ -29,7 +29,7 @@ const ProductDetail = () => {
     const handleAddToCart = () => {
         if (product) {
             addProduct({ 
-                id: product.id,
+                id: product._id,
                 name: product.name,
                 image: product.images && product.images.length > 0 ? product.images[0] : '',
                 price: product.price,

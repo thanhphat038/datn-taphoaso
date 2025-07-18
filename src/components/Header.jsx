@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -27,6 +27,9 @@ const Header = () => {
     // const filteredProducts = products.filter((product) =>
     //     product.data.name.toLowerCase().includes(query.toLowerCase())
     // );
+    const filteredProducts = useMemo(() => (
+        query.trim() ? products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())) : []
+    ), [query, products]);
 
     const navigate = useNavigate();
 
