@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import { getProfile, updateProfile, changePassword } from '../service/UserService';
+import { getProfile, updateProfile, changePassword, getAddresses, createAddress, deleteAddress } from '../service/UserService';
+import AddressSelector from '../components/AddressSelector.jsx';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -28,21 +29,18 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [gender, setGender] = useState('male');
 
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: 'Tên người nhận',
-      phone: 'Số điện thoại',
-      address: '29-31 Vườn Lài, Phường An Phú Đông, Quận 12, Thành phố Hồ Chí Minh, Việt Nam',
-      isDefault: true
-    }
-  ]);
+  const [addresses, setAddresses] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     name: '',
     phone: '',
-    address: ''
+    address: '',
+    city: '',
+    district: '',
+    ward: ''
   });
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [addressError, setAddressError] = useState(null);
 
   const [orders, setOrders] = useState([
     {
@@ -89,18 +87,53 @@ const ProfilePage = () => {
           setProfileError(error.message);
           setLoadingProfile(false);
         });
+    } else if (activeTab === 'address') {
+      fetchAddresses();
     }
   }, [activeTab]);
 
-  const handleDeleteAddress = (id) => {
-    setAddresses(addresses.filter(address => address.id !== id));
+  const fetchAddresses = async () => {
+    setLoadingAddresses(true);
+    setAddressError(null);
+    try {
+      const data = await getAddresses();
+      setAddresses(data);
+    } catch (error) {
+      setAddressError(error.message);
+    } finally {
+      setLoadingAddresses(false);
+    }
   };
 
-  const handleAddAddress = () => {
-    if (newAddress.name && newAddress.phone && newAddress.address) {
-      setAddresses([...addresses, { ...newAddress, id: Date.now(), isDefault: false }]);
-      setShowAddForm(false);
-      setNewAddress({ name: '', phone: '', address: '' });
+  const handleDeleteAddress = async (id) => {
+    try {
+      await deleteAddress(id);
+      setAddresses(addresses.filter(address => address.id !== id));
+    } catch (error) {
+      setAddressError(error.message);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    if (newAddress.name && newAddress.phone && newAddress.address && newAddress.city && newAddress.district && newAddress.ward) {
+      try {
+        const addressPayload = {
+          full_name: newAddress.name,
+          phone: newAddress.phone,
+          address: newAddress.address,
+          city: newAddress.city,
+          district: newAddress.district,
+          ward: newAddress.ward,
+          is_default: false
+        };
+        const created = await createAddress(addressPayload);
+        setAddresses([...addresses, created]);
+        setShowAddForm(false);
+        setNewAddress({ name: '', phone: '', address: '', city: '', district: '', ward: '' });
+        setAddressError(null);
+      } catch (error) {
+        setAddressError(error.message);
+      }
     }
   };
 
@@ -276,7 +309,7 @@ const ProfilePage = () => {
                     onChange={(e) => setProfile({ ...profile, username: e.target.value })}
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Mật khẩu
                   </label>
@@ -287,7 +320,7 @@ const ProfilePage = () => {
                     value={profile?.password || ''}
                     onChange={(e) => setProfile({ ...profile, password: e.target.value })}
                   />
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Số điện thoại
@@ -489,14 +522,20 @@ const ProfilePage = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Địa chỉ
+                        Tỉnh/Thành phố, Quận/Huyện, Phường/Xã
+                      </label>
+                      <AddressSelector onChange={(data) => setNewAddress({...newAddress, ...data})} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Địa chỉ chi tiết
                       </label>
                       <input
                         type="text"
                         value={newAddress.address}
                         onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Nhập địa chỉ"
+                        placeholder="Nhập địa chỉ chi tiết"
                       />
                     </div>
                     <div className="flex gap-4">
