@@ -194,17 +194,24 @@ const AdminCategory = () => {
     }
   };
 
-  // Filter categories
+  // Filter and sort categories
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name && category.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'All' || category.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const totalCategories = filteredCategories.length;
+  // Apply sorting
+  const sortedCategories = filteredCategories.sort((a, b) => {
+    const dateA = new Date(a.create_at || a.created_at || 0);
+    const dateB = new Date(b.create_at || b.created_at || 0);
+    return dateB - dateA; // Mặc định sắp xếp mới nhất
+  });
+
+  const totalCategories = sortedCategories.length;
   const totalPages = Math.ceil(totalCategories / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedCategories = filteredCategories.slice(startIndex, startIndex + pageSize);
+  const paginatedCategories = sortedCategories.slice(startIndex, startIndex + pageSize);
 
   // Get category status info
   const getCategoryStatusInfo = (status) => {

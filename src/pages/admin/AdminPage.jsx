@@ -18,17 +18,78 @@ const AdminPage = () => {
     recentOrders: []
   });
 
-  // Fetch dashboard stats
+  // Hàm đếm khách hàng
+  const countUsers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users`);
+      const data = await response.json();
+      return data.data?.length || 0;
+    } catch (error) {
+      console.error('Error counting users:', error);
+      return 0;
+    }
+  };
+
+  // Hàm đếm sản phẩm
+  const countProducts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products`);
+      const data = await response.json();
+      return data.data?.length || 0;
+    } catch (error) {
+      console.error('Error counting products:', error);
+      return 0;
+    }
+  };
+
+  // Hàm đếm tổng đơn hàng
+  const countOrders = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`);
+      const data = await response.json();
+      return data.data?.length || 0;
+    } catch (error) {
+      console.error('Error counting orders:', error);
+      return 0;
+    }
+  };
+
+  // Hàm đếm voucher
+  const countVouchers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/vouchers`);
+      const data = await response.json();
+      return data.data?.length || 0;
+    } catch (error) {
+      console.error('Error counting vouchers:', error);
+      return 0;
+    }
+  };
+
+  // Fetch dashboard stats với các hàm đếm riêng
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/admin/dashboard`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch dashboard stats');
-        }
-        const result = await response.json();
-        setStats(result.data || {});
+        
+        // Gọi các hàm đếm riêng lẻ
+        const [userCount, productCount, orderCount, voucherCount] = await Promise.all([
+          countUsers(),
+          countProducts(),
+          countOrders(),
+          countVouchers()
+        ]);
+
+        setStats({
+          users: userCount,
+          products: productCount,
+          orders: orderCount,
+          vouchers: voucherCount,
+          comments: 0,
+          reviews: 0,
+          totalRevenue: 0,
+          recentOrders: []
+        });
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
       } finally {
@@ -73,53 +134,77 @@ const AdminPage = () => {
           <p className="text-gray-600 mt-1">Xem tổng quan về hoạt động của cửa hàng</p>
         </div>
 
-        {/* Main Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <AdminCard className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-                <FaUsers className="w-6 h-6" />
+        {/* Main Stats - Chi tiết 4 mục chính */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Khách hàng */}
+          <AdminCard className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-transparent border border-blue-200 hover:border-blue-300 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className="relative p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                  <FaUsers className="w-6 h-6 text-white" />
+                </div>
+                <svg className="w-8 h-8 text-blue-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Khách hàng</div>
-                <div className="text-2xl font-bold">{stats.users}</div>
-              </div>
+              <div className="text-3xl font-bold text-blue-600 mb-1">{stats.users}</div>
+              <div className="text-sm text-gray-600 font-medium">Tổng khách hàng</div>
+              <div className="text-xs text-gray-500 mt-1">Khách hàng đang hoạt động</div>
             </div>
           </AdminCard>
 
-          <AdminCard className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-                <FaBox className="w-6 h-6" />
+          {/* Sản phẩm */}
+          <AdminCard className="group relative overflow-hidden bg-gradient-to-br from-green-50 to-transparent border border-green-200 hover:border-green-300 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-green-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className="relative p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/25">
+                  <FaBox className="w-6 h-6 text-white" />
+                </div>
+                <svg className="w-8 h-8 text-green-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Sản phẩm</div>
-                <div className="text-2xl font-bold">{stats.products}</div>
-              </div>
+              <div className="text-3xl font-bold text-green-600 mb-1">{stats.products}</div>
+              <div className="text-sm text-gray-600 font-medium">Tổng sản phẩm</div>
+              <div className="text-xs text-gray-500 mt-1">Sản phẩm đang bán</div>
             </div>
           </AdminCard>
 
-          <AdminCard className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-                <FaShoppingCart className="w-6 h-6" />
+          {/* Đơn hàng */}
+          <AdminCard className="group relative overflow-hidden bg-gradient-to-br from-purple-50 to-transparent border border-purple-200 hover:border-purple-300 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-purple-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className="relative p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                  <FaShoppingCart className="w-6 h-6 text-white" />
+                </div>
+                <svg className="w-8 h-8 text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Đơn hàng</div>
-                <div className="text-2xl font-bold">{stats.orders}</div>
-              </div>
+              <div className="text-3xl font-bold text-purple-600 mb-1">{stats.orders}</div>
+              <div className="text-sm text-gray-600 font-medium">Tổng đơn hàng</div>
+              <div className="text-xs text-gray-500 mt-1">Đơn hàng đã đặt</div>
             </div>
           </AdminCard>
 
-          <AdminCard className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-                <FaTicketAlt className="w-6 h-6" />
+          {/* Voucher */}
+          <AdminCard className="group relative overflow-hidden bg-gradient-to-br from-orange-50 to-transparent border border-orange-200 hover:border-orange-300 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className="relative p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
+                  <FaTicketAlt className="w-6 h-6 text-white" />
+                </div>
+                <svg className="w-8 h-8 text-orange-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Voucher</div>
-                <div className="text-2xl font-bold">{stats.vouchers}</div>
-              </div>
+              <div className="text-3xl font-bold text-orange-600 mb-1">{stats.vouchers}</div>
+              <div className="text-sm text-gray-600 font-medium">Tổng voucher</div>
+              <div className="text-xs text-gray-500 mt-1">Voucher khuyến mãi</div>
             </div>
           </AdminCard>
         </div>

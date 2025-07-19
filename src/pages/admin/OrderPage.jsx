@@ -358,7 +358,7 @@ const OrderPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản lý đơn hàng</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text ">Quản lý đơn hàng</h1>
             <p className="text-gray-600 mt-1">Quản lý và theo dõi tất cả đơn hàng</p>
           </div>
           <div className="flex items-center gap-4">
