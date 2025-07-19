@@ -32,9 +32,9 @@ const ProfilePage = () => {
   const [addresses, setAddresses] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    name: '',
+    full_name: '',
     phone: '',
-    address: '',
+    address_detail: '',
     city: '',
     district: '',
     ward: ''
