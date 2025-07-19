@@ -207,10 +207,10 @@ const AdminUser = () => {
       render: (user) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white font-semibold">
-            {getAvatarInitials(user.name)}
+            {getAvatarInitials(user.username)}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{user.name || 'Không có tên'}</div>
+            <div className="font-semibold text-gray-900">{user.username || 'Không có tên'}</div>
             <div className="text-sm text-gray-500">@{user.username || 'N/A'}</div>
           </div>
         </div>
