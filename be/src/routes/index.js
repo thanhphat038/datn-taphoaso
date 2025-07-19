@@ -24,9 +24,9 @@ const router = express.Router();
 router.use('/auth', authRouter);
 
 // User routes
-router.use('/users', userRouter);
-router.use('/orders', orderRouter);
-router.use('/addresses', addressRouter);
+router.use('/users',authMiddleware, userRouter);
+router.use('/orders', authMiddleware, orderRouter);
+router.use('/addresses', authMiddleware, addressRouter);
 
 router.use('/reviews', reviewRouter);
 router.use('/comments', commentRouter);
@@ -34,10 +34,10 @@ router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes
 router.use('/products', productRouter);
-router.use('/categories', categoryRouter);
+router.use('/categories', authMiddleware,categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);
 
-router.use('/vouchers', voucherRouter);
+router.use('/vouchers', authMiddleware, voucherRouter);
 
 export default router;
