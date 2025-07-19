@@ -6,12 +6,19 @@ import mongoose from 'mongoose';
 // Create new address
 export const createAddress = async (req, res, next) => {
   try {
+    const userId = req.user.id;
+
     const addressData = req.body;
 
     // Validate required fields
-    const requiredFields = ['full_name', 'phone', 'address', 'city', 'district', 'ward'];
-    const missingFields = requiredFields.filter(field => !addressData[field]);
-    
+    const requiredFields = [
+      'receiver', 'phone', 'address_detail', 'city',
+      'district', 'ward',
+    ];
+    const missingFields = requiredFields.filter(field =>
+      !addressData[field] || typeof addressData[field] !== 'string' || addressData[field].trim() === ''
+    );
+
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
@@ -19,19 +26,18 @@ export const createAddress = async (req, res, next) => {
       });
     }
 
-    // Validate phone number format
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(addressData.phone)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid phone number. Please enter 10 digits'
+        message: 'Invalid phone number. Please enter exactly 10 digits.'
       });
     }
 
-    const address = await addressService.create({
-      full_name: addressData.full_name,
+    const address = await addressService.createAddress(userId, {
+      receiver: addressData.receiver,
       phone: addressData.phone,
-      address: addressData.address,
+      address_detail: addressData.address_detail,
       city: addressData.city,
       district: addressData.district,
       ward: addressData.ward,
@@ -44,6 +50,7 @@ export const createAddress = async (req, res, next) => {
       message: 'Address added successfully'
     });
   } catch (error) {
+    console.error('[Create Address Error]', error);
     res.status(500).json({
       success: false,
       message: 'Error adding address',
