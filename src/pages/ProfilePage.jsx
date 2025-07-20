@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { getProfile, updateProfile, changePassword, getAddresses, createAddress, deleteAddress } from '../service/UserService';
+import { getFavorites, deleteFavorite } from '../service/FavoriteService';
 import AddressSelector from '../components/AddressSelector.jsx';
 
 const ProfilePage = () => {
@@ -72,6 +73,10 @@ const ProfilePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
 
+  const [favorites, setFavorites] = useState([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [favoritesError, setFavoritesError] = useState(null);
+
   useEffect(() => {
     if (activeTab === 'profile') {
       setLoadingProfile(true);
@@ -89,6 +94,8 @@ const ProfilePage = () => {
         });
     } else if (activeTab === 'address') {
       fetchAddresses();
+    } else if (activeTab === 'favorites') {
+      fetchFavorites();
     }
   }, [activeTab]);
 
@@ -105,12 +112,36 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchFavorites = async () => {
+    setFavoritesLoading(true);
+    setFavoritesError(null);
+    try {
+      const data = await getFavorites();
+      console.log('Fetched favorites:', data);
+      setFavorites(data);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      setFavoritesError(error.message);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
   const handleDeleteAddress = async (id) => {
     try {
       await deleteAddress(id);
       setAddresses(addresses.filter(address => address.id !== id));
     } catch (error) {
       setAddressError(error.message);
+    }
+  };
+
+  const handleDeleteFavorite = async (id) => {
+    try {
+      await deleteFavorite(id);
+      setFavorites(favorites.filter(fav => fav._id !== id));
+    } catch (error) {
+      setFavoritesError(error.message);
     }
   };
 
@@ -223,6 +254,17 @@ const ProfilePage = () => {
                 </svg>
                 Sản phẩm yêu thích
               </button>
+              <button
+            onClick={() => setActiveTab('changePassword')}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              activeTab === 'changePassword' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Đổi mật khẩu
+          </button>
               <button
                 onClick={handleLogout}
                 className="w-full px-4 py-3 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
@@ -382,7 +424,7 @@ const ProfilePage = () => {
           )}
 
           {/* Add Change Password tab button */}
-          <button
+          {/* <button
             onClick={() => setActiveTab('changePassword')}
             className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
               activeTab === 'changePassword' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
@@ -392,7 +434,7 @@ const ProfilePage = () => {
               <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             Đổi mật khẩu
-          </button>
+          </button> */}
 
           {activeTab === 'changePassword' && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg mx-auto">
@@ -645,79 +687,35 @@ const ProfilePage = () => {
           {activeTab === 'favorites' && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-xl font-semibold mb-4">Sản phẩm yêu thích</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {/* Example favorite product cards */}
-                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src="/images/image_product.png"
-                      alt="Sản phẩm 1"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 1</h3>
-                  <p className="text-red-500 font-semibold mb-3">100,000đ</p>
-                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Xóa
-                  </button>
+              {favoritesLoading ? (
+                <p>Đang tải...</p>
+              ) : favoritesError ? (
+                <p className="text-red-500">{favoritesError}</p>
+              ) : !favorites || favorites.length === 0 ? (
+                <p>Bạn chưa có sản phẩm yêu thích nào.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {favorites.map((fav) => (
+                    <div key={fav._id} className="bg-gray-50 rounded-lg p-3 flex flex-col">
+                      <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
+                        <img
+                          src={fav.product_id?.images?.[0] || '/images/image_product.png'}
+                          alt={fav.product_id?.name || 'Sản phẩm yêu thích'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="font-medium text-gray-800 mb-1 truncate">{fav.product_id?.name}</h3>
+                      <p className="text-red-500 font-semibold mb-3">{fav.product_id?.price?.toLocaleString()}đ</p>
+                      <button
+                        onClick={() => handleDeleteFavorite(fav._id)}
+                        className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src="/images/image_product.png"
-                      alt="Sản phẩm 2"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 2</h3>
-                  <p className="text-red-500 font-semibold mb-3">150,000đ</p>
-                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Xóa
-                  </button>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src="/images/image_product.png"
-                      alt="Sản phẩm 3"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 3</h3>
-                  <p className="text-red-500 font-semibold mb-3">200,000đ</p>
-                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Xóa
-                  </button>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src="/images/image_product.png"
-                      alt="Sản phẩm 4"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 4</h3>
-                  <p className="text-red-500 font-semibold mb-3">250,000đ</p>
-                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Xóa
-                  </button>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                  <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src="/images/image_product.png"
-                      alt="Sản phẩm 5"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 5</h3>
-                  <p className="text-red-500 font-semibold mb-3">300,000đ</p>
-                  <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Xóa
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           )}
         </div>
