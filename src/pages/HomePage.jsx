@@ -1,10 +1,78 @@
-import React from 'react'
-import { useProductData } from '../controller/Product.controller';
+import React, { useState, useEffect } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
+import Product from '../components/Product';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const HomePage = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch products từ API trực tiếp
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/products`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const result = await response.json();
+        setProducts(result.data || []);
+      } catch (error) {
+        setError('Không thể tải danh sách sản phẩm: ' + error.message);
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Hàm lọc sản phẩm theo danh mục và giới hạn số lượng
+  const getProductsByCategory = (categoryName, limit = 5) => {
+    if (loading) {
+      // Hiển thị skeleton loading
+      return Array.from({ length: limit }, (_, index) => (
+        <div key={index} className="animate-pulse">
+          <div className="bg-gray-200 rounded-lg h-48 mb-2"></div>
+          <div className="bg-gray-200 h-4 rounded mb-1"></div>
+          <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+        </div>
+      ));
+    }
+    
+    if (error) {
+      return (
+        <div className="col-span-full text-center py-8">
+          <p className="text-red-600">Không thể tải sản phẩm</p>
+        </div>
+      );
+    }
+    
+    const filteredProducts = products.filter(product => {
+      // Lọc theo tên danh mục (có thể là "mì ăn liền" hoặc "nước uống")
+      const categoryNameLower = categoryName.toLowerCase();
+      const productCategoryName = product.category_id?.name?.toLowerCase() || '';
+      
+      return productCategoryName.includes(categoryNameLower);
+    });
+
+    if (filteredProducts.length === 0) {
+      return (
+        <div className="col-span-full text-center py-8">
+          <p className="text-gray-500">Không có sản phẩm nào trong danh mục này</p>
+        </div>
+      );
+    }
+
+    return filteredProducts.slice(0, limit).map((product, index) => (
+      <Product key={product._id || index} data={product} />
+    ));
+  };
 
   return (
     <main className='w-full'>
@@ -43,7 +111,7 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("mì ăn liền", 5)}
+            {getProductsByCategory("mì ăn liền", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -57,7 +125,7 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("nước uống", 5)}
+            {getProductsByCategory("nước uống", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -92,7 +160,7 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {useProductData("mì ăn liền", 5)}
+            {getProductsByCategory("mì ăn liền", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
@@ -110,7 +178,7 @@ const HomePage = () => {
             </div>
 
             <div className='grid grid-cols-3 gap-3'>
-              {useProductData("nước uống", 3)}
+              {getProductsByCategory("nước uống", 3)}
             </div>
 
             <div className='mt-5 flex place-content-center'>

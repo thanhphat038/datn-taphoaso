@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import productsData from '../data/db.json';
 import { CartContext } from '../context/CartContext';
@@ -19,6 +19,28 @@ const CartPage = () => {
   //     setInitialCartItems(items);
   //   }
   // }, [cartItems, setInitialCartItems]);
+
+  // State cho mã giảm giá, thông báo và giá trị giảm giá
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherMessage, setVoucherMessage] = useState("");
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+
+  // Hàm xử lý áp dụng mã giảm giá
+  const handleApplyVoucher = () => {
+    // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k
+    if (voucherCode.trim().toUpperCase() === 'GIAM10') {
+      setVoucherDiscount(
+        Math.floor(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 0.1)
+      );
+      setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
+    } else if (voucherCode.trim().toUpperCase() === 'GIAM50K') {
+      setVoucherDiscount(50000);
+      setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
+    } else {
+      setVoucherDiscount(0);
+      setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -95,6 +117,32 @@ const CartPage = () => {
         ))}
       </div>
 
+      {/* Phần nhập mã giảm giá */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="mb-2 font-medium text-gray-700">Mã giảm giá</div>
+        <div className="flex">
+          <input
+            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
+            placeholder="Nhập mã giảm giá (chỉ áp dụng 1 lần)"
+            value={voucherCode}
+            onChange={(e) => setVoucherCode(e.target.value)}
+          />
+          <button
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            onClick={handleApplyVoucher}
+          >
+            Áp dụng
+          </button>
+        </div>
+        {voucherMessage && (
+          <div
+            className={`text-sm mt-2 ${voucherDiscount > 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {voucherMessage}
+          </div>
+        )}
+      </div>
+
       {/* Cart Summary */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex justify-between items-center mb-4">
@@ -107,11 +155,24 @@ const CartPage = () => {
           <span className="text-gray-600">Phí vận chuyển:</span>
           <span className="font-medium text-gray-800">15.000đ</span>
         </div>
+        {/* Hiển thị giảm giá nếu có */}
+        {voucherDiscount > 0 && (
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-gray-600">Giảm giá:</span>
+            <span className="font-medium text-green-600">- {voucherDiscount.toLocaleString()}đ</span>
+          </div>
+        )}
         <div className="border-t border-dashed pt-4">
           <div className="flex justify-between items-center mb-6">
             <span className="text-gray-800 font-medium">Tổng cộng:</span>
             <span className="text-xl font-bold text-red-500">
-              {(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) + 15000).toLocaleString()}đ
+              {/* Tính tổng cộng sau khi trừ giảm giá */}
+              {(
+                Math.max(
+                  cartItems.reduce((total, item) => total + item.price * item.quantity, 0) + 15000 - voucherDiscount,
+                  0
+                ).toLocaleString()
+              )}đ
             </span>
           </div>
           <Link to={`/checkout`}><button className="w-full bg-[#c4c4c47d] hover:bg-[#06AEF4] text-white font-medium py-3 rounded-lg transition-colors">
