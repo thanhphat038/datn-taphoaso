@@ -7,6 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import { fetchUsers } from '../../service/UserService';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -31,24 +32,21 @@ const AdminUser = () => {
   });
 
   // Fetch users
-  useEffect(() => {
-    const fetchUsers = async () => {
+   useEffect(() => {
+    const loadUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/users`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
-        }
-        const result = await response.json();
-        setUsers(result.data || []);
-      } catch (error) {
-        setError('Không thể tải danh sách người dùng: ' + error.message);
-        console.error('Error fetching users:', error);
+        const token = localStorage.getItem('auth_token');
+        const data = await fetchUsers(token);
+        setUsers(data);
+      } catch (err) {
+        setError('Không thể tải danh sách người dùng: ' + err.message);
+        console.error('Error fetching users:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+    loadUsers();
   }, []);
 
   // Handle edit user

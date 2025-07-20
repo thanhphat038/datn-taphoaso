@@ -131,3 +131,19 @@ export async function deleteAddress(id) {
     throw new Error(error.response?.data?.message || "Xóa địa chỉ thất bại");
   }
 }
+
+export async function fetchUsers(token) {
+  const response = await fetch(`${API_BASE_URL}/users`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+
+  const result = await response.json();
+  return result.data || [];
+}
