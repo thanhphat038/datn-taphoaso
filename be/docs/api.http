@@ -452,7 +452,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "code": "SUMMER2024",
+  "code": "sale77",
   "total_amount": 1000000
 }
 
