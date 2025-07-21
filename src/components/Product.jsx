@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { FavoritesContext } from '../context/FavoritesContext';
 
 export const formatCurrency = (value) => {
   if (typeof value !== 'number') return '—';
@@ -17,7 +18,15 @@ const Product = ({ data: product }) => {
   const imageUrl = product?.images?.[0] || '/placeholder.png';
 
   const { addItem } = useContext(CartContext);
+  const { favorites = [], addFavorite, removeFavorite } = useContext(FavoritesContext);
   const navigate = useNavigate();
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const fav = favorites.find(fav => fav.product_id?._id === product._id);
+    setIsFavorite(!!fav);
+  }, [favorites, product._id]);
 
   const handleBuyNow = () => {
     navigate('/checkout', { state: { product: {
@@ -27,6 +36,21 @@ const Product = ({ data: product }) => {
       price: product.price,
       quantity: 1,
     } } });
+  };
+
+  const toggleFavorite = async () => {
+    if (isFavorite) {
+      const fav = favorites.find(fav => fav.product_id?._id === product._id);
+      if (fav) {
+        await removeFavorite(fav._id);
+      }
+    } else {
+      try {
+        await addFavorite(product._id);
+      } catch (error) {
+        console.error('Failed to add favorite:', error);
+      }
+    }
   };
 
   return (
@@ -74,10 +98,16 @@ const Product = ({ data: product }) => {
          <button onClick={handleBuyNow} className='h-[40px] text-[18px] border-1 border-[#06AEF4] rounded-[10px] p-1 w-full hover:bg-[#06AEF4] hover:text-white cursor-pointer flex items-center justify-center'>
            Mua ngay
          </button>
-         <button className='cursor-pointer'>
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-           </svg>
+         <button onClick={toggleFavorite} className='cursor-pointer'>
+           {isFavorite ? (
+             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7 text-red-500">
+               <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+             </svg>
+           ) : (
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7 text-gray-600 hover:text-red-500 transition-colors">
+               <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+             </svg>
+           )}
          </button>
        </div>
     </div>
@@ -91,22 +121,6 @@ const StarIcon = ({ filled = false }) => (
     viewBox='0 0 20 20'
   >
 <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z' />
-  </svg>
-);
-const HeartIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    fill='none'
-    viewBox='0 0 24 24'
-    strokeWidth={1.5}
-    stroke='currentColor'
-    className='w-6 h-6 text-gray-600 hover:text-red-500 transition-colors'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'
-    />
   </svg>
 );
 
