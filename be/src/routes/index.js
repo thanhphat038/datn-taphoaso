@@ -28,8 +28,8 @@ router.use('/users',authMiddleware, userRouter);
 router.use('/orders', authMiddleware, orderRouter);
 router.use('/addresses', authMiddleware, addressRouter);
 
-router.use('/reviews', reviewRouter);
-router.use('/comments', commentRouter);
+router.use('/reviews', authMiddleware,reviewRouter);
+router.use('/comments', authMiddleware, commentRouter);
 router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes

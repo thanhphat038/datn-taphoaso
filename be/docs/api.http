@@ -4,12 +4,17 @@
 @userId = 685a9ea76875fcf8f499fa9a
 
 @addressId = 6862dbf5b04329ea26a04112
-@productId = 6862d1c32df5d5159cc51f08
+@productId = 6862d1c32df5d5159cc51ef2
 @categoryId = 684312904b15be945ea7a436
 @orderId = 686366fbbd9300db3933df53
 @addressId = 684694371aaf49d7a7259201
+
+@commentId = 687f9fadc0647b5a2ec6e3d7
+@reviewId = 687fb9d1add96fdef96b888e
+
 # chưa làm 
 @voucherId = 1
+@blogId = 1 
 
 ### Authentication ###
 
@@ -204,7 +209,7 @@ Content-Type: application/json
   "sdt": "0123456789",
   "items": [
     {
-      "product_id": "6862d1c32df5d5159cc51f08",
+      "product_id": "{{productId}}",
       "qty": 2
     }
   ],
@@ -279,9 +284,11 @@ Authorization: Bearer {{authToken}}
 
 ### Get all reviews
 GET {{baseUrl}}/reviews
+Authorization: Bearer {{authToken}}
 
 ### Get review by ID
-GET {{baseUrl}}/reviews/1
+GET {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{authToken}}
 
 ### Create review
 POST {{baseUrl}}/reviews
@@ -298,28 +305,36 @@ Content-Type: application/json
 GET {{baseUrl}}/products/{{productId}}/reviews
 ?page=1
 &limit=10
-
-### Update review
-PUT {{baseUrl}}/reviews/1
 Authorization: Bearer {{authToken}}
-Content-Type: application/json
 
-{
-  "rating": 4,
-  "content": "Updated review"
-}
+
+# ### Update review
+# PUT {{baseUrl}}/reviews/1
+# Authorization: Bearer {{authToken}}
+# Content-Type: application/json
+
+# {
+#   "rating": 4,
+#   "content": "Updated review"
+# }
 
 ### Delete review
-DELETE {{baseUrl}}/reviews/1
+DELETE {{baseUrl}}/reviews/{{reviewId}}
 Authorization: Bearer {{authToken}}
 
 ### Comments ###
 
 ### Get all comments
 GET {{baseUrl}}/comments
+Authorization: Bearer {{authToken}}
+
+### Get all comments of a product (no pagination)
+GET {{baseUrl}}/comments/product/{{productId}}/all-comments
+Authorization: Bearer {{authToken}}
 
 ### Get comment by ID
-GET {{baseUrl}}/comments/1
+GET {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
 
 ### Create comment
 POST {{baseUrl}}/comments
@@ -328,7 +343,7 @@ Content-Type: application/json
 
 {
   "product_id": "{{productId}}",
-  "content": "This is a comment"
+  "comment": "This is a sencond comment"
 }
 
 ### Get product comments
@@ -336,18 +351,18 @@ GET {{baseUrl}}/products/{{productId}}/comments
 ?page=1
 &limit=10
 
-### Update comment
-PUT {{baseUrl}}/comments/1
-Authorization: Bearer {{authToken}}
-Content-Type: application/json
+# ### Update comment
+# PUT {{baseUrl}}/comments/{{commentId}}
+# Authorization: Bearer {{authToken}}
+# Content-Type: application/json
 
-{
-  "content": "Updated comment"
-}
+# {
+#   "content": "Updated comment"
+# }
 
 ### Delete comment
-DELETE {{baseUrl}}/comments/1
-Authorization: Bearer {{authToken}}
+DELETE {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken_admin}}
 
 ### Favorites ###
 
@@ -446,6 +461,7 @@ Authorization: Bearer {{authToken}}
 
 ### Get active vouchers
 GET {{baseUrl}}/vouchers/active
+Authorization: Bearer {{authToken}}
 
 ### Apply voucher
 POST {{baseUrl}}/vouchers/apply
