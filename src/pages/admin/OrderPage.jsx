@@ -7,6 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -69,14 +70,11 @@ const OrderPage = () => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/orders`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-        const result = await response.json();
-        setOrders(result.data || []);
+        const response = await getAllOrders();
+        const ordersData = response.data.data;
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
       } catch (error) {
-        setError('Không thể tải danh sách đơn hàng: ' + error.message);
+        setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);
       } finally {
         setLoading(false);
@@ -88,33 +86,17 @@ const OrderPage = () => {
   // Handle status update
   const handleStatusUpdate = async () => {
     if (!currentEditOrder || !editStatus) return;
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/orders/${currentEditOrder._id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: editStatus
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update order status');
-      }
-
+      await updateOrderStatusService(currentEditOrder._id, editStatus);
       setOrders(orders.map(order => 
         order._id === currentEditOrder._id ? { ...order, status: editStatus } : order
       ));
-
       setShowEditModal(false);
       setCurrentEditOrder(null);
       setEditStatus('');
     } catch (error) {
-      alert('Lỗi khi cập nhật trạng thái: ' + error.message);
+      alert('Lỗi khi cập nhật trạng thái: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -123,25 +105,15 @@ const OrderPage = () => {
   // Handle delete order
   const handleDeleteOrder = async (orderId) => {
     const confirmMessage = `Bạn có chắc chắn muốn xóa đơn hàng này?\n\nHành động này không thể hoàn tác!`;
-    
     if (!window.confirm(confirmMessage)) {
       return;
     }
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete order');
-      }
-
+      await deleteOrderService(orderId);
       setOrders(orders.filter(order => order._id !== orderId));
     } catch (error) {
-      alert('Lỗi khi xóa đơn hàng: ' + error.message);
+      alert('Lỗi khi xóa đơn hàng: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }

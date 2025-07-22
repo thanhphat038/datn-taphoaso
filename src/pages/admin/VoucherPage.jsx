@@ -7,6 +7,7 @@ import AdminTable from '../../components/admin/AdminTable';
 import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
+import { getAllVouchers, deleteVoucher as deleteVoucherService, updateVoucher } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -25,12 +26,8 @@ const VoucherPage = () => {
     const fetchVouchers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/vouchers`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch vouchers');
-        }
-        const result = await response.json();
-        let vouchersData = result.data || [];
+        const response = await getAllVouchers();
+        let vouchersData = response.data.data || [];
         
         // Auto-update expired vouchers to inactive
         const updatedVouchers = vouchersData.map(voucher => {
@@ -42,7 +39,7 @@ const VoucherPage = () => {
         
         setVouchers(updatedVouchers);
       } catch (error) {
-        setError('Không thể tải danh sách voucher: ' + error.message);
+        setError('Không thể tải danh sách voucher: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching vouchers:', error);
       } finally {
         setLoading(false);
@@ -61,18 +58,11 @@ const VoucherPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete voucher');
-      }
+      await deleteVoucherService(voucherId);
 
       setVouchers(vouchers.filter(v => v._id !== voucherId));
     } catch (error) {
-      alert('Lỗi khi xóa voucher: ' + error.message);
+      alert('Lỗi khi xóa voucher: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -91,26 +81,18 @@ const VoucherPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
+      const response = await updateVoucher(voucherId, { status: newStatus });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (response.status === 200) {
+        setVouchers(vouchers.map(v => 
+          v._id === voucherId ? { ...v, status: newStatus } : v
+        ));
+      } else {
+        const errorData = response.data;
         throw new Error(errorData.message || 'Failed to update voucher status');
       }
-
-      setVouchers(vouchers.map(v => 
-        v._id === voucherId ? { ...v, status: newStatus } : v
-      ));
     } catch (error) {
-      alert(`Lỗi khi ${actionText} voucher: ` + error.message);
+      alert(`Lỗi khi ${actionText} voucher: ` + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import { FaTicketAlt, FaPercentage, FaDollarSign, FaCalendarAlt, FaInfoCircle } 
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
+import { getVoucherById, createVoucher, updateVoucher } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -31,19 +32,13 @@ const AddVoucherPage = () => {
       const fetchVoucher = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/vouchers/${id}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch voucher');
-          }
-          const result = await response.json();
-          const voucher = result.data;
-
+          const response = await getVoucherById(id);
+          const voucher = response.data.data;
           // Format dates for input fields
           const formatDate = (dateString) => {
             const date = new Date(dateString);
             return date.toISOString().split('T')[0];
           };
-          
           setFormData({
             code: voucher.code || '',
             discount_type: voucher.discount_type || 'percentage',
@@ -56,7 +51,7 @@ const AddVoucherPage = () => {
             status: voucher.status || 'active'
           });
         } catch (error) {
-          setError('Không thể tải thông tin voucher: ' + error.message);
+          setError('Không thể tải thông tin voucher: ' + (error.response?.data?.message || error.message));
         } finally {
           setLoading(false);
         }
@@ -110,35 +105,23 @@ const AddVoucherPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     try {
       setLoading(true);
       setError(null);
-
-      const url = id ? `${API_BASE_URL}/vouchers/${id}` : `${API_BASE_URL}/vouchers`;
-      const method = id ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          discount_value: Number(formData.discount_value),
-          max_discount: formData.max_discount ? Number(formData.max_discount) : undefined,
-          min_order_value: Number(formData.min_order_value)
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save voucher');
+      const data = {
+        ...formData,
+        discount_value: Number(formData.discount_value),
+        max_discount: formData.max_discount ? Number(formData.max_discount) : undefined,
+        min_order_value: Number(formData.min_order_value)
+      };
+      if (id) {
+        await updateVoucher(id, data);
+      } else {
+        await createVoucher(data);
       }
-
       navigate('/admin/voucher');
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.message || error.message);
     } finally {
       setLoading(false);
     }

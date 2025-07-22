@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { FaUsers, FaBox, FaShoppingCart, FaTicketAlt, FaChartLine, FaCalendarAlt, FaComments, FaStar } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
+import Cookies from 'js-cookie';
+import { useNavigate, Link } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     users: 0,
@@ -21,7 +24,16 @@ const AdminPage = () => {
   // Hàm đếm khách hàng
   const countUsers = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users`);
+      const token = Cookies.get('auth_token');
+      if (!token) return 0;
+      
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       const data = await response.json();
       return data.data?.length || 0;
     } catch (error) {
@@ -45,7 +57,16 @@ const AdminPage = () => {
   // Hàm đếm tổng đơn hàng
   const countOrders = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`);
+      const token = Cookies.get('auth_token');
+      if (!token) return 0;
+      
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       const data = await response.json();
       return data.data?.length || 0;
     } catch (error) {
@@ -57,7 +78,16 @@ const AdminPage = () => {
   // Hàm đếm voucher
   const countVouchers = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/vouchers`);
+      const token = Cookies.get('auth_token');
+      if (!token) return 0;
+      
+      const response = await fetch(`${API_BASE_URL}/vouchers`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       const data = await response.json();
       return data.data?.length || 0;
     } catch (error) {
@@ -71,6 +101,14 @@ const AdminPage = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
+        
+        // Kiểm tra token trước khi gọi API
+        const token = Cookies.get('auth_token');
+        if (!token) {
+console.error('No authentication token found, redirecting to login');
+          navigate('/login');
+          return;
+        }
         
         // Gọi các hàm đếm riêng lẻ
         const [userCount, productCount, orderCount, voucherCount] = await Promise.all([
@@ -97,7 +135,7 @@ const AdminPage = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -144,7 +182,7 @@ const AdminPage = () => {
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                   <FaUsers className="w-6 h-6 text-white" />
                 </div>
-                <svg className="w-8 h-8 text-blue-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<svg className="w-8 h-8 text-blue-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
@@ -180,7 +218,7 @@ const AdminPage = () => {
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
                   <FaShoppingCart className="w-6 h-6 text-white" />
                 </div>
-                <svg className="w-8 h-8 text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<svg className="w-8 h-8 text-purple-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
@@ -228,7 +266,7 @@ const AdminPage = () => {
               <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
                 <FaComments className="w-6 h-6" />
               </div>
-              <div>
+<div>
                 <div className="text-sm text-gray-600">Bình luận</div>
                 <div className="text-2xl font-bold text-gray-900">{stats.comments}</div>
               </div>
@@ -281,53 +319,58 @@ const AdminPage = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <AdminCard className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/admin/product'}>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
-                <FaBox className="w-5 h-5" />
+          <Link to="/admin/product" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+            <AdminCard>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                  <FaBox className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Quản lý sản phẩm</div>
+                  <div className="text-sm text-gray-500">Thêm và quản lý sản phẩm</div>
+                </div>
               </div>
-              <div>
-                <div className="font-medium text-gray-900">Quản lý sản phẩm</div>
-                <div className="text-sm text-gray-500">Thêm và quản lý sản phẩm</div>
+            </AdminCard>
+          </Link>
+          <Link to="/admin/order" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+            <AdminCard>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-green-100 text-green-600 rounded-lg">
+                  <FaShoppingCart className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Quản lý đơn hàng</div>
+                  <div className="text-sm text-gray-500">Xem và xử lý đơn hàng</div>
+                </div>
               </div>
-            </div>
-          </AdminCard>
-
-          <AdminCard className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/admin/order'}>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 text-green-600 rounded-lg">
-                <FaShoppingCart className="w-5 h-5" />
+            </AdminCard>
+          </Link>
+          <Link to="/admin/voucher" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+            <AdminCard>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
+                  <FaTicketAlt className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Quản lý voucher</div>
+                  <div className="text-sm text-gray-500">Tạo và quản lý voucher</div>
+                </div>
               </div>
-              <div>
-                <div className="font-medium text-gray-900">Quản lý đơn hàng</div>
-                <div className="text-sm text-gray-500">Xem và xử lý đơn hàng</div>
+            </AdminCard>
+          </Link>
+          <Link to="/admin/user" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+            <AdminCard>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
+                  <FaUsers className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Quản lý khách hàng</div>
+                  <div className="text-sm text-gray-500">Xem thông tin khách hàng</div>
+                </div>
               </div>
-            </div>
-          </AdminCard>
-
-          <AdminCard className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/admin/voucher'}>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
-                <FaTicketAlt className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Quản lý voucher</div>
-                <div className="text-sm text-gray-500">Tạo và quản lý voucher</div>
-              </div>
-            </div>
-          </AdminCard>
-
-          <AdminCard className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/admin/user'}>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
-                <FaUsers className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Quản lý khách hàng</div>
-                <div className="text-sm text-gray-500">Xem thông tin khách hàng</div>
-              </div>
-            </div>
-          </AdminCard>
+            </AdminCard>
+          </Link>
         </div>
       </div>
     </AdminLayout>

@@ -93,7 +93,7 @@ export async function getAddresses() {
 export async function createAddress(addressData) {
   try {
     const token = Cookies.get("auth_token");
-    if (!token) throw new Error("No auth token found");
+if (!token) throw new Error("No auth token found");
     
     const response = await axios.post(`${BASE_URL}/addresses`, addressData, {
       headers: { Authorization: `Bearer ${token}` }
@@ -132,8 +132,47 @@ export async function deleteAddress(id) {
   }
 }
 
+export async function updateUser(id, userData) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.put(`${BASE_URL}/users/${id}`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Cập nhật người dùng thất bại");
+  }
+}
+
+export async function deleteUser(id) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    await axios.delete(`${BASE_URL}/users/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return true;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Xóa người dùng thất bại");
+  }
+}
+
+export async function toggleUserStatus(id, status) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.put(`${BASE_URL}/users/${id}`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Cập nhật trạng thái người dùng thất bại");
+  }
+}
+
 export async function fetchUsers(token) {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+  const response = await fetch(`${BASE_URL}/users`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
