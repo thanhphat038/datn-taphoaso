@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate,  } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { FavoritesContext } from '../context/FavoritesContext';
 
@@ -17,7 +17,7 @@ const Product = ({ data: product }) => {
   const maxStars = 5;
   const imageUrl = product?.images?.[0] || '/placeholder.png';
 
-  const { addItem } = useContext(CartContext);
+
   const { favorites = [], addFavorite, removeFavorite } = useContext(FavoritesContext);
   const navigate = useNavigate();
 

@@ -12,4 +12,9 @@ const deleteFavorite = async (favoriteId) => {
   return response.data;
 };
 
-export { getFavorites, deleteFavorite };
+const addToFavorite = async (product_id) => {
+  const response = await axios.post(API_BASE_URL, { product_id });
+  return response.data.data;
+};
+
+export { getFavorites, deleteFavorite, addToFavorite };
