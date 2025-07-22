@@ -21,6 +21,7 @@ import {
 } from '../utils/response.js';
 
 const BASE_URL = 'http://localhost:3000'; 
+const FE_BASE_URL = 'http://localhost:5173 '; 
 
 export const register = async (req, res) => {
   try {
@@ -328,7 +329,7 @@ export const forgotPassword = async (req, res) => {
     });
 
     // Tạo link reset
-    const resetLink = `${BASE_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${FE_BASE_URL}/reset-password?token=${resetToken}`;
 
     // Gửi email
     await sendForgotPasswordEmail({

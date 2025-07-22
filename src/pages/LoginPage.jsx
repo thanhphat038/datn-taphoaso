@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../service/UserService';
+import { forgotPassword } from '../service/UserService';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +10,12 @@ const LoginPage = () => {
     });
 
     const [loginError, setLoginError] = useState('');
+    const [showForgotModal, setShowForgotModal] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState('');
+    const [forgotMessage, setForgotMessage] = useState('');
+    const [forgotLoading, setForgotLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -23,10 +30,15 @@ const handleSubmit = async (e) => {
     try {
         const response = await loginUser({username: formData.username, password: formData.password});
         if (response && response.data && response.data.user && response.data.user.username) {
-            alert('Đăng nhập thành công! Chào mừng ' + response.data.user.username);
+            const user = response.data.user;
+            alert('Đăng nhập thành công! Chào mừng ' + user.username);
             // Store user information in local storage
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            window.location.href = '/';
+            localStorage.setItem('user', JSON.stringify(user));
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } else {
             setLoginError('Tên đăng nhập hoặc mật khẩu không đúng');
         }
@@ -34,6 +46,20 @@ const handleSubmit = async (e) => {
         setLoginError('Đăng nhập thất bại: ' + error.message);
     }
 };
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setForgotMessage('');
+        setForgotLoading(true);
+        try {
+            await forgotPassword(forgotEmail);
+            setForgotMessage('Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.');
+        } catch (error) {
+            setForgotMessage('Lỗi: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setForgotLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen flex">
@@ -88,7 +114,7 @@ const handleSubmit = async (e) => {
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                            {/* <div className="flex items-center">
                                 <input
                                     id="remember-me"
                                     name="remember-me"
@@ -98,26 +124,30 @@ const handleSubmit = async (e) => {
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                                     Ghi nhớ đăng nhập
                                 </label>
-                            </div>
+                            </div> */}
 
                             <div className="text-sm">
-                                <a href="#" className="font-medium text-[#06AEF4] hover:text-[#06AEF4]">
+                                <button
+                                    type="button"
+                                    className="font-medium text-[#06AEF4] hover:underline focus:outline-none"
+                                    onClick={() => setShowForgotModal(true)}
+                                >
                                     Quên mật khẩu?
-                                </a>
+                                </button>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#06AEF4] hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#06AEF4] hover:bg-[#0590d8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4] transition-colors duration-200"
                             >
                                 Đăng nhập
                             </button>
 
                             <Link 
                                 to="/register" 
-                                className="w-full flex justify-center py-2 px-4 border border-[#06AEF4] rounded-md shadow-sm text-sm font-medium text-[#06AEF4] bg-white hover:bg-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4]"
+                                className="w-full flex justify-center py-2 px-4 border border-[#06AEF4] rounded-md shadow-sm text-sm font-medium text-[#06AEF4] bg-white hover:bg-[#06AEF4] hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4] transition-colors duration-200"
                             >
                                 Đăng ký
                             </Link>
@@ -125,6 +155,44 @@ const handleSubmit = async (e) => {
                     </form>
                 </div>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                        <button
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl"
+                            onClick={() => { setShowForgotModal(false); setForgotEmail(''); setForgotMessage(''); }}
+                        >
+                            &times;
+                        </button>
+                        <h3 className="text-lg font-bold mb-4 text-center">Quên mật khẩu</h3>
+                        <form onSubmit={handleForgotPassword} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nhập email đăng ký</label>
+                                <input
+                                    type="email"
+                                    value={forgotEmail}
+                                    onChange={e => setForgotEmail(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#06AEF4]"
+                                    placeholder="Nhập email của bạn"
+                                />
+                            </div>
+                            {forgotMessage && (
+                                <div className={`text-sm ${forgotMessage.startsWith('Đã gửi') ? 'text-green-600' : 'text-red-600'}`}>{forgotMessage}</div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full py-2 px-4 bg-[#06AEF4] text-white rounded-md font-medium hover:bg-[#0590d8] transition-colors"
+                                disabled={forgotLoading}
+                            >
+                                {forgotLoading ? 'Đang gửi...' : 'Gửi email đặt lại mật khẩu'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

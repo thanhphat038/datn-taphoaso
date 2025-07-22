@@ -38,6 +38,8 @@ import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
 import AdminReview from './pages/admin/AdminReview';
 import DetailProduct from './pages/admin/DetailProduct';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function Layout() {
   const location = useLocation();
@@ -68,8 +70,10 @@ function Layout() {
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
             </Routes>
           </div>
           {showFooter && <Footer />}

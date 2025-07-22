@@ -186,3 +186,21 @@ export async function fetchUsers(token) {
   const result = await response.json();
   return result.data || [];
 }
+
+export async function forgotPassword(email) {
+  try {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Không thể gửi email đặt lại mật khẩu');
+  }
+}
+
+export async function resetPassword(token, newPassword) {
+  try {
+    const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Không thể đặt lại mật khẩu');
+  }
+}
