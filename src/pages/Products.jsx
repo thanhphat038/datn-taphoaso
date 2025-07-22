@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Product from '../components/Product';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const ProductsPage = () => {
 
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
@@ -12,6 +14,14 @@ const ProductsPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const productsPerPage = 16;
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const categoryId = params.get('category');
+        if (categoryId) {
+            setSelectedCategoryId(categoryId);
+        }
+    }, [location.search]);
 
     // Fetch products từ API trực tiếp
     useEffect(() => {
@@ -34,6 +44,12 @@ const ProductsPage = () => {
         fetchProducts();
     }, []);
 
+    const categoryList = [
+        { id: "684697023d545550b38460cd", name: "Mì ăn liền" },
+        { id: "68693d5117edd67c23b67bc1", name: "Nước uống" },
+    ];
+
+    // Đếm số sản phẩm theo id danh mục
     const getCategoryCount = (categoryId) => {
         return products.filter(product => product.category_id === categoryId).length;
     };
@@ -111,6 +127,43 @@ const ProductsPage = () => {
         return pageNumbers;
     };
 
+    const getProductsByCategory = (categoryId, limit = 5) => {
+        if (loading) {
+            // Hiển thị skeleton loading
+            return Array.from({ length: limit }, (_, index) => (
+                <div key={index} className="animate-pulse">
+                    <div className="bg-gray-200 rounded-lg h-48 mb-2"></div>
+                    <div className="bg-gray-200 h-4 rounded mb-1"></div>
+                    <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+                </div>
+            ));
+        }
+
+        if (error) {
+            return (
+                <div className="col-span-full text-center py-8">
+                    <p className="text-red-600">Không thể tải sản phẩm</p>
+                </div>
+            );
+        }
+        // Lọc sản phẩm theo id danh mục (so sánh chuỗi)
+        const filteredProducts = products.filter(product => product.category_id === categoryId);
+        // Log ra để kiểm tra
+        // console.log('categoryId:', categoryId);
+        // console.log('filteredProducts:', filteredProducts);
+
+        if (filteredProducts.length === 0) {
+            return (
+                <div className="col-span-full text-center py-8">
+                    <p className="text-gray-500">Không có sản phẩm nào trong danh mục này</p>
+                </div>
+            );
+        }
+
+        return filteredProducts.slice(0, limit).map((product, index) => (
+            <Product key={product._id || index} data={product} />
+        ));
+    };
     // Hiển thị loading state
     if (loading) {
         return (
@@ -169,42 +222,28 @@ const ProductsPage = () => {
                                 )}
                             </div>
                             <div className='flex flex-col gap-2'>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedCategoryId === 1 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedCategoryId(1)}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="1"
-                                            className='w-4 h-4'
-                                            name="category"
-                                            checked={selectedCategoryId === 1}
-                                            onChange={() => setSelectedCategoryId(1)}
-                                        />
-                                        <label htmlFor="1">Mì ăn liền</label>
+                                {/* Hiển thị các radio button cho từng danh mục theo id */}
+                                {categoryList.map(category => (
+                                    <div
+                                        key={category.id}
+                                        className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
+                                    ${selectedCategoryId === category.id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                        onClick={() => setSelectedCategoryId(category.id)}
+                                    >
+                                        <div className='flex items-center gap-2'>
+                                            <input
+                                                type="radio"
+                                                id={category.id}
+                                                className='w-4 h-4'
+                                                name="category"
+                                                checked={selectedCategoryId === category.id}
+                                                onChange={() => setSelectedCategoryId(category.id)}
+                                            />
+                                            <label htmlFor={category.id}>{category.name}</label>
+                                        </div>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({getCategoryCount(1)})</span>
-                                </div>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedCategoryId === 2 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedCategoryId(2)}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="2"
-                                            className='w-4 h-4'
-                                            name="category"
-                                            checked={selectedCategoryId === 2}
-                                            onChange={() => setSelectedCategoryId(2)}
-                                        />
-                                        <label htmlFor="2">Nước uống</label>
-                                    </div>
-                                    <span className='text-sm text-gray-500'>({getCategoryCount(2)})</span>
-                                </div>
+                                ))}
+                                {/* Radio cho tất cả */}
                                 <div
                                     className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
                                     ${selectedCategoryId === null ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
@@ -221,7 +260,6 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="categoryAll">Tất cả</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({products.length})</span>
                                 </div>
                             </div>
                         </div>
@@ -255,7 +293,6 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="price1">Dưới 200.000đ</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('under-200')})</span>
                                 </div>
                                 <div
                                     className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
@@ -273,7 +310,6 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="price2">200.000đ - 500.000đ</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('200-500')})</span>
                                 </div>
                                 <div
                                     className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
@@ -291,7 +327,6 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="price3">500.000đ - 1.000.000đ</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('500-1000')})</span>
                                 </div>
                                 <div
                                     className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
@@ -309,7 +344,6 @@ const ProductsPage = () => {
                                         />
                                         <label htmlFor="price4">Trên 1.000.000đ</label>
                                     </div>
-                                    <span className='text-sm text-gray-500'>({getPriceRangeCount('over-1000')})</span>
                                 </div>
                             </div>
                         </div>

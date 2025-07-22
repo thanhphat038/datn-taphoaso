@@ -34,7 +34,7 @@ Content-Type: application/json
 
 {
   "username": "user1",
-  "password": "newpassword123"
+  "password": "password123"
 }
 
 ### Get Profile
@@ -342,8 +342,8 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "product_id": "{{productId}}",
-  "comment": "This is a sencond comment"
+  "product_id": "6862d1c32df5d5159cc51ef2",
+  "content": "Test comment"
 }
 
 ### Get product comments
@@ -362,7 +362,7 @@ GET {{baseUrl}}/products/{{productId}}/comments
 
 ### Delete comment
 DELETE {{baseUrl}}/comments/{{commentId}}
-Authorization: Bearer {{authToken_admin}}
+Authorization: Bearer {{authToken}}
 
 ### Favorites ###
 
@@ -425,6 +425,8 @@ Authorization: Bearer {{authToken}}
 
 ### Get all vouchers
 GET {{baseUrl}}/vouchers
+Authorization: Bearer {{authToken}}
+
 
 ### Get voucher by ID
 GET {{baseUrl}}/vouchers/{{voucherId}}

@@ -17,7 +17,7 @@ const ProductsSearch = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             const item = await dataProduct();
-            setProducts(item.data);
+            setProducts(item.data.products || []);
         };
         fetchProduct();
     }, []);
