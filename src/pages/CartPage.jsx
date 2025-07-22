@@ -20,23 +20,19 @@ const CartPage = () => {
   const fetchCartRef = useRef();
 
   // Định nghĩa fetchCart bằng useCallback
-  const fetchCart = useCallback(async () => {
+ // Định nghĩa fetchCart bằng useCallback
+ useEffect(() => {
+  const fetchCart = async () => {
     try {
       const res = await getCart();
       setInitialCartItems(res.data.data.items);
     } catch (err) {
       setInitialCartItems([]);
     }
-  }, [setInitialCartItems]);
-
-  // Gán fetchCart vào ref để dùng ở mọi nơi
-  useEffect(() => {
-    fetchCartRef.current = fetchCart;
-  }, [fetchCart]);
-
-  useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+  };
+  fetchCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
