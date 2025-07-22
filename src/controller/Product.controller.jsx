@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dataProduct, dataProductDetail } from "../service/Product.service";
+import { dataProduct, dataProductDetail, getRelatedProducts } from "../service/Product.service";
 import Product from "../components/Product";
 
 export const useProductData = (category, limit) => {
@@ -35,4 +35,21 @@ export const useProductDetailData = (id) => {
     }, [id]);
     console.log(product);
     return product;
+};
+
+export const useRelatedProducts = (id, limit = 5) => {
+    const [related, setRelated] = useState([]);
+    useEffect(() => {
+        if (!id) return;
+        const fetchRelated = async () => {
+            try {
+                const res = await getRelatedProducts(id, limit);
+                setRelated(res.data.data || []);
+            } catch (err) {
+                setRelated([]);
+            }
+        };
+        fetchRelated();
+    }, [id, limit]);
+    return related;
 };

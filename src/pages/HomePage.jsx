@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
@@ -11,7 +12,6 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch products từ API trực tiếp
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -32,8 +32,14 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
-  // Hàm lọc sản phẩm theo danh mục và giới hạn số lượng
-  const getProductsByCategory = (categoryName, limit = 5) => {
+  // Hàm lấy danh sách các category_id đang có trong dữ liệu sản phẩm
+  const getAllCategoryIds = () => {
+    // Lấy ra mảng các id danh mục duy nhất từ products
+    return Array.from(new Set(products.map(p => p.category_id)));
+  };
+
+  // Hàm lọc sản phẩm theo id danh mục
+  const getProductsByCategory = (categoryId, limit = 5) => {
     if (loading) {
       // Hiển thị skeleton loading
       return Array.from({ length: limit }, (_, index) => (
@@ -44,7 +50,7 @@ const HomePage = () => {
         </div>
       ));
     }
-    
+
     if (error) {
       return (
         <div className="col-span-full text-center py-8">
@@ -52,14 +58,11 @@ const HomePage = () => {
         </div>
       );
     }
-    
-    const filteredProducts = products.filter(product => {
-      // Lọc theo tên danh mục (có thể là "mì ăn liền" hoặc "nước uống")
-      const categoryNameLower = categoryName.toLowerCase();
-      const productCategoryName = product.category_id?.name?.toLowerCase() || '';
-      
-      return productCategoryName.includes(categoryNameLower);
-    });
+    // Lọc sản phẩm theo id danh mục (so sánh chuỗi)
+    const filteredProducts = products.filter(product => product.category_id === categoryId);
+    // Log ra để kiểm tra
+    // console.log('categoryId:', categoryId);
+    // console.log('filteredProducts:', filteredProducts);
 
     if (filteredProducts.length === 0) {
       return (
@@ -73,6 +76,14 @@ const HomePage = () => {
       <Product key={product._id || index} data={product} />
     ));
   };
+
+  // Log ra các category_id đang có để dev dễ lấy đúng id
+  useEffect(() => {
+    if (products.length > 0) {
+      const ids = getAllCategoryIds();
+      console.log('Các category_id đang có:', ids);
+    }
+  }, [products]);
 
   return (
     <main className='w-full'>
@@ -105,17 +116,17 @@ const HomePage = () => {
           </div>
         </div>
 
-<div className=' px-3 pb-5 rounded-[5px] shadow bg-cyan-100'>
+        <div className=' px-3 pb-5 rounded-[5px] shadow bg-cyan-100'>
           <div className='bg-stone-100 rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
             <p className='text-[20px] w-full text-center capitalize'>mì ăn liền</p>
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {getProductsByCategory("mì ăn liền", 5)}
+            {getProductsByCategory("684697023d545550b38460cd", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
-            <a href="" className='text-[18px]'>Xem thêm</a>
+            <Link to="/product?category=684697023d545550b38460cd" className='text-[18px]'>Xem thêm</Link>
           </div>
         </div>
 
@@ -125,11 +136,11 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {getProductsByCategory("nước uống", 5)}
+            {getProductsByCategory("68693d5117edd67c23b67bc1", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
-            <a href="" className='text-[18px]'>Xem thêm</a>
+            <Link to="/product?category=68693d5117edd67c23b67bc1" className='text-[18px]'>Xem thêm</Link>
           </div>
         </div>
 
@@ -160,11 +171,11 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-5 gap-3'>
-            {getProductsByCategory("mì ăn liền", 5)}
+            {getProductsByCategory("684697023d545550b38460cd", 5)}
           </div>
 
           <div className='mt-5 flex place-content-center'>
-            <a href="" className='text-[18px]'>Xem thêm</a>
+            <Link to="/product?category=684697023d545550b38460cd" className='text-[18px]'>Xem thêm</Link>
           </div>
         </div>
 
@@ -178,11 +189,11 @@ const HomePage = () => {
             </div>
 
             <div className='grid grid-cols-3 gap-3'>
-              {getProductsByCategory("nước uống", 3)}
+              {getProductsByCategory("68693d5117edd67c23b67bc1", 3)}
             </div>
 
             <div className='mt-5 flex place-content-center'>
-              <a href="" className='text-[18px]'>Xem thêm</a>
+              <Link to="/product?category=68693d5117edd67c23b67bc1" className='text-[18px]'>Xem thêm</Link>
             </div>
           </div>
         </div>
