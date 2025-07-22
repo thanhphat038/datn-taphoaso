@@ -11,8 +11,9 @@ import {
   searchProducts,
   getTopRatedProducts,
   getNewArrivals,
-  getRelatedProducts
+  getRelatedProducts,
 } from '../controllers/product.controller.js';
+import { getReviewsByProductId } from '../controllers/review.controller.js';
 
 const router = express.Router();
 
@@ -36,6 +37,9 @@ router.get('/new-arrivals', getNewArrivals);
 
 // Get related products
 router.get('/:id/related', getRelatedProducts);
+
+// Lấy review theo productId
+router.get('/:productId/reviews', getReviewsByProductId);
 
 // Get product by id
 router.get('/:id', getProductById);
