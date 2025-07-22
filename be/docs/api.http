@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000/api
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUwNzY5MzI2LCJleHAiOjE3NTEzNzQxMjZ9.a3i0-DmS2ZGUm3lPtAA7TfF4EArdnFwPKqK-a4FxQ_s
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyODY4MDkzLCJleHAiOjE3NTM0NzI4OTN9.zZm9aCrr2tXyxycR1f4WV1MkjmBzpgu16Ofz2xjiP3w
 ### Variables
 @userId = 685a9ea76875fcf8f499fa9a
 
@@ -7,7 +7,7 @@
 @productId = 6862d1c32df5d5159cc51f08
 @categoryId = 684312904b15be945ea7a436
 @orderId = 686366fbbd9300db3933df53
-
+@addressId = 684694371aaf49d7a7259201
 # chưa làm 
 @voucherId = 1
 
@@ -29,7 +29,7 @@ Content-Type: application/json
 
 {
   "username": "user1",
-  "password": "password123"
+  "password": "newpassword123"
 }
 
 ### Get Profile
@@ -121,6 +121,7 @@ Authorization: Bearer {{authToken}}
 
 ### Get all products
 GET {{baseUrl}}/products
+
 ?page=1
 &limit=10
 &sort=price
@@ -252,12 +253,12 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "full_name": "Test User",
   "phone": "0123456789",
-  "address": "123 Street",
   "city": "City",
   "district": "District",
   "ward": "Ward",
+  "address_detail": "Building A, Room 101",
+  "receiver": "Nguyen Van A",
   "is_default": true
 }
 
