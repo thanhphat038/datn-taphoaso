@@ -10,8 +10,10 @@ import {
   FaComments,
   FaStar,
   FaBlog,
-  FaChartBar
+  FaChartBar,
+  FaSignOutAlt
 } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
@@ -28,17 +30,22 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/blog', icon: FaBlog, label: 'Blog' }
   ];
 
+  const handleLogout = () => {
+    localStorage.clear();
+    Cookies.remove('auth_token');
+    window.location.href = '/login';
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-80 bg-white shadow-lg">
+      <div className="w-80 bg-white shadow-lg flex flex-col h-screen fixed left-0 top-0 z-30">
         {/* Logo */}
         <div className="h-20 flex items-center justify-center border-b border-gray-200">
           <img src="/images/logo_ngang.png" alt="Logo" className="h-10" />
         </div>
-
         {/* Navigation */}
-        <nav className="p-6 space-y-2">
+        <nav className="p-6 space-y-2 flex-1 ">
           {menuItems.map((item) => (
             <NavLink
               key={item.path}
@@ -56,10 +63,19 @@ const AdminLayout = ({ children }) => {
             </NavLink>
           ))}
         </nav>
+        {/* Logout Button */}
+        <div className="px-6 pb-8 border-t border-gray-200 pt-6">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-semibold shadow transition-all duration-150"
+          >
+            <FaSignOutAlt className="w-5 h-5" />
+            <span>Đăng xuất</span>
+          </button>
+        </div>
       </div>
-
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="ml-80 flex-1 flex flex-col min-h-screen">
         {/* Header */}
         <header className="h-20 bg-white shadow-sm flex items-center justify-between px-10">
           <h1 className="text-2xl font-bold text-gray-800">
@@ -76,7 +92,6 @@ const AdminLayout = ({ children }) => {
             </div>
           </div>
         </header>
-
         {/* Page Content */}
         <main className="flex-1 p-10 overflow-auto">
           <div className="max-w-full mx-auto">
