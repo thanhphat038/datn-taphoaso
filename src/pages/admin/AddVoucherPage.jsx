@@ -64,7 +64,7 @@ const AddVoucherPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'code' ? value.toUpperCase() : value
     }));
   };
 
