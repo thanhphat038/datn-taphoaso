@@ -62,7 +62,7 @@ function Layout() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/*" element={<ProfilePage />} />
               <Route path="/order/:id" element={<OrderDetailPage />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/select-address" element={<SelectAddress />} />
