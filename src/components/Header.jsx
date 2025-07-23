@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import axios from "axios";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import { dataProduct } from '../service/Product.service';
 import { CartContext } from '../context/CartContext';
@@ -29,7 +29,7 @@ const Header = () => {
     //     product.data.name.toLowerCase().includes(query.toLowerCase())
     // );
     const filteredProducts = useMemo(() => (
-        query.trim() ? products.filter(product => product.name .toLowerCase().includes(query.toLowerCase())) : []
+        query.trim() ? products.filter(product => product.name?.toLowerCase().includes(query.toLowerCase())) : []
     ), [query, products]);
 console.log(query);
 console.log(products);

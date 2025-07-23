@@ -116,19 +116,36 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className=' px-3 pb-5 rounded-[5px] shadow bg-cyan-100'>
-          <div className='bg-stone-100 rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
-            <p className='text-[20px] w-full text-center capitalize'>mì ăn liền</p>
+        <div className="relative w-full flex justify-center">
+          {/* Tam giác kẹp giấy (phía sau nội dung) */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-0 flex items-center">
+            {/* Tam giác trái */}
+            <div className="w-0 h-0 border-t-[28px] border-t-transparent border-b-[28px] border-b-transparent border-r-[19px] border-r-green-500"></div>
+
+            {/* Tam giác phải */}
+            <div className="w-0 h-0 border-t-[28px] border-t-transparent border-b-[28px] border-b-transparent border-l-[19px] border-l-green-500"></div>
           </div>
 
-          <div className='grid grid-cols-5 gap-3'>
-            {getProductsByCategory("684697023d545550b38460cd", 5)}
+          {/* Nút chính (nổi trên cùng) */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-[999]">
+            <div className="relative bg-green-100 text-green-700 text-[20px] font-semibold px-8 py-3.5 rounded-b-md border border-green-500 border-t-0 min-w-[211px] text-center shadow">
+              THỊT, CÁ, TRỨNG, HẢI SẢN
+            </div>
           </div>
 
-          <div className='mt-5 flex place-content-center'>
-            <Link to="/product?category=684697023d545550b38460cd" className='text-[18px]'>Xem thêm</Link>
+          {/* Box nội dung */}
+          <div className="w-full px-3 pb-5 rounded-[5px] shadow bg-cyan-100 pt-12 z-10 relative">
+            <div className='grid grid-cols-5 gap-3'>
+              {getProductsByCategory("684697023d545550b38460cd", 5)}
+            </div>
+
+            <div className='mt-5 flex place-content-center'>
+              <Link to="/product?category=684697023d545550b38460cd" className='text-[18px]'>Xem thêm</Link>
+            </div>
           </div>
         </div>
+
+
 
         <div className='bg-[#06adf492] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
