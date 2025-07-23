@@ -25,21 +25,22 @@ class CommentService extends DBService {
     }
 
     if (comment.user_id.toString() !== userId) {
-      throw new AppError(ERROR_CODES.AUTH_FORBIDDEN);
+      throw new AppError(ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS);
     }
 
     return await this.update(commentId, data);
   }
 
-  async deleteComment(commentId, userId) {
+  async deleteComment(commentId, userId, userRole = 'user') {
     const comment = await this.findById(commentId);
     
     if (!comment) {
       throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Comment not found');
     }
 
-    if (comment.user_id.toString() !== userId) {
-      throw new AppError(ERROR_CODES.AUTH_FORBIDDEN);
+    // Nếu không phải admin, chỉ cho phép chủ comment xóa
+    if (userRole !== 'admin' && comment.user_id.toString() !== userId) {
+      throw new AppError(ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS);
     }
 
     return await this.delete(commentId);

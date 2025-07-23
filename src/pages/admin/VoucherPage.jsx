@@ -7,6 +7,7 @@ import AdminTable from '../../components/admin/AdminTable';
 import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
+import { getAllVouchers, deleteVoucher as deleteVoucherService, updateVoucher } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -20,19 +21,25 @@ const VoucherPage = () => {
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Fetch vouchers
+  // Fetch vouchers and auto-update expired ones
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/vouchers`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch vouchers');
-        }
-        const result = await response.json();
-        setVouchers(result.data || []);
+        const response = await getAllVouchers();
+        let vouchersData = response.data.data || [];
+        
+        // Auto-update expired vouchers to inactive
+        const updatedVouchers = vouchersData.map(voucher => {
+          if (isExpired(voucher.end_date) && voucher.status === 'active') {
+            return { ...voucher, status: 'inactive' };
+          }
+          return voucher;
+        });
+        
+        setVouchers(updatedVouchers);
       } catch (error) {
-        setError('Không thể tải danh sách voucher: ' + error.message);
+        setError('Không thể tải danh sách voucher: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching vouchers:', error);
       } finally {
         setLoading(false);
@@ -51,18 +58,11 @@ const VoucherPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete voucher');
-      }
+      await deleteVoucherService(voucherId);
 
       setVouchers(vouchers.filter(v => v._id !== voucherId));
     } catch (error) {
-      alert('Lỗi khi xóa voucher: ' + error.message);
+      alert('Lỗi khi xóa voucher: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -81,42 +81,27 @@ const VoucherPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/vouchers/${voucherId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
+      const response = await updateVoucher(voucherId, { status: newStatus });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (response.status === 200) {
+        setVouchers(vouchers.map(v => 
+          v._id === voucherId ? { ...v, status: newStatus } : v
+        ));
+      } else {
+        const errorData = response.data;
         throw new Error(errorData.message || 'Failed to update voucher status');
       }
-
-      setVouchers(vouchers.map(v => 
-        v._id === voucherId ? { ...v, status: newStatus } : v
-      ));
     } catch (error) {
-      alert(`Lỗi khi ${actionText} voucher: ` + error.message);
+      alert(`Lỗi khi ${actionText} voucher: ` + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter vouchers
-  const filteredVouchers = vouchers.filter(voucher => {
-    const matchesSearch = voucher.code && voucher.code.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || voucher.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const totalVouchers = filteredVouchers.length;
-  const totalPages = Math.ceil(totalVouchers / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedVouchers = filteredVouchers.slice(startIndex, startIndex + pageSize);
+  // Check if voucher is expired
+  const isExpired = (endDate) => {
+    return new Date(endDate) < new Date();
+  };
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -135,10 +120,26 @@ const VoucherPage = () => {
     }
   };
 
-  // Check if voucher is expired
-  const isExpired = (endDate) => {
-    return new Date(endDate) < new Date();
-  };
+  // Filter vouchers
+  const filteredVouchers = vouchers.filter(voucher => {
+    const matchesSearch = voucher.code && voucher.code.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    let matchesStatus = true;
+    if (statusFilter === 'All') {
+      matchesStatus = true;
+    } else if (statusFilter === 'expired') {
+      matchesStatus = isExpired(voucher.end_date);
+    } else {
+      matchesStatus = voucher.status === statusFilter;
+    }
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalVouchers = filteredVouchers.length;
+  const totalPages = Math.ceil(totalVouchers / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedVouchers = filteredVouchers.slice(startIndex, startIndex + pageSize);
 
   // Get voucher status info
   const getVoucherStatusInfo = (voucher) => {
@@ -305,7 +306,7 @@ const VoucherPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản lý voucher</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text ">Quản lý voucher</h1>
             <p className="text-gray-600 mt-1">Tạo và quản lý các mã giảm giá</p>
           </div>
           <NavLink 
@@ -347,6 +348,105 @@ const VoucherPage = () => {
             onFilterChange={handleFilterChange}
           />
         </AdminCard>
+
+        {/* Quick Status Filters */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => handleFilterChange("status", "All")}
+            className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+              statusFilter === "All"
+                ? "bg-gradient-to-r from-[#06AEF4] to-[#05a0e0] text-white shadow-lg shadow-[#06AEF4]/25"
+                : "bg-white text-gray-700 border border-gray-200 hover:border-[#06AEF4]/50 hover:text-[#06AEF4] hover:shadow-md"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+              </svg>
+              Tất cả
+            </span>
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+              statusFilter === "All" 
+                ? "bg-white/20 text-white" 
+                : "bg-gray-100 text-gray-600 group-hover:bg-[#06AEF4]/10"
+            }`}>
+              {vouchers.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleFilterChange("status", "active")}
+            className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+              statusFilter === "active"
+                ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/25"
+                : "bg-white text-gray-700 border border-gray-200 hover:border-green-500/50 hover:text-green-600 hover:shadow-md"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Đang hoạt động
+            </span>
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+              statusFilter === "active" 
+                ? "bg-white/20 text-white" 
+                : "bg-gray-100 text-gray-600 group-hover:bg-green-500/10"
+            }`}>
+              {activeVouchers}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleFilterChange("status", "inactive")}
+            className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+              statusFilter === "inactive"
+                ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25"
+                : "bg-white text-gray-700 border border-gray-200 hover:border-red-500/50 hover:text-red-600 hover:shadow-md"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Không hoạt động
+            </span>
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+              statusFilter === "inactive" 
+                ? "bg-white/20 text-white" 
+                : "bg-gray-100 text-gray-600 group-hover:bg-red-500/10"
+            }`}>
+              {vouchers.filter(v => v.status === 'inactive').length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              const expiredCount = vouchers.filter(v => isExpired(v.end_date)).length;
+              setStatusFilter(prev => prev === "expired" ? "All" : "expired");
+              setCurrentPage(1);
+            }}
+            className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+              statusFilter === "expired"
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25"
+                : "bg-white text-gray-700 border border-gray-200 hover:border-orange-500/50 hover:text-orange-600 hover:shadow-md"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Đã hết hạn
+            </span>
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+              statusFilter === "expired" 
+                ? "bg-white/20 text-white" 
+                : "bg-gray-100 text-gray-600 group-hover:bg-orange-500/10"
+            }`}>
+              {expiredVouchers}
+            </span>
+          </button>
+        </div>
 
         {/* Vouchers Table */}
         <AdminCard noPadding>

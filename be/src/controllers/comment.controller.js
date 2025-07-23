@@ -77,8 +77,8 @@ export const updateComment = async (req, res, next) => {
 // Delete comment
 export const deleteComment = async (req, res, next) => {
   try {
-    const { commentId } = req.params;
-    await commentService.deleteComment(commentId, req.user.id);
+    const { id } = req.params;
+    await commentService.deleteComment(id, req.user.id, req.user.role);
     res.json({
       success: true,
       message: 'Comment deleted successfully'
@@ -123,6 +123,23 @@ export const getCommentReplies = async (req, res, next) => {
     res.json({
       success: true,
       data: replies
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Lấy tất cả comment của một productId (không phân trang)
+export const getAllCommentOfProductId = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const comments = await commentService.find({ product_id: productId }, {
+      populate: { path: 'user_id', select: 'name email' },
+      sort: { created_at: -1 }
+    });
+    res.json({
+      success: true,
+      data: comments
     });
   } catch (error) {
     next(error);

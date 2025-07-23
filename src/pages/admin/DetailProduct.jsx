@@ -4,6 +4,7 @@ import { FaEdit, FaTrash, FaArrowLeft, FaBox, FaTag, FaCalendarAlt, FaEye, FaEye
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
+import { getProductById, deleteProduct, toggleProductStatus } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -19,14 +20,10 @@ const DetailProduct = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/products/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch product');
-        }
-        const result = await response.json();
-        setProduct(result.data);
+        const response = await getProductById(id);
+        setProduct(response.data.data);
       } catch (error) {
-        setError('Không thể tải thông tin sản phẩm: ' + error.message);
+        setError('Không thể tải thông tin sản phẩm: ' + (error.response?.data?.message || error.message));
       } finally {
         setLoading(false);
       }
@@ -44,18 +41,10 @@ const DetailProduct = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete product');
-      }
-
+      await deleteProduct(id);
       navigate('/admin/product');
     } catch (error) {
-      alert('Lỗi khi xóa sản phẩm: ' + error.message);
+      alert('Lỗi khi xóa sản phẩm: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -76,18 +65,10 @@ const DetailProduct = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/products/${id}/${newStatus === 'active' ? 'activate' : 'deactivate'}`, {
-        method: 'PATCH',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update product status');
-      }
-
+      await toggleProductStatus(id, newStatus);
       setProduct(prev => ({ ...prev, status: newStatus }));
     } catch (error) {
-      alert(`Lỗi khi ${actionText} sản phẩm: ` + error.message);
+      alert(`Lỗi khi ${actionText} sản phẩm: ` + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -313,13 +294,24 @@ const DetailProduct = () => {
                   <div>
                     <div className="text-sm text-gray-600">Ngày tạo</div>
                     <div className="font-medium">
-                      {new Date(product.createdAt).toLocaleDateString('vi-VN', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {(() => {
+                        const date = product.create_at || product.created_at || product.createdAt;
+                        if (!date) return 'Không rõ';
+                        // Nếu là ISO string, chỉ lấy phần yyyy-MM-dd
+                        let displayDate = '';
+                        if (typeof date === 'string' && date.includes('T')) {
+                          displayDate = new Date(date).toLocaleDateString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          });
+                        } else {
+                          displayDate = date;
+                        }
+                        return displayDate;
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -356,4 +348,4 @@ const DetailProduct = () => {
   );
 };
 
-export default DetailProduct;
+export default DetailProduct; 
