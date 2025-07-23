@@ -77,3 +77,29 @@ export const toggleProductStatus = (id, status) => {
     const action = status === 'active' ? 'activate' : 'deactivate';
     return axios.patch(`${api}/products/${id}/${action}`, {}, { headers: getAuthHeaders() });
 };
+
+// REVIEW MANAGEMENT
+export const getAllReviews = () => {
+    return axios.get(`${api}/reviews`, { headers: getAuthHeaders() });
+};
+export const deleteReview = (reviewId) => {
+    return axios.delete(`${api}/reviews/${reviewId}`, { headers: getAuthHeaders() });
+};
+export const updateReviewStatus = (reviewId, status) => {
+    return axios.patch(`${api}/reviews/${reviewId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+// COMMENT MANAGEMENT
+export const getAllComments = () => {
+    return axios.get(`${api}/comments`, { headers: getAuthHeaders() });
+};
+export const deleteComment = (commentId) => {
+    return axios.delete(`${api}/comments/${commentId}`, { headers: getAuthHeaders() });
+};
+export const updateCommentStatus = (commentId, status) => {
+    return axios.patch(`${api}/comments/${commentId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const getUserById = (id) => {
+    return axios.get(`${api}/users/${id}`, { headers: getAuthHeaders() });
+};

@@ -7,8 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getAllComments, deleteComment, updateCommentStatus, getProductById, getUserById } from '../../service/Admin.Service.jsx';
 
 const AdminComment = () => {
   const [comments, setComments] = useState([]);
@@ -25,23 +24,65 @@ const AdminComment = () => {
   const [currentComment, setCurrentComment] = useState(null);
 
   // Fetch comments
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/comments`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch comments');
-        }
-        const result = await response.json();
-        setComments(result.data || []);
-      } catch (error) {
-        setError('Không thể tải danh sách bình luận: ' + error.message);
-        console.error('Error fetching comments:', error);
-      } finally {
-        setLoading(false);
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const result = await getAllComments();
+      let commentsArr = [];
+      if (Array.isArray(result.data)) {
+        commentsArr = result.data;
+      } else if (Array.isArray(result.data?.data)) {
+        commentsArr = result.data.data;
       }
-    };
+      // Map lại dữ liệu cho đúng định dạng component mong muốn
+      // Nếu user_id hoặc product_id là id, lấy chi tiết
+      const mappedComments = await Promise.all(commentsArr.map(async c => {
+        let user = { name: 'Ẩn danh', email: '' };
+        let product = { name: 'Không rõ', images: [] };
+        try {
+          if (c.user_id && typeof c.user_id === 'string') {
+            const userRes = await getUserById(c.user_id);
+            if (userRes?.data?.data) {
+              user = userRes.data.data;
+            } else if (userRes?.data) {
+              user = userRes.data;
+            }
+          } else if (typeof c.user_id === 'object' && c.user_id !== null) {
+            user = c.user_id;
+          }
+        } catch (e) { /* giữ mặc định */ }
+        try {
+          if (c.product_id && typeof c.product_id === 'string') {
+            const productRes = await getProductById(c.product_id);
+            if (productRes?.data?.data) {
+              product = productRes.data.data;
+            } else if (productRes?.data) {
+              product = productRes.data;
+            }
+          } else if (typeof c.product_id === 'object' && c.product_id !== null) {
+            product = c.product_id;
+          }
+        } catch (e) { /* giữ mặc định */ }
+        return {
+          _id: c._id,
+          content: c.comment || c.content || '',
+          createdAt: c.create_at || c.createdAt || '',
+          status: c.status || 'active',
+          user_id: user,
+          product_id: product,
+        };
+      }));
+      setComments(mappedComments);
+      console.log('Fetched comments:', mappedComments); // Log dữ liệu ra console
+    } catch (error) {
+      setError('Không thể tải danh sách bình luận: ' + error.message);
+      console.error('Error fetching comments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchComments();
   }, []);
 
@@ -55,15 +96,7 @@ const AdminComment = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete comment');
-      }
-
+      await deleteComment(commentId);
       setComments(comments.filter(c => c._id !== commentId));
     } catch (error) {
       alert('Lỗi khi xóa bình luận: ' + error.message);
@@ -85,21 +118,7 @@ const AdminComment = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/comments/${commentId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update comment status');
-      }
-
+      await updateCommentStatus(commentId, newStatus);
       setComments(comments.map(c => 
         c._id === commentId ? { ...c, status: newStatus } : c
       ));
@@ -149,10 +168,10 @@ const AdminComment = () => {
       render: (comment) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white font-semibold">
-            {comment.user_id?.name ? comment.user_id.name.charAt(0).toUpperCase() : 'U'}
+            {comment.user_id?.username ? comment.user_id.username.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{comment.user_id?.name || 'Người dùng ẩn danh'}</div>
+            <div className="font-semibold text-gray-900">{comment.user_id?.username || 'Người dùng ẩn danh'}</div>
             <div className="text-sm text-gray-500">{comment.user_id?.email || 'Không có email'}</div>
           </div>
         </div>
@@ -294,9 +313,18 @@ const AdminComment = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý bình luận</h1>
-          <p className="text-gray-600 mt-1">Quản lý bình luận của khách hàng</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý bình luận</h1>
+            <p className="text-gray-600 mt-1">Quản lý bình luận của khách hàng</p>
+          </div>
+          <button
+            className="px-4 py-2 bg-[#06AEF4] text-white rounded hover:bg-[#0590d8] transition"
+            onClick={fetchComments}
+            disabled={loading}
+          >
+            {loading ? 'Đang tải...' : 'Làm mới'}
+          </button>
         </div>
 
         {/* Statistics */}
@@ -378,10 +406,10 @@ const AdminComment = () => {
               {/* User Info */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white text-xl font-semibold">
-                  {currentComment.user_id?.name ? currentComment.user_id.name.charAt(0).toUpperCase() : 'U'}
+                  {currentComment.user_id?.username ? currentComment.user_id.username.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900">{currentComment.user_id?.name || 'Người dùng ẩn danh'}</div>
+                  <div className="font-semibold text-gray-900">{currentComment.user_id?.username || 'Người dùng ẩn danh'}</div>
                   <div className="text-sm text-gray-500">{currentComment.user_id?.email || 'Không có email'}</div>
                 </div>
               </div>

@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
+import { useEffect, useState } from 'react';
 
 export const formatCurrency = (value) => {
   if (typeof value !== 'number') return '—';
@@ -18,6 +20,21 @@ const Product = ({ data: product }) => {
 
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+
+  useEffect(() => {
+    // Kiểm tra trạng thái yêu thích khi mount
+    const fetchFavorite = async () => {
+      try {
+        const res = await getFavorites();
+        if (res.data?.data) {
+          setIsFavorite(res.data.data.some(fav => fav.product_id?._id === product._id));
+        }
+      } catch (e) {}
+    };
+    fetchFavorite();
+  }, [product._id]);
 
   const handleBuyNow = () => {
     navigate('/checkout', {
@@ -31,6 +48,28 @@ const Product = ({ data: product }) => {
         }
       }
     });
+  };
+
+  const handleToggleFavorite = async (e) => {
+    e.stopPropagation();
+    if (loadingFavorite) return;
+    setLoadingFavorite(true);
+    try {
+      if (isFavorite) {
+        const res = await removeFromFavorite(product._id);
+        console.log('Removed from favorite:', res);
+        setIsFavorite(false);
+      } else {
+        const res = await addToFavorite(product._id);
+        console.log('Added to favorite:', res);
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      alert('Có lỗi khi thao tác yêu thích!');
+      console.error('Favorite error:', err);
+    } finally {
+      setLoadingFavorite(false);
+    }
   };
 
   return (
@@ -87,10 +126,16 @@ const Product = ({ data: product }) => {
         >
           Mua ngay
         </button>
-        <button className='cursor-pointer' onClick={e => e.stopPropagation()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-          </svg>
+        <button className='cursor-pointer' onClick={handleToggleFavorite} disabled={loadingFavorite} aria-label={isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}>
+          {isFavorite ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="#ef4444" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#ef4444" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+            </svg>
+          )}
         </button>
       </div>
     </div>

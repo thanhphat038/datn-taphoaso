@@ -7,8 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getAllReviews, deleteReview, updateReviewStatus, getProductById, getUserById } from '../../service/Admin.Service.jsx';
 
 const AdminReview = () => {
   const [reviews, setReviews] = useState([]);
@@ -27,23 +26,69 @@ const AdminReview = () => {
 
 
   // Fetch reviews
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/reviews`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
-        }
-        const result = await response.json();
-        setReviews(result.data || []);
-      } catch (error) {
-        setError('Không thể tải danh sách đánh giá: ' + error.message);
-        console.error('Error fetching reviews:', error);
-      } finally {
-        setLoading(false);
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const result = await getAllReviews();
+      let reviewsArr = [];
+      if (Array.isArray(result.data)) {
+        reviewsArr = result.data;
+      } else if (Array.isArray(result.data?.data)) {
+        reviewsArr = result.data.data;
       }
-    };
+      // Map lại dữ liệu: lấy chi tiết user và sản phẩm nếu chỉ có id
+      const mappedReviews = [];
+      for (const r of reviewsArr) {
+        let user = { username: 'Ẩn danh', email: '' };
+        let product = { name: 'Sản phẩm không tồn tại', images: [] };
+        let skip = false;
+        try {
+          if (r.user_id && typeof r.user_id === 'string') {
+            const userRes = await getUserById(r.user_id);
+            if (userRes?.data?.data) {
+              user = userRes.data.data;
+            } else if (userRes?.data) {
+              user = userRes.data;
+            }
+          } else if (typeof r.user_id === 'object' && r.user_id !== null) {
+            user = r.user_id;
+          }
+        } catch (e) {
+          if (e?.response?.status === 404) skip = true; // Nếu lỗi 404 thì bỏ qua review này
+        }
+        try {
+          if (r.product_id && typeof r.product_id === 'string') {
+            const productRes = await getProductById(r.product_id);
+            if (productRes?.data?.data) {
+              product = productRes.data.data;
+            } else if (productRes?.data) {
+              product = productRes.data;
+            }
+          } else if (typeof r.product_id === 'object' && r.product_id !== null) {
+            product = r.product_id;
+          }
+        } catch (e) {
+          if (e?.response?.status === 404) skip = true; // Nếu lỗi 404 thì bỏ qua review này
+        }
+        if (!skip) {
+          mappedReviews.push({
+            ...r,
+            user_id: user,
+            product_id: product,
+          });
+        }
+      }
+      setReviews(mappedReviews);
+      console.log('Fetched reviews:', mappedReviews); // Log dữ liệu ra console
+    } catch (error) {
+      setError('Không thể tải danh sách đánh giá: ' + error.message);
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchReviews();
   }, []);
 
@@ -57,14 +102,7 @@ const AdminReview = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete review');
-      }
+      await deleteReview(reviewId);
 
       setReviews(reviews.filter(r => r._id !== reviewId));
     } catch (error) {
@@ -87,20 +125,7 @@ const AdminReview = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update review status');
-      }
+      await updateReviewStatus(reviewId, newStatus);
 
       setReviews(reviews.map(r => 
         r._id === reviewId ? { ...r, status: newStatus } : r
@@ -116,7 +141,7 @@ const AdminReview = () => {
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = 
       (review.comment && review.comment.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (review.user_id?.name && review.user_id.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      (review.user_id?.username && review.user_id.username.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
     const matchesRating = ratingFilter === 'All' || review.rating === parseInt(ratingFilter);
     return matchesSearch && matchesStatus && matchesRating;
@@ -161,6 +186,13 @@ const AdminReview = () => {
     );
   };
 
+  // Hàm giới hạn số từ
+  function limitWords(str, num) {
+    if (!str) return '';
+    const words = str.split(' ');
+    return words.length > num ? words.slice(0, num).join(' ') + '...' : str;
+  }
+
   // Table columns
   const columns = [
     {
@@ -169,10 +201,10 @@ const AdminReview = () => {
       render: (review) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white font-semibold">
-            {review.user_id?.name ? review.user_id.name.charAt(0).toUpperCase() : 'U'}
+            {review.user_id?.username ? review.user_id.username.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{review.user_id?.name || 'Người dùng ẩn danh'}</div>
+            <div className="font-semibold text-gray-900">{review.user_id?.username || 'Người dùng ẩn danh'}</div>
             <div className="text-sm text-gray-500">{review.user_id?.email || 'Không có email'}</div>
           </div>
         </div>
@@ -210,8 +242,8 @@ const AdminReview = () => {
       key: 'comment',
       render: (review) => (
         <div className="max-w-xs">
-          <div className="text-sm text-gray-600 line-clamp-2">{review.comment || 'Không có bình luận'}</div>
-          {review.comment && review.comment.length > 100 && (
+          <div className="text-sm text-gray-600 line-clamp-2">{limitWords(review.user_review, 3) || 'Không có bình luận'}</div>
+          {review.user_review && review.user_review.length > 100 && (
             <button
               className="text-[#06AEF4] text-sm hover:underline mt-1"
               onClick={() => {
@@ -230,12 +262,11 @@ const AdminReview = () => {
       key: 'createdAt',
       render: (review) => (
         <div className="text-sm text-gray-600">
-          {review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN', {
+          {review.create_at ? new Date(review.create_at).toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+
           }) : 'N/A'}
         </div>
       )
@@ -337,9 +368,18 @@ const AdminReview = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý đánh giá</h1>
-          <p className="text-gray-600 mt-1">Quản lý đánh giá sản phẩm từ khách hàng</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý đánh giá</h1>
+            <p className="text-gray-600 mt-1">Quản lý đánh giá sản phẩm từ khách hàng</p>
+          </div>
+          <button
+            className="px-4 py-2 bg-[#06AEF4] text-white rounded hover:bg-[#0590d8] transition"
+            onClick={fetchReviews}
+            disabled={loading}
+          >
+            {loading ? 'Đang tải...' : 'Làm mới'}
+          </button>
         </div>
 
         {/* Statistics */}
@@ -424,10 +464,10 @@ const AdminReview = () => {
               {/* User Info */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white text-xl font-semibold">
-                  {currentReview.user_id?.name ? currentReview.user_id.name.charAt(0).toUpperCase() : 'U'}
+                  {currentReview.user_id?.username ? currentReview.user_id.username.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900">{currentReview.user_id?.name || 'Người dùng ẩn danh'}</div>
+                  <div className="font-semibold text-gray-900">{currentReview.user_id?.username || 'Người dùng ẩn danh'}</div>
                   <div className="text-sm text-gray-500">{currentReview.user_id?.email || 'Không có email'}</div>
                 </div>
               </div>
