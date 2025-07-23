@@ -46,11 +46,7 @@ const Header = () => {
     //     product.data.name.toLowerCase().includes(query.toLowerCase())
     // );
     const filteredProducts = useMemo(() => (
-<<<<<<< HEAD
         query.trim() ? products.filter(product => product.name?.toLowerCase().includes(query.toLowerCase())) : []
-=======
-        query.trim() ? products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())) : []
->>>>>>> thienadmin
     ), [query, products]);
 
     const navigate = useNavigate();
