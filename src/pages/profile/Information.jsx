@@ -1,6 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getProfile, updateProfile } from '../../service/UserService';
+
 const Information = () => {
-  const [gender, setGender] = useState('male');
+  const [user, setUser] = useState({ username: '', email: '', phone: '', gender: 'male' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getProfile();
+        setUser({
+          username: data.username || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          gender: data.gender || 'male',
+        });
+      } catch (err) {
+        setError('Không thể tải thông tin người dùng');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await updateProfile(user);
+      setSuccess('Cập nhật thông tin thành công!');
+    } catch (err) {
+      setError('Cập nhật thông tin thất bại!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       {/* Profile Picture Section */}
@@ -29,8 +76,8 @@ const Information = () => {
               type="radio"
               name="gender"
               value="male"
-              checked={gender === 'male'}
-              onChange={(e) => setGender(e.target.value)}
+              checked={user.gender === 'male'}
+              onChange={handleChange}
               className="w-4 h-4 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-gray-700">Anh</span>
@@ -40,8 +87,8 @@ const Information = () => {
               type="radio"
               name="gender"
               value="female"
-              checked={gender === 'female'}
-              onChange={(e) => setGender(e.target.value)}
+              checked={user.gender === 'female'}
+              onChange={handleChange}
               className="w-4 h-4 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-gray-700">Chị</span>
@@ -51,34 +98,30 @@ const Information = () => {
               type="radio"
               name="gender"
               value="other"
-              checked={gender === 'other'}
-              onChange={(e) => setGender(e.target.value)}
+              checked={user.gender === 'other'}
+              onChange={handleChange}
               className="w-4 h-4 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-gray-700">Khác</span>
           </label>
         </div>
       </div>
+      {/* Thông báo */}
+      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+      {success && <div className="text-green-600 text-center mb-4">{success}</div>}
       {/* Profile Form */}
-      <div className="space-y-6 max-w-lg mx-auto">
+      <form className="space-y-6 max-w-lg mx-auto" onSubmit={handleSave}>
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             Tên tài khoản
           </label>
           <input
             type="text"
+            name="username"
+            value={user.username}
+            onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             placeholder="Nhập tên tài khoản"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Mật khẩu
-          </label>
-          <input
-            type="password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-            placeholder="Nhập mật khẩu"
           />
         </div>
         <div>
@@ -87,6 +130,9 @@ const Information = () => {
           </label>
           <input
             type="tel"
+            name="phone"
+            value={user.phone}
+            onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             placeholder="Nhập số điện thoại"
           />
@@ -97,20 +143,23 @@ const Information = () => {
           </label>
           <input
             type="email"
+            name="email"
+            value={user.email}
+            onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             placeholder="Nhập địa chỉ email"
           />
         </div>
         {/* Action Buttons */}
         <div className="flex gap-4 pt-6">
-          <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
+          <button type="button" className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium" onClick={() => window.location.reload()}>
             Cập nhật
           </button>
-          <button className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium">
-            Lưu
+          <button type="submit" className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium" disabled={loading}>
+            {loading ? 'Đang lưu...' : 'Lưu'}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
