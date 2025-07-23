@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProductDetailData, useRelatedProducts } from '../controller/Product.controller';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
-import { CartContext } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { addToCart } from '../service/Cart.service';
 import Product from '../components/Product';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -13,8 +12,17 @@ const ProductDetail = () => {
 
     const [mainImage, setMainImage] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [pendingAddQty, setPendingAddQty] = useState(0);
 
-    const { addProduct } = useContext(CartContext);
+    const { id } = useParams();
+    const pd = useProductDetailData(id) || [];
+    const product = pd.data || {};
+
+    // Ref để debounce khi thêm vào giỏ hàng
+    const debounceAddToCart = useRef();
+    const pendingAddQtyRef = useRef(0);
+
+    const relatedProducts = useRelatedProducts(product._id, 20);
 
     const handleQuantityChange = (delta) => {
         setQuantity((prev) => {
@@ -24,25 +32,29 @@ const ProductDetail = () => {
             return newQuantity;
         });
     };
-    // console.log(useParams());
-    const { id } = useParams();
-    const pd = useProductDetailData(id) || [];
-    console.log(pd);
-    const product = pd.data || {};
-    // Lấy danh sách sản phẩm liên quan
-    const relatedProducts = useRelatedProducts(product._id, 20);
 
     const handleAddToCart = () => {
-        if (product) {
-            addProduct({
-                id: product._id,
-                name: product.name,
-                image: product.images && product.images.length > 0 ? product.images[0] : '',
-                price: product.price,
-                quantity: quantity
-            });
+        pendingAddQtyRef.current += quantity;
+        setPendingAddQty(pendingAddQtyRef.current);
+
+        if (debounceAddToCart.current) {
+            clearTimeout(debounceAddToCart.current);
         }
+        debounceAddToCart.current = setTimeout(async () => {
+            if (pendingAddQtyRef.current > 0) {
+                try {
+                    await addToCart(product._id, pendingAddQtyRef.current);
+                    window.dispatchEvent(new Event('cart-updated'));
+                } catch (err) {
+                    alert('Thêm vào giỏ hàng thất bại!');
+                }
+                pendingAddQtyRef.current = 0;
+                setPendingAddQty(0);
+            }
+            debounceAddToCart.current = null;
+        }, 400);
     };
+
     if (product.images) return (
         <main className="container mx-auto py-10 px-4">
             <div className="flex flex-wrap lg:flex-nowrap gap-8">
@@ -66,12 +78,12 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="w-full lg:w-1/2">
-                    <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+<h1 className="text-3xl font-bold mb-4">{product.name}</h1>
 
                     <div className="mb-4">
-                        <span className="text-2xl font-semibold text-red-600 mr-2">{formatCurrency(product.price)}</span>
+                        <span className="text-2xl font-semibold text-red-600 mr-2">{formatCurrency(product.price )}</span>
                         {product.price && (
-                            <span className="text-gray-500 line-through">{formatCurrency(product.price)}</span>
+                            <span className="text-gray-500 line-through">{formatCurrency(product.price )}</span>
                         )}
                     </div>
 
@@ -86,9 +98,9 @@ const ProductDetail = () => {
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                             </svg>
                         ))}
-                        <span className='text-[14px] ms-2'> {product.rating.rate}</span>
+                        <span className='text-[14px] ms-2'> {product.rating.rate}/5</span>
                     </p>
-                    {/* <p className='text-[14px] mb-3'> {product.rating.count} đánh giá</p> */}
+                    <p className='text-[14px] mb-3'> {product.rating.count} đánh giá</p>
 
                     <div className="flex items-center mb-6">
                         <button
@@ -106,15 +118,15 @@ const ProductDetail = () => {
                         />
                         <button
                             onClick={() => handleQuantityChange(1)}
-                            className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center rounded-r-md hover:bg-gray-300"
+className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center rounded-r-md hover:bg-gray-300"
                         >
                             +
                         </button>
-                        <span className="ml-4 text-sm text-gray-600">Còn hàng: {product.in_stock || 'X'}</span> {/* Placeholder */}
+                        <span className="ml-4 text-sm text-gray-600">Còn hàng: {product.stock || 'X'}</span> {/* Placeholder */}
                     </div>
 
                     <div className="flex gap-4">
-                        <button
+                        <button 
                             onClick={handleAddToCart}
                             className="bg-[#06AEF4] text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
                         >
@@ -233,4 +245,3 @@ const ProductDetail = () => {
     );
 };
 export default ProductDetail;
-

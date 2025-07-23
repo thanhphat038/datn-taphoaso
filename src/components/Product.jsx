@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link, useNavigate,  } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
 
 export const formatCurrency = (value) => {
   if (typeof value !== 'number') return '—';
@@ -16,8 +17,27 @@ const Product = ({ data: product }) => {
   const maxStars = 5;
   const imageUrl = product?.images?.[0] || '/placeholder.png';
 
-  const { addItem } = useContext(CartContext);
+
   const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+
+  useEffect(() => {
+    // Kiểm tra trạng thái yêu thích khi mount
+    const fetchFavorite = async () => {
+      try {
+        const res = await getFavorites();
+        if (res.data?.data) {
+          setIsFavorite(res.data.data.some(fav => fav.product_id?._id === product._id));
+        }
+      } catch (e) {}
+    };
+    fetchFavorite();
+  }, [product._id]);
+
+  useEffect(() => {
+    // Xóa mọi chỗ dùng FavoritesContext nếu có
+  }, [product._id]);
 
   const handleBuyNow = () => {
     navigate('/checkout', {
@@ -31,6 +51,32 @@ const Product = ({ data: product }) => {
         }
       }
     });
+  };
+
+  const handleToggleFavorite = async (e) => {
+    e.stopPropagation();
+    if (loadingFavorite) return;
+    setLoadingFavorite(true);
+    try {
+      if (isFavorite) {
+        const res = await removeFromFavorite(product._id);
+        console.log('Removed from favorite:', res);
+        setIsFavorite(false);
+      } else {
+        const res = await addToFavorite(product._id);
+        console.log('Added to favorite:', res);
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      alert('Có lỗi khi thao tác yêu thích!');
+      console.error('Favorite error:', err);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    // Xóa mọi chỗ dùng FavoritesContext nếu có
   };
 
   return (
@@ -87,10 +133,16 @@ const Product = ({ data: product }) => {
         >
           Mua ngay
         </button>
-        <button className='cursor-pointer' onClick={e => e.stopPropagation()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-          </svg>
+        <button className='cursor-pointer' onClick={handleToggleFavorite} disabled={loadingFavorite} aria-label={isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}>
+          {isFavorite ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="#ef4444" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#ef4444" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+            </svg>
+          )}
         </button>
       </div>
     </div>
@@ -104,22 +156,6 @@ const StarIcon = ({ filled = false }) => (
     viewBox='0 0 20 20'
   >
     <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z' />
-  </svg>
-);
-const HeartIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    fill='none'
-    viewBox='0 0 24 24'
-    strokeWidth={1.5}
-    stroke='currentColor'
-    className='w-6 h-6 text-gray-600 hover:text-red-500 transition-colors'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'
-    />
   </svg>
 );
 
