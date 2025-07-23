@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Cookies from "js-cookie";
 import Information from './profile/Information';
@@ -16,6 +16,10 @@ const ProfilePage = () => {
 
   // Xác định tab hiện tại dựa vào pathname
   const currentTab = location.pathname.split('/').pop();
+
+  // Thêm state cho xác nhận mật khẩu mới
+  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -70,6 +74,15 @@ const ProfilePage = () => {
                 </svg>
                 Sản phẩm yêu thích
               </NavLink>
+              <button
+                className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold shadow hover:from-blue-500 hover:to-blue-700"
+                onClick={() => setShowChangePassword(true)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Đổi mật khẩu
+              </button>
               <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
                 Đăng xuất
               </button>
@@ -86,6 +99,97 @@ const ProfilePage = () => {
             <Route path="favorites" element={<ProductFavorite />} />
           </Routes>
         </div>
+        {showChangePassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-30">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold"
+                onClick={() => setShowChangePassword(false)}
+                aria-label="Đóng"
+              >
+                &times;
+              </button>
+              <h2 className="text-xl font-semibold mb-6">Đổi mật khẩu</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu hiện tại</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập mật khẩu hiện tại"
+                    value={passwords.currentPassword}
+                    onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu mới</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập mật khẩu mới"
+                    value={passwords.newPassword}
+                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Xác nhận mật khẩu mới</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập lại mật khẩu mới"
+                    value={passwords.confirmPassword}
+                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                  />
+                </div>
+                <div className="flex gap-4 pt-6">
+                  <button
+                    className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
+                    onClick={async () => {
+                      // setChangePasswordLoading(true); // This state was removed
+                      // setChangePasswordError(null); // This state was removed
+                      // setChangePasswordSuccess(null); // This state was removed
+                      // Validate trước khi gọi API
+                      if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
+                        // setChangePasswordError('Vui lòng nhập đầy đủ các trường!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
+                      if (passwords.newPassword.length < 6) {
+                        // setChangePasswordError('Mật khẩu mới phải có ít nhất 6 ký tự!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
+                      if (passwords.newPassword !== passwords.confirmPassword) {
+                        // setChangePasswordError('Mật khẩu xác nhận không khớp!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
+                      try {
+                        // await changePassword(passwords.currentPassword, passwords.newPassword); // This function was removed
+                        // setChangePasswordSuccess('Đổi mật khẩu thành công'); // This state was removed
+                        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                      } catch (error) {
+                        // setChangePasswordError(error.message); // This state was removed
+                      } finally {
+                        // setChangePasswordLoading(false); // This state was removed
+                      }
+                    }}
+                    // disabled={changePasswordLoading} // This state was removed
+                  >
+                    {/* {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'} */}
+                    Đổi mật khẩu
+                  </button>
+                </div>
+                {/* {changePasswordError && ( // This state was removed
+                  <p className="text-red-500 mt-2 text-center">{changePasswordError}</p>
+                )} */}
+                {/* {changePasswordSuccess && ( // This state was removed
+                  <p className="text-green-500 mt-2 text-center">{changePasswordSuccess}</p>
+                )} */}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
