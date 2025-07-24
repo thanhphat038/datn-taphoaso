@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 const Order = () => {
   const [orders] = useState([
     {
@@ -14,12 +15,35 @@ const Order = () => {
       originalTotal: 100000
     }
   ]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
   const totalPages = Math.ceil(orders.length / ordersPerPage);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+
+  const handleOpenPopup = (product) => {
+    setSelectedProduct(product);
+    setRating(0);
+    setComment('');
+    setShowPopup(true);
+  };
+
+  const handleSubmitReview = () => {
+    console.log('Đánh giá:', {
+      product: selectedProduct,
+      rating,
+      comment
+    });
+    setShowPopup(false);
+  };
+
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <div className="space-y-6">
@@ -45,6 +69,12 @@ const Order = () => {
                   <div className="flex-grow min-w-0">
                     <h4 className="font-medium text-gray-800 mb-1 truncate">{product.name}</h4>
                     <p className="text-red-500 font-medium">{product.price.toLocaleString()}đ</p>
+                    <button
+                      className="mt-2 px-4 py-1.5 text-sm rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors"
+                      onClick={() => handleOpenPopup(product)}
+                    >
+                      Đánh giá
+                    </button>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span className="w-8 text-center font-medium">{product.quantity}</span>
@@ -77,7 +107,60 @@ const Order = () => {
           </div>
         ))}
       </div>
+
+      {/* Popup đánh giá */}
+      {showPopup && selectedProduct && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative">
+            <button
+              className="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl"
+              onClick={() => setShowPopup(false)}
+            >
+              &times;
+            </button>
+            <div className="flex items-center gap-6 mb-6">
+              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-20 h-20 rounded-xl object-cover" />
+              <div>
+                <h3 className="font-semibold text-2xl text-gray-800">{selectedProduct.name}</h3>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-base text-gray-600 mb-2">Chọn số sao:</p>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    onClick={() => setRating(star)}
+                    className={`cursor-pointer text-3xl ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-base text-gray-600 mb-2">Nội dung đánh giá:</p>
+              <textarea
+                rows={5}
+                className="w-full border border-gray-300 rounded-lg p-3 text-base"
+                placeholder="Nhập nội dung đánh giá..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={handleSubmitReview}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-base font-semibold"
+            >
+              Gửi đánh giá
+            </button>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 };
-export default Order; 
+
+export default Order;
