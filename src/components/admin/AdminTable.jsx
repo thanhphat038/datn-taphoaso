@@ -77,7 +77,7 @@ const AdminTable = ({
             </tr>
           ) : (
             data.map((item, rowIndex) => (
-              <React.Fragment key={item.id || rowIndex}>
+              <React.Fragment key={item._id || rowIndex}>
                 <tr 
                   className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
                     onRowClick ? 'cursor-pointer' : ''
@@ -89,8 +89,8 @@ const AdminTable = ({
                       <input
                         type="checkbox"
                         className="rounded border-gray-300"
-                        checked={selectedIds.includes(item.id)}
-                        onChange={(e) => onSelectOne && onSelectOne(item.id, e.target.checked)}
+                        checked={selectedIds.includes(item._id)}
+                        onChange={(e) => onSelectOne && onSelectOne(item._id, e.target.checked)}
                       />
                     </td>
                   )}
@@ -103,7 +103,7 @@ const AdminTable = ({
                     </td>
                   ))}
                 </tr>
-                {expandedRowId === item.id && renderExpandedRow && (
+                {expandedRowId === item._id && renderExpandedRow && (
                   <tr>
                     <td colSpan={columns.length + (selectable ? 1 : 0)} className="border-b border-gray-200">
                       {renderExpandedRow(item)}
