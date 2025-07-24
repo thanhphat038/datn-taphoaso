@@ -7,7 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService } from '../../service/Admin.Service.jsx';
+import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getProductById, getOrderDetailsByOrderId } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -20,6 +20,7 @@ const OrderPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [orderDetailsMap, setOrderDetailsMap] = useState({});
 
   // Modal states
   const [expandedOrderId, setExpandedOrderId] = useState(null);
@@ -71,8 +72,33 @@ const OrderPage = () => {
       try {
         setLoading(true);
         const response = await getAllOrders();
-        const ordersData = response.data.data;
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
+        const ordersData = response.data.data.orders || [];
+        console.log('Orders from API:', ordersData); // Log dữ liệu trả về từ API
+        // Lấy chi tiết user và sản phẩm cho từng order
+        const ordersWithDetails = await Promise.all((ordersData).map(async order => {
+          let user = null;
+          try {
+            if (order.user_id && typeof order.user_id === 'string') {
+              const userRes = await getUserById(order.user_id);
+              user = userRes?.data?.data || userRes?.data;
+            } else if (typeof order.user_id === 'object' && order.user_id !== null) {
+              user = order.user_id;
+            }
+          } catch (e) {}
+          // Lấy chi tiết sản phẩm cho từng item
+          let items = order.items || [];
+          items = await Promise.all(items.map(async item => {
+            let product = null;
+            try {
+              // Luôn gọi API lấy chi tiết sản phẩm theo id
+              const productRes = await getProductById(item.product_id);
+              product = productRes?.data?.data || productRes?.data;
+            } catch (e) {}
+            return { ...item, product };
+          }));
+          return { ...order, user, items };
+        }));
+        setOrders(ordersWithDetails);
       } catch (error) {
         setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);
@@ -161,7 +187,7 @@ const OrderPage = () => {
           <div>
             <div className="font-semibold text-gray-900">#{order._id?.slice(-8)}</div>
             <div className="text-sm text-gray-500">
-              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+              {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN') : 'N/A'}
             </div>
           </div>
         </div>
@@ -176,8 +202,8 @@ const OrderPage = () => {
             <FaUser className="w-3 h-3 text-gray-600" />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{order.receiver || 'Không có tên'}</div>
-            <div className="text-sm text-gray-500">{order.sdt || 'Không có SĐT'}</div>
+            <div className="font-medium text-gray-900">{order.user?.username || order.receiver || 'Không có tên'}</div>
+            <div className="text-sm text-gray-500">{order.user?.email || order.sdt || 'Không có SĐT'}</div>
           </div>
         </div>
       )
@@ -197,7 +223,7 @@ const OrderPage = () => {
       key: 'total',
       render: (order) => (
         <div className="text-right">
-          <div className="font-semibold text-gray-900">{formatCurrency(calculateOrderTotal(order))}</div>
+          <div className="font-semibold text-gray-900">{formatCurrency(order.total_amount)}</div>
           <div className="text-sm text-gray-500">
             {order.payment_method === 'cod' ? 'Tiền mặt' : order.payment_method || 'N/A'}
           </div>
@@ -226,7 +252,10 @@ const OrderPage = () => {
             {
               label: 'Xem chi tiết',
               icon: FaEye,
-              onClick: () => setExpandedOrderId(expandedOrderId === order._id ? null : order._id)
+              onClick: () => {
+                console.log('Xem chi tiết:', order._id);
+                setExpandedOrderId(expandedOrderId === order._id ? null : order._id);
+              }
             },
             {
               label: 'Sửa trạng thái',
@@ -274,55 +303,88 @@ const OrderPage = () => {
   };
 
   // Render expanded row
-  const renderExpandedRow = (order) => (
-    <div className="p-6 bg-gray-50 border-t border-gray-200">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Order Items */}
-        <AdminCard title="Chi tiết sản phẩm" className="h-fit">
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {order.items && order.items.length > 0 ? (
-              order.items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100">
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.product_id?.name || 'Sản phẩm không xác định'}</div>
-                    <div className="text-sm text-gray-500">Số lượng: {item.qty}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-gray-900">{formatCurrency(item.price * item.qty)}</div>
-                    <div className="text-sm text-gray-500">{formatCurrency(item.price)}/sp</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-500 py-4">Không có sản phẩm</div>
-            )}
+  const renderExpandedRow = (order) => {
+    const [details, setDetails] = React.useState([]);
+    React.useEffect(() => {
+      let isMounted = true;
+      const fetchDetails = async () => {
+        try {
+          const res = await getOrderDetailsByOrderId(order._id);
+          if (isMounted) setDetails(res.data?.data || []);
+        } catch (e) {
+          if (isMounted) setDetails([]);
+        }
+      };
+      fetchDetails();
+      return () => { isMounted = false; };
+    }, [order._id]);
+    return (
+      <div className="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 border-t border-gray-200">
+        {/* Danh sách sản phẩm */}
+        <div className="flex-1 overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg shadow border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 text-left">Sản phẩm</th>
+                <th className="px-4 py-2 text-right">Giá</th>
+                <th className="px-4 py-2 text-right">Số lượng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {details.length > 0 ? (
+                details.map((item, idx) => (
+                  <tr key={idx} className="border-b last:border-b-0">
+                    <td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
+                    <td className="px-4 py-2 text-right">{formatCurrency(item.cur_price)}</td>
+                    <td className="px-4 py-2 text-right">x{item.qty}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan={3} className="text-center text-gray-500 py-4">Không có sản phẩm</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Tổng hợp đơn hàng */}
+        <div className="w-full md:w-96 flex-shrink-0 bg-white rounded-lg shadow p-6 flex flex-col gap-3">
+          <div className="flex justify-between items-center">
+            <span>Tiền hàng</span>
+            <span>{formatCurrency(order.total_amount)}</span>
           </div>
-        </AdminCard>
-
-        {/* Order Summary */}
-        <AdminCard title="Thông tin đơn hàng" className="h-fit">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100">
-              <span className="text-gray-600">Tổng tiền hàng:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(calculateOrderTotal(order))}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100">
-              <span className="text-gray-600">Phương thức thanh toán:</span>
-              <span className="font-medium text-gray-900">{order.payment_method === 'cod' ? 'Tiền mặt' : order.payment_method || 'N/A'}</span>
-            </div>
-            <div className="p-3 bg-white rounded-lg border border-gray-100">
-              <div className="text-gray-600 mb-2">Ghi chú:</div>
-              <div className="text-gray-900">{order.note || 'Không có ghi chú'}</div>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#06AEF4] to-[#0590d8] rounded-lg text-white">
-              <span>Trạng thái hiện tại:</span>
-              <span className="font-semibold">{getStatusInfo(order.status).label}</span>
-            </div>
+          <div className="flex justify-between items-center">
+            <span>Phí giao hàng, phụ phí</span>
+            <span>Miễn phí</span>
           </div>
-        </AdminCard>
+          <div className="flex justify-between items-center">
+            <span>Tiền được giảm</span>
+            <span className="text-red-500">- {formatCurrency(order.discount || 0)}</span>
+          </div>
+          <div className="flex justify-between items-center font-bold text-lg mt-2">
+            <span>Tổng đơn</span>
+            <span>{formatCurrency(order.total_amount - (order.discount || 0))}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Đã thanh toán</span>
+            <span className="font-bold text-green-600">{formatCurrency(order.total_amount - (order.discount || 0))}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Thanh toán</span>
+            <span>{order.payment_method === 'cod' ? 'Tiền mặt' : order.payment_method || 'N/A'}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Trạng thái</span>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border bg-green-100 text-green-800 border-green-200">
+              {getStatusInfo(order.status).label}
+            </span>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">Chỉnh đơn hàng</button>
+            <button className="flex-1 px-4 py-2 rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition">Hủy bỏ</button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <AdminLayout>

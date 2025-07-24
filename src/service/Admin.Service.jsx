@@ -56,12 +56,24 @@ export const getAllOrders = () => {
     return axios.get(`${api}/orders`, { headers: getAuthHeaders() });
 };
 
-export const updateOrderStatus = (id, status) => {
-    return axios.put(`${api}/orders/${id}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+export const getOrderById = (id) => {
+    return axios.get(`${api}/orders/${id}`, { headers: getAuthHeaders() });
+};
+
+export const createOrder = (data) => {
+    return axios.post(`${api}/orders`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const updateOrder = (id, data) => {
+    return axios.put(`${api}/orders/${id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const deleteOrder = (id) => {
     return axios.delete(`${api}/orders/${id}`, { headers: getAuthHeaders() });
+};
+
+export const updateOrderStatus = (id, status) => {
+    return axios.put(`${api}/orders/${id}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const getProductById = (id) => {
@@ -102,4 +114,8 @@ export const updateCommentStatus = (commentId, status) => {
 
 export const getUserById = (id) => {
     return axios.get(`${api}/users/${id}`, { headers: getAuthHeaders() });
+};
+
+export const getOrderDetailsByOrderId = (orderId) => {
+    return axios.get(`${api}/orderdetails?order_id=${orderId}`, { headers: getAuthHeaders() });
 };
