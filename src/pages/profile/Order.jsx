@@ -70,11 +70,13 @@ const Order = () => {
                     <h4 className="font-medium text-gray-800 mb-1 truncate">{product.name}</h4>
                     <p className="text-red-500 font-medium">{product.price.toLocaleString()}đ</p>
                     <button
-                      className="mt-2 px-4 py-1.5 text-sm rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors"
                       onClick={() => handleOpenPopup(product)}
+                      className="mt-2 px-4 py-2 text-sm rounded-md text-white font-medium transition-colors bg-[#fcd34d] hover:bg-[#fbbf24]"
                     >
                       Đánh giá
                     </button>
+
+
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span className="w-8 text-center font-medium">{product.quantity}</span>

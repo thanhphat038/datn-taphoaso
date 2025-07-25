@@ -100,7 +100,7 @@ const ProductDetail = () => {
                         ))}
                         <span className='text-[14px] ms-2'> {product.rating.rate}/5</span>
                     </p>
-                    <p className='text-[14px] mb-3'> {product.rating.count} đánh giá</p>
+                    {/* <p className='text-[14px] mb-3'> {product.rating.count} đánh giá</p> */}
 
                     <div className="flex items-center mb-6">
                         <button

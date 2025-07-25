@@ -1,8 +1,13 @@
 @baseUrl = http://localhost:3000/api
-
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzMjkzNDczLCJleHAiOjE3NTM4OTgyNzN9.LyY3tvZ2p023MIM6VKsD1XPnDHqJToAPsFm89AKjzd4
-
-
+<<<<<<< HEAD
+<<<<<<< HEAD
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjgxM2MwYzQ4MmMyZDJhMWI2MWQyNiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyODUxNDkwLCJleHAiOjE3NTM0NTYyOTB9.J-pCwtJKyEyU1o12h9eJIGLrAN135vAKGwue6BtqFfs
+=======
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzMTY4MDMwLCJleHAiOjE3NTM3NzI4MzB9.hjEPawZwyN1oRIkVTalXWcAgFwz9a8D4GVUMxGsd9yg
+>>>>>>> phat
+=======
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzhhMzQ3ZDg2OWQyMTA0MzI3ZGRiMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyNzM2NTk5LCJleHAiOjE3NTMzNDEzOTl9.GuqULQQRAkDcvzKNjl4GblZgykMfuKU0-A6A7CeSQ8M
+>>>>>>> devThai
 ### Variables
 @userId = 685a9ea76875fcf8f499fa9a
 
@@ -210,16 +215,16 @@ Content-Type: application/json
   "address": "Số 123, Quận ABC, TP XYZ",
   "receiver": "Nguyễn Văn A",
   "sdt": "0123456789",
-  "voucher_id":"6869399cba26bcc881d6ed88",
   "items": [
     {
-      "product_id": "6862d1c32df5d5159cc51ef9",
+      "product_id": "{{productId}}",
       "qty": 2
     }
   ],
   "payment_method": "cod",
   "note": "Vui lòng giao buổi sáng"
 }
+
 ### Get my orders (User)
 GET {{baseUrl}}/orders/my
 Authorization: Bearer {{authToken}}
@@ -401,7 +406,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "product_id": "6862d1c32df5d5159cc51ef9",
+  "product_id": "{{productId}}",
 
   "qty": 2
 }
