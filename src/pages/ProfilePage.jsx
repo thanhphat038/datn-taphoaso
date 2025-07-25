@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Cookies from "js-cookie";
 import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
 import ProductFavorite from './profile/ProductFavorite';
+import axios from 'axios'; // Nếu bạn dùng axios
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -19,6 +20,8 @@ const ProfilePage = () => {
   const [changePasswordError, setChangePasswordError] = useState(null);
   const [changePasswordSuccess, setChangePasswordSuccess] = useState(null);
 
+  console.log('profile:', profile); // Đặt ở đây
+
   const handleLogout = () => {
     Cookies.remove("auth_token");
     window.location.href = "/login";
@@ -30,9 +33,26 @@ const ProfilePage = () => {
   const location = useLocation();
   const currentTab = location.pathname.split('/').pop();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setActiveTab(currentTab);
   }, [currentTab]);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await axios.get('/api/auth/profile', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        // Nếu response là { data: { ...user } }
+        setProfile(res.data.data || res.data);
+      } catch (err) {
+        console.error('Lỗi lấy profile:', err);
+      }
+    }
+    fetchProfile();
+  }, []);
 
   // Thêm state cho xác nhận mật khẩu mới
   // const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -46,12 +66,16 @@ const ProfilePage = () => {
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             {/* Profile Icon */}
             <div className="flex items-center gap-3 p-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
+              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden">
+                {profile && profile.avatar ? (
+                  <img src={profile.avatar} alt="avatar" className="w-10 h-10 object-cover rounded-full" />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
-              <span className="font-medium">{profile ? profile.username : 'Tên'}</span>
+              <span className="font-medium">{profile ? (profile.full_name || profile.username) : 'Tên'} </span>
             </div>
 
             {/* Navigation Menu */}

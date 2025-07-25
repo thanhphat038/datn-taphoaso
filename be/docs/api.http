@@ -381,10 +381,6 @@ Content-Type: application/json
 {
   "user_id": "user685a9ea76875fcf8f499fa9aId",
   "product_id": "6862d1c32df5d5159cc51f08"
-<<<<<<< HEAD
-=======
-
->>>>>>> thienadmin
 }
 
 ### Remove from favorites

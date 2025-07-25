@@ -4,18 +4,25 @@ import { useParams, Link } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
 import { addToCart } from '../service/Cart.service';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
+import { getProductComments, postComment } from '../service/Comment.service';
 
 const ProductDetail = () => {
 
     const [mainImage, setMainImage] = useState('');
     const [quantity, setQuantity] = useState(1);
-    const [pendingAddQty, setPendingAddQty] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(false);
 
     const { id } = useParams();
     const pd = useProductDetailData(id) || [];
     const product = pd.data || {};
+
+    const [comments, setComments] = useState([]);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [newComment, setNewComment] = useState('');
+    const [postingComment, setPostingComment] = useState(false);
+    const [showAllComments, setShowAllComments] = useState(false);
+    const COMMENTS_TO_SHOW = 5;
 
     // Ref để debounce khi thêm vào giỏ hàng
     const debounceAddToCart = useRef();
@@ -24,14 +31,20 @@ const ProductDetail = () => {
     useEffect(() => {
         // Kiểm tra trạng thái yêu thích khi mount
         const fetchFavorite = async () => {
-            try {
-                const res = await getFavorites();
-                if (res.data?.data) {
-                    setIsFavorite(res.data.data.some(fav => fav.product_id?._id === product._id));
-                }
-            } catch (e) {}
+            const res = await getFavorites();
+            if (res.data?.data) {
+                setIsFavorite(res.data.data.some(fav => fav.product_id?._id === product._id));
+            }
         };
         if (product._id) fetchFavorite();
+    }, [product._id]);
+
+    useEffect(() => {
+      if (!product._id) return;
+      setLoadingComments(true);
+      getProductComments(product._id)
+        .then(data => setComments(data.data || []))
+        .finally(() => setLoadingComments(false));
     }, [product._id]);
 
     const handleToggleFavorite = async () => {
@@ -45,7 +58,7 @@ const ProductDetail = () => {
                 await addToFavorite(product._id);
                 setIsFavorite(true);
             }
-        } catch (err) {
+        } catch {
             alert('Có lỗi khi thao tác yêu thích!');
         } finally {
             setLoadingFavorite(false);
@@ -63,7 +76,7 @@ const ProductDetail = () => {
 
     const handleAddToCart = () => {
         pendingAddQtyRef.current += quantity;
-        setPendingAddQty(pendingAddQtyRef.current);
+        // setPendingAddQty(pendingAddQtyRef.current); // This line was removed as per the edit hint
 
         if (debounceAddToCart.current) {
             clearTimeout(debounceAddToCart.current);
@@ -73,15 +86,34 @@ const ProductDetail = () => {
                 try {
                     await addToCart(product._id, pendingAddQtyRef.current);
                     window.dispatchEvent(new Event('cart-updated'));
-                } catch (err) {
+                } catch {
                     alert('Thêm vào giỏ hàng thất bại!');
                 }
                 pendingAddQtyRef.current = 0;
-                setPendingAddQty(0);
+                // setPendingAddQty(0); // This line was removed as per the edit hint
             }
             debounceAddToCart.current = null;
         }, 400);
     };
+
+    const handlePostComment = async () => {
+      if (!newComment.trim()) return;
+      setPostingComment(true);
+      try {
+        await postComment(product._id, newComment);
+        setNewComment('');
+        // Reload lại toàn bộ bình luận từ server
+        const data = await getProductComments(product._id);
+        setComments(data.data || []);
+      } catch (err) {
+        console.log("Lỗi khi gửi bình luận", err);
+        // Có thể alert hoặc hiển thị thông báo lỗi ở đây nếu muốn
+      } finally {
+        setPostingComment(false);
+      }
+    };
+
+    const displayedComments = showAllComments ? comments : comments.slice(0, COMMENTS_TO_SHOW);
 
     if (product.images) return (
         <main className="container mx-auto py-10 px-4">
@@ -197,73 +229,55 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                             type="text"
                             placeholder="Bình luận"
                             className="w-full border-none outline-none bg-transparent text-[16px]"
+                            value={newComment}
+                            onChange={e => setNewComment(e.target.value)}
+                            disabled={postingComment}
                         />
                         <div className="flex justify-end mt-2">
-                            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2">
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            <button
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2"
+                                onClick={handlePostComment}
+                                disabled={postingComment}
+                            >
                                 Gửi
                             </button>
                         </div>
                     </div>
-                    {/* Danh sách bình luận (dữ liệu tĩnh) */}
+                    {/* Danh sách bình luận */}
                     <div className="space-y-6">
-                        {[1,2,3].map((item, idx) => (
-                            <div key={idx} className="border border-blue-300 rounded-lg p-4">
-{/* Thông tin người dùng và đánh giá */}
-                                <div className="flex items-center gap-3 mb-2">
-                                    <img src="https://i.imgur.com/0y0y0y0.png" alt="avatar" className="w-10 h-10 rounded-full border" />
-                                    <div>
-                                        <div className="font-semibold">Admin</div>
-                                        {/* Hiển thị 5 sao vàng */}
-                                        {/* <div className="flex items-center gap-1">
-                                            
-                                            {[...Array(5)].map((_, i) => (
-                                                <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" /></svg>
-                                            ))}
-                                        </div> */}
-                                    </div>
-                                    <div className="ml-auto text-xs text-gray-500">00:00, 20/5</div>
-                                </div>
-                                {/* Nội dung bình luận */}
-                                <div className="bg-[#f6f6f6] rounded-lg p-3 ml-12 mb-2">
-                                    Xà lách tươi, giòn và sạch, rất thích hợp cho các món salad và ăn kèm. Hương vị nhẹ, dễ ăn, cảm giác thanh mát. Rau được bảo quản tốt, không héo úa. Rất hài lòng về chất lượng, sẽ tiếp tục ủng hộ.
-                                </div>
-                                {/* Hành động */}
-                                <div className="flex items-center gap-6 ml-12">
-                                    <button className="flex items-center gap-1 text-blue-500 hover:underline text-[15px]">
-                                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>
-                                        Trả lời
-                                    </button>
-                                    <button className="flex items-center gap-1 text-blue-500 hover:underline text-[15px]">
-                                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                        0
-</button>
-                                </div>
-                                {/* Bình luận trả lời (nếu có) */}
-                                <div className="mt-4 ml-12">
+                        {loadingComments ? (
+                            <div>Đang tải bình luận...</div>
+                        ) : displayedComments.length === 0 ? (
+                            <div>Chưa có bình luận nào.</div>
+                        ) : (
+                            displayedComments.map((cmt, idx) => (
+                                <div key={cmt._id || idx} className="border border-blue-300 rounded-lg p-4">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <img src="https://i.imgur.com/0y0y0y0.png" alt="avatar" className="w-8 h-8 rounded-full border" />
+                                        <img src={cmt.user_id?.avatar || '/default-avatar.png'} alt="avatar" className="w-10 h-10 rounded-full border" />
                                         <div>
-                                            <div className="font-semibold text-sm">Admin</div>
-                                            {/* <div className="flex items-center gap-1">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <svg key={i} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" /></svg>
-                                            ))}
-                                            </div> */}
+                                            <div className="font-semibold">{cmt.user_id?.full_name || cmt.user_id?.username || 'Ẩn danh'}</div>
                                         </div>
-                                        <div className="ml-auto text-xs text-gray-500">00:00, 20/5</div>
+                                        <div className="ml-auto text-xs text-gray-500">
+  {cmt.create_at ? new Date(cmt.create_at).toLocaleString('vi-VN') : ''}
+</div>
                                     </div>
-                                    <div className="bg-[#f6f6f6] rounded-lg p-3 ml-10">
-                                        Xà lách tươi, giòn và sạch, rất thích hợp cho các món salad và ăn kèm. Hương vị nhẹ, dễ ăn, cảm giác thanh mát. Rau được bảo quản tốt, không héo úa. Rất hài lòng về chất lượng, sẽ tiếp tục ủng hộ.
+                                    <div className="bg-[#f6f6f6] rounded-lg p-3 ml-12 mb-2">
+                                        {cmt.comment}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
-                    {/* Nút xem tất cả */}
-                    <div className="mt-6 flex justify-center">
-                        <button className="text-blue-500 text-lg font-semibold hover:underline">Xem tất cả</button>
-                    </div>
+                    {comments.length > COMMENTS_TO_SHOW && (
+  <div className="mt-6 flex justify-center">
+    <button
+      className="text-blue-500 text-lg font-semibold hover:underline"
+      onClick={() => setShowAllComments(!showAllComments)}
+    >
+      {showAllComments ? 'Thu gọn' : 'Xem thêm'}
+    </button>
+  </div>
+)}
                 </div>
             </div>
         </main>
