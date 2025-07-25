@@ -1,16 +1,22 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProductDetailData } from '../controller/Product.controller';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
-import { CartContext } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { addToCart } from '../service/Cart.service';
 
 const ProductDetail = () => {
 
     const [mainImage, setMainImage] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [pendingAddQty, setPendingAddQty] = useState(0);
 
-    const { addProduct } = useContext(CartContext);
+    const { id } = useParams();
+    const pd = useProductDetailData(id) || [];
+    const product = pd.data || {};
+
+    // Ref để debounce khi thêm vào giỏ hàng
+    const debounceAddToCart = useRef();
+    const pendingAddQtyRef = useRef(0);
 
     const handleQuantityChange = (delta) => {
         setQuantity((prev) => {
@@ -20,22 +26,27 @@ const ProductDetail = () => {
             return newQuantity;
         });
     };
-    // console.log(useParams());
-    const { id } = useParams();
-    const pd = useProductDetailData(id) || [];
-    console.log(pd);
-    const product = pd.data || {};
 
     const handleAddToCart = () => {
-        if (product) {
-            addProduct({ 
-                id: product._id,
-                name: product.name,
-                image: product.images && product.images.length > 0 ? product.images[0] : '',
-                price: product.price,
-                quantity: quantity
-            });
+        pendingAddQtyRef.current += quantity;
+        setPendingAddQty(pendingAddQtyRef.current);
+
+        if (debounceAddToCart.current) {
+            clearTimeout(debounceAddToCart.current);
         }
+        debounceAddToCart.current = setTimeout(async () => {
+            if (pendingAddQtyRef.current > 0) {
+                try {
+                    await addToCart(product._id, pendingAddQtyRef.current);
+                    window.dispatchEvent(new Event('cart-updated'));
+                } catch (err) {
+                    alert('Thêm vào giỏ hàng thất bại!');
+                }
+                pendingAddQtyRef.current = 0;
+                setPendingAddQty(0);
+            }
+            debounceAddToCart.current = null;
+        }, 400);
     };
 
     if (product.images) return (
@@ -61,7 +72,7 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="w-full lg:w-1/2">
-                    <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+<h1 className="text-3xl font-bold mb-4">{product.name}</h1>
 
                     <div className="mb-4">
                         <span className="text-2xl font-semibold text-red-600 mr-2">{formatCurrency(product.price )}</span>
@@ -101,7 +112,7 @@ const ProductDetail = () => {
                         />
                         <button
                             onClick={() => handleQuantityChange(1)}
-                            className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center rounded-r-md hover:bg-gray-300"
+className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center rounded-r-md hover:bg-gray-300"
                         >
                             +
                         </button>
@@ -152,7 +163,7 @@ const ProductDetail = () => {
                     <div className="space-y-6">
                         {[1,2,3].map((item, idx) => (
                             <div key={idx} className="border border-blue-300 rounded-lg p-4">
-                                {/* Thông tin người dùng và đánh giá */}
+{/* Thông tin người dùng và đánh giá */}
                                 <div className="flex items-center gap-3 mb-2">
                                     <img src="https://i.imgur.com/0y0y0y0.png" alt="avatar" className="w-10 h-10 rounded-full border" />
                                     <div>
@@ -180,7 +191,7 @@ const ProductDetail = () => {
                                     <button className="flex items-center gap-1 text-blue-500 hover:underline text-[15px]">
                                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                                         0
-                                    </button>
+</button>
                                 </div>
                                 {/* Bình luận trả lời (nếu có) */}
                                 <div className="mt-4 ml-12">

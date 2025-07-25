@@ -16,6 +16,7 @@ import AdminTable from "../../components/admin/AdminTable";
 import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
+import { getAllCategories } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -33,6 +34,7 @@ const AdminProduct = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const navigate = useNavigate();
 
@@ -55,6 +57,19 @@ const AdminProduct = () => {
       }
     };
     fetchProducts();
+  }, []);
+
+  // Fetch categories for mapping
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        setCategories(response.data.data || []);
+      } catch (error) {
+        // Không cần setError ở đây, chỉ cần để danh mục là [] nếu lỗi
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Handle edit product
@@ -222,7 +237,7 @@ const AdminProduct = () => {
         return (
           <div className=" flex items-center gap-3">
             <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-              {product.images && product.images[0] ? (
+              {product.images && product.images[0] && !product.images[0].startsWith('blob:') ? (
                 <img
                   src={product.images[0]}
                   alt={product.name}
@@ -237,7 +252,7 @@ const AdminProduct = () => {
                 className="w-full h-full bg-gray-200 flex items-center justify-center"
                 style={{
                   display:
-                    product.images && product.images[0] ? "none" : "flex",
+                    product.images && product.images[0] && !product.images[0].startsWith('blob:') ? "none" : "flex",
                 }}
               >
                 <FaImage className="w-4 h-4 text-gray-400" />
@@ -258,11 +273,20 @@ const AdminProduct = () => {
     {
       title: "Danh mục",
       key: "category",
-      render: (product) => (
-        <div className="text-sm text-gray-600">
-          {product.category_id?.name || "Chưa phân loại"}
-        </div>
-      ),
+      render: (product) => {
+        let categoryName = "Chưa phân loại";
+        if (product.category_id) {
+          if (typeof product.category_id === 'object' && product.category_id.name) {
+            categoryName = product.category_id.name;
+          } else if (typeof product.category_id === 'string') {
+            const found = categories.find(c => c._id === product.category_id);
+            if (found) categoryName = found.name;
+          }
+        }
+        return (
+          <div className="text-sm text-gray-600">{categoryName}</div>
+        );
+      },
     },
     {
       title: "Giá bán",

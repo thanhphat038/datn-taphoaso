@@ -4,8 +4,17 @@ import { FaUpload, FaTrash, FaImage, FaPlus } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import { getAllCategories, createCategory } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
+
+// Utility function to convert ISO or any date string to yyyy-MM-dd
+const toDateInputValue = (dateString) => {
+  if (!dateString) return '';
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().split('T')[0];
+};
 
 const AddProductPage = () => {
   const { id } = useParams();
@@ -64,7 +73,7 @@ const AddProductPage = () => {
             category_id: product.category_id?._id || product.category_id || '',
             status: product.status || 'active',
             images: product.images || [],
-            created_at: product.created_at || product.create_at || new Date().toISOString().split('T')[0] // Handle both field names
+            created_at: toDateInputValue(product.created_at || product.create_at || product.createdAt || new Date())
           });
 
           if (product.images && product.images.length > 0) {
@@ -85,14 +94,10 @@ const AddProductPage = () => {
     const fetchCategories = async () => {
       try {
         setCategoriesLoading(true);
-        const response = await fetch(`${API_BASE_URL}/categories`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        const result = await response.json();
-        setCategories(result.data || []);
+        const response = await getAllCategories();
+        setCategories(response.data.data || []);
       } catch (error) {
-        setError('Không thể tải danh mục: ' + error.message);
+        setError('Không thể tải danh mục: ' + (error.response?.data?.message || error.message));
       } finally {
         setCategoriesLoading(false);
       }
@@ -133,8 +138,8 @@ const AddProductPage = () => {
 
     // Limit to 3 images total to reduce payload size
     const totalImages = imagePreviews.length + files.length;
-    if (totalImages > 3) {
-      setError('Tối đa 3 hình ảnh cho mỗi sản phẩm');
+    if (totalImages > 5) {
+      setError('Tối đa 5 hình ảnh cho mỗi sản phẩm');
       return;
     }
 
@@ -197,34 +202,21 @@ const AddProductPage = () => {
       setError('Vui lòng nhập tên danh mục');
       return;
     }
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newCategory.name.trim(),
-          description: newCategory.description.trim(),
-          status: 'active'
-        }),
+      const response = await createCategory({
+        name: newCategory.name.trim(),
+        description: newCategory.description.trim(),
+        status: 'active'
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create category');
-      }
-
-      const result = await response.json();
-      setCategories(prev => [...prev, result.data]);
-      setFormData(prev => ({ ...prev, category_id: result.data._id }));
+      const created = response.data.data;
+      setCategories(prev => [...prev, created]);
+      setFormData(prev => ({ ...prev, category_id: created._id }));
       setNewCategory({ name: '', description: '' });
       setShowCategoryModal(false);
       setError(null);
     } catch (error) {
-      setError('Lỗi khi tạo danh mục: ' + error.message);
+      setError('Lỗi khi tạo danh mục: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -391,9 +383,10 @@ const AddProductPage = () => {
                     <input
                       type="date"
                       name="created_at"
-                      value={formData.created_at}
+                      value={toDateInputValue(formData.created_at)}
                       onChange={handleChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                      readOnly={!!id}
                     />
                     <p className="text-xs text-gray-500 mt-1">Ngày tạo sản phẩm (tự động điền ngày hôm nay)</p>
                   </div>
@@ -469,11 +462,11 @@ const AddProductPage = () => {
                       onChange={handleChange}
                       placeholder="0"
                       min="0"
-                      step="1000"
+                      step="0.01"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-1">Giá gốc của sản phẩm (VND)</p>
+                    <p className="text-xs text-gray-500 mt-1">Giá gốc của sản phẩm (VND, cho phép số lẻ)</p>
                   </div>
 
               <div>
@@ -487,11 +480,11 @@ const AddProductPage = () => {
                   onChange={handleChange}
                   placeholder="0"
                   min="0"
-                  step="1000"
+                  step="0.01"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Giá bán cho khách hàng (VND)</p>
+                <p className="text-xs text-gray-500 mt-1">Giá bán cho khách hàng (VND, cho phép số lẻ)</p>
               </div>
               {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

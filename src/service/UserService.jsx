@@ -93,7 +93,7 @@ export async function getAddresses() {
 export async function createAddress(addressData) {
   try {
     const token = Cookies.get("auth_token");
-    if (!token) throw new Error("No auth token found");
+if (!token) throw new Error("No auth token found");
     
     const response = await axios.post(`${BASE_URL}/addresses`, addressData, {
       headers: { Authorization: `Bearer ${token}` }
@@ -129,5 +129,78 @@ export async function deleteAddress(id) {
     return true;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Xóa địa chỉ thất bại");
+  }
+}
+
+export async function updateUser(id, userData) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.put(`${BASE_URL}/users/${id}`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Cập nhật người dùng thất bại");
+  }
+}
+
+export async function deleteUser(id) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    await axios.delete(`${BASE_URL}/users/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return true;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Xóa người dùng thất bại");
+  }
+}
+
+export async function toggleUserStatus(id, status) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.put(`${BASE_URL}/users/${id}`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Cập nhật trạng thái người dùng thất bại");
+  }
+}
+
+export async function fetchUsers(token) {
+  const response = await fetch(`${BASE_URL}/users`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+
+  const result = await response.json();
+  return result.data || [];
+}
+
+export async function forgotPassword(email) {
+  try {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Không thể gửi email đặt lại mật khẩu');
+  }
+}
+
+export async function resetPassword(token, newPassword) {
+  try {
+    const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Không thể đặt lại mật khẩu');
   }
 }

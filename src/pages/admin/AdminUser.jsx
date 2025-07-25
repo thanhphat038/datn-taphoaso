@@ -7,10 +7,14 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import { fetchUsers, updateUser, deleteUser, toggleUserStatus } from '../../service/UserService';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const AdminUser = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -31,61 +35,77 @@ const AdminUser = () => {
   });
 
   // Fetch users
-  useEffect(() => {
-    const fetchUsers = async () => {
+   useEffect(() => {
+    const loadUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/users`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
+        const token = Cookies.get('auth_token');
+        if (!token) {
+          console.error('No authentication token found, redirecting to login');
+          navigate('/login');
+          return;
         }
+        
+        const response = await fetch(`${API_BASE_URL}/users`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized: Token may be invalid or expired');
+            navigate('/login');
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const result = await response.json();
         setUsers(result.data || []);
-      } catch (error) {
-        setError('Không thể tải danh sách người dùng: ' + error.message);
-        console.error('Error fetching users:', error);
+      } catch (err) {
+        setError('Không thể tải danh sách người dùng: ' + err.message);
+        console.error('Error fetching users:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
-  }, []);
+    loadUsers();
+  }, [navigate]);
 
   // Handle edit user
   const handleEditUser = (user) => {
     setCurrentEditUser(user);
     setEditFormData({
-      name: user.name || '',
+      name: user.full_name || '',
       email: user.email || '',
       phone: user.phone || '',
       username: user.username || ''
     });
-    setShowEditModal(true);
+setShowEditModal(true);
   };
 
   // Handle save edit
   const handleSaveEdit = async () => {
     if (!currentEditUser) return;
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/users/${currentEditUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editFormData),
+      await updateUser(currentEditUser._id, {
+        full_name: editFormData.name,
+        email: editFormData.email,
+        phone: editFormData.phone,
+        username: editFormData.username
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update user');
-      }
-
       setUsers(users.map(user => 
-        user._id === currentEditUser._id ? { ...user, ...editFormData } : user
+        user._id === currentEditUser._id ? { 
+          ...user, 
+          full_name: editFormData.name,
+          email: editFormData.email,
+          phone: editFormData.phone,
+          username: editFormData.username
+        } : user
       ));
-
       setShowEditModal(false);
       setCurrentEditUser(null);
       setEditFormData({ name: '', email: '', phone: '', username: '' });
@@ -99,22 +119,12 @@ const AdminUser = () => {
   // Handle delete user
   const handleDeleteUser = async (userId, userName) => {
     const confirmMessage = `Bạn có chắc chắn muốn xóa người dùng "${userName}"?\n\nHành động này không thể hoàn tác!`;
-    
     if (!window.confirm(confirmMessage)) {
       return;
     }
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete user');
-      }
-
+      await deleteUser(userId);
       setUsers(users.filter(user => user._id !== userId));
     } catch (error) {
       alert('Lỗi khi xóa người dùng: ' + error.message);
@@ -127,30 +137,13 @@ const AdminUser = () => {
   const handleToggleStatus = async (userId, currentStatus, userName) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const actionText = currentStatus === 'active' ? 'vô hiệu hóa' : 'kích hoạt';
-    
     const confirmMessage = `Bạn có chắc chắn muốn ${actionText} tài khoản "${userName}"?`;
-    
     if (!window.confirm(confirmMessage)) {
       return;
     }
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update user status');
-      }
-
+      await toggleUserStatus(userId, newStatus);
       setUsers(users.map(user => 
         user._id === userId ? { ...user, status: newStatus } : user
       ));
@@ -164,7 +157,7 @@ const AdminUser = () => {
   // Filter users
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
-      (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
@@ -211,7 +204,7 @@ const AdminUser = () => {
           </div>
           <div>
             <div className="font-semibold text-gray-900">{user.username || 'Không có tên'}</div>
-            <div className="text-sm text-gray-500">@{user.username || 'N/A'}</div>
+<div className="text-sm text-gray-500">@{user.username || 'N/A'}</div>
           </div>
         </div>
       )
@@ -273,13 +266,13 @@ const AdminUser = () => {
               label: user.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt',
               icon: user.status === 'active' ? FaUserTimes : FaUserCheck,
               variant: user.status === 'active' ? 'warning' : 'success',
-              onClick: () => handleToggleStatus(user._id, user.status, user.name)
+              onClick: () => handleToggleStatus(user._id, user.status, user.full_name || user.username)
             },
             {
               label: 'Xóa người dùng',
               icon: FaTrash,
               variant: 'danger',
-              onClick: () => handleDeleteUser(user._id, user.name)
+              onClick: () => handleDeleteUser(user._id, user.full_name || user.username)
             }
           ]}
           onActionClick={(action) => action.onClick()}
@@ -305,7 +298,7 @@ const AdminUser = () => {
 
   const handleFilterChange = (key, value) => {
     if (key === 'status') {
-      setStatusFilter(value);
+setStatusFilter(value);
       setCurrentPage(1);
     }
   };
@@ -340,9 +333,9 @@ const AdminUser = () => {
             <div className="text-sm text-gray-600">Không hoạt động</div>
           </AdminCard>
           <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-gray-600">
-              {users.filter(u => u.createdAt && new Date(u.createdAt) > new Date(Date.now() - 30*24*60*60*1000)).length}
-            </div>
+                      <div className="text-2xl font-bold text-gray-600">
+            {users.filter(u => u.create_at && new Date(u.create_at) > new Date(Date.now() - 30*24*60*60*1000)).length}
+          </div>
             <div className="text-sm text-gray-600">Mới trong tháng</div>
           </AdminCard>
         </div>
@@ -382,7 +375,7 @@ const AdminUser = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             pageSize={pageSize}
-            totalItems={totalUsers}
+totalItems={totalUsers}
             onPageChange={setCurrentPage}
             onPageSizeChange={(size) => {
               setPageSize(size);
@@ -424,10 +417,10 @@ const AdminUser = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
               <div className="w-12 h-12 bg-gradient-to-br from-[#06AEF4] to-[#0590d8] rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                {getAvatarInitials(currentEditUser?.name)}
+                {getAvatarInitials(currentEditUser?.full_name || currentEditUser?.username)}
               </div>
               <div>
-                <div className="font-semibold text-gray-900">{currentEditUser?.name}</div>
+                <div className="font-semibold text-gray-900">{currentEditUser?.full_name || currentEditUser?.username}</div>
                 <div className="text-sm text-gray-500">ID: {currentEditUser?._id}</div>
               </div>
             </div>
@@ -452,7 +445,7 @@ const AdminUser = () => {
                   type="text"
                   value={editFormData.username}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
                 />
               </div>
             </div>

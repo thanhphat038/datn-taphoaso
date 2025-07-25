@@ -5,10 +5,13 @@ import { getProfile, updateProfile, changePassword, getAddresses, createAddress,
 import { getFavorites, deleteFavorite } from '../service/FavoriteService';
 import AddressSelector from '../components/AddressSelector.jsx';
 
+import Information from './profile/Information';
+import Address from './profile/Address';
+import Order from './profile/Order';
+import ProductFavorite from './profile/ProductFavorite';
+
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(false);
-  const [profileError, setProfileError] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
@@ -21,14 +24,11 @@ const ProfilePage = () => {
   const [changePasswordSuccess, setChangePasswordSuccess] = useState(null);
 
   const handleLogout = () => {
-    // Xoá token khỏi cookie
     Cookies.remove("auth_token");
-    // Tuỳ bạn: có thể redirect về trang login
     window.location.href = "/login";
   };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
-  const [gender, setGender] = useState('male');
 
   const [addresses, setAddresses] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -43,7 +43,7 @@ const ProfilePage = () => {
   const [loadingAddresses, setLoadingAddresses] = useState(false);
   const [addressError, setAddressError] = useState(null);
 
-  const [orders, setOrders] = useState([
+  const [orders] = useState([
     {
       id: '#123',
       date: 'Mua lúc 06/06, 2024',
@@ -79,19 +79,11 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (activeTab === 'profile') {
-      setLoadingProfile(true);
       getProfile()
         .then(data => {
           setProfile(data);
-          if (data.gender) setGender(data.gender);
-          // You can set other profile fields here as needed
-          setLoadingProfile(false);
-          setProfileError(null);
         })
-        .catch(error => {
-          setProfileError(error.message);
-          setLoadingProfile(false);
-        });
+        .catch(() => {});
     } else if (activeTab === 'address') {
       fetchAddresses();
     } else if (activeTab === 'favorites') {
@@ -117,10 +109,8 @@ const ProfilePage = () => {
     setFavoritesError(null);
     try {
       const data = await getFavorites();
-      console.log('Fetched favorites:', data);
       setFavorites(data);
     } catch (error) {
-      console.error('Error fetching favorites:', error);
       setFavoritesError(error.message);
     } finally {
       setFavoritesLoading(false);
@@ -168,29 +158,9 @@ const ProfilePage = () => {
     }
   };
 
-  const handleReorder = (orderId) => {
-    console.log('Reorder:', orderId);
-  };
-
-  const handleQuantityChange = (orderId, productId, newQuantity) => {
-    setOrders(orders.map(order => 
-      order.id === orderId 
-        ? {
-            ...order,
-            products: order.products.map(product =>
-              product.id === productId 
-                ? { ...product, quantity: Math.max(1, newQuantity) }
-                : product
-            )
-          }
-        : order
-    ));
-  };
-
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -724,4 +694,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfilePage;           

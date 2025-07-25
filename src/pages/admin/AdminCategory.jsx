@@ -7,6 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import { getAllCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -34,14 +35,10 @@ const AdminCategory = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/categories`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        const result = await response.json();
-        setCategories(result.data || []);
+        const response = await getAllCategories();
+        setCategories(response.data.data || []);
       } catch (error) {
-        setError('Không thể tải danh sách danh mục: ' + error.message);
+        setError('Không thể tải danh sách danh mục: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching categories:', error);
       } finally {
         setLoading(false);
@@ -59,25 +56,12 @@ const AdminCategory = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create category');
-      }
-
-      const result = await response.json();
-      setCategories([...categories, result.data]);
+      const response = await createCategory(formData);
+      setCategories([...categories, response.data.data]);
       setShowAddModal(false);
       setFormData({ name: '', description: '' });
     } catch (error) {
-      alert('Lỗi khi tạo danh mục: ' + error.message);
+      alert('Lỗi khi tạo danh mục: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -102,28 +86,15 @@ const AdminCategory = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories/${currentEditCategory._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update category');
-      }
-
+      await updateCategory(currentEditCategory._id, formData);
       setCategories(categories.map(cat => 
         cat._id === currentEditCategory._id ? { ...cat, ...formData } : cat
       ));
-
       setShowEditModal(false);
       setCurrentEditCategory(null);
       setFormData({ name: '', description: '' });
     } catch (error) {
-      alert('Lỗi khi cập nhật danh mục: ' + error.message);
+      alert('Lỗi khi cập nhật danh mục: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -139,18 +110,10 @@ const AdminCategory = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete category');
-      }
-
+      await deleteCategory(categoryId);
       setCategories(categories.filter(cat => cat._id !== categoryId));
     } catch (error) {
-      alert('Lỗi khi xóa danh mục: ' + error.message);
+      alert('Lỗi khi xóa danh mục: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -160,35 +123,23 @@ const AdminCategory = () => {
   const handleToggleStatus = async (categoryId, currentStatus, categoryName) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const actionText = currentStatus === 'active' ? 'ẩn' : 'hiển thị';
-    
     const confirmMessage = `Bạn có chắc chắn muốn ${actionText} danh mục "${categoryName}"?`;
-    
     if (!window.confirm(confirmMessage)) {
       return;
     }
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update category status');
-      }
-
-      setCategories(categories.map(cat => 
-        cat._id === categoryId ? { ...cat, status: newStatus } : cat
+      const response = await toggleCategoryStatus(categoryId, newStatus);
+      // Nếu backend trả về category đã cập nhật, dùng nó để cập nhật state
+      const updatedCategory = response?.data?.data;
+      setCategories(categories.map(cat =>
+        cat._id === categoryId
+          ? (updatedCategory ? { ...cat, ...updatedCategory } : { ...cat, status: newStatus })
+          : cat
       ));
+      alert(`Đã ${actionText} danh mục thành công!`);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} danh mục: ` + error.message);
+      alert(`Lỗi khi ${actionText} danh mục: ` + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -329,6 +280,13 @@ const AdminCategory = () => {
   // Calculate statistics
   const activeCategories = categories.filter(c => c.status === 'active').length;
   const inactiveCategories = categories.filter(c => c.status === 'inactive').length;
+  const now = new Date();
+  const newThisMonth = categories.filter(c => {
+    const created = c.create_at || c.created_at || c.createdAt;
+    if (!created) return false;
+    const d = new Date(created);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
 
   return (
     <AdminLayout>
@@ -363,9 +321,7 @@ const AdminCategory = () => {
             <div className="text-sm text-gray-600">Đang ẩn</div>
           </AdminCard>
           <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-purple-600">
-              {categories.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 30*24*60*60*1000)).length}
-            </div>
+            <div className="text-2xl font-bold text-purple-600">{newThisMonth}</div>
             <div className="text-sm text-gray-600">Mới trong tháng</div>
           </AdminCard>
         </div>

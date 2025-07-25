@@ -1,17 +1,35 @@
-
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import { dataProduct } from '../service/Product.service';
-import { CartContext } from '../context/CartContext';
 import Cookies from "js-cookie";
+import { getCart } from '../service/Cart.service';
 
 const Header = () => {
     const token = Cookies.get("auth_token");
-    const { cartItems } = useContext(CartContext);
+    const [cartItems, setCartItems] = useState([]);
 
-    const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
+    useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                const res = await getCart();
+                setCartItems(res.data.data.items); // hoặc res.data.items tùy API trả về
+            } catch (err) {
+                setCartItems([]);
+            }
+        };
+        fetchCart();
+
+        const handleCartUpdate = () => fetchCart();
+        window.addEventListener('cart-updated', handleCartUpdate);
+        return () => {
+            window.removeEventListener('cart-updated', handleCartUpdate);
+        };
+    }, []);
+    
+
+    const totalQuantity = cartItems.reduce((total, item) => total + (item.qty || item.quantity || 0), 0);
     const [query, setQuery] = useState("");
     const [products, setProducts] = useState([]);
     const [isFocused, setIsFocused] = useState(false);
@@ -67,7 +85,7 @@ const Header = () => {
 
                             <input className='w-full px-4 outline-0' placeholder='Tìm kiếm...' type="search"
                                 value={query}
-                                onChange={(e) => setQuery(e.target.value)}
+onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 onFocus={() => setIsFocused(true)}
                                 onBlur={() => setTimeout(() => setIsFocused(false), 200)} />
@@ -94,7 +112,7 @@ const Header = () => {
                                                     <span>
                                                         {product.name.length > 30
                                                             ? product.name.slice(0, 30) + "..."
-                                                            : product.name}
+                                                            : product.name} 
                                                     </span>
                                                 </Link>
                                             </li>
@@ -116,7 +134,7 @@ const Header = () => {
                     <Link to="/cart" className="relative group">
                         <div className="flex place-content-end place-items-center cursor-pointer hover:text-blue-600 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+<path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                             </svg>
                             {totalQuantity > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">

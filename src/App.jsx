@@ -38,6 +38,8 @@ import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
 import AdminReview from './pages/admin/AdminReview';
 import DetailProduct from './pages/admin/DetailProduct';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function Layout() {
   const location = useLocation();
@@ -60,7 +62,7 @@ function Layout() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/*" element={<ProfilePage />} />
               <Route path="/order/:id" element={<OrderDetailPage />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/select-address" element={<SelectAddress />} />
@@ -68,8 +70,10 @@ function Layout() {
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
             </Routes>
           </div>
           {showFooter && <Footer />}
