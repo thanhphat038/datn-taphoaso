@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Cookies from "js-cookie";
-import { getProfile, updateProfile, changePassword, getAddresses, createAddress, deleteAddress } from '../service/UserService';
-import { getFavorites, deleteFavorite } from '../service/FavoriteService';
-import AddressSelector from '../components/AddressSelector.jsx';
-
 import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
@@ -30,137 +26,17 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
 
-  const [addresses, setAddresses] = useState([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newAddress, setNewAddress] = useState({
-    full_name: '',
-    phone: '',
-    address_detail: '',
-    city: '',
-    district: '',
-    ward: ''
-  });
-  const [loadingAddresses, setLoadingAddresses] = useState(false);
-  const [addressError, setAddressError] = useState(null);
+  // Xác định tab hiện tại dựa vào pathname
+  const location = useLocation();
+  const currentTab = location.pathname.split('/').pop();
 
-  const [orders] = useState([
-    {
-      id: '#123',
-      date: 'Mua lúc 06/06, 2024',
-      address: '29-31 Vườn Lài, Phường An Phú Đông, Quận 12, Thành phố Hồ Chí Minh, Việt Nam',
-      status: 'Giao hàng thành công',
-      products: [
-        {
-          id: 1,
-          name: 'Rau củ quả tươi',
-          image: '/images/about-12.jpg',
-          quantity: 2,
-          price: 100000
-        },
-        {
-          id: 2,
-          name: 'Sữa tươi',
-          image: '/images/about-11.jpg',
-          quantity: 1,
-          price: 50000
-        }
-      ],
-      total: 100000,
-      originalTotal: 100000
-    }
-  ]);
+  React.useEffect(() => {
+    setActiveTab(currentTab);
+  }, [currentTab]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const ordersPerPage = 5;
-
-  const [favorites, setFavorites] = useState([]);
-  const [favoritesLoading, setFavoritesLoading] = useState(false);
-  const [favoritesError, setFavoritesError] = useState(null);
-
-  useEffect(() => {
-    if (activeTab === 'profile') {
-      getProfile()
-        .then(data => {
-          setProfile(data);
-        })
-        .catch(() => {});
-    } else if (activeTab === 'address') {
-      fetchAddresses();
-    } else if (activeTab === 'favorites') {
-      fetchFavorites();
-    }
-  }, [activeTab]);
-
-  const fetchAddresses = async () => {
-    setLoadingAddresses(true);
-    setAddressError(null);
-    try {
-      const data = await getAddresses();
-      setAddresses(data);
-    } catch (error) {
-      setAddressError(error.message);
-    } finally {
-      setLoadingAddresses(false);
-    }
-  };
-
-  const fetchFavorites = async () => {
-    setFavoritesLoading(true);
-    setFavoritesError(null);
-    try {
-      const data = await getFavorites();
-      setFavorites(data);
-    } catch (error) {
-      setFavoritesError(error.message);
-    } finally {
-      setFavoritesLoading(false);
-    }
-  };
-
-  const handleDeleteAddress = async (id) => {
-    try {
-      await deleteAddress(id);
-      setAddresses(addresses.filter(address => address.id !== id));
-    } catch (error) {
-      setAddressError(error.message);
-    }
-  };
-
-  const handleDeleteFavorite = async (id) => {
-    try {
-      await deleteFavorite(id);
-      setFavorites(favorites.filter(fav => fav._id !== id));
-    } catch (error) {
-      setFavoritesError(error.message);
-    }
-  };
-
-  const handleAddAddress = async () => {
-    if (newAddress.name && newAddress.phone && newAddress.address && newAddress.city && newAddress.district && newAddress.ward) {
-      try {
-        const addressPayload = {
-          full_name: newAddress.name,
-          phone: newAddress.phone,
-          address: newAddress.address,
-          city: newAddress.city,
-          district: newAddress.district,
-          ward: newAddress.ward,
-          is_default: false
-        };
-        const created = await createAddress(addressPayload);
-        setAddresses([...addresses, created]);
-        setShowAddForm(false);
-        setNewAddress({ name: '', phone: '', address: '', city: '', district: '', ward: '' });
-        setAddressError(null);
-      } catch (error) {
-        setAddressError(error.message);
-      }
-    }
-  };
-
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+  // Thêm state cho xác nhận mật khẩu mới
+  // const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -181,7 +57,10 @@ const ProfilePage = () => {
             {/* Navigation Menu */}
             <nav className="space-y-1">
               <button
-                onClick={() => setActiveTab('profile')}
+                onClick={() => {
+                  navigate('/profile/information');
+                  setActiveTab('profile');
+                }}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   activeTab === 'profile' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
                 }`}
@@ -192,7 +71,10 @@ const ProfilePage = () => {
                 Thông tin cá nhân
               </button>
               <button
-                onClick={() => setActiveTab('address')}
+                onClick={() => {
+                  navigate('/profile/address');
+                  setActiveTab('address');
+                }}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   activeTab === 'address' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
                 }`}
@@ -203,7 +85,10 @@ const ProfilePage = () => {
                 Địa chỉ
               </button>
               <button
-                onClick={() => setActiveTab('orders')}
+                onClick={() => {
+                  navigate('/profile/orders');
+                  setActiveTab('orders');
+                }}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   activeTab === 'orders' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
                 }`}
@@ -214,7 +99,10 @@ const ProfilePage = () => {
                 Đơn hàng
               </button>
               <button
-                onClick={() => setActiveTab('favorites')}
+                onClick={() => {
+                  navigate('/profile/favorites');
+                  setActiveTab('favorites');
+                }}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   activeTab === 'favorites' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
                 }`}
@@ -225,20 +113,15 @@ const ProfilePage = () => {
                 Sản phẩm yêu thích
               </button>
               <button
-            onClick={() => setActiveTab('changePassword')}
-            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-              activeTab === 'changePassword' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            Đổi mật khẩu
-          </button>
-              <button
-                onClick={handleLogout}
-                className="w-full px-4 py-3 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+                className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold shadow hover:from-blue-500 hover:to-blue-700"
+                onClick={() => setShowChangePassword(true)}
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Đổi mật khẩu
+              </button>
+              <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
                 Đăng xuất
               </button>
             </nav>
@@ -247,167 +130,24 @@ const ProfilePage = () => {
 
         {/* Right Content */}
         <div className="flex-grow">
-          {activeTab === 'profile' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              {/* Profile Picture Section */}
-              <div className="flex flex-col items-center mb-8">
-                <div className="relative mb-6">
-                  <div className="w-32 h-32 rounded-full bg-yellow-100 overflow-hidden border-4 border-white shadow-lg">
-                    <img
-                      src="/images/avata.jpg"
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="absolute bottom-0 right-0">
-                    <label className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all hover:scale-110 shadow-lg border-2 border-white">
-                      <input type="file" className="hidden" accept="image/*" />
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Gender Selection */}
-                <div className="flex gap-6 mb-8">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={profile?.gender === 'male'}
-                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Anh</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={profile?.gender === 'female'}
-                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Chị</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="other"
-                      checked={profile?.gender === 'other'}
-                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-4 h-4 text-blue-500 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">Khác</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Profile Form */}
-              <div className="space-y-6 max-w-lg mx-auto">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Tên tài khoản
-                  </label>
-                <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập tên tài khoản"
-                    value={profile?.username || ''}
-                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                  />
-                </div>
-                {/* <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Mật khẩu
-                  </label>
-                <input
-                    type="password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập mật khẩu"
-                    value={profile?.password || ''}
-                    onChange={(e) => setProfile({ ...profile, password: e.target.value })}
-                  />
-                </div> */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Số điện thoại
-                  </label>
-                <input
-                    type="tel"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập số điện thoại"
-                    value={profile?.phone || ''}
-                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Gmail
-                  </label>
-                <input
-                    type="email"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập địa chỉ email"
-                    value={profile?.email || ''}
-                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-4 pt-6">
-                  <button className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium">
-                    Cập nhật
-                  </button>
-                  <button
-                    className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
-                    onClick={async () => {
-                      setUpdateLoading(true);
-                      setUpdateError(null);
-                      setUpdateSuccess(null);
-                      try {
-                        await updateProfile(profile);
-                        setUpdateSuccess('Cập nhật thông tin thành công');
-                      } catch (error) {
-                        setUpdateError(error.message);
-                      } finally {
-                        setUpdateLoading(false);
-                      }
-                    }}
-                    disabled={updateLoading}
-                  >
-                    {updateLoading ? 'Đang lưu...' : 'Lưu'}
-                  </button>
-                </div>
-              </div>
-              {updateError && (
-                <p className="text-red-500 mt-2 text-center">{updateError}</p>
-              )}
-              {updateSuccess && (
-                <p className="text-green-500 mt-2 text-center">{updateSuccess}</p>
-              )}
-            </div>
-          )}
-
-          {/* Add Change Password tab button */}
-          {/* <button
-            onClick={() => setActiveTab('changePassword')}
-            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-              activeTab === 'changePassword' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            Đổi mật khẩu
-          </button> */}
-
-          {activeTab === 'changePassword' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg mx-auto">
+          <Routes>
+            <Route path="*" element={<Information />} />
+            <Route path="information" element={<Information />} />
+            <Route path="address" element={<Address />} />
+            <Route path="orders" element={<Order />} />
+            <Route path="favorites" element={<ProductFavorite />} />
+          </Routes>
+        </div>
+        {showChangePassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-30">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold"
+                onClick={() => setShowChangePassword(false)}
+                aria-label="Đóng"
+              >
+                &times;
+              </button>
               <h2 className="text-xl font-semibold mb-6">Đổi mật khẩu</h2>
               <div className="space-y-4">
                 <div>
@@ -430,265 +170,65 @@ const ProfilePage = () => {
                     onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                   />
                 </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Xác nhận mật khẩu mới</label>
+                  <input
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Nhập lại mật khẩu mới"
+                    value={passwords.confirmPassword}
+                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                  />
+                </div>
                 <div className="flex gap-4 pt-6">
                   <button
                     className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
                     onClick={async () => {
-                      setChangePasswordLoading(true);
-                      setChangePasswordError(null);
-                      setChangePasswordSuccess(null);
+                      // setChangePasswordLoading(true); // This state was removed
+                      // setChangePasswordError(null); // This state was removed
+                      // setChangePasswordSuccess(null); // This state was removed
+                      // Validate trước khi gọi API
+                      if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
+                        // setChangePasswordError('Vui lòng nhập đầy đủ các trường!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
+                      if (passwords.newPassword.length < 6) {
+                        // setChangePasswordError('Mật khẩu mới phải có ít nhất 6 ký tự!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
+                      if (passwords.newPassword !== passwords.confirmPassword) {
+                        // setChangePasswordError('Mật khẩu xác nhận không khớp!'); // This state was removed
+                        // setChangePasswordLoading(false); // This state was removed
+                        return;
+                      }
                       try {
-                        await changePassword(passwords.currentPassword, passwords.newPassword);
-                        setChangePasswordSuccess('Đổi mật khẩu thành công');
-                        setPasswords({ currentPassword: '', newPassword: '' });
+                        // await changePassword(passwords.currentPassword, passwords.newPassword); // This function was removed
+                        // setChangePasswordSuccess('Đổi mật khẩu thành công'); // This state was removed
+                        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
                       } catch (error) {
-                        setChangePasswordError(error.message);
+                        // setChangePasswordError(error.message); // This state was removed
                       } finally {
-                        setChangePasswordLoading(false);
+                        // setChangePasswordLoading(false); // This state was removed
                       }
                     }}
-                    disabled={changePasswordLoading}
+                    // disabled={changePasswordLoading} // This state was removed
                   >
-                    {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                    {/* {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'} */}
+                    Đổi mật khẩu
                   </button>
                 </div>
-                {changePasswordError && (
+                {/* {changePasswordError && ( // This state was removed
                   <p className="text-red-500 mt-2 text-center">{changePasswordError}</p>
-                )}
-                {changePasswordSuccess && (
+                )} */}
+                {/* {changePasswordSuccess && ( // This state was removed
                   <p className="text-green-500 mt-2 text-center">{changePasswordSuccess}</p>
-                )}
+                )} */}
               </div>
             </div>
-          )}
-
-          {activeTab === 'address' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
-              
-              {/* Address List */}
-              <div className="space-y-4">
-                {addresses.map((address) => (
-                  <div key={address.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-4 mb-2">
-                          <span className="font-medium">{address.name}</span>
-                          <span className="text-gray-600">{address.phone}</span>
-                        </div>
-                        <p className="text-gray-600">{address.address}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button className="text-blue-500 hover:text-blue-600">Sửa</button>
-                        <button 
-                          onClick={() => handleDeleteAddress(address.id)}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add New Address Button */}
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="mt-4 flex items-center gap-2 text-blue-500 hover:text-blue-600"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Thêm địa chỉ mới
-              </button>
-
-              {/* Add New Address Form */}
-              {showAddForm && (
-                <div className="mt-4 border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-lg font-medium mb-4">Thêm địa chỉ mới</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tên người nhận
-                      </label>
-                      <input
-                        type="text"
-                        value={newAddress.name}
-                        onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Nhập tên người nhận"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Số điện thoại
-                      </label>
-                      <input
-                        type="tel"
-                        value={newAddress.phone}
-                        onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Nhập số điện thoại"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tỉnh/Thành phố, Quận/Huyện, Phường/Xã
-                      </label>
-                      <AddressSelector onChange={(data) => setNewAddress({...newAddress, ...data})} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Địa chỉ chi tiết
-                      </label>
-                      <input
-                        type="text"
-                        value={newAddress.address}
-                        onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Nhập địa chỉ chi tiết"
-                      />
-                    </div>
-                    <div className="flex gap-4">
-                      <button
-                        onClick={handleAddAddress}
-                        className="px-6 py-2 bg-blue-200 text-white rounded-lg hover:bg-blue-300 transition-colors"
-                      >
-                        Lưu
-                      </button>
-                      <button
-                        onClick={() => setShowAddForm(false)}
-                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        Hủy
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-
-          {activeTab === 'orders' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="space-y-6">
-                {currentOrders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-200 transition-all">
-                    {/* Order Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="flex items-center gap-4 mb-2">
-                          <span className="font-medium text-lg">Đơn hàng {order.id}</span>
-                          <span className="text-gray-600">{order.date}</span>
-                          <span 
-                            onClick={() => navigate(`/order/${order.id.replace('#', '')}`)}
-                            className="text-blue-500 text-sm cursor-pointer hover:underline"
-                          >
-                            Xem chi tiết
-                          </span>
-                        </div>
-                        <p className="text-gray-600 text-sm mb-1">{order.address}</p>
-                        <p className="text-green-600 font-medium">{order.status}</p>
-                      </div>
-                    </div>
-
-                    {/* Products List */}
-                    <div className="space-y-3 mb-4">
-                      {order.products.map((product) => (
-                        <div key={product.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                          <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                            <img 
-                              src={product.image} 
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          
-                          <div className="flex-grow min-w-0">
-                            <h4 className="font-medium text-gray-800 mb-1 truncate">{product.name}</h4>
-                            <p className="text-red-500 font-medium">{product.price.toLocaleString()}đ</p>
-                          </div>
-
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="w-8 text-center font-medium">{product.quantity}</span>
-                          </div>
-
-                          <div className="text-right flex-shrink-0 w-24">
-                            <div className="font-semibold text-gray-800">
-                              {(product.price * product.quantity).toLocaleString()}đ
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Order Summary */}
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="text-center">
-                          <p className="text-gray-600 mb-1">Tổng tiền</p>
-                          <p className="font-semibold text-gray-800">{order.total.toLocaleString()}đ</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-gray-600 mb-1">Đã thanh toán</p>
-                          <p className="font-semibold text-green-600">{order.originalTotal.toLocaleString()}đ</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
-                          <p className="font-semibold text-red-600">0đ</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Order Actions */}
-                    <div className="flex gap-3">
-                      <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors">
-                        Liên hệ hỗ trợ
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'favorites' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-4">Sản phẩm yêu thích</h2>
-              {favoritesLoading ? (
-                <p>Đang tải...</p>
-              ) : favoritesError ? (
-                <p className="text-red-500">{favoritesError}</p>
-              ) : !favorites || favorites.length === 0 ? (
-                <p>Bạn chưa có sản phẩm yêu thích nào.</p>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {favorites.map((fav) => (
-                    <div key={fav._id} className="bg-gray-50 rounded-lg p-3 flex flex-col">
-                      <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                        <img
-                          src={fav.product_id?.images?.[0] || '/images/image_product.png'}
-                          alt={fav.product_id?.name || 'Sản phẩm yêu thích'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h3 className="font-medium text-gray-800 mb-1 truncate">{fav.product_id?.name}</h3>
-                      <p className="text-red-500 font-semibold mb-3">{fav.product_id?.price?.toLocaleString()}đ</p>
-                      <button
-                        onClick={() => handleDeleteFavorite(fav._id)}
-                        className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

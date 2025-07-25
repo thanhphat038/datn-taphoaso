@@ -1,6 +1,7 @@
 @baseUrl = http://localhost:3000/api
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzhhMzQ3ZDg2OWQyMTA0MzI3ZGRiMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyNzM2NTk5LCJleHAiOjE3NTMzNDEzOTl9.GuqULQQRAkDcvzKNjl4GblZgykMfuKU0-A6A7CeSQ8M
-### Variables
+
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjgxM2MwYzQ4MmMyZDJhMWI2MWQyNiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyODUxNDkwLCJleHAiOjE3NTM0NTYyOTB9.J-pCwtJKyEyU1o12h9eJIGLrAN135vAKGwue6BtqFfs
+
 @userId = 685a9ea76875fcf8f499fa9a
 
 @addressId = 6862dbf5b04329ea26a04112
@@ -342,8 +343,10 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "product_id": "6862d1c32df5d5159cc51ef2",
-  "content": "Test comment"
+
+  "product_id": "{{productId}}",
+  "comment": "This is a sencond comment"
+
 }
 
 ### Get product comments
@@ -378,6 +381,10 @@ Content-Type: application/json
 {
   "user_id": "user685a9ea76875fcf8f499fa9aId",
   "product_id": "6862d1c32df5d5159cc51f08"
+<<<<<<< HEAD
+=======
+
+>>>>>>> thienadmin
 }
 
 ### Remove from favorites

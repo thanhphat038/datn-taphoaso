@@ -12,7 +12,7 @@ const productService = new ProductService();
 
 export const createOrder = async (req, res, next) => {
   try {
-    const { address, receiver, sdt, items, payment_method, note } = req.body;
+    const { address, receiver, sdt, items, payment_method, note,voucher_code } = req.body;
 
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
@@ -39,7 +39,8 @@ export const createOrder = async (req, res, next) => {
       sdt,
       payment_method,
       note,
-      items: items
+      items: items,
+      voucher_code: voucher_code
     });
 
     await cartService.clearCart(userId);

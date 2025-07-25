@@ -1,50 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getProductById } from '../../service/Admin.Service.jsx';
+import { useFavorite } from '../../context/FavoriteContext';
+import Product from '../../components/Product';
+
 const ProductFavorite = () => {
+  const { favoriteIds, removeFavorite } = useFavorite();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const prods = await Promise.all(
+          favoriteIds.map(async (id) => {
+            try {
+              const res = await getProductById(id);
+              return res.data?.data || res.data;
+            } catch (e) { return null; }
+          })
+        );
+        setProducts(prods.filter(Boolean));
+      } catch (err) {
+        setError('Không thể tải sản phẩm yêu thích');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (favoriteIds.length > 0) fetchProducts();
+    else setProducts([]);
+  }, [favoriteIds]);
+
+  if (loading) return <div>Đang tải sản phẩm yêu thích...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 w-full">
       <h2 className="text-xl font-semibold mb-4">Sản phẩm yêu thích</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {/* Example favorite product cards */}
-        <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-          <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-            <img src="/images/image_product.png" alt="Sản phẩm 1" className="w-full h-full object-cover" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 max-w-7xl mx-auto px-4 py-6">
+        {products.length === 0 && (
+          <div className="col-span-full text-gray-500">
+            Chưa có sản phẩm yêu thích nào
           </div>
-          <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 1</h3>
-          <p className="text-red-500 font-semibold mb-3">100,000đ</p>
-          <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Xóa</button>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-          <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-            <img src="/images/image_product.png" alt="Sản phẩm 2" className="w-full h-full object-cover" />
+        )}
+        {products.map((product) => (
+          <div key={product._id} className="p-2 min-w-[220px] max-w-[260px] mx-auto">
+            <Product data={product} />
+            {/* 
+            <button
+              onClick={() => removeFavorite(product._id)}
+              className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 z-10"
+            >
+              Xóa
+            </button> 
+            */}
           </div>
-          <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 2</h3>
-          <p className="text-red-500 font-semibold mb-3">150,000đ</p>
-          <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Xóa</button>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-          <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-            <img src="/images/image_product.png" alt="Sản phẩm 3" className="w-full h-full object-cover" />
-          </div>
-          <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 3</h3>
-          <p className="text-red-500 font-semibold mb-3">200,000đ</p>
-          <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Xóa</button>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-          <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-            <img src="/images/image_product.png" alt="Sản phẩm 4" className="w-full h-full object-cover" />
-          </div>
-          <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 4</h3>
-          <p className="text-red-500 font-semibold mb-3">250,000đ</p>
-          <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Xóa</button>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 flex flex-col">
-          <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-            <img src="/images/image_product.png" alt="Sản phẩm 5" className="w-full h-full object-cover" />
-          </div>
-          <h3 className="font-medium text-gray-800 mb-1 truncate">Sản phẩm yêu thích 5</h3>
-          <p className="text-red-500 font-semibold mb-3">300,000đ</p>
-          <button className="mt-auto px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Xóa</button>
-        </div>
+        ))}
       </div>
     </div>
   );

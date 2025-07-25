@@ -103,8 +103,8 @@ setVoucherDiscount(0);
       note: note,
     };
 
-    if (voucher && voucher._id) {
-      orderData.voucher_id = voucher._id;
+    if (voucher && voucher.code) {
+      orderData.voucher_code = voucher.code;
     }
     try {
       await createOrder(orderData);

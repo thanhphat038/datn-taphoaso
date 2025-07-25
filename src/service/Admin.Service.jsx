@@ -56,12 +56,24 @@ export const getAllOrders = () => {
     return axios.get(`${api}/orders`, { headers: getAuthHeaders() });
 };
 
-export const updateOrderStatus = (id, status) => {
-    return axios.put(`${api}/orders/${id}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+export const getOrderById = (id) => {
+    return axios.get(`${api}/orders/${id}`, { headers: getAuthHeaders() });
+};
+
+export const createOrder = (data) => {
+    return axios.post(`${api}/orders`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const updateOrder = (id, data) => {
+    return axios.put(`${api}/orders/${id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const deleteOrder = (id) => {
     return axios.delete(`${api}/orders/${id}`, { headers: getAuthHeaders() });
+};
+
+export const updateOrderStatus = (id, status) => {
+    return axios.put(`${api}/orders/${id}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const getProductById = (id) => {
@@ -76,4 +88,34 @@ export const toggleProductStatus = (id, status) => {
     // status: 'active' or 'inactive'
     const action = status === 'active' ? 'activate' : 'deactivate';
     return axios.patch(`${api}/products/${id}/${action}`, {}, { headers: getAuthHeaders() });
+};
+
+// REVIEW MANAGEMENT
+export const getAllReviews = () => {
+    return axios.get(`${api}/reviews`, { headers: getAuthHeaders() });
+};
+export const deleteReview = (reviewId) => {
+    return axios.delete(`${api}/reviews/${reviewId}`, { headers: getAuthHeaders() });
+};
+export const updateReviewStatus = (reviewId, status) => {
+    return axios.patch(`${api}/reviews/${reviewId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+// COMMENT MANAGEMENT
+export const getAllComments = () => {
+    return axios.get(`${api}/comments`, { headers: getAuthHeaders() });
+};
+export const deleteComment = (commentId) => {
+    return axios.delete(`${api}/comments/${commentId}`, { headers: getAuthHeaders() });
+};
+export const updateCommentStatus = (commentId, status) => {
+    return axios.patch(`${api}/comments/${commentId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const getUserById = (id) => {
+    return axios.get(`${api}/users/${id}`, { headers: getAuthHeaders() });
+};
+
+export const getOrderDetailsByOrderId = (orderId) => {
+    return axios.get(`${api}/orderdetails?order_id=${orderId}`, { headers: getAuthHeaders() });
 };
