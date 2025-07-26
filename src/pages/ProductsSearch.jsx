@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useProductData } from '../controller/Product.controller';
 import { useParams } from 'react-router-dom';
 import { dataProduct } from '../service/Product.service';
 import Product from '../components/Product';
@@ -7,6 +6,8 @@ import Product from '../components/Product';
 const ProductsSearch = () => {
 
     const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -16,14 +17,24 @@ const ProductsSearch = () => {
 
     useEffect(() => {
         const fetchProduct = async () => {
-            const item = await dataProduct();
-            setProducts(item.data.products || []);
+            try {
+                setLoading(true);
+                setError(null);
+                const item = await dataProduct();
+                setProducts(item.data.products || []);
+            } catch (error) {
+                console.error('Lỗi khi tải sản phẩm:', error);
+                setError('Không thể tải danh sách sản phẩm');
+                setProducts([]);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchProduct();
     }, []);
 
     const filteredProductsSearch = products.filter((product) =>
-        product.name.toLowerCase().includes(value.toLowerCase())
+        product.name.toLowerCase().includes((value || '').toLowerCase())
     );
 
     const getCategoryCount = (categoryId) => {
@@ -109,6 +120,45 @@ const ProductsSearch = () => {
 
 
 
+
+    // Hiển thị loading state
+    if (loading) {
+        return (
+            <main className='w-full'>
+                <div className='w-[1240px] m-auto py-10'>
+                    <div className='flex justify-center items-center h-64'>
+                        <div className='text-center'>
+                            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4'></div>
+                            <p className='text-gray-600'>Đang tải kết quả tìm kiếm...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Hiển thị error state
+    if (error) {
+        return (
+            <main className='w-full'>
+                <div className='w-[1240px] m-auto py-10'>
+                    <div className='flex justify-center items-center h-64'>
+                        <div className='text-center'>
+                            <div className='text-red-500 text-xl mb-4'>⚠️</div>
+                            <p className='text-red-600 mb-2'>Lỗi tải dữ liệu</p>
+                            <p className='text-gray-600 text-sm'>{error}</p>
+                            <button 
+                                onClick={() => window.location.reload()} 
+                                className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
+                            >
+                                Thử lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className='w-full'>
@@ -277,9 +327,20 @@ const ProductsSearch = () => {
 
                     <div className='w-full'>
                         <div className='px-3 pb-5 rounded-[5px]'>
+                            {/* Debug info */}
+                            <div className='mb-4 p-4 bg-gray-100 rounded-lg'>
+                                <p><strong>Từ khóa tìm kiếm:</strong> "{value}"</p>
+                                <p><strong>Tổng sản phẩm:</strong> {products.length}</p>
+                                <p><strong>Sản phẩm tìm thấy:</strong> {filteredProductsSearch.length}</p>
+                                <p><strong>Sản phẩm hiển thị:</strong> {currentProducts.length}</p>
+                            </div>
+                            
                             {
                                 currentProducts.length === 0 ?
-                                    <p className='text-xl text-center'>Không tìm thấy sản phẩm!</p>
+                                    <div className='text-center py-8'>
+                                        <p className='text-xl text-gray-600 mb-2'>Không tìm thấy sản phẩm!</p>
+                                        <p className='text-gray-500'>Thử tìm kiếm với từ khóa khác</p>
+                                    </div>
                                     :
                                     <div className='grid grid-cols-4 gap-3'>{currentProducts}</div>
                             }

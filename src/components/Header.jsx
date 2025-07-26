@@ -36,8 +36,14 @@ const Header = () => {
 
     useEffect(() => {
         const fetchProduct = async () => {
-            const item = await dataProduct();
-            setProducts(item.data);
+            try {
+                const item = await dataProduct();
+                console.log('🔍 Debug - Products data:', item);
+                setProducts(item.data || []);
+            } catch (error) {
+                console.error('❌ Lỗi khi tải products:', error);
+                setProducts([]);
+            }
         };
         fetchProduct();
     }, []);
@@ -46,7 +52,7 @@ const Header = () => {
     //     product.data.name.toLowerCase().includes(query.toLowerCase())
     // );
     const filteredProducts = useMemo(() => (
-        query.trim() ? products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())) : []
+        query.trim() && Array.isArray(products) ? products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())) : []
     ), [query, products]);
 
     const navigate = useNavigate();

@@ -91,12 +91,8 @@ export const getProductComments = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const { page, limit, sort } = req.query;
-    const skip = (page - 1) * limit;
-    const comments = await commentService.model.find({ product_id: productId })
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .populate('user_id', 'full_name avatar username');
+    const options = { page: parseInt(page) || 1, limit: parseInt(limit) || 10, sort: sort || { created_at: -1 } };
+    const comments = await commentService.getProductComments(productId, options);
     res.json({
       success: true,
       data: comments
@@ -138,7 +134,8 @@ export const getAllCommentOfProductId = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const comments = await commentService.model.find({ product_id: productId })
-      .populate('user_id', 'full_name avatar username');
+      .populate('user_id', 'full_name avatar username')
+      .sort({ created_at: -1 });
     res.json({
       success: true,
       data: comments

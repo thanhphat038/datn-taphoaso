@@ -5,7 +5,8 @@ import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
 import ProductFavorite from './profile/ProductFavorite';
-import axios from 'axios'; // Nếu bạn dùng axios
+import axios from 'axios';
+import { changePassword } from '../service/UserService';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -14,7 +15,8 @@ const ProfilePage = () => {
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [passwords, setPasswords] = useState({
     currentPassword: '',
-    newPassword: ''
+    newPassword: '',
+    confirmPassword: ''
   });
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState(null);
@@ -40,11 +42,17 @@ const ProfilePage = () => {
   useEffect(() => {
     async function fetchProfile() {
       try {
+        const token = localStorage.getItem('token') || Cookies.get("auth_token");
+        console.log('🔍 Debug - Token:', token);
+        console.log('🔍 Debug - localStorage token:', localStorage.getItem('token'));
+        console.log('🔍 Debug - Cookies token:', Cookies.get("auth_token"));
+        
         const res = await axios.get('/api/auth/profile', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
+        console.log('🔍 Debug - Profile response:', res.data);
         // Nếu response là { data: { ...user } }
         setProfile(res.data.data || res.data);
       } catch (err) {
@@ -54,8 +62,6 @@ const ProfilePage = () => {
     fetchProfile();
   }, []);
 
-  // Thêm state cho xác nhận mật khẩu mới
-  // const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
@@ -75,7 +81,7 @@ const ProfilePage = () => {
                   </svg>
                 )}
               </div>
-              <span className="font-medium">{profile ? (profile.full_name || profile.username) : 'Tên'} </span>
+              <span className="font-medium">{profile ? (profile.full_name || profile.username || 'Tên người dùng') : 'Tên người dùng'} </span>
             </div>
 
             {/* Navigation Menu */}
@@ -137,7 +143,7 @@ const ProfilePage = () => {
                 Sản phẩm yêu thích
               </button>
               <button
-                className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold shadow hover:from-blue-500 hover:to-blue-700"
+                className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold shadow hover:from-blue-500 hover:to-blue-700 mt-2"
                 onClick={() => setShowChangePassword(true)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -145,7 +151,7 @@ const ProfilePage = () => {
                 </svg>
                 Đổi mật khẩu
               </button>
-              <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              <button onClick={handleLogout} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mt-2">
                 Đăng xuất
               </button>
             </nav>
@@ -163,7 +169,7 @@ const ProfilePage = () => {
           </Routes>
         </div>
         {showChangePassword && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-30">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg w-full relative">
               <button
                 className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold"
@@ -208,47 +214,48 @@ const ProfilePage = () => {
                   <button
                     className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
                     onClick={async () => {
-                      // setChangePasswordLoading(true); // This state was removed
-                      // setChangePasswordError(null); // This state was removed
-                      // setChangePasswordSuccess(null); // This state was removed
+                      setChangePasswordLoading(true);
+                      setChangePasswordError(null);
+                      setChangePasswordSuccess(null);
+                      
                       // Validate trước khi gọi API
                       if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
-                        // setChangePasswordError('Vui lòng nhập đầy đủ các trường!'); // This state was removed
-                        // setChangePasswordLoading(false); // This state was removed
+                        setChangePasswordError('Vui lòng nhập đầy đủ các trường!');
+                        setChangePasswordLoading(false);
                         return;
                       }
                       if (passwords.newPassword.length < 6) {
-                        // setChangePasswordError('Mật khẩu mới phải có ít nhất 6 ký tự!'); // This state was removed
-                        // setChangePasswordLoading(false); // This state was removed
+                        setChangePasswordError('Mật khẩu mới phải có ít nhất 6 ký tự!');
+                        setChangePasswordLoading(false);
                         return;
                       }
                       if (passwords.newPassword !== passwords.confirmPassword) {
-                        // setChangePasswordError('Mật khẩu xác nhận không khớp!'); // This state was removed
-                        // setChangePasswordLoading(false); // This state was removed
+                        setChangePasswordError('Mật khẩu xác nhận không khớp!');
+                        setChangePasswordLoading(false);
                         return;
                       }
-                      try {
-                        // await changePassword(passwords.currentPassword, passwords.newPassword); // This function was removed
-                        // setChangePasswordSuccess('Đổi mật khẩu thành công'); // This state was removed
-                        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                      } catch (error) {
-                        // setChangePasswordError(error.message); // This state was removed
-                      } finally {
-                        // setChangePasswordLoading(false); // This state was removed
-                      }
+                                              try {
+                          await changePassword(passwords.currentPassword, passwords.newPassword);
+                          setChangePasswordSuccess('Đổi mật khẩu thành công');
+                          setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                          setShowChangePassword(false);
+                        } catch (error) {
+                          setChangePasswordError(error.message);
+                        } finally {
+                          setChangePasswordLoading(false);
+                        }
                     }}
-                    // disabled={changePasswordLoading} // This state was removed
+                    disabled={changePasswordLoading}
                   >
-                    {/* {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'} */}
-                    Đổi mật khẩu
+                    {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
                   </button>
                 </div>
-                {/* {changePasswordError && ( // This state was removed
+                {changePasswordError && (
                   <p className="text-red-500 mt-2 text-center">{changePasswordError}</p>
-                )} */}
-                {/* {changePasswordSuccess && ( // This state was removed
+                )}
+                {changePasswordSuccess && (
                   <p className="text-green-500 mt-2 text-center">{changePasswordSuccess}</p>
-                )} */}
+                )}
               </div>
             </div>
           </div>
