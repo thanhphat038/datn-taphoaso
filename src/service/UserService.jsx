@@ -204,3 +204,17 @@ export async function resetPassword(token, newPassword) {
     throw new Error(error.response?.data?.message || 'Không thể đặt lại mật khẩu');
   }
 }
+
+// Lấy danh sách đơn hàng của user
+export async function getMyOrders() {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.get(`${BASE_URL}/orders/my`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Lấy danh sách đơn hàng thất bại");
+  }
+}

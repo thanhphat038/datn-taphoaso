@@ -20,19 +20,19 @@ const CartPage = () => {
   const fetchCartRef = useRef();
 
   // Định nghĩa fetchCart bằng useCallback
- // Định nghĩa fetchCart bằng useCallback
- useEffect(() => {
-  const fetchCart = async () => {
-    try {
-      const res = await getCart();
-      setInitialCartItems(res.data.data.items);
-    } catch (err) {
-      setInitialCartItems([]);
-    }
-  };
-  fetchCart();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+  // Định nghĩa fetchCart bằng useCallback
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const res = await getCart();
+        setInitialCartItems(res.data.data.items);
+      } catch (err) {
+        setInitialCartItems([]);
+      }
+    };
+    fetchCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,7 +79,7 @@ const CartPage = () => {
     if (qty <= 0) return;
     // Nếu đã có timer cho item này thì clear
     if (debounceTimers.current[productId]) {
-clearTimeout(debounceTimers.current[productId]);
+      clearTimeout(debounceTimers.current[productId]);
     }
     // Set timer mới
     debounceTimers.current[productId] = setTimeout(() => {
@@ -135,7 +135,7 @@ clearTimeout(debounceTimers.current[productId]);
 
                 {/* Product Details */}
                 <div className="flex-grow">
-                  <h3 className="font-medium text-gray-800 mb-1 hover:text-blue-600 cursor-pointer">
+                  <h3 className="font-medium text-gray-800 mb-1 cursor-pointer">
                     <Link to={`/product/${product._id}`}>
                       {product.name}
                     </Link>
@@ -148,14 +148,14 @@ clearTimeout(debounceTimers.current[productId]);
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => changeQuantity(product._id, item.qty - 1, item._id)}
-                    className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors"
+                    className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-[#06AEF4] transition-colors"
                   >
                     -
                   </button>
                   <span className="w-8 text-center">{item.qty}</span>
                   <button
-onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
-                    className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors"
+                    onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
+                    className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-[#06AEF4] transition-colors"
                   >
                     +
                   </button>
@@ -186,17 +186,18 @@ onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
         <div className="mb-2 font-medium text-gray-700">Mã giảm giá</div>
         <div className="flex">
           <input
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
+            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#06AEF4]"
             placeholder="Nhập mã giảm giá (chỉ áp dụng 1 lần)"
             value={voucherCode}
             onChange={(e) => setVoucherCode(e.target.value)}
           />
           <button
-            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="ml-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors bg-[#06AEF4] hover:bg-[#70d9ff]"
             onClick={handleApplyVoucher}
           >
             Áp dụng
           </button>
+
         </div>
         {voucherMessage && (
           <div
@@ -217,7 +218,7 @@ onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
         </div>
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-600">Phí vận chuyển:</span>
-<span className="font-medium text-gray-800">15.000đ</span>
+          <span className="font-medium text-gray-800">15.000đ</span>
         </div>
         {/* Hiển thị giảm giá nếu có */}
         {voucherDiscount > 0 && (

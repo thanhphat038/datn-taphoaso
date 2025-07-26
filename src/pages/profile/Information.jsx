@@ -152,12 +152,27 @@ const Information = () => {
         </div>
         {/* Action Buttons */}
         <div className="flex gap-4 pt-6">
-          <button type="button" className="flex-1 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium" onClick={() => window.location.reload()}>
+          {/* Nút Cập nhật */}
+          <button
+            type="button"
+            className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all font-medium"
+            onClick={() => window.location.reload()}
+          >
             Cập nhật
           </button>
-          <button type="submit" className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium" disabled={loading}>
-            {loading ? 'Đang lưu...' : 'Lưu'}
+
+          {/* Nút Lưu */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`flex-1 px-6 py-3 rounded-lg text-white font-semibold transition-colors relative overflow-hidden ${loading
+                ? 'opacity-60 cursor-not-allowed bg-[#b3e6f9]'
+              : 'bg-[#06AEF4] hover:bg-[#70d9ff]'
+              }`}
+          >
+            <span className="relative z-10">{loading ? 'Đang lưu...' : 'Lưu'}</span>
           </button>
+
         </div>
       </form>
     </div>
