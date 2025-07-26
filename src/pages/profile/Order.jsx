@@ -75,82 +75,81 @@ const Order = () => {
 
   // Thêm component con cho từng sản phẩm trong đơn hàng
   const OrderProductItem = ({ item, onReview }) => (
-    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border-b last:border-b-0">
-      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm mb-3 transition hover:shadow-md">
+      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
         <img src={item.product_id?.image} alt={item.product_id?.name} className="w-full h-full object-cover" />
       </div>
-      <div className="flex-grow min-w-0">
-        <h4 className="font-medium text-gray-800 mb-1 truncate" title={item.product_id?.name}>{item.product_id?.name}</h4><p className="text-red-500 font-medium">{item.cur_price?.toLocaleString()}đ</p>
+      <div className="flex-grow min-w-0 w-full">
+        <h4 className="font-semibold text-gray-800 mb-1 truncate text-base sm:text-lg" title={item.product_id?.name}>{item.product_id?.name}</h4>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-red-500 font-bold text-base">{item.cur_price?.toLocaleString()}đ</span>
+          <span className="text-gray-400 text-sm line-through">{item.old_price ? item.old_price.toLocaleString() + 'đ' : ''}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-600 text-sm">Số lượng:</span>
+          <span className="font-medium text-gray-800">{item.qty}</span>
+        </div>
         <button
           onClick={() => onReview(item.product_id)}
-          className="mt-2 px-4 py-2 text-sm rounded-md text-white font-medium transition-colors bg-[#fcd34d] hover:bg-[#fbbf24]"
+          className="mt-2 px-4 py-2 text-xs sm:text-sm rounded-md text-white font-semibold bg-gradient-to-r from-yellow-400 to-yellow-300 shadow hover:from-yellow-500 hover:to-yellow-400 transition-colors"
         >
-          Đánh giá
+          Đánh giá sản phẩm
         </button>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <span className="w-8 text-center font-medium">{item.qty}</span>
-      </div>
-      <div className="text-right flex-shrink-0 w-24">
-        <div className="font-semibold text-gray-800">{(item.cur_price * item.qty).toLocaleString()}đ</div>
+      <div className="text-right flex-shrink-0 w-24 hidden sm:block">
+        <div className="font-semibold text-gray-800 text-base">{(item.cur_price * item.qty).toLocaleString()}đ</div>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-      {orders.map((order) => (
-        <div key={order._id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-[#06AEF4] transition-all mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <div className="flex items-center gap-4 mb-2">
-                <span className="font-medium text-lg">Đơn hàng {order._id}</span>
-                <span className="text-gray-600">{new Date(order.create_at).toLocaleString()}</span>
+    <div className="bg-white rounded-xl p-2 sm:p-6 shadow border border-gray-100 min-h-[60vh]">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Lịch sử đơn hàng</h2>
+      <div className="space-y-8">
+        {orders.map((order) => (
+          <div key={order._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 hover:border-[#06AEF4] transition-all">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
+              <div>
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                  <span className="font-bold text-lg text-blue-600">#{order._id.slice(-6).toUpperCase()}</span>
+                  <span className="text-gray-500 text-sm">{new Date(order.create_at).toLocaleString()}</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-2 ${order.order_status === 'Đã giao' ? 'bg-green-100 text-green-700' : order.order_status === 'Đang xử lý' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{order.order_status}</span>
+                </div>
+                <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
               </div>
-              <p className="text-gray-600 text-sm mb-1">{order.address}</p>
-              <p className="text-green-600 font-medium">{order.order_status}</p>
-            </div>
-          </div>
-          <div className="space-y-3 mb-4">
-            {order.items?.length > 0 ? order.items.map((item) => (
-              <OrderProductItem key={item._id} item={item} onReview={handleOpenPopup} />
-            )) : (
-              <div className="text-gray-400 italic">Không có sản phẩm nào trong đơn hàng này.</div>
-            )}
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div className="text-center">
-                <p className="text-gray-600 mb-1">Tổng tiền</p>
-                <p className="font-semibold text-gray-800">
-                  {(order?.total_amount ?? 0).toLocaleString()}đ
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600 mb-1">Đã thanh toán</p>
-                <p className="font-semibold text-green-600">
-                  {(order?.originalTotal ?? 0).toLocaleString()}đ
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
-                <p className="font-semibold text-red-600">0đ</p>
+              <div className="flex gap-2 mt-2 sm:mt-0">
+                <button className="px-5 py-2 border border-[#06AEF4] bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold rounded-lg shadow-sm transition-colors">
+                  Liên hệ hỗ trợ
+                </button>
               </div>
             </div>
+            <div className="space-y-2 mb-4">
+              {order.items?.length > 0 ? order.items.map((item) => (
+                <OrderProductItem key={item._id} item={item} onReview={handleOpenPopup} />
+              )) : (
+                <div className="text-gray-400 italic">Không có sản phẩm nào trong đơn hàng này.</div>
+              )}
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 mb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <p className="text-gray-600 mb-1">Tổng tiền</p>
+                  <p className="font-bold text-gray-800 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                  <p className="font-bold text-green-600 text-lg">{(order?.originalTotal ?? 0).toLocaleString()}đ</p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div className="flex gap-3">
-            <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors">
-              Liên hệ hỗ trợ</button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Popup đánh giá */}
       {showPopup && selectedProduct && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative border border-blue-100">
             <button
               className="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl"
               onClick={() => setShowPopup(false)}
@@ -158,7 +157,7 @@ const Order = () => {
               &times;
             </button>
             <div className="flex items-center gap-6 mb-6">
-              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-20 h-20 rounded-xl object-cover" />
+              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
               <div>
                 <h3 className="font-semibold text-2xl text-gray-800">{selectedProduct.name}</h3>
               </div>
@@ -189,7 +188,7 @@ const Order = () => {
             </div>
             <button
               onClick={handleSubmitReview}
-              className="w-full bg-[#70d9ff] hover:bg-[#06AEF4] text-white py-3 rounded-lg text-base font-semibold transition-colors"
+              className="w-full bg-gradient-to-r from-sky-400 to-blue-400 hover:from-sky-500 hover:to-blue-500 text-white py-3 rounded-lg text-base font-semibold shadow transition-colors"
             >
               Gửi đánh giá
             </button>
