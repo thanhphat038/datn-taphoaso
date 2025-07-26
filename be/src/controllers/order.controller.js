@@ -82,9 +82,15 @@ export const getOrders = async (req, res, next) => {
 
 export const getUserOrders = async (req, res, next) => {
   try {
-    const orders = await orderService.getOrdersByUser(req.user.id);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const orders = await orderService.getOrdersByUser(req.user.id, { page, limit });
+
     res.json({ success: true, data: orders });
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getOrderById = async (req, res, next) => {
