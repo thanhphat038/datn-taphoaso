@@ -4,7 +4,7 @@ import { FaEdit, FaTrash, FaArrowLeft, FaBox, FaTag, FaCalendarAlt, FaEye, FaEye
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
-import { getProductById, deleteProduct, toggleProductStatus } from '../../service/Admin.Service.jsx';
+import { deleteProduct, toggleProductStatus } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 

@@ -7,7 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getProductById, getOrderDetailsByOrderId } from '../../service/Admin.Service.jsx';
+import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -74,7 +74,8 @@ const OrderPage = () => {
       try {
         setLoading(true);
         const response = await getAllOrders();
-        const ordersData = response.data.data.orders || [];
+const ordersData = response.data.data.ordersWithItems || [];
+
         console.log('Orders from API:', ordersData); // Log dữ liệu trả về từ API
         // Lấy chi tiết user và sản phẩm cho từng order
         const ordersWithDetails = await Promise.all((ordersData).map(async order => {
@@ -87,18 +88,7 @@ const OrderPage = () => {
               user = order.user_id;
             }
           } catch (e) {}
-          // Lấy chi tiết sản phẩm cho từng item
-          let items = order.items || [];
-          items = await Promise.all(items.map(async item => {
-            let product = null;
-            try {
-              // Luôn gọi API lấy chi tiết sản phẩm theo id
-              const productRes = await getProductById(item.product_id);
-              product = productRes?.data?.data || productRes?.data;
-            } catch (e) {}
-            return { ...item, product };
-          }));
-          return { ...order, user, items };
+        
         }));
         setOrders(ordersWithDetails);
       } catch (error) {
@@ -159,11 +149,14 @@ const OrderPage = () => {
 
   // Filter and pagination logic
   const filteredOrders = orders.filter(order => {
+    // Kiểm tra order có tồn tại không
+    if (!order) return false;
+    
     const matchesSearch = 
       (order._id && order._id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
+(order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (order.address && order.address.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = selectedStatus === 'All' || order.status === selectedStatus;
+    const matchesStatus = selectedStatus === 'All' || (order.order_status || order.status) === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -214,8 +207,8 @@ const OrderPage = () => {
             <FaUser className="w-3 h-3 text-gray-600" />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{order.user?.username || order.receiver || 'Không có tên'}</div>
-            <div className="text-sm text-gray-500">{order.user?.email || order.sdt || 'Không có SĐT'}</div>
+            <div className="font-medium text-gray-900">{order.user_id?.email || order.receiver || 'Không có tên'}</div>
+            <div className="text-sm text-gray-500">{order.sdt || 'Không có SĐT'}</div>
           </div>
         </div>
       )
@@ -239,14 +232,14 @@ const OrderPage = () => {
           <div className="text-sm text-gray-500">
             {order.payment_method === 'cod' ? 'Tiền mặt' : order.payment_method || 'N/A'}
           </div>
-        </div>
+</div>
       )
     },
     {
       title: 'Trạng thái',
       key: 'status',
       render: (order) => {
-        const statusInfo = getStatusInfo(order.status);
+        const statusInfo = getStatusInfo(order.order_status || order.status);
         return (
           <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
             <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
@@ -274,7 +267,7 @@ const OrderPage = () => {
               icon: FaEdit,
               onClick: () => {
                 setCurrentEditOrder(order);
-                setEditStatus(order.status);
+                setEditStatus(order.order_status || order.status);
                 setShowEditModal(true);
               }
             },
@@ -316,20 +309,6 @@ const OrderPage = () => {
 
   // Render expanded row
   const renderExpandedRow = (order) => {
-    const [details, setDetails] = React.useState([]);
-    React.useEffect(() => {
-      let isMounted = true;
-      const fetchDetails = async () => {
-        try {
-          const res = await getOrderDetailsByOrderId(order._id);
-          if (isMounted) setDetails(res.data?.data || []);
-        } catch (e) {
-          if (isMounted) setDetails([]);
-        }
-      };
-      fetchDetails();
-      return () => { isMounted = false; };
-    }, [order._id]);
     return (
       <div className="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 border-t border-gray-200">
         {/* Danh sách sản phẩm */}
@@ -343,10 +322,10 @@ const OrderPage = () => {
               </tr>
             </thead>
             <tbody>
-              {details.length > 0 ? (
-                details.map((item, idx) => (
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, idx) => (
                   <tr key={idx} className="border-b last:border-b-0">
-                    <td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
+<td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
                     <td className="px-4 py-2 text-right">{formatCurrency(item.cur_price)}</td>
                     <td className="px-4 py-2 text-right">x{item.qty}</td>
                   </tr>
@@ -404,7 +383,7 @@ const OrderPage = () => {
       {message && (
         <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
           <span>{message}</span>
-          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+<button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
         </div>
       )}
       <div className="space-y-6">
@@ -485,7 +464,7 @@ const OrderPage = () => {
                 onClick={() => {
                   setShowEditModal(false);
                   setCurrentEditOrder(null);
-                  setEditStatus('');
+setEditStatus('');
                 }}
               >
                 Hủy bỏ

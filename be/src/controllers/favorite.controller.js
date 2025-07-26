@@ -9,10 +9,10 @@ export const getFavorites = async (req, res, next) => {
     const filters = {};
     if (user_id) filters.user_id = user_id;
 
-    const favorites = await favoriteService.findAll(filters, {
+    const favorites = await favoriteService.find(filters, {
       populate: [
         { path: 'user_id', select: 'name email' },
-        { path: 'product_id', select: 'name price images' }
+        { path: 'product_id', select: 'name price images rating' }
       ]
     });
     res.json({

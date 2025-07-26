@@ -26,7 +26,7 @@ export async function getReviewsByProductId(productId, page = 1, limit = 10) {
       });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || "Tạo đánh giá thất bại");
+      throw new Error(error.response?.data?.message || "Lấy đánh giá thất bại");
     }
   }
 

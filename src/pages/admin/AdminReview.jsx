@@ -7,7 +7,8 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllReviews, deleteReview, updateReviewStatus, getProductById, getUserById } from '../../service/Admin.Service.jsx';
+import { getAllReviews, deleteReview, updateReviewStatus, getUserById } from '../../service/Admin.Service.jsx';
+
 
 const AdminReview = () => {
   const [reviews, setReviews] = useState([]);

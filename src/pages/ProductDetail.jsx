@@ -4,6 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
 import { addToCart } from '../service/Cart.service';
 import { getReviewsByProductId } from '../service/Product.service';
+import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
+import Cookies from 'js-cookie';
 import Product from '../components/Product';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -23,6 +25,10 @@ const ProductDetail = () => {
         totalPages: 1
     });
     const [reviewsLoading, setReviewsLoading] = useState(false);
+    
+    // Favorite states
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [loadingFavorite, setLoadingFavorite] = useState(false);
 
     const { id } = useParams();
     const pd = useProductDetailData(id) || [];
@@ -34,10 +40,47 @@ const ProductDetail = () => {
 
     const relatedProducts = useRelatedProducts(product._id, 20);
 
+    // Lấy user_id từ token
+    const getUserId = () => {
+        const token = Cookies.get('auth_token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.id;
+            } catch (error) {
+                console.error('Error parsing token:', error);
+                return null;
+            }
+        }
+        return null;
+    };
+
+    // Kiểm tra trạng thái yêu thích khi component mount
+    useEffect(() => {
+        const checkFavoriteStatus = async () => {
+            try {
+                const response = await getFavorites();
+                if (response.data?.data) {
+                    const isProductFavorite = response.data.data.some(
+                        (fav) => fav.product_id?._id === product._id
+                    );
+                    setIsFavorite(isProductFavorite);
+                }
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+                setIsFavorite(false);
+            }
+        };
+
+        if (product._id) {
+            checkFavoriteStatus();
+        }
+    }, [product._id]);
+
     // Fetch reviews when product changes or tab changes to reviews
     useEffect(() => {
         if (product._id) {
-            fetchReviews(1);
+fetchReviews(1);
         }
     }, [activeTab, product._id]);
 
@@ -87,7 +130,42 @@ pendingAddQtyRef.current = 0;
         }, 400);
     };
 
-    if (product.images) return (
+    const handleToggleFavorite = async () => {
+        if (loadingFavorite) return;
+        
+        const userId = getUserId();
+        if (!userId) {
+            alert('Vui lòng đăng nhập để sử dụng tính năng yêu thích');
+            return;
+        }
+        
+        setLoadingFavorite(true);
+        try {
+            if (isFavorite) {
+                // Xóa khỏi favorite
+                await removeFromFavorite(product._id);
+                setIsFavorite(false);
+                // Phát sự kiện thông báo xóa sản phẩm khỏi favorite
+                window.dispatchEvent(new CustomEvent('favorite-removed', {
+                    detail: { productId: product._id, product: product }
+                }));
+            } else {
+                // Thêm vào favorite
+                await addToFavorite(userId, product._id);
+                setIsFavorite(true);
+                // Phát sự kiện thông báo thêm sản phẩm vào favorite
+                window.dispatchEvent(new CustomEvent('favorite-added', {
+                    detail: { productId: product._id, product: product }
+                }));
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            alert('Có lỗi xảy ra khi thao tác với mục yêu thích');
+        } finally {
+            setLoadingFavorite(false);
+        }
+    };
+if (product.images) return (
         <main className="container mx-auto py-10 px-4">
             <div className="flex flex-wrap lg:flex-nowrap gap-8">
                 <div className="w-full lg:w-1/2 flex flex-col items-center">
@@ -130,7 +208,7 @@ pendingAddQtyRef.current = 0;
 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                             </svg>
                         ))}
-                        <span className='text-[14px] ms-2'> {product.rating.rate}/5</span>
+<span className='text-[14px] ms-2'> {product.rating.rate}/5</span>
                     </p>
                     {/* <p className='text-[14px] mb-3'> {product.rating.count} đánh giá</p> */}
 
@@ -157,7 +235,7 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                         <span className="ml-4 text-sm text-gray-600">Còn hàng: {product.stock || 'X'}</span> {/* Placeholder */}
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 items-center">
                         <button 
                             onClick={handleAddToCart}
                             className="bg-[#06AEF4] text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
@@ -183,7 +261,7 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                                 className="w-full max-h-60 object-contain rounded mb-4"
                             />
                         )}
-                        <p>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
+<p>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
                     </div>
 
                     {/* Comments */}
@@ -232,7 +310,7 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                                 {/* Comments List - scrollable */}
                                 <div className="flex-grow overflow-y-auto pr-4 space-y-6">
                                     {[1, 2, 3].map((item, idx) => (
-                                        <div key={idx} className="border border-blue-300 rounded-lg p-4">
+<div key={idx} className="border border-blue-300 rounded-lg p-4">
                                             {/* User info */}
                                             <div className="flex items-center gap-3 mb-2">
                                                 <img src="https://i.imgur.com/0y0y0y0.png" alt="avatar" className="w-10 h-10 rounded-full border" />
@@ -262,7 +340,7 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                                                     <img src="https://i.imgur.com/0y0y0y0.png" alt="avatar" className="w-8 h-8 rounded-full border" />
                                                     <div>
                                                         <div className="font-semibold text-sm">Admin</div>
-                                                    </div>
+</div>
                                                     <div className="ml-auto text-xs text-gray-500">00:00, 20/5</div>
                                                 </div>
                                                 <div className="bg-[#f6f6f6] rounded-lg p-3 ml-10">
@@ -298,8 +376,8 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                                                             {[...Array(5)].map((_, i) => (
                                                                 <svg 
                                                                     key={i} 
-                                                                    className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                                                                    fill="currentColor" 
+                                                                    className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+fill="currentColor" 
                                                                     viewBox="0 0 20 20"
                                                                 >
                                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
@@ -343,7 +421,7 @@ className="bg-gray-200 text-gray-700 w-8 h-8 flex items-center justify-center ro
                                     <Product data={item} />
                                 </SwiperSlide>
                             ))}
-                        </Swiper>
+</Swiper>
                     )}
                 </div>
             </div>
