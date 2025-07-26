@@ -21,6 +21,8 @@ const OrderPage = () => {
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderDetailsMap, setOrderDetailsMap] = useState({});
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   // Modal states
   const [expandedOrderId, setExpandedOrderId] = useState(null);
@@ -121,8 +123,13 @@ const OrderPage = () => {
       setShowEditModal(false);
       setCurrentEditOrder(null);
       setEditStatus('');
+      setMessage('Cập nhật trạng thái thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi cập nhật trạng thái: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi cập nhật trạng thái: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -138,8 +145,13 @@ const OrderPage = () => {
       setLoading(true);
       await deleteOrderService(orderId);
       setOrders(orders.filter(order => order._id !== orderId));
+      setMessage('Xóa đơn hàng thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa đơn hàng: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi xóa đơn hàng: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -388,6 +400,13 @@ const OrderPage = () => {
 
   return (
     <AdminLayout>
+      {/* Toast Message */}
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

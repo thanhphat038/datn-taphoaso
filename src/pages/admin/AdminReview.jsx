@@ -19,6 +19,8 @@ const AdminReview = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
@@ -105,8 +107,13 @@ const AdminReview = () => {
       await deleteReview(reviewId);
 
       setReviews(reviews.filter(r => r._id !== reviewId));
+      setMessage('Xóa đánh giá thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa đánh giá: ' + error.message);
+      setMessage('Lỗi khi xóa đánh giá: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -130,8 +137,13 @@ const AdminReview = () => {
       setReviews(reviews.map(r => 
         r._id === reviewId ? { ...r, status: newStatus } : r
       ));
+      setMessage(`Đã ${actionText} đánh giá thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} đánh giá: ` + error.message);
+      setMessage(`Lỗi khi ${actionText} đánh giá: ` + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -366,6 +378,12 @@ const AdminReview = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

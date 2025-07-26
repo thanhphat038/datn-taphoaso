@@ -12,6 +12,8 @@ const ProductDetail = () => {
     const [pendingAddQty, setPendingAddQty] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(false);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
     const { id } = useParams();
     const pd = useProductDetailData(id) || [];
@@ -46,7 +48,9 @@ const ProductDetail = () => {
                 setIsFavorite(true);
             }
         } catch (err) {
-            alert('Có lỗi khi thao tác yêu thích!');
+            setMessage('Có lỗi khi thao tác yêu thích!');
+            setMessageType('error');
+            setTimeout(() => setMessage(''), 2000);
         } finally {
             setLoadingFavorite(false);
         }
@@ -74,7 +78,9 @@ const ProductDetail = () => {
                     await addToCart(product._id, pendingAddQtyRef.current);
                     window.dispatchEvent(new Event('cart-updated'));
                 } catch (err) {
-                    alert('Thêm vào giỏ hàng thất bại!');
+                    setMessage('Thêm vào giỏ hàng thất bại!');
+                    setMessageType('error');
+                    setTimeout(() => setMessage(''), 2000);
                 }
                 pendingAddQtyRef.current = 0;
                 setPendingAddQty(0);
@@ -85,6 +91,13 @@ const ProductDetail = () => {
 
     if (product.images) return (
         <main className="container mx-auto py-10 px-4">
+            {/* Toast Message */}
+            {message && (
+                <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    <span>{message}</span>
+                    <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+                </div>
+            )}
             <div className="flex flex-wrap lg:flex-nowrap gap-8">
                 <div className="w-full lg:w-1/2 flex flex-col items-center">
                     <img

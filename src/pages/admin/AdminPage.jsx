@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import Cookies from 'js-cookie';
 import { useNavigate, Link } from 'react-router-dom';
+import { getAllComments, getAllReviews, getAllOrders } from '../../service/Admin.Service.jsx';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -101,32 +102,40 @@ const AdminPage = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        
         // Kiểm tra token trước khi gọi API
         const token = Cookies.get('auth_token');
         if (!token) {
-console.error('No authentication token found, redirecting to login');
+          console.error('No authentication token found, redirecting to login');
           navigate('/login');
           return;
         }
-        
         // Gọi các hàm đếm riêng lẻ
-        const [userCount, productCount, orderCount, voucherCount] = await Promise.all([
+        const [userCount, productCount, orderCount, voucherCount, commentsRes, reviewsRes, ordersRes] = await Promise.all([
           countUsers(),
           countProducts(),
           countOrders(),
-          countVouchers()
+          countVouchers(),
+          getAllComments(),
+          getAllReviews(),
+          getAllOrders()
         ]);
-
+        const comments = commentsRes?.data?.data || [];
+        const reviews = reviewsRes?.data?.data || [];
+        const orders = ordersRes?.data?.data?.orders || ordersRes?.data?.data || [];
+        // Tính tổng doanh thu
+        const totalRevenue = Array.isArray(orders) ? orders.reduce((sum, o) => sum + (o.total_amount || 0), 0) : 0;
+        // Lấy 5 đơn hàng gần nhất (theo ngày tạo mới nhất)
+        const sortedOrders = Array.isArray(orders) ? [...orders].sort((a, b) => new Date(b.create_at || b.created_at) - new Date(a.create_at || a.created_at)) : [];
+        const recentOrders = sortedOrders.slice(0, 5);
         setStats({
           users: userCount,
           products: productCount,
           orders: orderCount,
           vouchers: voucherCount,
-          comments: 0,
-          reviews: 0,
-          totalRevenue: 0,
-          recentOrders: []
+          comments: comments.length,
+          reviews: reviews.length,
+          totalRevenue,
+          recentOrders
         });
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);

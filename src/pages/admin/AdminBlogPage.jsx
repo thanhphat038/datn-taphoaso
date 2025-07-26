@@ -17,6 +17,8 @@ const AdminBlogPage = () => {
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   const navigate = useNavigate();
 
@@ -78,8 +80,13 @@ const AdminBlogPage = () => {
       }
 
       setBlogs(blogs.filter(b => b._id !== blogId));
+      setMessage("Xóa blog thành công!");
+      setMessageType("success");
+      setTimeout(() => setMessage(""), 2000);
     } catch (error) {
-      alert("Lỗi khi xóa blog: " + error.message);
+      setMessage("Lỗi khi xóa blog: " + error.message);
+      setMessageType("error");
+      setTimeout(() => setMessage(""), 2000);
     } finally {
       setLoading(false);
     }
@@ -178,6 +185,12 @@ const AdminBlogPage = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+        </div>
+      )}
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

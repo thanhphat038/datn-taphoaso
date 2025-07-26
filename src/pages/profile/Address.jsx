@@ -17,6 +17,9 @@ const Address = () => {
   const [error, setError] = useState('');
   const [editId, setEditId] = useState(null);
   const [editAddress, setEditAddress] = useState({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
+  const [phoneError, setPhoneError] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' | 'error'
 
   // Dữ liệu vị trí
   const [cities, setCities] = useState([]);
@@ -37,7 +40,9 @@ const Address = () => {
       const res = await getAllAddress();
       setAddresses(res.data.data);
     } catch (err) {
-      setError('Không thể tải địa chỉ');
+      setMessage('Không thể tải địa chỉ');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
     } finally {
       setLoading(false);
     }
@@ -98,14 +103,27 @@ const Address = () => {
     try {
       await deleteAddress(id);
       setAddresses(addresses.filter(address => address._id !== id));
+      setMessage('Xóa địa chỉ thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
-      alert('Xóa địa chỉ thất bại!');
+      setMessage('Xóa địa chỉ thất bại!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
     }
   };
 
   const handleAddAddress = async () => {
+    setPhoneError('');
     if (!newAddress.receiver || !newAddress.phone || !newAddress.city || !newAddress.district || !newAddress.ward || !newAddress.address_detail) {
-      alert('Vui lòng nhập đầy đủ thông tin!');
+      setMessage('Vui lòng nhập đầy đủ thông tin!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    // Validate số điện thoại
+    if (!/^\d{10}$/.test(newAddress.phone)) {
+      setPhoneError('Số điện thoại phải đủ 10 số!');
       return;
     }
     // Lấy lại name từ code (dùng state hiện tại)
@@ -119,7 +137,9 @@ const Address = () => {
       ward: wardObj ? wardObj.name : ''
     };
     if (!payload.city || !payload.district || !payload.ward) {
-      alert('Vui lòng chọn đầy đủ vị trí!');
+      setMessage('Vui lòng chọn đầy đủ vị trí!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
       return;
     }
     try {
@@ -129,8 +149,13 @@ const Address = () => {
       setNewAddress({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
       setDistricts([]);
       setWards([]);
+      setMessage('Thêm địa chỉ thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
-      alert('Thêm địa chỉ thất bại!');
+      setMessage('Thêm địa chỉ thất bại!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
     }
   };
 
@@ -178,7 +203,9 @@ const Address = () => {
   // Lưu sửa địa chỉ
   const handleSaveEdit = async () => {
     if (!editAddress.receiver || !editAddress.phone || !editAddress.city || !editAddress.district || !editAddress.ward || !editAddress.address_detail) {
-      alert('Vui lòng nhập đầy đủ thông tin!');
+      setMessage('Vui lòng nhập đầy đủ thông tin!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
       return;
     }
     try {
@@ -194,8 +221,13 @@ const Address = () => {
       const res = await updateAddress(editId, payload);
       setAddresses(addresses.map(addr => addr._id == editId ? res.data.data : addr));
       handleCancelEdit();
+      setMessage('Cập nhật địa chỉ thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
-      alert('Cập nhật địa chỉ thất bại!');
+      setMessage('Cập nhật địa chỉ thất bại!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
     }
   };
 
@@ -219,6 +251,12 @@ const Address = () => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       {loading && <div>Đang tải...</div>}
       {error && <div className="text-red-500">{error}</div>}
       <div className="space-y-4">
@@ -310,6 +348,7 @@ const Address = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
               <input type="tel" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Nhập số điện thoại" />
+              {phoneError && <div className="text-red-500 text-sm mt-1">{phoneError}</div>}
             </div>
             <div className="flex gap-2">
               <div className="flex-1">

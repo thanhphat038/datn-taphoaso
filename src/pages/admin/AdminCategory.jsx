@@ -30,6 +30,10 @@ const AdminCategory = () => {
     description: ''
   });
 
+  // Toast/Message states
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
+
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -50,7 +54,9 @@ const AdminCategory = () => {
   // Handle add category
   const handleAddCategory = async () => {
     if (!formData.name.trim()) {
-      alert('Vui lòng nhập tên danh mục');
+      setMessage('Vui lòng nhập tên danh mục');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
       return;
     }
 
@@ -60,8 +66,13 @@ const AdminCategory = () => {
       setCategories([...categories, response.data.data]);
       setShowAddModal(false);
       setFormData({ name: '', description: '' });
+      setMessage('Tạo danh mục thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi tạo danh mục: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi tạo danh mục: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -80,7 +91,9 @@ const AdminCategory = () => {
   // Handle save edit
   const handleSaveEdit = async () => {
     if (!formData.name.trim()) {
-      alert('Vui lòng nhập tên danh mục');
+      setMessage('Vui lòng nhập tên danh mục');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
       return;
     }
 
@@ -93,8 +106,13 @@ const AdminCategory = () => {
       setShowEditModal(false);
       setCurrentEditCategory(null);
       setFormData({ name: '', description: '' });
+      setMessage('Cập nhật danh mục thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi cập nhật danh mục: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi cập nhật danh mục: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -112,8 +130,13 @@ const AdminCategory = () => {
       setLoading(true);
       await deleteCategory(categoryId);
       setCategories(categories.filter(cat => cat._id !== categoryId));
+      setMessage('Xóa danh mục thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa danh mục: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi xóa danh mục: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -137,9 +160,13 @@ const AdminCategory = () => {
           ? (updatedCategory ? { ...cat, ...updatedCategory } : { ...cat, status: newStatus })
           : cat
       ));
-      alert(`Đã ${actionText} danh mục thành công!`);
+      setMessage(`Đã ${actionText} danh mục thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} danh mục: ` + (error.response?.data?.message || error.message));
+      setMessage(`Lỗi khi ${actionText} danh mục: ` + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -290,6 +317,12 @@ const AdminCategory = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

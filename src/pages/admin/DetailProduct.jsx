@@ -14,6 +14,8 @@ const DetailProduct = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [product, setProduct] = useState(null);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   // Fetch product data
   useEffect(() => {
@@ -42,9 +44,14 @@ const DetailProduct = () => {
     try {
       setLoading(true);
       await deleteProduct(id);
+      setMessage('Xóa sản phẩm thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
       navigate('/admin/product');
     } catch (error) {
-      alert('Lỗi khi xóa sản phẩm: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi xóa sản phẩm: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -67,8 +74,13 @@ const DetailProduct = () => {
       setLoading(true);
       await toggleProductStatus(id, newStatus);
       setProduct(prev => ({ ...prev, status: newStatus }));
+      setMessage(`Đã ${actionText} sản phẩm thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} sản phẩm: ` + (error.response?.data?.message || error.message));
+      setMessage(`Lỗi khi ${actionText} sản phẩm: ` + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -133,6 +145,12 @@ const DetailProduct = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
