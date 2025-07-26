@@ -119,3 +119,12 @@ export const getUserById = (id) => {
 export const getOrderDetailsByOrderId = (orderId) => {
     return axios.get(`${api}/orderdetails?order_id=${orderId}`, { headers: getAuthHeaders() });
 };
+
+export const getMyOrders = () => {
+    return axios.get(`${api}/orders/my`, { headers: getAuthHeaders() });
+};
+
+// Lấy đơn hàng theo userId (Admin)
+export const getOrdersByUserId = (userId) => {
+    return axios.get(`${api}/orders?user_id=${userId}`, { headers: getAuthHeaders() });
+};

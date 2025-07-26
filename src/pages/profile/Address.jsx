@@ -280,8 +280,20 @@ const Address = () => {
                   </>
                 ) : (
                   <>
-                    <button onClick={() => handleStartEdit(address)} className="border-1 px-3 py-1 rounded-md cursor-pointer text-blue-500 hover:bg-blue-500 hover:text-white">Sửa</button>
-                    <button onClick={() => handleDeleteAddress(address._id)} className="border-1 px-3 py-1 rounded-md cursor-pointer text-red-500 hover:bg-red-500 hover:text-white">Xóa</button>
+                      <button
+                        onClick={() => handleStartEdit(address)}
+                        className="px-4 py-2 rounded-md text-white font-medium transition-colors bg-[#06AEF4] hover:bg-[#70d9ff]"
+                      >
+                        Sửa
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteAddress(address._id)}
+                        className="px-4 py-2 rounded-md text-white font-medium transition-colors bg-red-500 hover:bg-red-400"
+                      >
+                        Xóa
+                      </button>
+
                   </>
                 )}
               </div>
