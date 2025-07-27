@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from "axios";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import { dataProduct } from '../service/Product.service';
 import Cookies from "js-cookie";
@@ -52,7 +52,7 @@ const Header = () => {
     //     product.data.name.toLowerCase().includes(query.toLowerCase())
     // );
     const filteredProducts = useMemo(() => (
-        query.trim() && Array.isArray(products) ? products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())) : []
+        query.trim() && Array.isArray(products) ? products.filter(product => product.name?.toLowerCase().includes(query.toLowerCase())) : []
     ), [query, products]);
 
     const navigate = useNavigate();

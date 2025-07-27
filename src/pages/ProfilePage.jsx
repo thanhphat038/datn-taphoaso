@@ -142,18 +142,21 @@ const ProfilePage = () => {
                 </svg>
                 Sản phẩm yêu thích
               </button>
-              <button
-                className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold shadow hover:from-blue-500 hover:to-blue-700 mt-2"
-                onClick={() => setShowChangePassword(true)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 9a3 3 0 116 0v1h1a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2v-3a2 2 0 012-2h1V9zm3-3a1 1 0 00-1 1v1h2V7a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                Đổi mật khẩu
-              </button>
-              <button onClick={handleLogout} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mt-2">
-                Đăng xuất
-              </button>
+              <div className="flex gap-4 mt-2">
+                <button
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-white font-medium transition-colors bg-[#06AEF4] hover:bg-[#70d9ff]"
+                  onClick={() => setShowChangePassword(true)}
+                >
+                  Đổi mật khẩu
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm text-white font-medium bg-red-500 hover:bg-red-400 transition-colors"
+                >
+                  Đăng xuất
+                </button>
+              </div>
             </nav>
           </div>
         </div>

@@ -1,7 +1,8 @@
 @baseUrl = http://localhost:3000/api
 
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjgxM2MwYzQ4MmMyZDJhMWI2MWQyNiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUyODUxNDkwLCJleHAiOjE3NTM0NTYyOTB9.J-pCwtJKyEyU1o12h9eJIGLrAN135vAKGwue6BtqFfs
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNDU5NTUyLCJleHAiOjE3NTQwNjQzNTJ9.N8Mwo-81Q48q8ykTimYChznEjXpxI7HwIp-3HYqHdp0
 
+### Variables
 @userId = 685a9ea76875fcf8f499fa9a
 
 @addressId = 6862dbf5b04329ea26a04112
@@ -34,8 +35,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "username": "user1",
-  "password": "password123"
+  "username": "thanh phat test",
+  "password": "Phat1234567890"
 }
 
 ### Get Profile
@@ -206,11 +207,11 @@ Content-Type: application/json
 
 {
   "address": "Số 123, Quận ABC, TP XYZ",
-  "receiver": "Nguyễn Văn A",
+  "receiver": "Nguyễn Văn AAAAAA",
   "sdt": "0123456789",
   "items": [
     {
-      "product_id": "{{productId}}",
+      "product_id": "6862d1c32df5d5159cc51ef9",
       "qty": 2
     }
   ],
@@ -398,7 +399,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "product_id": "{{productId}}",
+  "product_id": "6862d1c32df5d5159cc51ef9",
 
   "qty": 2
 }
