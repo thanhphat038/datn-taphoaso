@@ -13,16 +13,12 @@ const productService = new ProductService();
 
 export const createOrder = async (req, res, next) => {
   try {
-<<<<<<< HEAD
-    const { address, receiver, sdt, items, payment_method, note,voucher_code } = req.body;
-=======
-    const { address, receiver, sdt, items, payment_method, voucher, note } = req.body;
->>>>>>> origin/be
+    const { address, receiver, sdt, items, payment_method, note, voucher_code } = req.body;
 
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
-    } 
-    console.log('REQ ITEMS:', items);  
+    }
+
     const userId = req.user.id;
     const cart = await cartService.getCart(userId);
 
@@ -31,22 +27,33 @@ export const createOrder = async (req, res, next) => {
     }
 
     for (const item of items) {
-      console.log('Item:', item);   // Thêm log
-      console.log('Product ID:', item.product_id);   // Thêm log
+      console.log('Item:', item);
+      console.log('Product ID:', item.product_id);
 
       const product = await productService.findById(item.product_id);
+      if (!product) {
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Product with ID ${item.product_id} not found`);
+      }
+    }
+
+    let voucher = null;
+    if (voucher_code) {
+      voucher = await voucherService.findValidVoucherByCode(voucher_code, userId);
+      if (!voucher) {
+        throw new AppError(ERROR_CODES.BAD_REQUEST, 'Invalid or expired voucher');
+      }
     }
 
     const order = await orderService.createOrder({
       user_id: userId,
-      voucher,
       address,
       receiver,
       sdt,
       payment_method,
       note,
-      items: items,
-      voucher_code: voucher_code
+      items,
+      voucher_code,
+      voucher, // optional, may be null
     });
 
     await cartService.clearCart(userId);

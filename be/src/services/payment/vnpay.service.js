@@ -25,11 +25,11 @@ function signData(data, secretKey) {
   return hmac.update(Buffer.from(data, 'utf-8')).digest('hex');
 }
 
-export async function createPaymentUrl({ amount, bankCode, language, ipAddr }) {
+export async function createPaymentUrl({ amount, bankCode, language, ipAddr, orderId }) {
   process.env.TZ = 'Asia/Ho_Chi_Minh';
   const date = new Date();
   const createDate = moment(date).format('YYYYMMDDHHmmss');
-  const orderId = moment(date).format('DDHHmmss');
+  const txnRef = moment(date).format('DDHHmmss'); // Luôn tạo txnRef ngắn từ timestamp
   const tmnCode = config.vnpay.tmnCode;
   const secretKey = config.vnpay.hashSecret;
   let vnpUrl = config.vnpay.url;
@@ -42,8 +42,8 @@ export async function createPaymentUrl({ amount, bankCode, language, ipAddr }) {
     vnp_TmnCode: tmnCode,
     vnp_Locale: locale,
     vnp_CurrCode: currCode,
-    vnp_TxnRef: orderId,
-    vnp_OrderInfo: 'Thanh toan cho ma GD:' + orderId,
+    vnp_TxnRef: txnRef,
+    vnp_OrderInfo: orderId,
     vnp_OrderType: 'other',
     vnp_Amount: amount * 100,
     vnp_ReturnUrl: returnUrl,
@@ -57,7 +57,7 @@ export async function createPaymentUrl({ amount, bankCode, language, ipAddr }) {
   const signStr = qs.stringify(vnp_Params, { encode: false });
   vnp_Params['vnp_SecureHash'] = signData(signStr, secretKey);
   vnpUrl += '?' + qs.stringify(vnp_Params, { encode: false });
-  return vnpUrl;
+  return { url: vnpUrl, txnRef: txnRef }; // Trả về cả URL và txnRef
 }
 
 export function verifyReturn(query) {
@@ -138,4 +138,65 @@ export async function refund({ orderId, transDate, amount, transType, user, ipAd
   };
   const response = await axios.post(vnp_Api, dataObj);
   return response.data;
+}
+
+// Function để xử lý callback VNPAY và cập nhật trạng thái đơn hàng
+export function processVNPayCallback(query) {
+  // Verify signature
+  const isValid = verifyReturn(query);
+  
+  if (!isValid) {
+    return {
+      success: false,
+      message: 'Invalid signature'
+    };
+  }
+
+  // Parse response code
+  const responseCode = query.vnp_ResponseCode;
+  const txnRef = query.vnp_TxnRef;
+  const amount = query.vnp_Amount;
+  const transactionStatus = query.vnp_TransactionStatus;
+  const bankCode = query.vnp_BankCode;
+  const cardType = query.vnp_CardType;
+  const payDate = query.vnp_PayDate;
+  const transactionNo = query.vnp_TransactionNo;
+
+  // VNPAY response codes
+  // 00: Giao dịch thành công
+  // 24: Giao dịch thất bại
+  // 51: Tài khoản không đủ số dư
+  // 65: Tài khoản vượt quá hạn mức cho phép
+  // 75: Ngân hàng thanh toán đang bảo trì
+  // 79: Khách hàng nhập sai mật khẩu thanh toán quá số lần quy định
+  // 99: Các lỗi khác
+
+  const isSuccess = responseCode === '00' && transactionStatus === '00';
+  
+  return {
+    success: isSuccess,
+    orderId: txnRef,
+    responseCode,
+    amount: amount ? parseInt(amount) / 100 : 0, // Convert from VNPAY format (x100)
+    transactionStatus,
+    bankCode,
+    cardType,
+    payDate,
+    transactionNo,
+    message: isSuccess ? 'Thanh toán thành công' : getErrorMessage(responseCode)
+  };
+}
+
+// Function để lấy thông báo lỗi dựa trên response code
+function getErrorMessage(responseCode) {
+  const errorMessages = {
+    '24': 'Giao dịch thất bại',
+    '51': 'Tài khoản không đủ số dư',
+    '65': 'Tài khoản vượt quá hạn mức cho phép',
+    '75': 'Ngân hàng thanh toán đang bảo trì',
+    '79': 'Khách hàng nhập sai mật khẩu thanh toán quá số lần quy định',
+    '99': 'Các lỗi khác'
+  };
+  
+  return errorMessages[responseCode] || 'Giao dịch thất bại';
 } 

@@ -6,7 +6,7 @@ import PaymentMethodModal from '../../components/checkout/PaymentMethodModal';
 import { CartContext } from '../../context/CartContext';
 import { getAllAddress } from '../../service/Address.service';
 import { getVoucherByCode } from '../../service/Voucher.service';
-import { createOrder } from '../../service/Checkout.service';
+import { createOrder, createVNPayPayment } from '../../service/Checkout.service';
 
 // Xử lý mã voucher
 
@@ -14,7 +14,6 @@ const Checkout = () => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [voucherCode, setVoucherCode] = useState('');
-  const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [voucherMessage, setVoucherMessage] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,8 +21,30 @@ const Checkout = () => {
   const [userAddress, setUserAddress] = useState(null);
   const [voucher, setVoucher] = useState(null);
   const [note, setNote] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const productFromState = location.state?.product;
+  const productsToDisplay = productFromState ? [productFromState] : cartItems;
 
   useEffect(() => {
+    // Kiểm tra sản phẩm trong giỏ hàng trước khi cho phép thanh toán
+    if (productsToDisplay.length === 0) {
+      setVoucherMessage('Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi thanh toán.');
+      // Redirect về trang chủ sau 2 giây
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+      return;
+    }
+
+    // Xử lý error message từ VNPayLoading
+    if (location.state && location.state.error) {
+      setVoucherMessage(location.state.error);
+      // Clear error state
+      navigate(location.pathname, { replace: true });
+      return;
+    }
+
     // Nếu có địa chỉ được chọn từ SelectAddress, ưu tiên hiển thị địa chỉ này
     if (location.state && location.state.selectedAddress) {
       setUserAddress(location.state.selectedAddress);
@@ -42,18 +63,13 @@ const Checkout = () => {
       }
     };
     fetchAddress();
-  }, [location.state]);
-
-  const productFromState = location.state?.product;
-
-  const productsToDisplay = productFromState ? [productFromState] : cartItems;
+  }, [location.state, navigate, cartItems.length, productFromState]);
 
   // Hàm xử lý khi nhấn nút "Áp dụng" mã voucher
   const handleApplyVoucher = async () => {
     if (!voucherCode) {
       setVoucherMessage('Vui lòng nhập mã giảm giá.');
       setVoucher(null);
-      setVoucherDiscount(0);
       return;
     }
 
@@ -62,9 +78,8 @@ const Checkout = () => {
       // Nếu API trả về { data: { ...voucher } }
       const voucherData = res.data; // tuỳ API trả về
       // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
-      if (subtotal < voucherData.min_order_value) {
+      if (total < voucherData.min_order_value) {
         setVoucher(null);
-        setVoucherDiscount(0);
         setVoucherMessage(
           `Đơn hàng tối thiểu ${voucherData.min_order_value.toLocaleString()}đ mới được áp dụng mã này.`
         );
@@ -76,7 +91,6 @@ const Checkout = () => {
       );
     } catch (error) {
       setVoucher(null);
-setVoucherDiscount(0);
       setVoucherMessage(
         error.response?.data?.message ||
         'Mã giảm giá không hợp lệ hoặc đã hết hạn.'
@@ -84,12 +98,26 @@ setVoucherDiscount(0);
     }
   };
 
-  // Hàm xử lý đặt hàng
+    // Hàm xử lý đặt hàng
   const handleOrder = async () => {
     if (!userAddress) {
       setVoucherMessage('Vui lòng chọn địa chỉ giao hàng!');
       return;
     }
+    
+    if (!paymentMethod) {
+      setVoucherMessage('Vui lòng chọn phương thức thanh toán!');
+      return;
+    }
+    
+    if (productsToDisplay.length === 0) {
+      setVoucherMessage('Giỏ hàng trống, vui lòng thêm sản phẩm!');
+      return;
+    }
+
+    setIsProcessing(true);
+    setVoucherMessage('');
+
     // Chuẩn bị dữ liệu đơn hàng
     const orderData = {
       address: `${userAddress.address_detail}, ${userAddress.ward}, ${userAddress.district}, ${userAddress.city}`,
@@ -101,43 +129,124 @@ setVoucherDiscount(0);
       })),
       payment_method: paymentMethod,
       note: note,
+      total_amount: calculateTotal(), // Thêm tổng tiền cho VNPAY
     };
 
     if (voucher && voucher.code) {
       orderData.voucher_code = voucher.code;
     }
+
     try {
-      await createOrder(orderData);
-      window.dispatchEvent(new Event('cart-updated'));
-      navigate('/payment-success');
+      // Tạo đơn hàng trước (cho cả COD và VNPAY)
+      try {
+        const orderResponse = await createOrder(orderData);
+        console.log('Order created:', orderResponse);
+        console.log('Order ID from response:', orderResponse.data._id);
+        
+        if (paymentMethod === 'vnpay') {
+          // Xử lý thanh toán VNPAY - truyền orderId từ orderResponse
+          const paymentData = {
+            ...orderData,
+            _id: orderResponse.data._id // Thêm orderId từ response
+          };
+          
+          console.log('Payment data with orderId:', paymentData);
+          console.log('Payment data _id:', paymentData._id);
+          
+          const paymentResponse = await createVNPayPayment(paymentData);
+          console.log('VNPAY API Response:', paymentResponse);
+          console.log('Payment URL:', paymentResponse.url);
+          
+          if (paymentResponse.success && paymentResponse.url) {
+            // Chuyển hướng đến trang processing payment
+            navigate('/checkout/payment/processing', { 
+              state: { 
+                paymentUrl: paymentResponse.url,
+                orderData: paymentData // Truyền paymentData có _id thay vì orderData
+              } 
+            });
+          } else {
+            setVoucherMessage('Không thể tạo thanh toán VNPAY, vui lòng thử lại!');
+          }
+        } else {
+          // Xử lý thanh toán COD - đơn hàng đã được tạo ở trên
+          window.dispatchEvent(new Event('cart-updated'));
+          navigate('/checkout/payment/success');
+        }
+      } catch (orderError) {
+        console.error('Create order error:', orderError);
+        setVoucherMessage(
+          orderError.response?.data?.message || 
+          'Không thể tạo đơn hàng, vui lòng thử lại!'
+        );
+      }
     } catch (err) {
-      setVoucherMessage('Đặt hàng thất bại, vui lòng thử lại!');
+      console.error('Payment error:', err);
+      setVoucherMessage(
+        err.response?.data?.message || 
+        'Đặt hàng thất bại, vui lòng thử lại!'
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Tính tổng tiền tạm tính
   const shippingFee = 15000;
   const total = productsToDisplay.reduce((total, item) => total + (item.price || item.product_id.price) * (item.quantity || item.qty), 0);
-  const subtotal = productsToDisplay.reduce((total, item) => total + (item.price || item.product_id.price) * (item.quantity || item.qty), 0) + shippingFee;
+  const subtotal = total + shippingFee;
 
   const calculateVoucherDiscount = () => {
     if (!voucher) return 0;
     if (voucher.discount_type === 'percentage') {
-      const discount = (subtotal * voucher.discount_value) / 100;
-      return Math.min(discount, voucher.max_discount);
+      const discount = (total * voucher.discount_value) / 100; // Sử dụng total thay vì subtotal
+      return Math.min(discount, voucher.max_discount || discount);
     }
     if (voucher.discount_type === 'amount') {
-      return voucher.discount_value;
+      return Math.min(voucher.discount_value, total); // Không giảm quá tổng tiền hàng
     }
     return 0;
   };
 
+  const voucherDiscount = calculateVoucherDiscount();
 
   const calculateTotal = () => {
-    return subtotal - calculateVoucherDiscount();
+    return subtotal - voucherDiscount;
   };
 
 
+  // Hiển thị thông báo giỏ hàng trống
+  if (productsToDisplay.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full mx-4 text-center">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-yellow-600 mb-4">Giỏ hàng trống</h2>
+          <p className="text-gray-600 mb-6">
+            Bạn chưa có sản phẩm nào trong giỏ hàng. Vui lòng thêm sản phẩm trước khi thanh toán.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => navigate('/product')}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Mua sắm ngay
+            </button>
+            <button
+              onClick={() => navigate('/cart')}
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Xem giỏ hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-grid-container grid grid-cols-12 w-full">
@@ -160,7 +269,7 @@ setVoucherDiscount(0);
               {userAddress ? (
                 <>
                   <div className="font-semibold">
-Giao đến: {userAddress.receiver} {userAddress.phone}
+                    Giao đến: {userAddress.receiver} {userAddress.phone}
                   </div>
                   <div className="text-sm text-gray-500">
                     {userAddress.address_detail}, {userAddress.ward}, {userAddress.district}, {userAddress.city}
@@ -185,8 +294,12 @@ Giao đến: {userAddress.receiver} {userAddress.phone}
                     <div className="text-xs text-gray-500">Số lượng: {item.quantity || item.qty}</div>
                   </div>
                   <div className="text-right">
-                    <div className="checkout-price">{(item.price * item.quantity || item.product_id.price * item.qty).toLocaleString()} đ</div>
-                    <div className="text-xs text-gray-400">({item.price.toLocaleString() || item.product_id.price.toLocaleString()} đ/Hộp)</div>
+                    <div className="checkout-price">
+                      {((item.price || item.product_id.price) * (item.quantity || item.qty)).toLocaleString()} đ
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      ({(item.price || item.product_id.price).toLocaleString()} đ/Hộp)
+                    </div>
                   </div>
                 </div>
               ))
@@ -217,13 +330,13 @@ Giao đến: {userAddress.receiver} {userAddress.phone}
                 value={voucherCode}
                 onChange={(e) => setVoucherCode(e.target.value)}
               />
-<button className="checkout-btn-apply ml-2" onClick={handleApplyVoucher}>
+              <button className="checkout-btn-apply ml-2" onClick={handleApplyVoucher}>
                 Áp dụng
               </button>
             </div>
             {voucherMessage && (
               <div
-                className={`text-sm mt-2 ${voucherDiscount > 0 ? 'text-green-600' : 'text-red-600'
+                className={`text-sm mt-2 ${voucher ? 'text-green-600' : 'text-red-600'
                   }`}
               >
                 {voucherMessage}
@@ -267,7 +380,7 @@ Giao đến: {userAddress.receiver} {userAddress.phone}
           <div className="flex justify-between items-center mb-2">
             <span className="text-[13px] text-[#959595]">Giảm giá (voucher):</span>
             <span className="text-[13px] text-[#959595] font-medium">
-              -{calculateVoucherDiscount().toLocaleString()} đ
+              -{voucherDiscount.toLocaleString()} đ
             </span>
           </div>
           <div className="flex justify-between items-center mb-4">
@@ -279,11 +392,21 @@ Giao đến: {userAddress.receiver} {userAddress.phone}
           <button
             className="checkout-btn-order gradient-slide-effect w-full"
             onClick={handleOrder}
+            disabled={isProcessing}
           >
-            <span>Đặt ngay</span>
+            <span>
+              {isProcessing ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  {paymentMethod === 'vnpay' ? 'Đang xử lý...' : 'Đang đặt hàng...'}
+                </div>
+              ) : (
+                paymentMethod === 'vnpay' ? 'Thanh toán ngay' : 'Đặt ngay'
+              )}
+            </span>
           </button>
         </div>
-<PaymentMethodModal
+        <PaymentMethodModal
           open={openPaymentModal}
           onClose={() => setOpenPaymentModal(false)}
           selected={paymentMethod}

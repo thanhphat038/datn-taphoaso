@@ -59,6 +59,13 @@ const SelectAddress = () => {
       alert('Vui lòng nhập đầy đủ thông tin!');
       return;
     }
+    
+    // Validate phone number
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(newAddress.phone)) {
+      alert('Số điện thoại không hợp lệ!');
+      return;
+    }
     const cityObj = cities.find(c => c.code == newAddress.city);
     const districtObj = districts.find(d => d.code == newAddress.district);
     const wardObj = wards.find(w => w.code == newAddress.ward);
