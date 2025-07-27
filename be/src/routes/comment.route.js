@@ -5,7 +5,8 @@ import {
   getCommentById,
   updateComment,
   deleteComment,
-  getAllCommentOfProductId
+  getAllCommentOfProductId,
+  toggleCommentHidden
 } from '../controllers/comment.controller.js';
 
 const router = express.Router();
@@ -24,6 +25,9 @@ router.put('/:id', updateComment);
 
 // Delete comment
 router.delete('/:id', deleteComment);
+
+// Toggle is_hidden của comment
+router.patch('/:id/toggle-hidden', toggleCommentHidden);
 
 router.get('/product/:productId/all-comments', getAllCommentOfProductId);
 
