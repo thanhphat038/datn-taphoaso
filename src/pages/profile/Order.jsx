@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getMyOrders } from '../../service/UserService';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
 
 const Order = () => {
   const { orderId } = useParams(); // Lấy orderId từ URL
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -118,6 +119,12 @@ const Order = () => {
                 <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
               </div>
               <div className="flex gap-2 mt-2 sm:mt-0">
+                <button 
+                  onClick={() => navigate(`/order/${order._id}`)}
+                  className="px-5 py-2 border border-blue-600 bg-white hover:bg-blue-50 text-blue-600 font-semibold rounded-lg shadow-sm transition-colors"
+                >
+                  Xem chi tiết
+                </button>
                 <button className="px-5 py-2 border border-[#06AEF4] bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold rounded-lg shadow-sm transition-colors">
                   Liên hệ hỗ trợ
                 </button>

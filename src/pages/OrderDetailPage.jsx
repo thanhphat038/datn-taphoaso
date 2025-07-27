@@ -1,73 +1,71 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
-  
-  // Sample order data - in real app this would come from API/props
-  const order = {
-    id: '#123',
-    date: 'Mua lúc 06/06, 2024',
-    status: 'Giao hàng thành công',
-    address: '29-31 Vườn Lài, Phường An Phú Đông, Quận 12, Thành phố Hồ Chí Minh, Việt Nam',
-    products: [
-      {
-        id: 1,
-        name: 'Rau củ quả tươi',
-        image: '/images/about-12.jpg',
-        quantity: 2,
-        price: 100000
-      },
-      {
-        id: 2,
-        name: 'Sữa tươi',
-        image: '/images/about-11.jpg',
-        quantity: 1,
-        price: 50000
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/orders/${id}`);
+        setOrder(response.data.data);
+      } catch (err) {
+        console.error('Lỗi khi lấy chi tiết đơn hàng:', err);
+        setError('Không thể tải chi tiết đơn hàng');
+      } finally {
+        setLoading(false);
       }
-    ],
-    total: 250000,
-    originalTotal: 250000,
-    paymentMethod: 'Thanh toán khi nhận hàng',
-    deliveryMethod: 'Giao hàng nhanh',
-    timeline: [
-      {
-        status: 'Đã đặt hàng',
-        date: '06/06/2024 16:30',
-        description: 'Đơn hàng đã được đặt thành công'
-      },
-      {
-        status: 'Đã xác nhận',
-        date: '06/06/2024 18:45',
-        description: 'Đơn hàng đã được xác nhận'
-      },
-      {
-        status: 'Đang vận chuyển',
-        date: '07/06/2024 14:20',
-        description: 'Đơn hàng đang được vận chuyển'
-      },
-      {
-        status: 'Đang giao hàng',
-        date: '08/06/2024 09:15',
-        description: 'Đơn hàng đang được giao đến địa chỉ người nhận'
-      },
-      {
-        status: 'Đã giao hàng',
-        date: '08/06/2024 15:30',
-        description: 'Đơn hàng đã được giao thành công'
-      }
-    ]
-  };
+    };
+
+    if (id) {
+      fetchOrderDetail();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải chi tiết đơn hàng...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error || 'Không tìm thấy đơn hàng'}</p>
+          <button 
+            onClick={() => navigate('/profile/orders')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Quay lại danh sách đơn hàng
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold mb-2">Chi tiết đơn hàng {order.id}</h1>
-          <p className="text-gray-600">{order.date}</p>
+          <h1 className="text-2xl font-semibold mb-2">Chi tiết đơn hàng #{order._id?.slice(-6).toUpperCase() || order.id}</h1>
+          <p className="text-gray-600">{order.create_at ? new Date(order.create_at).toLocaleString('vi-VN') : order.date}</p>
         </div>
         <button 
-          onClick={() => navigate('/profile')}
+          onClick={() => navigate('/profile/orders')}
           className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -109,31 +107,37 @@ const OrderDetailPage = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-lg font-semibold mb-4">Sản phẩm</h2>
             <div className="space-y-4">
-              {order.products.map((product) => (
-                <div key={product.id} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-grow">
-                    <h3 className="font-medium text-gray-900">{product.name}</h3>
-                    <div className="mt-1 text-sm text-gray-500">
-                      x{product.quantity}
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item) => (
+                  <div key={item._id} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <img
+                        src={item.product_id?.images?.[0] || '/images/image_product.png'}
+                        alt={item.product_id?.name || 'Sản phẩm'}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="mt-1 font-medium text-red-500">
-                      {product.price.toLocaleString()}đ
+                    <div className="flex-grow">
+                      <h3 className="font-medium text-gray-900">{item.product_id?.name || 'Sản phẩm'}</h3>
+                      <div className="mt-1 text-sm text-gray-500">
+                        x{item.qty}
+                      </div>
+                      <div className="mt-1 font-medium text-red-500">
+                        {item.cur_price?.toLocaleString()}đ
+                      </div>
+                    </div>
+                    <div className="text-right flex flex-col justify-center">
+                      <div className="font-semibold text-gray-900">
+                        {((item.cur_price || 0) * (item.qty || 1)).toLocaleString()}đ
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right flex flex-col justify-center">
-                    <div className="font-semibold text-gray-900">
-                      {(product.price * product.quantity).toLocaleString()}đ
-                    </div>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Không có sản phẩm nào trong đơn hàng này.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -146,11 +150,11 @@ const OrderDetailPage = () => {
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-gray-500 mb-1">Địa chỉ giao hàng</div>
-                <div className="text-gray-900">{order.address}</div>
+                <div className="text-gray-900">{order.address || 'Chưa có địa chỉ'}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-500 mb-1">Phương thức giao hàng</div>
-                <div className="text-gray-900">{order.deliveryMethod}</div>
+                <div className="text-sm text-gray-500 mb-1">Trạng thái đơn hàng</div>
+                <div className="text-gray-900">{order.order_status || 'Đang xử lý'}</div>
               </div>
             </div>
           </div>
@@ -161,12 +165,12 @@ const OrderDetailPage = () => {
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-gray-500 mb-1">Phương thức thanh toán</div>
-                <div className="text-gray-900">{order.paymentMethod}</div>
+                <div className="text-gray-900">{order.payment_method || 'Thanh toán khi nhận hàng'}</div>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Tạm tính</span>
-                  <span className="font-medium">{order.total.toLocaleString()}đ</span>
+                  <span className="font-medium">{(order.total_amount || 0).toLocaleString()}đ</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Phí vận chuyển</span>
@@ -175,7 +179,7 @@ const OrderDetailPage = () => {
                 <div className="flex justify-between pt-2 border-t">
                   <span className="font-medium">Tổng tiền</span>
                   <span className="font-semibold text-xl text-red-500">
-                    {order.total.toLocaleString()}đ
+                    {(order.total_amount || 0).toLocaleString()}đ
                   </span>
                 </div>
               </div>

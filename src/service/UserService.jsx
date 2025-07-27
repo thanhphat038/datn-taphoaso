@@ -51,9 +51,15 @@ export async function updateProfile(userData) {
     const token = Cookies.get("auth_token");
     if (!token) throw new Error("No auth token found");
     
-    const response = await axios.patch(`${API_URL}/profile`, userData, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // Check if userData is FormData (for file upload)
+    const isFormData = userData instanceof FormData;
+    
+    const headers = { 
+      Authorization: `Bearer ${token}`,
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+    };
+    
+    const response = await axios.patch(`${API_URL}/profile`, userData, { headers });
     return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Cập nhật profile thất bại");

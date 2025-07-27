@@ -143,7 +143,18 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { full_name, phone, email } = req.body;
+    const { username, full_name, phone, email, gender } = req.body;
+    
+    console.log('🔍 Debug - Update Profile Request:', {
+      userId,
+      body: req.body,
+      username,
+      full_name,
+      phone,
+      email,
+      gender
+    });
+    
     const updateData = {};
 
     // Validate full_name if provided
@@ -179,9 +190,9 @@ export const updateProfile = async (req, res) => {
 
     // Validate phone if provided
     if (phone) {
-      const phoneRegex = /^[0-9]{10}$/;
+      const phoneRegex = /^[0-9]{10,11}$/;
       if (!phoneRegex.test(phone)) {
-        return badRequest(res, 'Invalid phone number. Please enter 10 digits');
+        return badRequest(res, 'Invalid phone number. Please enter 10-11 digits');
       }
       updateData.phone = phone;
     }
@@ -205,12 +216,52 @@ export const updateProfile = async (req, res) => {
       updateData.email = email;
     }
 
+    // Validate username if provided
+    if (username) {
+      const trimmedUsername = username.trim();
+      
+      if (!trimmedUsername) {
+        return badRequest(res, 'Username cannot be empty');
+      }
+
+      if (trimmedUsername.length < 3) {
+        return badRequest(res, 'Username must be at least 3 characters long');
+      }
+
+      if (trimmedUsername.length > 20) {
+        return unprocessableEntity(res, 'Username must not exceed 20 characters');
+      }
+
+      // Check if username is already used by another user
+      const existingUsername = await userService.findOne({ 
+        username: trimmedUsername, 
+        _id: { $ne: userId } 
+      });
+      
+      if (existingUsername) {
+        return badRequest(res, 'Username is already in use');
+      }
+      updateData.username = trimmedUsername;
+    }
+
+    // Validate gender if provided
+    if (gender) {
+      const validGenders = ['male', 'female', 'other'];
+      if (!validGenders.includes(gender)) {
+        return badRequest(res, 'Invalid gender value');
+      }
+      updateData.gender = gender;
+    }
+
+    console.log('🔍 Debug - Final updateData:', updateData);
+    
     const updatedUser = await authService.updateProfile(userId, updateData);
     
     if (!updatedUser) {
       return notFound(res, 'User not found');
     }
 
+    console.log('🔍 Debug - Updated user:', updatedUser);
     return ok(res, updatedUser, 'Profile updated successfully');
   } catch (error) {
     return serverError(res, 'Error updating profile', error);
@@ -273,7 +324,7 @@ export const resetPassword = async (req, res) => {
     let payload;
     try {
       payload = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    } catch (error) {
       return badRequest(res, 'Invalid or expired token');
     }
 

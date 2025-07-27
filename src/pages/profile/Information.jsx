@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { getProfile, updateProfile } from '../../service/UserService';
 
 const Information = () => {
-  const [user, setUser] = useState({ username: '', email: '', phone: '', gender: 'male' });
+  const [user, setUser] = useState({ username: '', full_name: '', email: '', phone: '', gender: 'male', avatar: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,12 +16,14 @@ const Information = () => {
         const data = await getProfile();
         setUser({
           username: data.username || '',
+          full_name: data.full_name || '',
           email: data.email || '',
           phone: data.phone || '',
           gender: data.gender || 'male',
+          avatar: data.avatar || '',
         });
       } catch (err) {
-        setError('Không thể tải thông tin người dùng');
+        setError(err.message || 'Không thể tải thông tin người dùng');
       } finally {
         setLoading(false);
       }
@@ -33,16 +36,105 @@ const Information = () => {
     setUser(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Update user state
+      setUser(prev => ({ ...prev, avatar: file }));
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!user.username.trim()) {
+      setError('Tên tài khoản không được để trống!');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
+    if (user.full_name && user.full_name.trim().length < 2) {
+      setError('Họ và tên phải có ít nhất 2 ký tự!');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
+    if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+      setError('Email không hợp lệ!');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
+    if (user.phone && !/^[0-9]{10,11}$/.test(user.phone.replace(/\s/g, ''))) {
+      setError('Số điện thoại không hợp lệ!');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      await updateProfile(user);
+      console.log('🔍 Debug - Frontend sending data:', user);
+      
+      // If avatar is a File object, handle file upload
+      if (user.avatar instanceof File) {
+        const formData = new FormData();
+        formData.append('avatar', user.avatar);
+        formData.append('username', user.username);
+        formData.append('full_name', user.full_name);
+        formData.append('email', user.email);
+        formData.append('phone', user.phone);
+        formData.append('gender', user.gender);
+        
+        console.log('🔍 Debug - Sending FormData');
+        await updateProfile(formData);
+      } else {
+        // Regular update without file
+        console.log('🔍 Debug - Sending JSON data');
+        await updateProfile(user);
+      }
+      
       setSuccess('Cập nhật thông tin thành công!');
+      setAvatarPreview(null); // Clear preview after successful save
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError('Cập nhật thông tin thất bại!');
+      setError(err.message || 'Cập nhật thông tin thất bại!');
+      // Clear error message after 3 seconds
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      // Fetch latest user data from server
+      const data = await getProfile();
+      setUser({
+        username: data.username || '',
+        full_name: data.full_name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        gender: data.gender || 'male',
+      });
+      setSuccess('Đã tải lại thông tin mới nhất!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err.message || 'Không thể tải thông tin mới nhất!');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setLoading(false);
     }
@@ -55,14 +147,19 @@ const Information = () => {
         <div className="relative mb-6">
           <div className="w-32 h-32 rounded-full bg-yellow-100 overflow-hidden border-4 border-white shadow-lg">
             <img
-              src="/images/avata.jpg"
+              src={avatarPreview || user.avatar || "/images/avata.jpg"}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="absolute bottom-0 right-0">
             <label className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all hover:scale-110 shadow-lg border-2 border-white">
-              <input type="file" className="hidden" accept="image/*" />
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleAvatarChange}
+              />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
               </svg>
@@ -70,7 +167,7 @@ const Information = () => {
           </div>
         </div>
         {/* Gender Selection */}
-        <div className="flex gap-6 mb-8">
+        {/* <div className="flex gap-6 mb-8">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
@@ -104,7 +201,7 @@ const Information = () => {
             />
             <span className="text-gray-700">Khác</span>
           </label>
-        </div>
+        </div> */}
       </div>
       {/* Thông báo */}
       {error && <div className="text-red-500 text-center mb-4">{error}</div>}
@@ -122,6 +219,19 @@ const Information = () => {
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             placeholder="Nhập tên tài khoản"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">
+            Họ và tên
+          </label>
+          <input
+            type="text"
+            name="full_name"
+            value={user.full_name}
+            onChange={handleChange}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+            placeholder="Nhập họ và tên"
           />
         </div>
         <div>
@@ -155,10 +265,15 @@ const Information = () => {
           {/* Nút Cập nhật */}
           <button
             type="button"
-            className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all font-medium"
-            onClick={() => window.location.reload()}
+            disabled={loading}
+            onClick={handleUpdate}
+            className={`flex-1 px-6 py-3 rounded-lg border border-gray-300 text-gray-700 transition-all font-medium ${
+              loading 
+                ? 'opacity-60 cursor-not-allowed bg-gray-50' 
+                : 'hover:bg-gray-100'
+            }`}
           >
-            Cập nhật
+            {loading ? 'Đang tải...' : 'Cập nhật'}
           </button>
 
           {/* Nút Lưu */}
