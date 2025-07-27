@@ -1,8 +1,9 @@
 // order.controller.js
 import OrderService from '../services/order.service.js';
 import CartService from '../services/cart.service.js';
-
+import VoucherService from '../services/voucher.service.js';
 import ProductService from '../services/product.service.js';
+
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
@@ -12,7 +13,11 @@ const productService = new ProductService();
 
 export const createOrder = async (req, res, next) => {
   try {
+<<<<<<< HEAD
     const { address, receiver, sdt, items, payment_method, note,voucher_code } = req.body;
+=======
+    const { address, receiver, sdt, items, payment_method, voucher, note } = req.body;
+>>>>>>> origin/be
 
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
@@ -34,6 +39,7 @@ export const createOrder = async (req, res, next) => {
 
     const order = await orderService.createOrder({
       user_id: userId,
+      voucher,
       address,
       receiver,
       sdt,
@@ -44,6 +50,43 @@ export const createOrder = async (req, res, next) => {
     });
 
     await cartService.clearCart(userId);
+
+    res.json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createbuyNowOrder = async (req, res, next) => {
+  try {
+    const { address, receiver, sdt, payment_method, note, product_id, quantity = 1, voucher } = req.body;
+
+    if (!address || !receiver || !sdt || !payment_method || !product_id) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
+    }
+
+    const userId = req.user.id;
+
+    const product = await productService.findById(product_id);
+    if (!product) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Product not found');
+    }
+
+    const order = await orderService.createOrder({
+      user_id: userId,
+      voucher,
+      address,
+      receiver,
+      sdt,
+      payment_method,
+      note,
+      items: [
+        {
+          product_id,
+          quantity
+        }
+      ]
+    });
 
     res.json({ success: true, data: order });
   } catch (err) {

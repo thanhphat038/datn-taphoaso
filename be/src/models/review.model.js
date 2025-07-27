@@ -19,6 +19,10 @@ const reviewSchema = new mongoose.Schema({
   },
   user_review: {
     type: String
+  },
+  is_hidden: {
+    type: Boolean,
+    default: false 
   }
 }, {
   timestamps: {
