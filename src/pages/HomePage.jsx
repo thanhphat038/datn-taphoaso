@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
 import Product from '../components/Product';
+import 'swiper/css';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -58,6 +58,7 @@ const HomePage = () => {
         </div>
       );
     }
+
     // Lọc sản phẩm theo id danh mục (so sánh chuỗi)
     const filteredProducts = products.filter(product => product.category_id === categoryId);
     // Log ra để kiểm tra
@@ -145,8 +146,6 @@ const HomePage = () => {
           </div>
         </div>
 
-
-
         <div className='bg-[#06adf492] px-3 pb-5 rounded-[5px]'>
           <div className='bg-[#D9D9D9] rounded-full w-[400px] h-[60px] -translate-y-[30px] m-auto flex place-items-center'>
             <p className='text-[20px] w-full text-center capitalize'>nước uống</p>
@@ -216,8 +215,9 @@ const HomePage = () => {
         </div>
 
       </div>
-    </main >
+    </main>
   );
 };
 
 export default HomePage;
+

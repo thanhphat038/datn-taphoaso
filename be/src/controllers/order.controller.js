@@ -14,24 +14,33 @@ export const createOrder = async (req, res, next) => {
   try {
     const { address, receiver, sdt, items, payment_method, note,voucher_code } = req.body;
 
+    console.log('🔍 Debug - createOrder called with items:', items);
+    console.log('🔍 Debug - items type:', typeof items);
+    console.log('🔍 Debug - items length:', items?.length);
+
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
     } 
-    console.log('REQ ITEMS:', items);  
+    
     const userId = req.user.id;
+    console.log('🔍 Debug - User ID:', userId);
+    
     const cart = await cartService.getCart(userId);
+    console.log('🔍 Debug - Cart:', cart);
 
     if (!cart || !cart.items?.length) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
     }
 
     for (const item of items) {
-      console.log('Item:', item);   // Thêm log
-      console.log('Product ID:', item.product_id);   // Thêm log
+      console.log('🔍 Debug - Processing item:', item);   
+      console.log('🔍 Debug - Product ID:', item.product_id);   
 
       const product = await productService.findById(item.product_id);
+      console.log('🔍 Debug - Found product:', product?.name);
     }
 
+    console.log('🔍 Debug - Calling orderService.createOrder with items:', items);
     const order = await orderService.createOrder({
       user_id: userId,
       address,
@@ -43,10 +52,12 @@ export const createOrder = async (req, res, next) => {
       voucher_code: voucher_code
     });
 
+    console.log('🔍 Debug - Created order:', order._id);
     await cartService.clearCart(userId);
 
     res.json({ success: true, data: order });
   } catch (err) {
+    console.error('🔍 Debug - Error in createOrder:', err);
     next(err);
   }
 };

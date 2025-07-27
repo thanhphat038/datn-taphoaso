@@ -167,12 +167,13 @@ const ProductsPage = () => {
     // Hiển thị loading state
     if (loading) {
         return (
-            <main className='w-full'>
-                <div className='w-[1240px] m-auto py-10'>
-                    <div className='flex justify-center items-center h-64'>
+            <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+                <div className='max-w-7xl mx-auto px-4 py-8'>
+                    <div className='flex justify-center items-center h-96'>
                         <div className='text-center'>
-                            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4'></div>
-                            <p className='text-gray-600'>Đang tải sản phẩm...</p>
+                            <div className='animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-6'></div>
+                            <h2 className='text-2xl font-bold text-gray-800 mb-2'>Đang tải sản phẩm...</h2>
+                            <p className='text-gray-600'>Vui lòng chờ trong giây lát</p>
                         </div>
                     </div>
                 </div>
@@ -183,16 +184,16 @@ const ProductsPage = () => {
     // Hiển thị error state
     if (error) {
         return (
-            <main className='w-full'>
-                <div className='w-[1240px] m-auto py-10'>
-                    <div className='flex justify-center items-center h-64'>
-                        <div className='text-center'>
-                            <div className='text-red-500 text-xl mb-4'>⚠️</div>
-                            <p className='text-red-600 mb-2'>Lỗi tải dữ liệu</p>
-                            <p className='text-gray-600 text-sm'>{error}</p>
+            <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+                <div className='max-w-7xl mx-auto px-4 py-8'>
+                    <div className='flex justify-center items-center h-96'>
+                        <div className='text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100'>
+                            <div className='text-red-500 text-6xl mb-4'>⚠️</div>
+                            <h2 className='text-2xl font-bold text-gray-800 mb-2'>Lỗi tải dữ liệu</h2>
+                            <p className='text-gray-600 mb-6 max-w-md'>{error}</p>
                             <button 
                                 onClick={() => window.location.reload()} 
-                                className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
+                                className='px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors duration-200 font-medium'
                             >
                                 Thử lại
                             </button>
@@ -204,198 +205,253 @@ const ProductsPage = () => {
     }
 
     return (
-        <main className='w-full'>
-            <div className='w-[1240px] m-auto py-10'>
-                <div className='flex gap-5'>
+        <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+            <div className='max-w-7xl mx-auto px-4 py-8'>
+                {/* Header */}
+                <div className='mb-8'>
+                    <h1 className='text-3xl font-bold text-gray-800 mb-2'>Sản phẩm</h1>
+                    <p className='text-gray-600'>Khám phá các sản phẩm chất lượng của chúng tôi</p>
+                </div>
 
-                    <div className='w-[350px] flex flex-col gap-4 sticky top-4 h-fit'>
-                        <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
-                            <div className='flex justify-between items-center mb-4'>
-                                <h2 className='text-xl font-bold'>Danh mục</h2>
-                                {selectedCategoryId && (
-                                    <button
-                                        onClick={() => setSelectedCategoryId(null)}
-                                        className='text-sm text-blue-500 hover:text-blue-700'
-                                    >
-                                        Xóa bộ lọc
-                                    </button>
-                                )}
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                {/* Hiển thị các radio button cho từng danh mục theo id */}
-                                {categoryList.map(category => (
+                <div className='flex gap-8'>
+                    {/* Sidebar Filters */}
+                    <div className='w-80 flex-shrink-0'>
+                        <div className='sticky top-4 space-y-6'>
+                            {/* Category Filter */}
+                            <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
+                                <div className='flex justify-between items-center mb-4'>
+                                    <h2 className='text-xl font-bold text-gray-800'>Danh mục</h2>
+                                    {selectedCategoryId && (
+                                        <button
+                                            onClick={() => setSelectedCategoryId(null)}
+                                            className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+                                        >
+                                            Xóa bộ lọc
+                                        </button>
+                                    )}
+                                </div>
+                                <div className='space-y-2'>
+                                    {categoryList.map(category => (
+                                        <div
+                                            key={category.id}
+                                            className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                            ${selectedCategoryId === category.id 
+                                                ? 'bg-blue-50 border border-blue-200' 
+                                                : 'hover:bg-gray-50 border border-transparent'}`}
+                                            onClick={() => setSelectedCategoryId(category.id)}
+                                        >
+                                            <div className='flex items-center gap-3'>
+                                                <input
+                                                    type="radio"
+                                                    id={category.id}
+                                                    className='w-4 h-4 text-blue-600'
+                                                    name="category"
+                                                    checked={selectedCategoryId === category.id}
+                                                    onChange={() => setSelectedCategoryId(category.id)}
+                                                />
+                                                <label htmlFor={category.id} className='font-medium text-gray-700'>{category.name}</label>
+                                            </div>
+                                            <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                                {getCategoryCount(category.id)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {/* All Categories */}
                                     <div
-                                        key={category.id}
-                                        className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedCategoryId === category.id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setSelectedCategoryId(category.id)}
+                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                        ${selectedCategoryId === null 
+                                            ? 'bg-blue-50 border border-blue-200' 
+                                            : 'hover:bg-gray-50 border border-transparent'}`}
+                                        onClick={() => setSelectedCategoryId(null)}
                                     >
-                                        <div className='flex items-center gap-2'>
+                                        <div className='flex items-center gap-3'>
                                             <input
                                                 type="radio"
-                                                id={category.id}
-                                                className='w-4 h-4'
+                                                id="all"
+                                                className='w-4 h-4 text-blue-600'
                                                 name="category"
-                                                checked={selectedCategoryId === category.id}
-                                                onChange={() => setSelectedCategoryId(category.id)}
+                                                checked={selectedCategoryId === null}
+                                                onChange={() => setSelectedCategoryId(null)}
                                             />
-                                            <label htmlFor={category.id}>{category.name}</label>
+                                            <label htmlFor="all" className='font-medium text-gray-700'>Tất cả</label>
                                         </div>
-                                    </div>
-                                ))}
-                                {/* Radio cho tất cả */}
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedCategoryId === null ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedCategoryId(null)}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="categoryAll"
-                                            className='w-4 h-4'
-                                            name="category"
-                                            checked={selectedCategoryId === null}
-                                            onChange={() => setSelectedCategoryId(null)}
-                                        />
-                                        <label htmlFor="categoryAll">Tất cả</label>
+                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {products.length}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className='bg-white drop-shadow-lg p-4 rounded-[15px]'>
-                            <div className='flex justify-between items-center mb-4'>
-                                <h2 className='text-xl font-bold'>Khoảng giá</h2>
-                                {selectedPriceRange && (
-                                    <button
-                                        onClick={() => setSelectedPriceRange(null)}
-                                        className='text-sm text-blue-500 hover:text-blue-700'
+                            {/* Price Filter */}
+                            <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
+                                <div className='flex justify-between items-center mb-4'>
+                                    <h2 className='text-xl font-bold text-gray-800'>Khoảng giá</h2>
+                                    {selectedPriceRange && (
+                                        <button
+                                            onClick={() => setSelectedPriceRange(null)}
+                                            className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+                                        >
+                                            Xóa bộ lọc
+                                        </button>
+                                    )}
+                                </div>
+                                <div className='space-y-2'>
+                                    <div
+                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                        ${selectedPriceRange === 'under-200' ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}
+                                        onClick={() => setSelectedPriceRange('under-200')}
                                     >
-                                        Xóa bộ lọc
-                                    </button>
-                                )}
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedPriceRange === 'under-200' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedPriceRange('under-200')}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="price1"
-                                            className='w-4 h-4'
-                                            name="price"
-                                            checked={selectedPriceRange === 'under-200'}
-                                            onChange={() => setSelectedPriceRange('under-200')}
-                                        />
-                                        <label htmlFor="price1">Dưới 200.000đ</label>
+                                        <div className='flex items-center gap-3'>
+                                            <input
+                                                type="radio"
+                                                id="price1"
+                                                className='w-4 h-4 text-blue-600'
+                                                name="price"
+                                                checked={selectedPriceRange === 'under-200'}
+                                                onChange={() => setSelectedPriceRange('under-200')}
+                                            />
+                                            <label htmlFor="price1" className='font-medium text-gray-700'>Dưới 200.000đ</label>
+                                        </div>
+                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {getPriceRangeCount('under-200')}
+                                        </span>
                                     </div>
-                                </div>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedPriceRange === '200-500' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedPriceRange('200-500')}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="price2"
-                                            className='w-4 h-4'
-                                            name="price"
-                                            checked={selectedPriceRange === '200-500'}
-                                            onChange={() => setSelectedPriceRange('200-500')}
-                                        />
-                                        <label htmlFor="price2">200.000đ - 500.000đ</label>
+                                    <div
+                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                        ${selectedPriceRange === '200-500' ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}
+                                        onClick={() => setSelectedPriceRange('200-500')}
+                                    >
+                                        <div className='flex items-center gap-3'>
+                                            <input
+                                                type="radio"
+                                                id="price2"
+                                                className='w-4 h-4 text-blue-600'
+                                                name="price"
+                                                checked={selectedPriceRange === '200-500'}
+                                                onChange={() => setSelectedPriceRange('200-500')}
+                                            />
+                                            <label htmlFor="price2" className='font-medium text-gray-700'>200.000đ - 500.000đ</label>
+                                        </div>
+                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {getPriceRangeCount('200-500')}
+                                        </span>
                                     </div>
-                                </div>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedPriceRange === '500-1000' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedPriceRange('500-1000')}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="price3"
-                                            className='w-4 h-4'
-                                            name="price"
-                                            checked={selectedPriceRange === '500-1000'}
-                                            onChange={() => setSelectedPriceRange('500-1000')}
-                                        />
-                                        <label htmlFor="price3">500.000đ - 1.000.000đ</label>
+                                    <div
+                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                        ${selectedPriceRange === '500-1000' ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}
+                                        onClick={() => setSelectedPriceRange('500-1000')}
+                                    >
+                                        <div className='flex items-center gap-3'>
+                                            <input
+                                                type="radio"
+                                                id="price3"
+                                                className='w-4 h-4 text-blue-600'
+                                                name="price"
+                                                checked={selectedPriceRange === '500-1000'}
+                                                onChange={() => setSelectedPriceRange('500-1000')}
+                                            />
+                                            <label htmlFor="price3" className='font-medium text-gray-700'>500.000đ - 1.000.000đ</label>
+                                        </div>
+                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {getPriceRangeCount('500-1000')}
+                                        </span>
                                     </div>
-                                </div>
-                                <div
-                                    className={`flex items-center justify-between cursor-pointer py-2 px-2 rounded-lg transition-colors
-                                    ${selectedPriceRange === 'over-1000' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                                    onClick={() => setSelectedPriceRange('over-1000')}
-                                >
-                                    <div className='flex items-center gap-2'>
-                                        <input
-                                            type="radio"
-                                            id="price4"
-                                            className='w-4 h-4'
-                                            name="price"
-                                            checked={selectedPriceRange === 'over-1000'}
-                                            onChange={() => setSelectedPriceRange('over-1000')}
-                                        />
-                                        <label htmlFor="price4">Trên 1.000.000đ</label>
+                                    <div
+                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                        ${selectedPriceRange === 'over-1000' ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}
+                                        onClick={() => setSelectedPriceRange('over-1000')}
+                                    >
+                                        <div className='flex items-center gap-3'>
+                                            <input
+                                                type="radio"
+                                                id="price4"
+                                                className='w-4 h-4 text-blue-600'
+                                                name="price"
+                                                checked={selectedPriceRange === 'over-1000'}
+                                                onChange={() => setSelectedPriceRange('over-1000')}
+                                            />
+                                            <label htmlFor="price4" className='font-medium text-gray-700'>Trên 1.000.000đ</label>
+                                        </div>
+                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {getPriceRangeCount('over-1000')}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className='w-full'>
-                        <div className='px-3 pb-5 rounded-[5px]'>
-                            <div className='grid grid-cols-4 gap-3'>
-                                {currentProducts}
-                            </div>
-
-                            <div className='flex justify-center items-center gap-2 mt-8'>
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 
-                                    ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                    </svg>
-                                </button>
-
-                                {getPageNumbers().map((pageNum) => (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => handlePageChange(pageNum)}
-                                        className={`w-10 h-10 flex items-center justify-center rounded-lg border 
-                                        ${currentPage === pageNum
-                                                ? 'bg-blue-500 text-white border-blue-500'
-                                                : 'border-gray-300 hover:bg-gray-100'}`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                ))}
-
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 
-                                    ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
+                    {/* Products Grid */}
+                    <div className='flex-1'>
+                        {/* Results Header */}
+                        <div className='bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100'>
+                            <div className='flex justify-between items-center'>
+                                <div>
+                                    <h2 className='text-xl font-bold text-gray-800'>Kết quả tìm kiếm</h2>
+                                    <p className='text-gray-600 mt-1'>
+                                        Hiển thị {currentProducts.length} trong tổng số {totalProducts} sản phẩm
+                                    </p>
+                                </div>
+                                <div className='text-right'>
+                                    <p className='text-sm text-gray-500'>Trang {currentPage} / {totalPages}</p>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Products Grid */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
+                            {currentProducts}
+                        </div>
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
+                                <div className='flex justify-center items-center gap-2'>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                        ${currentPage === 1 
+                                            ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                                            : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+
+                                    {getPageNumbers().map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => handlePageChange(pageNum)}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                            ${currentPage === pageNum
+                                                ? 'bg-blue-500 text-white border-blue-500 shadow-md'
+                                                : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                        ${currentPage === totalPages 
+                                            ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                                            : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-        </main >
+        </main>
     );
 };
 

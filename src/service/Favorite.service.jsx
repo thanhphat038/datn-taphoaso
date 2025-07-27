@@ -8,6 +8,20 @@ function getAuthHeaders() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function getUserId() {
+    const token = Cookies.get('auth_token');
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.id;
+        } catch (error) {
+            console.error('Error parsing token:', error);
+            return null;
+        }
+    }
+    return null;
+}
+
 export const getFavorites = (userId) => {
     return axios.get(`${api}/favorites`, {
         headers: getAuthHeaders(),
@@ -15,12 +29,19 @@ export const getFavorites = (userId) => {
     });
 };
 
-export const addToFavorite = (userId, productId) => {
-    return axios.post(`${api}/favorites`, { user_id: userId, product_id: productId }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+export const addToFavorite = (productId) => {
+    console.log('🔍 Debug - Frontend addToFavorite:', { productId });
+    return axios.post(`${api}/favorites`, { product_id: productId }, { 
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } 
+    });
 };
 
 export const removeFromFavorite = (productId) => {
-    return axios.delete(`${api}/favorites/${productId}`, { headers: getAuthHeaders() });
+    console.log('🔍 Debug - Frontend removeFromFavorite:', { productId });
+    return axios.delete(`${api}/favorites`, { 
+        headers: getAuthHeaders(),
+        data: { product_id: productId }
+    });
 };
 
 // Nếu cần kiểm tra trạng thái yêu thích

@@ -1,22 +1,72 @@
 import React, { useEffect, useState } from 'react';
 import { getFavorites } from '../../service/Favorite.service';
+import { dataProductDetail } from '../../service/Product.service';
 import Product from '../../components/Product';
+import Cookies from 'js-cookie';
 
 const ProductFavorite = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Lấy user_id từ token
+  const getUserId = () => {
+    const token = Cookies.get('auth_token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id;
+      } catch (error) {
+        console.error('Error parsing token:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
   const fetchFavorites = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getFavorites();
+      const userId = getUserId();
+      console.log('🔍 Debug - User ID:', userId);
+      const response = await getFavorites(userId);
+      console.log('🔍 Debug - Favorites response:', response);
       if (response.data?.data) {
-        // Lấy danh sách sản phẩm từ favorites
-        const favoriteProducts = response.data.data.map(fav => fav.product_id).filter(Boolean);
+        // Lấy danh sách sản phẩm từ favorites - kiểm tra xem có thông tin đầy đủ không
+        const favoriteProducts = [];
+        const productIdsToFetch = [];
+        
+        for (const fav of response.data.data) {
+          // Nếu fav.product_id chỉ là ID, cần lấy thông tin đầy đủ
+          if (typeof fav.product_id === 'string' || (typeof fav.product_id === 'object' && !fav.product_id.name)) {
+            console.log('🔍 Debug - Product ID only:', fav.product_id);
+            const productId = typeof fav.product_id === 'string' ? fav.product_id : fav.product_id._id;
+            productIdsToFetch.push(productId);
+          } else {
+            favoriteProducts.push(fav.product_id);
+          }
+        }
+        
+        console.log('🔍 Debug - Products with full data:', favoriteProducts);
+        console.log('🔍 Debug - Product IDs to fetch:', productIdsToFetch);
+        
+        // Fetch thông tin đầy đủ cho các sản phẩm chỉ có ID
+        if (productIdsToFetch.length > 0) {
+          try {
+            const productPromises = productIdsToFetch.map(id => dataProductDetail(id));
+            const productResponses = await Promise.all(productPromises);
+            const fullProducts = productResponses.map(res => res.data.data || res.data);
+            console.log('🔍 Debug - Fetched full products:', fullProducts);
+            favoriteProducts.push(...fullProducts);
+          } catch (fetchError) {
+            console.error('Error fetching product details:', fetchError);
+          }
+        }
+        
         setFavorites(favoriteProducts);
       } else {
+        console.log('🔍 Debug - No favorites data found');
         setFavorites([]);
       }
     } catch (err) {
@@ -93,11 +143,14 @@ const ProductFavorite = () => {
             <p className="text-sm text-gray-400">Hãy thêm sản phẩm vào danh sách yêu thích để xem chúng ở đây</p>
           </div>
         ) : (
-          favorites.map((product) => (
-            <div key={product._id} className="p-2 min-w-[220px] max-w-[260px] mx-auto">
-              <Product data={product} />
-            </div>
-          ))
+          favorites.map((product) => {
+            console.log('🔍 Debug - Rendering product:', product);
+            return (
+              <div key={product._id} className="p-2 min-w-[220px] max-w-[260px] mx-auto">
+                <Product data={product} isFavorited={true} />
+              </div>
+            );
+          })
         )}
       </div>
     </div>
