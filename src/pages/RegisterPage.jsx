@@ -14,6 +14,8 @@ const RegisterPage = () => {
 
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   const validatePassword = (password) => {
     if (password.length < 8) {
@@ -59,11 +61,15 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu và xác nhận mật khẩu không khớp!");
+      setMessage("Mật khẩu và xác nhận mật khẩu không khớp!");
+      setMessageType("error");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
     if (passwordError) {
-      alert(passwordError);
+      setMessage(passwordError);
+      setMessageType("error");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
     try {
@@ -74,16 +80,28 @@ const RegisterPage = () => {
         phone: formData.phone,
         password: formData.password,
       });
-      alert("Đăng ký thành công! Vui lòng đăng nhập.");
-      // Redirect to login page
-      window.location.href = "/login";
+      setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
+      setMessageType("success");
+      setTimeout(() => {
+        setMessage("");
+        window.location.href = "/login";
+      }, 2000);
     } catch (error) {
-      alert("Đăng ký thất bại: " + error.message);
+      setMessage("Đăng ký thất bại: " + error.message);
+      setMessageType("error");
+      setTimeout(() => setMessage(""), 2000);
     }
   };
 
   return (
     <div className="min-h-screen flex">
+      {/* Toast Message */}
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+        </div>
+      )}
       {/* Left side - Image */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
         <img

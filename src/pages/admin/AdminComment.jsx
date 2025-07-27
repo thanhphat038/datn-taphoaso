@@ -7,7 +7,8 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllComments, deleteComment, updateCommentStatus, getProductById, getUserById } from '../../service/Admin.Service.jsx';
+import { getAllComments, deleteComment, updateCommentStatus, getUserById } from '../../service/Admin.Service.jsx';
+
 
 const AdminComment = () => {
   const [comments, setComments] = useState([]);
@@ -22,6 +23,10 @@ const AdminComment = () => {
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentComment, setCurrentComment] = useState(null);
+
+  // Toast/Message states
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   // Fetch comments
   const fetchComments = async () => {
@@ -98,8 +103,13 @@ const AdminComment = () => {
       setLoading(true);
       await deleteComment(commentId);
       setComments(comments.filter(c => c._id !== commentId));
+      setMessage('Xóa bình luận thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa bình luận: ' + error.message);
+      setMessage('Lỗi khi xóa bình luận: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -122,8 +132,13 @@ const AdminComment = () => {
       setComments(comments.map(c => 
         c._id === commentId ? { ...c, status: newStatus } : c
       ));
+      setMessage(`Đã ${actionText} bình luận thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} bình luận: ` + error.message);
+      setMessage(`Lỗi khi ${actionText} bình luận: ` + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -311,6 +326,12 @@ const AdminComment = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

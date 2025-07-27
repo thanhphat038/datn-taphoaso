@@ -34,6 +34,10 @@ const AdminUser = () => {
     username: ''
   });
 
+  // Toast/Message states
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
+
   // Fetch users
    useEffect(() => {
     const loadUsers = async () => {
@@ -109,8 +113,13 @@ setShowEditModal(true);
       setShowEditModal(false);
       setCurrentEditUser(null);
       setEditFormData({ name: '', email: '', phone: '', username: '' });
+      setMessage('Cập nhật người dùng thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi cập nhật người dùng: ' + error.message);
+      setMessage('Lỗi khi cập nhật người dùng: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -126,8 +135,13 @@ setShowEditModal(true);
       setLoading(true);
       await deleteUser(userId);
       setUsers(users.filter(user => user._id !== userId));
+      setMessage('Xóa người dùng thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa người dùng: ' + error.message);
+      setMessage('Lỗi khi xóa người dùng: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -147,8 +161,13 @@ setShowEditModal(true);
       setUsers(users.map(user => 
         user._id === userId ? { ...user, status: newStatus } : user
       ));
+      setMessage(`Đã ${actionText} tài khoản thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} tài khoản: ` + error.message);
+      setMessage(`Lỗi khi ${actionText} tài khoản: ` + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -309,6 +328,12 @@ setStatusFilter(value);
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

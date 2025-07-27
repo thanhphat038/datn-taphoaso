@@ -14,6 +14,8 @@ const SelectAddress = () => {
   const [wards, setWards] = useState([]);
   const [newAddress, setNewAddress] = useState({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
   const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   useEffect(() => {
     fetchAddresses();
@@ -56,7 +58,9 @@ const SelectAddress = () => {
 
   const handleAddAddress = async () => {
     if (!newAddress.receiver || !newAddress.phone || !newAddress.city || !newAddress.district || !newAddress.ward || !newAddress.address_detail) {
-      alert('Vui lòng nhập đầy đủ thông tin!');
+      setMessage('Vui lòng nhập đầy đủ thông tin!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
       return;
     }
     const cityObj = cities.find(c => c.code == newAddress.city);
@@ -69,7 +73,9 @@ const SelectAddress = () => {
       ward: wardObj ? wardObj.name : ''
     };
     if (!payload.city || !payload.district || !payload.ward) {
-      alert('Vui lòng chọn đầy đủ vị trí!');
+      setMessage('Vui lòng chọn đầy đủ vị trí!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
       return;
     }
     try {
@@ -77,11 +83,16 @@ const SelectAddress = () => {
       await fetchAddresses();
       setShowAddForm(false);
       setNewAddress({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
-setDistricts([]);
+      setDistricts([]);
       setWards([]);
       setSelected(res.data.data._id);
+      setMessage('Thêm địa chỉ thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (err) {
-      alert('Thêm địa chỉ thất bại!');
+      setMessage('Thêm địa chỉ thất bại!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     }
   };
 
@@ -105,6 +116,13 @@ setDistricts([]);
 
   return (
     <div className="select-address-wrapper">
+      {/* Toast Message */}
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+        </div>
+      )}
       <div className="select-address-container">
         {/* Header */}
         <div className="select-address-header">

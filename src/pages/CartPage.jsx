@@ -46,22 +46,22 @@ const CartPage = () => {
     fetchProducts();
   }, []);
 
-  // Hàm xử lý áp dụng mã giảm giá
-  const handleApplyVoucher = () => {
-    // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k
-    if (voucherCode.trim().toUpperCase() === 'GIAM10') {
-      setVoucherDiscount(
-        Math.floor(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 0.1)
-      );
-      setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
-    } else if (voucherCode.trim().toUpperCase() === 'GIAM50K') {
-      setVoucherDiscount(50000);
-      setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
-    } else {
-      setVoucherDiscount(0);
-      setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
-    }
-  };
+  // // Hàm xử lý áp dụng mã giảm giá
+  // const handleApplyVoucher = () => {
+  //   // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k
+  //   if (voucherCode.trim().toUpperCase() === 'GIAM10') {
+  //     setVoucherDiscount(
+  //       Math.floor(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 0.1)
+  //     );
+  //     setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
+  //   } else if (voucherCode.trim().toUpperCase() === 'GIAM50K') {
+  //     setVoucherDiscount(50000);
+  //     setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
+  //   } else {
+  //     setVoucherDiscount(0);
+  //     setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+  //   }
+  // };
 
   // Sửa updateCartItemQty để dùng fetchCartRef
   const updateCartItemQty = async (itemId, newQty) => {
@@ -182,7 +182,7 @@ const CartPage = () => {
       </div>
 
       {/* Phần nhập mã giảm giá */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+      {/* <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
         <div className="mb-2 font-medium text-gray-700">Mã giảm giá</div>
         <div className="flex">
           <input
@@ -206,7 +206,7 @@ const CartPage = () => {
             {voucherMessage}
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Cart Summary */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -218,7 +218,7 @@ const CartPage = () => {
         </div>
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-600">Phí vận chuyển:</span>
-          <span className="font-medium text-gray-800">15.000đ</span>
+<span className="font-medium text-gray-800">0đ</span>
         </div>
         {/* Hiển thị giảm giá nếu có */}
         {voucherDiscount > 0 && (
@@ -234,7 +234,7 @@ const CartPage = () => {
               {/* Tính tổng cộng sau khi trừ giảm giá */}
               {(
                 Math.max(
-                  cartItems.reduce((total, item) => total + item.price * item.qty, 0) + 15000 - voucherDiscount,
+                  cartItems.reduce((total, item) => total + item.price * item.qty, 0) - voucherDiscount,
                   0
                 ).toLocaleString()
               )}đ
