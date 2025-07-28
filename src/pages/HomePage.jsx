@@ -129,7 +129,7 @@ const HomePage = () => {
           {/* Nút chính (nổi trên cùng) */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-[999]">
             <div className="relative bg-green-100 text-green-700 text-[20px] font-semibold px-8 py-3.5 rounded-b-md border border-green-500 border-t-0 min-w-[211px] text-center shadow">
-              THỊT, CÁ, TRỨNG, HẢI SẢN
+              Mi ăn liền
             </div>
           </div>
 
