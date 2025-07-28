@@ -21,10 +21,19 @@ const Header = () => {
         };
         fetchCart();
 
-        const handleCartUpdate = () => fetchCart();
+        // Debounce để tránh gọi API quá nhiều
+        let debounceTimer;
+        const handleCartUpdate = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchCart();
+            }, 300);
+        };
+        
         window.addEventListener('cart-updated', handleCartUpdate);
         return () => {
             window.removeEventListener('cart-updated', handleCartUpdate);
+            clearTimeout(debounceTimer);
         };
     }, []);
     

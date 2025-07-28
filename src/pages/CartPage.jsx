@@ -20,19 +20,24 @@ const CartPage = () => {
   const fetchCartRef = useRef();
 
   // Định nghĩa fetchCart bằng useCallback
-  // Định nghĩa fetchCart bằng useCallback
+  const fetchCart = useCallback(async () => {
+    try {
+      const res = await getCart();
+      setInitialCartItems(res.data.data.items);
+    } catch (err) {
+      setInitialCartItems([]);
+    }
+  }, []); // Bỏ dependency setInitialCartItems
+
+  // Gán fetchCart vào ref
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const res = await getCart();
-        setInitialCartItems(res.data.data.items);
-      } catch (err) {
-        setInitialCartItems([]);
-      }
-    };
+    fetchCartRef.current = fetchCart;
+  }, [fetchCart]);
+
+  // Gọi fetchCart lần đầu - chỉ gọi 1 lần khi mount
+  useEffect(() => {
     fetchCart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Bỏ dependency fetchCart
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,10 +73,12 @@ const CartPage = () => {
     try {
       await updateCartItem(itemId, newQty);
       window.dispatchEvent(new Event('cart-updated')); // Phát sự kiện cho Header
-      // Dùng ref để gọi fetchCart
-      if (fetchCartRef.current) await fetchCartRef.current();
+      // Không cần gọi lại fetchCart vì UI đã được cập nhật trong changeQuantity
+      // Header sẽ tự động cập nhật thông qua event cart-updated
     } catch (err) {
       console.error('Lỗi cập nhật số lượng:', err);
+      // Nếu lỗi thì refresh lại để khôi phục trạng thái
+      if (fetchCartRef.current) await fetchCartRef.current();
     }
   };
 
@@ -97,11 +104,18 @@ const CartPage = () => {
 
   const removeItem = async (itemId) => {
     try {
+      // Cập nhật UI ngay lập tức để UX mượt hơn
+      setInitialCartItems(prev => prev.filter(item => item._id !== itemId));
+      
       await removeCartItem(itemId); // Gọi API xóa
       window.dispatchEvent(new Event('cart-updated')); // Phát sự kiện cho Header
-      await fetchCartRef.current();
+      
+      // Không cần gọi lại fetchCart vì đã cập nhật UI rồi
+      // Header sẽ tự động cập nhật thông qua event cart-updated
     } catch (err) {
       console.error("Error removing item:", err);
+      // Nếu lỗi thì refresh lại để khôi phục trạng thái
+      await fetchCartRef.current();
     }
   };
 

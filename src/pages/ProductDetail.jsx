@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useProductDetailData, useRelatedProducts } from '../controller/Product.controller';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
 import { addToCart } from '../service/Cart.service';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
@@ -13,39 +13,44 @@ import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
 
 const ProductDetail = () => {
-    const [mainImage, setMainImage] = useState('');
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [product, setProduct] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [mainImage, setMainImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [pendingAddQty, setPendingAddQty] = useState(0);
-    const [activeTab, setActiveTab] = useState('comments'); // 'comments' or 'reviews'
-    const [reviews, setReviews] = useState([]);
-    const [reviewsPagination, setReviewsPagination] = useState({
-        total: 0,
-        page: 1,
-        limit: 5,
-        totalPages: 1
-    });
-    const [reviewsLoading, setReviewsLoading] = useState(false);
-    
-    // Favorite states
+    const [loadingAddToCart, setLoadingAddToCart] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(false);
-    const [loadingAddToCart, setLoadingAddToCart] = useState(false);
-
-    const { id } = useParams();
-    const pd = useProductDetailData(id) || [];
-    const product = pd.data || {};
-    const relatedProducts = useRelatedProducts(product._id, 20);
-
     const [comments, setComments] = useState([]);
-    const [loadingComments, setLoadingComments] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [postingComment, setPostingComment] = useState(false);
     const [showAllComments, setShowAllComments] = useState(false);
-    const COMMENTS_TO_SHOW = 5;
-
-    // Ref để debounce khi thêm vào giỏ hàng
-    const debounceAddToCart = useRef();
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [reviewsPage, setReviewsPage] = useState(1);
+    const [hasMoreReviews, setHasMoreReviews] = useState(true);
+    const [pendingAddQty, setPendingAddQty] = useState(0);
     const pendingAddQtyRef = useRef(0);
+    const debounceAddToCart = useRef(null);
+    const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const [activeTab, setActiveTab] = useState('comments'); // 'comments' or 'reviews'
+    const [loadingComments, setLoadingComments] = useState(false);
+
+    const COMMENTS_TO_SHOW = 3;
+
+    const pd = useProductDetailData(id) || [];
+    const productData = pd.data || {};
+    const relatedProducts = useRelatedProducts(productData._id, 20);
+
+    // Hàm hiển thị notification
+    const showNotification = (message, type = 'success') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => {
+            setNotification({ show: false, message: '', type: 'success' });
+        }, 3000);
+    };
 
     // Lấy user_id từ token
     const getUserId = () => {
@@ -67,11 +72,11 @@ const ProductDetail = () => {
         const fetchFavorite = async () => {
             const res = await getFavorites();
             if (res.data?.data) {
-                setIsFavorite(res.data.data.some(fav => fav.product_id?._id === product._id));
+                setIsFavorite(res.data.data.some(fav => fav.product_id?._id === productData._id));
             }
         };
-        if (product._id) fetchFavorite();
-    }, [product._id]);
+        if (productData._id) fetchFavorite();
+    }, [productData._id]);
 
     // Kiểm tra trạng thái yêu thích khi component mount
     useEffect(() => {
@@ -80,7 +85,7 @@ const ProductDetail = () => {
                 const response = await getFavorites();
                 if (response.data?.data) {
                     const isProductFavorite = response.data.data.some(
-                        (fav) => fav.product_id?._id === product._id
+                        (fav) => fav.product_id?._id === productData._id
                     );
                     setIsFavorite(isProductFavorite);
                 }
@@ -90,35 +95,41 @@ const ProductDetail = () => {
             }
         };
 
-        if (product._id) {
+        if (productData._id) {
             checkFavoriteStatus();
         }
-    }, [product._id]);
+    }, [productData._id]);
 
     useEffect(() => {
-        if (!product._id) return;
+        if (!productData._id) return;
         setLoadingComments(true);
-        getProductComments(product._id)
+        getProductComments(productData._id)
             .then(data => {
                 console.log('🔍 Debug - Comments data:', data.data);
                 setComments(data.data || []);
             })
-            .finally(() => setLoadingComments(false));
-    }, [product._id]);
+            .catch(err => {
+                console.error('Error fetching comments:', err);
+                setComments([]);
+            })
+            .finally(() => {
+                setLoadingComments(false);
+            });
+    }, [productData._id]);
 
     // Fetch reviews when product changes or tab changes to reviews
     useEffect(() => {
-        if (product._id) {
+        if (productData._id) {
             fetchReviews(1);
         }
-    }, [activeTab, product._id]);
+    }, [activeTab, productData._id]);
 
     const fetchReviews = async (page = 1) => {
-        if (!product._id) return;
+        if (!productData._id) return;
         
         try {
             setReviewsLoading(true);
-            const response = await getReviewsByProductId(product._id);
+            const response = await getReviewsByProductId(productData._id);
             setReviews(response.data || []);
         } catch (error) {
             console.error('Error fetching reviews:', error);
@@ -141,19 +152,19 @@ const ProductDetail = () => {
         try {
             if (isFavorite) {
                 // Xóa khỏi favorite
-                await removeFromFavorite(product._id);
+                await removeFromFavorite(productData._id);
                 setIsFavorite(false);
                 // Phát sự kiện thông báo xóa sản phẩm khỏi favorite
                 window.dispatchEvent(new CustomEvent('favorite-removed', {
-                    detail: { productId: product._id, product: product }
+                    detail: { productId: productData._id, product: productData }
                 }));
             } else {
                 // Thêm vào favorite
-                await addToFavorite(product._id); // Không cần truyền userId nữa
+                await addToFavorite(productData._id); // Không cần truyền userId nữa
                 setIsFavorite(true);
                 // Phát sự kiện thông báo thêm sản phẩm vào favorite
                 window.dispatchEvent(new CustomEvent('favorite-added', {
-                    detail: { productId: product._id, product: product }
+                    detail: { productId: productData._id, product: productData }
                 }));
             }
         } catch (error) {
@@ -167,16 +178,16 @@ const ProductDetail = () => {
     const handleQuantityChange = (delta) => {
         setQuantity((prev) => {
             const newQuantity = prev + delta;
-            if (newQuantity < 1) return 1;
-            if (product.stock && newQuantity > product.stock) return product.stock;
-            return newQuantity;
+                    if (newQuantity < 1) return 1;
+        if (productData.stock && newQuantity > productData.stock) return productData.stock;
+        return newQuantity;
         });
     };
 
     const handleAddToCart = () => {
         console.log('🔍 Debug - handleAddToCart called');
-        console.log('🔍 Debug - Product stock:', product.stock);
-        console.log('🔍 Debug - Product ID:', product._id);
+        console.log('🔍 Debug - Product stock:', productData.stock);
+        console.log('🔍 Debug - Product ID:', productData._id);
         console.log('🔍 Debug - Quantity:', quantity);
         
         const userId = getUserId();
@@ -188,7 +199,7 @@ const ProductDetail = () => {
         }
 
         // Chỉ kiểm tra stock nếu có thông tin stock và stock = 0
-        if (product.stock !== undefined && product.stock !== null && product.stock === 0) {
+        if (productData.stock !== undefined && productData.stock !== null && productData.stock === 0) {
             alert('Sản phẩm hiện tại hết hàng!');
             return;
         }
@@ -209,15 +220,15 @@ const ProductDetail = () => {
         debounceAddToCart.current = setTimeout(async () => {
             if (pendingAddQtyRef.current > 0) {
                 try {
-                    console.log('🔍 Debug - Adding to cart:', product._id, 'quantity:', pendingAddQtyRef.current);
-                    await addToCart(product._id, pendingAddQtyRef.current);
+                    console.log('🔍 Debug - Adding to cart:', productData._id, 'quantity:', pendingAddQtyRef.current);
+                    await addToCart(productData._id, pendingAddQtyRef.current);
                     console.log('✅ Debug - Added to cart successfully');
                     
                     window.dispatchEvent(new Event('cart-updated'));
-                    alert(`Đã thêm ${pendingAddQtyRef.current} sản phẩm vào giỏ hàng!`);
+                    showNotification(`Đã thêm ${pendingAddQtyRef.current} sản phẩm vào giỏ hàng!`, 'success');
                 } catch (error) {
                     console.error('Error adding to cart:', error);
-                    alert('Thêm vào giỏ hàng thất bại! Vui lòng thử lại.');
+                    showNotification('Thêm vào giỏ hàng thất bại! Vui lòng thử lại.', 'error');
                 } finally {
                     setLoadingAddToCart(false);
                 }
@@ -232,10 +243,10 @@ const ProductDetail = () => {
         if (!newComment.trim()) return;
         setPostingComment(true);
         try {
-            await postComment(product._id, newComment);
+            await postComment(productData._id, newComment);
             setNewComment('');
             // Reload lại toàn bộ bình luận từ server
-            const data = await getProductComments(product._id);
+            const data = await getProductComments(productData._id);
             setComments(data.data || []);
         } catch (err) {
             console.log("Lỗi khi gửi bình luận", err);
@@ -247,7 +258,7 @@ const ProductDetail = () => {
 
     const displayedComments = showAllComments ? comments : comments.slice(0, COMMENTS_TO_SHOW);
 
-    if (!product._id) {
+    if (!productData._id) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="text-center">
@@ -283,7 +294,7 @@ const ProductDetail = () => {
                             <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
                             </svg>
-                            <span className="ml-1 text-gray-500 md:ml-2">{product.name}</span>
+                            <span className="ml-1 text-gray-500 md:ml-2">{productData.name}</span>
                         </div>
                     </li>
                 </ol>
@@ -294,14 +305,14 @@ const ProductDetail = () => {
                 <div className="space-y-4">
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                         <img
-                            src={mainImage || product.images?.[0] || '/images/image_product.png'}
-                            alt={product.name}
+                            src={mainImage || productData.images?.[0] || '/images/image_product.png'}
+                            alt={productData.name}
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    {product.images && product.images.length > 1 && (
+                    {productData.images && productData.images.length > 1 && (
                         <div className="grid grid-cols-5 gap-2">
-                            {product.images.map((image, index) => (
+                            {productData.images.map((image, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setMainImage(image)}
@@ -311,7 +322,7 @@ const ProductDetail = () => {
                                 >
                                     <img
                                         src={image}
-                                        alt={`${product.name} ${index + 1}`}
+                                        alt={`${productData.name} ${index + 1}`}
                                         className="w-full h-full object-cover"
                                     />
                                 </button>
@@ -323,21 +334,21 @@ const ProductDetail = () => {
                 {/* Product Info */}
                 <div className="space-y-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center">
                                 <span className="text-2xl font-bold text-red-500">
-                                    {formatCurrency(product.price)}
+                                    {formatCurrency(productData.price)}
                                 </span>
-                                {product.original_price && product.original_price > product.price && (
+                                {productData.original_price && productData.original_price > productData.price && (
                                     <span className="ml-2 text-lg text-gray-500 line-through">
-                                        {formatCurrency(product.original_price)}
+                                        {formatCurrency(productData.original_price)}
                                     </span>
                                 )}
                             </div>
-                            {product.original_price && product.original_price > product.price && (
+                            {productData.original_price && productData.original_price > productData.price && (
                                 <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
-                                    -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                                    -{Math.round(((productData.original_price - productData.price) / productData.original_price) * 100)}%
                                 </span>
                             )}
                         </div>
@@ -346,23 +357,23 @@ const ProductDetail = () => {
                     <div className="space-y-4">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
-                            <p className="text-gray-600 leading-relaxed">{product.description}</p>
+                            <p className="text-gray-600 leading-relaxed">{productData.description}</p>
                         </div>
 
-                        {product.stock !== undefined && (
+                        {productData.stock !== undefined && (
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Tình trạng</h3>
-                                <p className={`font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
+                                <p className={`font-medium ${productData.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {productData.stock > 0 ? `Còn ${productData.stock} sản phẩm` : 'Hết hàng'}
                                 </p>
                             </div>
                         )}
 
-                        {product.category && (
+                        {productData.category && (
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Danh mục</h3>
                                 <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                    {product.category.name}
+                                    {productData.category.name}
                                 </span>
                             </div>
                         )}
@@ -386,7 +397,7 @@ const ProductDetail = () => {
                                 <button
                                     onClick={() => handleQuantityChange(1)}
                                     className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                                    disabled={product.stock && quantity >= product.stock}
+                                    disabled={productData.stock && quantity >= productData.stock}
                                 >
                                     +
                                 </button>
@@ -438,14 +449,14 @@ const ProductDetail = () => {
                 {/* Description */}
                 <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-[600px] overflow-y-auto">
                     <h2 className="text-2xl font-bold mb-4 sticky top-0 bg-white z-10">Mô tả sản phẩm</h2>
-                    {product.images && product.images.length > 0 && (
+                    {productData.images && productData.images.length > 0 && (
                         <img
-                            src={product.images[0]}
-                            alt={product.name}
+                            src={productData.images[0]}
+                            alt={productData.name}
                             className="w-full max-h-60 object-contain rounded mb-4"
                         />
                     )}
-                    <p>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
+                    <p>{productData.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
                 </div>
 
                 {/* Comments */}
@@ -653,6 +664,46 @@ const ProductDetail = () => {
                     </Swiper>
                 </div>
             )}
+
+            {/* Custom Notification */}
+                            {notification.show && (
+                    <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+                        notification.type === 'success' ? 'border-green-500' : 'border-red-500'
+                    } transform transition-all duration-300 ease-in-out`}>
+                        <div className="p-4">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    {notification.type === 'success' ? (
+                                        <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <div className="ml-3 w-0 flex-1">
+                                    <p className={`text-sm font-medium ${
+                                        notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                    }`}>
+                                        {notification.message}
+                                    </p>
+                                </div>
+                                <div className="ml-4 flex-shrink-0 flex">
+                                    <button
+                                        className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                                        onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                                    >
+                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
         </div>
     );
 };

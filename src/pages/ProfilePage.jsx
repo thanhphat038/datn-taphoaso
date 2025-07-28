@@ -5,23 +5,14 @@ import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
 import ProductFavorite from './profile/ProductFavorite';
+import ChangePassword from './profile/ChangePassword';
 import axios from 'axios';
-import { changePassword } from '../service/UserService';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
-  const [passwords, setPasswords] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
-  const [changePasswordError, setChangePasswordError] = useState(null);
-  const [changePasswordSuccess, setChangePasswordSuccess] = useState(null);
-
   console.log('profile:', profile); // Đặt ở đây
 
   const handleLogout = () => {
@@ -62,37 +53,37 @@ const ProfilePage = () => {
     fetchProfile();
   }, []);
 
-  const [showChangePassword, setShowChangePassword] = useState(false);
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex gap-8">
         {/* Left Sidebar */}
         <div className="w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             {/* Profile Icon */}
-            <div className="flex items-center gap-3 p-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden">
+            <div className="flex items-center gap-3 p-3 mb-4 border-b border-gray-100">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                 {profile && profile.avatar ? (
                   <img src={profile.avatar} alt="avatar" className="w-10 h-10 object-cover rounded-full" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 )}
               </div>
-              <span className="font-medium">{profile ? (profile.full_name || profile.username || 'Tên người dùng') : 'Tên người dùng'} </span>
+              <span className="font-medium text-gray-800">{profile ? (profile.full_name || profile.username || 'Tên người dùng') : 'Tên người dùng'}</span>
             </div>
 
             {/* Navigation Menu */}
-            <nav className="space-y-1">
+            <nav className="space-y-1 mb-6">
               <button
                 onClick={() => {
                   navigate('/profile/information');
                   setActiveTab('profile');
                 }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  activeTab === 'profile' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+                className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  activeTab === 'profile' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -100,13 +91,14 @@ const ProfilePage = () => {
                 </svg>
                 Thông tin cá nhân
               </button>
+              
               <button
                 onClick={() => {
                   navigate('/profile/address');
                   setActiveTab('address');
                 }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  activeTab === 'address' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+                className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  activeTab === 'address' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -114,13 +106,14 @@ const ProfilePage = () => {
                 </svg>
                 Địa chỉ
               </button>
+              
               <button
                 onClick={() => {
                   navigate('/profile/orders');
                   setActiveTab('orders');
                 }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  activeTab === 'orders' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+                className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  activeTab === 'orders' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -128,13 +121,14 @@ const ProfilePage = () => {
                 </svg>
                 Đơn hàng
               </button>
+              
               <button
                 onClick={() => {
                   navigate('/profile/favorites');
                   setActiveTab('favorites');
                 }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  activeTab === 'favorites' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+                className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  activeTab === 'favorites' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -142,22 +136,32 @@ const ProfilePage = () => {
                 </svg>
                 Sản phẩm yêu thích
               </button>
-              <div className="flex gap-4 mt-2">
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-white font-medium transition-colors bg-[#06AEF4] hover:bg-[#70d9ff]"
-                  onClick={() => setShowChangePassword(true)}
-                >
-                  Đổi mật khẩu
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="flex-1 px-4 py-2 rounded-lg text-sm text-white font-medium bg-red-500 hover:bg-red-400 transition-colors"
-                >
-                  Đăng xuất
-                </button>
-              </div>
+              
+              <button
+                onClick={() => {
+                  navigate('/profile/change-password');
+                  setActiveTab('change-password');
+                }}
+                className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  activeTab === 'change-password' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                Đổi mật khẩu
+              </button>
             </nav>
+
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-2 rounded-md text-sm text-white font-medium transition-colors bg-red-500 hover:bg-red-600"
+              >
+                Đăng xuất
+              </button>
+            </div>
           </div>
         </div>
 
@@ -169,100 +173,9 @@ const ProfilePage = () => {
             <Route path="address" element={<Address />} />
             <Route path="orders" element={<Order />} />
             <Route path="favorites" element={<ProductFavorite />} />
+            <Route path="change-password" element={<ChangePassword />} />
           </Routes>
-        </div>
-        {showChangePassword && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 max-w-lg w-full relative">
-              <button
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold"
-                onClick={() => setShowChangePassword(false)}
-                aria-label="Đóng"
-              >
-                &times;
-              </button>
-              <h2 className="text-xl font-semibold mb-6">Đổi mật khẩu</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu hiện tại</label>
-                  <input
-                    type="password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập mật khẩu hiện tại"
-                    value={passwords.currentPassword}
-                    onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                  />
                 </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Mật khẩu mới</label>
-                  <input
-                    type="password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập mật khẩu mới"
-                    value={passwords.newPassword}
-                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Xác nhận mật khẩu mới</label>
-                  <input
-                    type="password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Nhập lại mật khẩu mới"
-                    value={passwords.confirmPassword}
-                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-4 pt-6">
-                  <button
-                    className="flex-1 px-6 py-3 rounded-lg bg-[#06AEF4] text-white hover:bg-blue-500 transition-colors font-medium"
-                    onClick={async () => {
-                      setChangePasswordLoading(true);
-                      setChangePasswordError(null);
-                      setChangePasswordSuccess(null);
-                      
-                      // Validate trước khi gọi API
-                      if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
-                        setChangePasswordError('Vui lòng nhập đầy đủ các trường!');
-                        setChangePasswordLoading(false);
-                        return;
-                      }
-                      if (passwords.newPassword.length < 6) {
-                        setChangePasswordError('Mật khẩu mới phải có ít nhất 6 ký tự!');
-                        setChangePasswordLoading(false);
-                        return;
-                      }
-                      if (passwords.newPassword !== passwords.confirmPassword) {
-                        setChangePasswordError('Mật khẩu xác nhận không khớp!');
-                        setChangePasswordLoading(false);
-                        return;
-                      }
-                                              try {
-                          await changePassword(passwords.currentPassword, passwords.newPassword);
-                          setChangePasswordSuccess('Đổi mật khẩu thành công');
-                          setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                          setShowChangePassword(false);
-                        } catch (error) {
-                          setChangePasswordError(error.message);
-                        } finally {
-                          setChangePasswordLoading(false);
-                        }
-                    }}
-                    disabled={changePasswordLoading}
-                  >
-                    {changePasswordLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
-                  </button>
-                </div>
-                {changePasswordError && (
-                  <p className="text-red-500 mt-2 text-center">{changePasswordError}</p>
-                )}
-                {changePasswordSuccess && (
-                  <p className="text-green-500 mt-2 text-center">{changePasswordSuccess}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
