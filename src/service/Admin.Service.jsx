@@ -76,9 +76,7 @@ export const updateOrderStatus = (id, status) => {
     return axios.put(`${api}/orders/${id}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
-export const getProductById = (id) => {
-    return axios.get(`${api}/products/${id}`, { headers: getAuthHeaders() });
-};
+
 
 export const deleteProduct = (id) => {
     return axios.delete(`${api}/products/${id}`, { headers: getAuthHeaders() });

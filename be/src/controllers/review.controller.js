@@ -80,20 +80,14 @@ export const getReviewsByProductId = async (req, res) => {
   try {
     const { productId } = req.params;
     const { page = 1, limit = 10 } = req.query;
-    const reviews = await reviewService.findAll(
-      { product_id: productId },
-      {
-        populate: [
-          { path: 'user_id', select: 'name email' },
-          { path: 'product_id', select: 'name price' }
-        ],
-        sort: { created_at: -1 },
-        skip: (page - 1) * limit,
-        limit: Number(limit)
-      }
-    );
+    
+    const reviews = await reviewService.getProductReviews(productId, {
+      page: parseInt(page),
+      limit: parseInt(limit)
+    });
+    
     res.json(reviews);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}; 
+}

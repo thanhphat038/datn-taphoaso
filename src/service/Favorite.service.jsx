@@ -15,8 +15,8 @@ export const getFavorites = (userId) => {
     });
 };
 
-export const addToFavorite = (productId) => {
-    return axios.post(`${api}/favorites`, { product_id: productId }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+export const addToFavorite = (userId, productId) => {
+    return axios.post(`${api}/favorites`, { user_id: userId, product_id: productId }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const removeFromFavorite = (productId) => {

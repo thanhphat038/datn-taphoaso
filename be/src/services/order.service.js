@@ -30,15 +30,22 @@ class OrderService extends DBService {
       .populate('user_id', 'name email') // nếu cần thông tin người dùng
       .lean();
 
-    const total = await this.model.countDocuments(filter);
-
-    return {
-      orders,
-      total,
-      page,
-      limit
-    };
-  }
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
+          return { ...order, items };
+        })
+      );
+  
+      const total = await this.model.countDocuments(filter);
+  
+      return {
+        ordersWithItems,
+        total,
+        page,
+        limit
+      };
+    }
 
   async getOrderById(orderId) {
     return await this.model.findById(orderId).populate('user_id');
@@ -121,8 +128,15 @@ class OrderService extends DBService {
       this.model.countDocuments(query)
     ]);
 
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
+        return { ...order.toObject(), items };
+      })
+    );
+
     return {
-      data: orders,
+      data: ordersWithItems,
       pagination: {
         total,
         page,

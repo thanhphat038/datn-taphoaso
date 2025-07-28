@@ -14,6 +14,8 @@ const LoginPage = () => {
     const [forgotEmail, setForgotEmail] = useState('');
     const [forgotMessage, setForgotMessage] = useState('');
     const [forgotLoading, setForgotLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
     const navigate = useNavigate();
 
@@ -31,14 +33,18 @@ const handleSubmit = async (e) => {
         const response = await loginUser({username: formData.username, password: formData.password});
         if (response && response.data && response.data.user && response.data.user.username) {
             const user = response.data.user;
-            alert('Đăng nhập thành công! Chào mừng ' + user.username);
-            // Store user information in local storage
-            localStorage.setItem('user', JSON.stringify(user));
-            if (user.role === 'admin') {
-                navigate('/admin');
-            } else {
-                navigate('/');
-            }
+            setMessage('Đăng nhập thành công! Chào mừng ' + user.username);
+            setMessageType('success');
+            setTimeout(() => {
+                setMessage("");
+                // Store user information in local storage
+                localStorage.setItem('user', JSON.stringify(user));
+                if (user.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/');
+                }
+            }, 2000);
         } else {
             setLoginError('Tên đăng nhập hoặc mật khẩu không đúng');
         }
@@ -63,6 +69,13 @@ const handleSubmit = async (e) => {
 
     return (
         <div className="min-h-screen flex">
+            {/* Toast Message */}
+            {message && (
+                <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    <span>{message}</span>
+                    <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
+                </div>
+            )}
             {/* Left side - Image */}
             <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
                 <img
