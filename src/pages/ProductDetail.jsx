@@ -90,7 +90,7 @@ fetchReviews(1);
         try {
             setReviewsLoading(true);
             const response = await getReviewsByProductId(product._id);
-            setReviews(response.data || []);
+            setReviews((response.data || []).reverse());
         } catch (error) {
             console.error('Error fetching reviews:', error);
             setReviews([]);

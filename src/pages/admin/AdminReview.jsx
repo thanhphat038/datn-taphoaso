@@ -335,7 +335,7 @@ const AdminReview = () => {
     {
       key: 'status',
       label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
-             statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
+            statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
       value: statusFilter,
       options: [
         { value: 'All', label: 'Tất cả trạng thái' },
