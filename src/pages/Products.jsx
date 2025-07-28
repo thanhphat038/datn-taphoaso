@@ -208,10 +208,10 @@ const ProductsPage = () => {
         <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
             <div className='max-w-7xl mx-auto px-4 py-8'>
                 {/* Header */}
-                <div className='mb-8'>
+                {/* <div className='mb-8'>
                     <h1 className='text-3xl font-bold text-gray-800 mb-2'>Sản phẩm</h1>
                     <p className='text-gray-600'>Khám phá các sản phẩm chất lượng của chúng tôi</p>
-                </div>
+                </div> */}
 
                 <div className='flex gap-8'>
                     {/* Sidebar Filters */}
@@ -251,9 +251,9 @@ const ProductsPage = () => {
                                                 />
                                                 <label htmlFor={category.id} className='font-medium text-gray-700'>{category.name}</label>
                                             </div>
-                                            <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                            {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                                 {getCategoryCount(category.id)}
-                                            </span>
+                                            </span> */}
                                         </div>
                                     ))}
                                     {/* All Categories */}
@@ -275,9 +275,9 @@ const ProductsPage = () => {
                                             />
                                             <label htmlFor="all" className='font-medium text-gray-700'>Tất cả</label>
                                         </div>
-                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                             {products.length}
-                                        </span>
+                                        </span> */}
                                     </div>
                                 </div>
                             </div>
@@ -312,9 +312,9 @@ const ProductsPage = () => {
                                             />
                                             <label htmlFor="price1" className='font-medium text-gray-700'>Dưới 200.000đ</label>
                                         </div>
-                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                             {getPriceRangeCount('under-200')}
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
@@ -332,9 +332,9 @@ const ProductsPage = () => {
                                             />
                                             <label htmlFor="price2" className='font-medium text-gray-700'>200.000đ - 500.000đ</label>
                                         </div>
-                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                             {getPriceRangeCount('200-500')}
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
@@ -352,9 +352,9 @@ const ProductsPage = () => {
                                             />
                                             <label htmlFor="price3" className='font-medium text-gray-700'>500.000đ - 1.000.000đ</label>
                                         </div>
-                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                             {getPriceRangeCount('500-1000')}
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
@@ -372,9 +372,9 @@ const ProductsPage = () => {
                                             />
                                             <label htmlFor="price4" className='font-medium text-gray-700'>Trên 1.000.000đ</label>
                                         </div>
-                                        <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
                                             {getPriceRangeCount('over-1000')}
-                                        </span>
+                                        </span> */}
                                     </div>
                                 </div>
                             </div>
@@ -384,7 +384,7 @@ const ProductsPage = () => {
                     {/* Products Grid */}
                     <div className='flex-1'>
                         {/* Results Header */}
-                        <div className='bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100'>
+                        {/* <div className='bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100'>
                             <div className='flex justify-between items-center'>
                                 <div>
                                     <h2 className='text-xl font-bold text-gray-800'>Kết quả tìm kiếm</h2>
@@ -396,7 +396,7 @@ const ProductsPage = () => {
                                     <p className='text-sm text-gray-500'>Trang {currentPage} / {totalPages}</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Products Grid */}
                         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
@@ -405,7 +405,7 @@ const ProductsPage = () => {
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
+                            <div className=' border-gray-100'>
                                 <div className='flex justify-center items-center gap-2'>
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
