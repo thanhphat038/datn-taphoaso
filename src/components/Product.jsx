@@ -164,7 +164,7 @@ const Product = ({ data: product, isFavorited = false }) => {
   return (
     <div className='bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group min-w-[220px] max-w-[280px] w-full h-full flex flex-col'>
       {/* Product Image Container */}
-      <div className='relative overflow-hidden bg-gray-50 p-4'>
+      <div className='relative overflow-hidden bg-white p-4'>
         <Link to={`/product/${product._id}`}>
           <img
             className='w-full h-48 object-contain transition-transform duration-300 group-hover:scale-105'
