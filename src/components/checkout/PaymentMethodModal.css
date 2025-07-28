@@ -110,12 +110,23 @@
   margin-right: 8px;
 }
 
+.pm-modal-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .pm-modal-label {
   font-size: 18px;
   font-weight: 500;
   color: #222;
-  display: flex;
-  align-items: center;
+  margin-bottom: 4px;
+}
+
+.pm-modal-description {
+  font-size: 14px;
+  color: #666;
+  font-weight: 400;
 }
 
 .pm-modal-radio-icon {

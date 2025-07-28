@@ -68,7 +68,7 @@ class OrderService extends DBService {
 
     let voucher_id = null;
     if (voucher_code) {
-      const voucher = await voucherService.validateVoucher(voucher_code, user_id, total_amount);
+      const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
       if (voucher) {
         voucher_id = voucher._id;
         const discountAmount = voucher.discount_type === 'percentage'
@@ -170,7 +170,7 @@ class OrderService extends DBService {
   }
 
   async updateStatus(orderId, status) {
-    const validStatuses =['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
     if (!validStatuses.includes(status)) {
       throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid order status');

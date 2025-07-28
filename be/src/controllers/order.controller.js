@@ -1,8 +1,9 @@
 // order.controller.js
 import OrderService from '../services/order.service.js';
 import CartService from '../services/cart.service.js';
-
+import VoucherService from '../services/voucher.service.js';
 import ProductService from '../services/product.service.js';
+
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
@@ -12,12 +13,12 @@ const productService = new ProductService();
 
 export const createOrder = async (req, res, next) => {
   try {
-    const { address, receiver, sdt, items, payment_method, note,voucher_code } = req.body;
+    const { address, receiver, sdt, items, payment_method, note, voucher_code } = req.body;
 
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
-    } 
-    console.log('REQ ITEMS:', items);  
+    }
+
     const userId = req.user.id;
     const cart = await cartService.getCart(userId);
 
@@ -26,10 +27,21 @@ export const createOrder = async (req, res, next) => {
     }
 
     for (const item of items) {
-      console.log('Item:', item);   // Thêm log
-      console.log('Product ID:', item.product_id);   // Thêm log
+      console.log('Item:', item);
+      console.log('Product ID:', item.product_id);
 
       const product = await productService.findById(item.product_id);
+      if (!product) {
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Product with ID ${item.product_id} not found`);
+      }
+    }
+
+    let voucher = null;
+    if (voucher_code) {
+      voucher = await voucherService.findValidVoucherByCode(voucher_code, userId);
+      if (!voucher) {
+        throw new AppError(ERROR_CODES.BAD_REQUEST, 'Invalid or expired voucher');
+      }
     }
 
     const order = await orderService.createOrder({
@@ -39,11 +51,49 @@ export const createOrder = async (req, res, next) => {
       sdt,
       payment_method,
       note,
-      items: items,
-      voucher_code: voucher_code
+      items,
+      voucher_code,
+      voucher, // optional, may be null
     });
 
     await cartService.clearCart(userId);
+
+    res.json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createbuyNowOrder = async (req, res, next) => {
+  try {
+    const { address, receiver, sdt, payment_method, note, product_id, quantity = 1, voucher } = req.body;
+
+    if (!address || !receiver || !sdt || !payment_method || !product_id) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
+    }
+
+    const userId = req.user.id;
+
+    const product = await productService.findById(product_id);
+    if (!product) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Product not found');
+    }
+
+    const order = await orderService.createOrder({
+      user_id: userId,
+      voucher,
+      address,
+      receiver,
+      sdt,
+      payment_method,
+      note,
+      items: [
+        {
+          product_id,
+          quantity
+        }
+      ]
+    });
 
     res.json({ success: true, data: order });
   } catch (err) {

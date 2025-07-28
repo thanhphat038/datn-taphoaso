@@ -144,4 +144,26 @@ export const getAllCommentOfProductId = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}; 
+};
+
+// Toggle is_hidden của comment
+export const toggleCommentHidden = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const comment = await commentService.findById(id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    const newHiddenState = !comment.is_hidden;
+    const updated = await commentService.update(id, { is_hidden: newHiddenState });
+
+    res.json({
+      message: `Comment visibility updated: now ${newHiddenState ? 'hidden' : 'visible'}.`,
+      data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+};
