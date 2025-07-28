@@ -130,7 +130,7 @@ const ProductDetail = () => {
         try {
             setReviewsLoading(true);
             const response = await getReviewsByProductId(productData._id);
-            setReviews(response.data || []);
+            setReviews((response.data || []).reverse());
         } catch (error) {
             console.error('Error fetching reviews:', error);
             setReviews([]);

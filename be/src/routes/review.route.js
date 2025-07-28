@@ -4,7 +4,8 @@ import {
   getReviews,
   getReviewById,
   updateReview,
-  deleteReview
+  deleteReview,
+  toggleReviewHidden
 } from '../controllers/review.controller.js';
 
 const router = express.Router();
@@ -23,5 +24,8 @@ router.put('/:id', updateReview);
 
 // Delete review
 router.delete('/:id', deleteReview);
+
+// Toggle is_hidden của review
+router.patch('/:id/toggle-hidden', toggleReviewHidden);
 
 export default router; 

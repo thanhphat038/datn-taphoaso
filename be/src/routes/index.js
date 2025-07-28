@@ -15,6 +15,7 @@ import cartRouter from './cart.route.js';
 
 import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
+import paymentRouter from './payment.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -39,5 +40,8 @@ router.use('/categories', authMiddleware,categoryRouter);
 router.use('/carts', authMiddleware, cartRouter);
 
 router.use('/vouchers', authMiddleware, voucherRouter);
+
+// Payment routes
+router.use('/payment', paymentRouter);
 
 export default router;
