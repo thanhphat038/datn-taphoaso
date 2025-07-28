@@ -74,23 +74,28 @@ const OrderPage = () => {
       try {
         setLoading(true);
         const response = await getAllOrders();
-const ordersData = response.data.data.ordersWithItems || [];
+        const ordersData = response.data.data.ordersWithItems || [];
 
-        console.log('Orders from API:', ordersData); // Log dữ liệu trả về từ API
-        // Lấy chi tiết user và sản phẩm cho từng order
-        const ordersWithDetails = await Promise.all((ordersData).map(async order => {
-          let user = null;
-          try {
-            if (order.user_id && typeof order.user_id === 'string') {
-              const userRes = await getUserById(order.user_id);
-              user = userRes?.data?.data || userRes?.data;
-            } else if (typeof order.user_id === 'object' && order.user_id !== null) {
-              user = order.user_id;
-            }
-          } catch (e) {}
-        
-        }));
+        // Lấy chi tiết user cho từng order (KHÔNG lấy orderdetail nữa)
+        const ordersWithDetails = await Promise.all(
+          ordersData.map(async (order) => {
+            let user = null;
+            try {
+              if (order.user_id && typeof order.user_id === 'string') {
+                const userRes = await getUserById(order.user_id);
+                user = userRes?.data?.data || userRes?.data;
+              } else if (typeof order.user_id === 'object' && order.user_id !== null) {
+                user = order.user_id;
+              }
+            } catch (e) {}
+            return {
+              ...order,
+              user_id: user,
+            };
+          })
+        );
         setOrders(ordersWithDetails);
+        console.log('All orders with details:', ordersWithDetails);
       } catch (error) {
         setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);
@@ -325,7 +330,7 @@ const ordersData = response.data.data.ordersWithItems || [];
               {order.items && order.items.length > 0 ? (
                 order.items.map((item, idx) => (
                   <tr key={idx} className="border-b last:border-b-0">
-<td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
+                    <td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
                     <td className="px-4 py-2 text-right">{formatCurrency(item.cur_price)}</td>
                     <td className="px-4 py-2 text-right">x{item.qty}</td>
                   </tr>
