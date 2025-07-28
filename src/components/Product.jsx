@@ -90,9 +90,13 @@ const Product = ({ data: product, isFavorited = false }) => {
       return;
     }
     
+    let isMounted = true;
+    
     const checkFavoriteStatus = async () => {
       try {
         const response = await getFavorites();
+        if (!isMounted) return;
+        
         if (response.data?.data) {
           const isProductFavorite = response.data.data.some(
             (fav) => fav.product_id?._id === product._id
@@ -100,12 +104,17 @@ const Product = ({ data: product, isFavorited = false }) => {
           setIsFavorite(isProductFavorite);
         }
       } catch (error) {
+        if (!isMounted) return;
         console.error('Error checking favorite status:', error);
         setIsFavorite(false);
       }
     };
 
     checkFavoriteStatus();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [product._id, isFavorited]);
 
   const handleBuyNow = () => {

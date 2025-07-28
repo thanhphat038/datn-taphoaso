@@ -79,10 +79,18 @@ const ProductFavorite = () => {
   };
 
   useEffect(() => {
-    fetchFavorites();
+    let isMounted = true;
+    
+    const loadFavorites = async () => {
+      if (!isMounted) return;
+      await fetchFavorites();
+    };
+    
+    loadFavorites();
 
     // Lắng nghe sự kiện xóa sản phẩm khỏi favorite
     const handleFavoriteRemoved = (event) => {
+      if (!isMounted) return;
       const { productId } = event.detail;
       setFavorites(prevFavorites => 
         prevFavorites.filter(product => product._id !== productId)
@@ -91,6 +99,7 @@ const ProductFavorite = () => {
 
     // Lắng nghe sự kiện thêm sản phẩm vào favorite
     const handleFavoriteAdded = (event) => {
+      if (!isMounted) return;
       const { product } = event.detail;
       setFavorites(prevFavorites => {
         // Kiểm tra xem sản phẩm đã có trong danh sách chưa
@@ -108,6 +117,7 @@ const ProductFavorite = () => {
 
     // Cleanup event listeners khi component unmount
     return () => {
+      isMounted = false;
       window.removeEventListener('favorite-removed', handleFavoriteRemoved);
       window.removeEventListener('favorite-added', handleFavoriteAdded);
     };

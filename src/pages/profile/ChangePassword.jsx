@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { changePassword } from '../../service/UserService';
 
 const ChangePassword = () => {
@@ -10,9 +10,22 @@ const ChangePassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      // Clear any pending state updates
+      setLoading(false);
+      setError('');
+      setSuccess('');
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isMountedRef.current) return;
+    
     setLoading(true);
     setError('');
     setSuccess('');
@@ -36,12 +49,18 @@ const ChangePassword = () => {
     
     try {
       await changePassword(passwords.currentPassword, passwords.newPassword);
-      setSuccess('Đổi mật khẩu thành công!');
-      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      if (isMountedRef.current) {
+        setSuccess('Đổi mật khẩu thành công!');
+        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
     } catch (error) {
-      setError(error.message);
+      if (isMountedRef.current) {
+        setError(error.message);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -60,7 +79,7 @@ const ChangePassword = () => {
         <p className="text-gray-600 mt-2">Bảo mật tài khoản của bạn</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form key="change-password-form" onSubmit={handleSubmit} className="space-y-6">
         {/* Current Password */}
         <div className="group">
           <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -70,13 +89,14 @@ const ChangePassword = () => {
             Mật khẩu hiện tại
           </label>
           <div className="relative">
-                         <input
-               type="password"
-               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
-               placeholder="Nhập mật khẩu hiện tại"
-               value={passwords.currentPassword}
-               onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-             />
+            <input
+              key="current-password"
+              type="password"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              placeholder="Nhập mật khẩu hiện tại"
+              value={passwords.currentPassword}
+              onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+            />
              <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
@@ -90,13 +110,14 @@ const ChangePassword = () => {
             Mật khẩu mới
           </label>
           <div className="relative">
-                         <input
-               type="password"
-               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
-               placeholder="Nhập mật khẩu mới"
-               value={passwords.newPassword}
-               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-             />
+            <input
+              key="new-password"
+              type="password"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              placeholder="Nhập mật khẩu mới"
+              value={passwords.newPassword}
+              onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+            />
              <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
@@ -110,20 +131,21 @@ const ChangePassword = () => {
             Xác nhận mật khẩu mới
           </label>
           <div className="relative">
-                         <input
-               type="password"
-               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
-               placeholder="Nhập lại mật khẩu mới"
-               value={passwords.confirmPassword}
-               onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-             />
+            <input
+              key="confirm-password"
+              type="password"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              placeholder="Nhập lại mật khẩu mới"
+              value={passwords.confirmPassword}
+              onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+            />
              <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
 
         {/* Error/Success Messages */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+          <div key="error-message" className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -134,7 +156,7 @@ const ChangePassword = () => {
         )}
         
         {success && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+          <div key="success-message" className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

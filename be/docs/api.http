@@ -217,7 +217,7 @@ Content-Type: application/json
 }
 
 ### Get my orders (User)
-GET {{baseUrl}}/orders/my
+GET {{baseUrl}}/orders/my?page=1&limit=3
 Authorization: Bearer {{authToken}}
 
 ### Update order status (Admin)
@@ -385,13 +385,17 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "user_id": "user685a9ea76875fcf8f499fa9aId",
   "product_id": "6862d1c32df5d5159cc51f08"
 }
 
 ### Remove from favorites
-DELETE {{baseUrl}}/favorites/{{productId}}
+DELETE {{baseUrl}}/favorites
 Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
 
 ### Cart ###
 ### Get cart

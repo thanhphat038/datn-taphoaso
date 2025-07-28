@@ -67,17 +67,6 @@ const ProductDetail = () => {
         return null;
     };
 
-    useEffect(() => {
-        // Kiểm tra trạng thái yêu thích khi mount
-        const fetchFavorite = async () => {
-            const res = await getFavorites();
-            if (res.data?.data) {
-                setIsFavorite(res.data.data.some(fav => fav.product_id?._id === productData._id));
-            }
-        };
-        if (productData._id) fetchFavorite();
-    }, [productData._id]);
-
     // Kiểm tra trạng thái yêu thích khi component mount
     useEffect(() => {
         const checkFavoriteStatus = async () => {

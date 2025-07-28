@@ -102,6 +102,7 @@ class AuthService {
       }
 
       const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      
       if (!isValidPassword) {
         throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Current password is incorrect');
       }
