@@ -9,6 +9,8 @@ import FavoriteService from './favorite.service.js';
 import CategoryService from './category.service.js';
 import AddressService from './address.service.js';
 import AuthService from './auth.service.js';
+import BlogService from './blog.service.js';
+import BlogCategoryService from './blogCategory.service.js';
 
 // Create instances
 const userService = new UserService();
@@ -22,6 +24,8 @@ const favoriteService = new FavoriteService();
 const categoryService = new CategoryService();
 const addressService = new AddressService();
 const authService = new AuthService();
+const blogService = new BlogService();
+const blogCategoryService = new BlogCategoryService();
 
 // Export instances
 export {
@@ -35,5 +39,7 @@ export {
   favoriteService,
   categoryService,
   addressService,
-  authService
-}; 
+  authService,
+  blogService,
+  blogCategoryService
+};

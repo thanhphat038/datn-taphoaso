@@ -142,20 +142,20 @@ const AdminBlogPage = () => {
       key: "status",
       render: (blog) => (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-          blog.status === 'published' 
+          blog.status === 'publish' 
             ? 'bg-green-100 text-green-800' 
             : 'bg-yellow-100 text-yellow-800'
         }`}>
-          {blog.status === 'published' ? 'Đã xuất bản' : 'Nháp'}
+          {blog.status === 'publish' ? 'Đã xuất bản' : 'Nháp'}
         </span>
       ),
     },
     {
       title: "Ngày tạo",
-      key: "createdAt",
+      key: "create_at",
       render: (blog) => (
         <div className="text-sm text-gray-600">
-          {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+          {new Date(blog.create_at).toLocaleDateString('vi-VN')}
         </div>
       ),
     },

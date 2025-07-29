@@ -3,6 +3,9 @@ import express from 'express';
 import userRouter from './user.route.js';
 
 import productRouter from './product.route.js';
+import blogRouter from './blog.route.js';
+import blogCategoryRouter from './blogCategory.route.js';
+
 import categoryRouter from './category.route.js';
 import orderRouter from './order.route.js';
 import addressRouter from './address.route.js';
@@ -34,6 +37,11 @@ router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes
 router.use('/products', productRouter);
+
+router.use('/blogs', blogRouter);
+
+router.use('/blogs_categories', blogCategoryRouter);
+
 router.use('/categories', authMiddleware,categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);

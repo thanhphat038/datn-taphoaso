@@ -1,43 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaImage, FaUpload } from 'react-icons/fa';
+import { FaImage, FaUpload, FaTrash } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Toolbar from '../../components/admin/ToolbarTiptap';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const AddBlog = () => {
-
-
   const editor = useEditor({
-    extensions: [StarterKit],
-    content: '<p>Chào bạn! Đây là trình soạn thảo Tiptap ✨</p>',
+    extensions: [
+      StarterKit,
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline cursor-pointer',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
+        },
+      }),
+    ],
+    content: '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       setFormData(prev => ({
         ...prev,
         content: html
       }));
+      
+      // Extract base64 images from content (for logging/debugging)
+      const base64ImagesFromContent = extractBase64Images(html);
+      console.log('Base64 images in content:', base64ImagesFromContent.length);
     }
   });
-
 
 
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
 
   const [formData, setFormData] = useState({
     title: '',
-    excerpt: '',
+    description: '',
     content: '',
     image: '',
-    category: '',
+    blog_category_id: '',
     status: 'draft'
   });
 
@@ -55,13 +78,13 @@ const AddBlog = () => {
           }
           const result = await response.json();
           const blog = result.data;
-          
+
           setFormData({
             title: blog.title || '',
-            excerpt: blog.excerpt || '',
+            description: blog.description || '',
             content: blog.content || '',
             image: blog.image || '',
-            category: blog.category || '',
+            blog_category_id: blog.blog_category_id || '',
             status: blog.status || 'draft'
           });
 
@@ -72,7 +95,7 @@ const AddBlog = () => {
             editor.commands.setContent(blog.content);
           }
         } catch (error) {
-          setError('Không thể tải thông tin bài viết: ' + error.message);
+setError('Không thể tải thông tin bài viết: ' + error.message);
         } finally {
           setLoading(false);
         }
@@ -139,6 +162,30 @@ const AddBlog = () => {
     }
   };
 
+  // Function để extract base64 images từ content (for debugging)
+  const extractBase64Images = (htmlContent) => {
+    const base64Images = [];
+    const imgRegex = /<img[^>]+src="(data:image\/[^;]+;base64,[^"]+)"/g;
+    let match;
+    
+    while ((match = imgRegex.exec(htmlContent)) !== null) {
+      base64Images.push(match[1]);
+    }
+    
+    return base64Images;
+  };
+
+  // Function để replace base64 images với URLs trong content (không cần thiết nữa)
+  // const replaceBase64WithUrls = (content, base64Images, uploadedUrls) => {
+  //   let updatedContent = content;
+  //   
+  //   for (let i = 0; i < base64Images.length; i++) {
+  //     updatedContent = updatedContent.replace(base64Images[i], uploadedUrls[i]);
+  //   }
+  //   
+  //   return updatedContent;
+  // };
+
   const validateForm = () => {
     if (!formData.title.trim()) {
       setError('Vui lòng nhập tiêu đề bài viết');
@@ -161,7 +208,13 @@ const AddBlog = () => {
       setLoading(true);
       setError(null);
 
-      const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
+      // Lưu trực tiếp vào database với base64 images
+      const blogData = {
+        ...formData
+      };
+
+      console.log(blogData);
+const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
       const method = id ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -169,7 +222,7 @@ const AddBlog = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(blogData),
       });
 
       if (!response.ok) {
@@ -227,13 +280,13 @@ const AddBlog = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mô tả ngắn
+                    Mô tả
                   </label>
                   <textarea
-                    name="excerpt"
-                    value={formData.excerpt}
+                    name="description"
+                    value={formData.description}
                     onChange={handleChange}
-                    placeholder="Nhập mô tả ngắn cho bài viết"
+                    placeholder="Nhập mô tả cho bài viết"
                     rows="3"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
                   />
@@ -243,8 +296,15 @@ const AddBlog = () => {
 
             {/* Content */}
             <AdminCard title="Nội dung">
-            <EditorContent editor={editor} />
-            {/* Removed textarea since content is handled by tiptap editor */}
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <Toolbar editor={editor} />
+<div className="min-h-[400px] max-h-[600px] overflow-y-auto">
+                  <EditorContent
+                    editor={editor}
+                    className="prose prose-sm max-w-none border-none focus:outline-none"
+                  />
+                </div>
+              </div>
             </AdminCard>
           </div>
 
@@ -259,10 +319,10 @@ const AddBlog = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
               >
                 <option value="draft">Bản nháp</option>
-                <option value="published">Xuất bản</option>
+                <option value="publish">Xuất bản</option>
               </select>
               <p className="mt-2 text-sm text-gray-500">
-                {formData.status === 'published' 
+                {formData.status === 'publish'
                   ? 'Bài viết sẽ được hiển thị công khai'
                   : 'Bài viết sẽ được lưu dưới dạng bản nháp'}
               </p>
@@ -272,8 +332,8 @@ const AddBlog = () => {
             <AdminCard title="Danh mục">
               <input
                 type="text"
-                name="category"
-                value={formData.category}
+                name="blog_category_id"
+                value={formData.blog_category_id}
                 onChange={handleChange}
                 placeholder="Nhập danh mục"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
@@ -310,7 +370,7 @@ const AddBlog = () => {
                       id="image-upload"
                     />
                     <label
-                      htmlFor="image-upload"
+htmlFor="image-upload"
                       className="cursor-pointer flex flex-col items-center gap-2"
                     >
                       <FaImage className="w-8 h-8 text-gray-400" />
