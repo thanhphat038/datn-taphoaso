@@ -72,7 +72,7 @@ const VNPayReturn = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Lỗi xử lý thanh toán</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
-              onClick={() => navigate('/profile/order')}
+              onClick={() => navigate('/profile/orders')}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Xem đơn hàng
@@ -129,7 +129,7 @@ const VNPayReturn = () => {
               </p>
               
               <button
-                onClick={() => navigate('/profile/order')}
+                onClick={() => navigate('/profile/orders')}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Xem đơn hàng

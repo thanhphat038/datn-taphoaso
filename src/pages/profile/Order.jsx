@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';
 import { getMyOrders } from '../../service/UserService';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
+
+const API_BASE_URL = 'http://localhost:3000/api';
+
+const fetchOrderProducts = async (orderId) => {
+  let token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token') || '';
+  if (!token) {
+    console.warn('Không tìm thấy token, bỏ qua gọi API products');
+    return [];
+  }
+  console.log('Token dùng cho API:', token);
+  const res = await axios.get(`${API_BASE_URL}/orders/${orderId}/products`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data.data;
+};
 
 const Order = () => {
   const { orderId } = useParams(); // Lấy orderId từ URL
@@ -21,19 +37,14 @@ const Order = () => {
         setLoading(true);
         setError(null);
         const ordersData = await getMyOrders();
-
-        // Nếu API trả về mỗi order đã có items:
-        setOrders(ordersData.data);
-
-        // Nếu API trả về order chưa có items, dùng đoạn này:
-        // const ordersWithDetails = await Promise.all(
-        //   ordersData.data.map(async (order) => {
-        //     const detailsRes = await getOrderDetailsByOrderId(order._id);
-        //     return { ...order, items: detailsRes.data.data };
-        //   })
-        // );
-        // setOrders(ordersWithDetails);
-
+        // Lấy products cho từng order
+        const ordersWithProducts = await Promise.all(
+          ordersData.data.map(async (order) => {
+            const items = await fetchOrderProducts(order._id);
+            return { ...order, items };
+          })
+        );
+        setOrders(ordersWithProducts);
       } catch (err) {
         setOrders([]);
         setError(err?.message || 'Đã xảy ra lỗi khi lấy đơn hàng.');
@@ -74,33 +85,40 @@ const Order = () => {
   }
 
   // Thêm component con cho từng sản phẩm trong đơn hàng
-  const OrderProductItem = ({ item, onReview }) => (
-    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm mb-3 transition hover:shadow-md">
-      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
-        <img src={item.product_id?.image} alt={item.product_id?.name} className="w-full h-full object-cover" />
-      </div>
-      <div className="flex-grow min-w-0 w-full">
-        <h4 className="font-semibold text-gray-800 mb-1 truncate text-base sm:text-lg" title={item.product_id?.name}>{item.product_id?.name}</h4>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-red-500 font-bold text-base">{item.cur_price?.toLocaleString()}đ</span>
-          <span className="text-gray-400 text-sm line-through">{item.old_price ? item.old_price.toLocaleString() + 'đ' : ''}</span>
+  const OrderProductItem = ({ item, onReview }) => {
+    // Lấy ảnh đầu tiên từ mảng images nếu có
+    const product = item.product_id;
+    const imageUrl = Array.isArray(product?.images) && product.images.length > 0
+      ? product.images[0]
+      : '/images/image_product.png';
+    return (
+      <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm mb-3 transition hover:shadow-md">
+        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
+          <img src={imageUrl} alt={product?.name} className="w-full h-full object-cover" />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600 text-sm">Số lượng:</span>
-          <span className="font-medium text-gray-800">{item.qty}</span>
+        <div className="flex-grow min-w-0 w-full">
+          <h4 className="font-semibold text-gray-800 mb-1 truncate text-base sm:text-lg" title={product?.name}>{product?.name}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-red-500 font-bold text-base">{item.cur_price?.toLocaleString()}đ</span>
+            <span className="text-gray-400 text-sm line-through">{item.old_price ? item.old_price.toLocaleString() + 'đ' : ''}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600 text-sm">Số lượng:</span>
+            <span className="font-medium text-gray-800">{item.qty}</span>
+          </div>
+          <button
+            onClick={() => onReview(product)}
+            className="mt-2 px-4 py-2 text-xs sm:text-sm rounded-md text-white font-semibold bg-gradient-to-r from-yellow-400 to-yellow-300 shadow hover:from-yellow-500 hover:to-yellow-400 transition-colors"
+          >
+            Đánh giá sản phẩm
+          </button>
         </div>
-        <button
-          onClick={() => onReview(item.product_id)}
-          className="mt-2 px-4 py-2 text-xs sm:text-sm rounded-md text-white font-semibold bg-gradient-to-r from-yellow-400 to-yellow-300 shadow hover:from-yellow-500 hover:to-yellow-400 transition-colors"
-        >
-          Đánh giá sản phẩm
-        </button>
+        <div className="text-right flex-shrink-0 w-24 hidden sm:block">
+          <div className="font-semibold text-gray-800 text-base">{(item.cur_price * item.qty).toLocaleString()}đ</div>
+        </div>
       </div>
-      <div className="text-right flex-shrink-0 w-24 hidden sm:block">
-        <div className="font-semibold text-gray-800 text-base">{(item.cur_price * item.qty).toLocaleString()}đ</div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl p-2 sm:p-6 shadow border border-gray-100 min-h-[60vh]">
@@ -136,10 +154,12 @@ const Order = () => {
                   <p className="text-gray-600 mb-1">Tổng tiền</p>
                   <p className="font-bold text-gray-800 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-gray-600 mb-1">Đã thanh toán</p>
-                  <p className="font-bold text-green-600 text-lg">{(order?.originalTotal ?? 0).toLocaleString()}đ</p>
-                </div>
+                {order.order_status !== 'cancelled' && (
+                  <div className="text-center">
+                    <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                    <p className="font-bold text-green-600 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

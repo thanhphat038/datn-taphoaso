@@ -58,7 +58,8 @@ class OrderService extends DBService {
       if (product.stock < item.qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
       total_amount += product.price * item.qty;
     }
-
+    // Luôn cộng phí ship 15000
+    total_amount += 15000;
     let voucher_id = null;
     if (voucher_code) {
       const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
@@ -138,6 +139,11 @@ class OrderService extends DBService {
 
     const items = await OrderDetail.find({ order_id: orderId }).populate('product_id');
     return { ...order.toObject(), items };
+  }
+
+  async getProductsInOrder(orderId) {
+    // Lấy tất cả OrderDetail theo orderId và populate product_id
+    return await OrderDetail.find({ order_id: orderId }).populate('product_id');
   }
 
   async calculateOrderStats() {

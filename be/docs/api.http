@@ -584,3 +584,7 @@ GET {{baseUrl}}/payment/return?vnp_ResponseCode=00&vnp_TxnRef=27193316&vnp_Amoun
 
 ### Payment Return Test (VNPAY Failed)
 GET {{baseUrl}}/payment/return?vnp_ResponseCode=24&vnp_TxnRef=27193316&vnp_Amount=1100000&vnp_BankCode=VNPAY&vnp_CardType=QRCODE&vnp_PayDate=20250727175916&vnp_TransactionStatus=02&vnp_TransactionNo=0&vnp_SecureHash=test_hash 
+
+### Get products in an order
+GET {{baseUrl}}/orders/{{orderId}}/products
+Authorization: Bearer {{authToken}} 

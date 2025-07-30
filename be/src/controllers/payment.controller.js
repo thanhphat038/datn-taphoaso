@@ -99,6 +99,14 @@ export const paymentReturn = async (req, res, next) => {
         }
       } else {
         // Thanh toán thất bại
+        // Nếu tìm thấy order, cập nhật trạng thái là cancelled
+        const vnpayTxnRef = callbackResult.orderId;
+        if (vnpayTxnRef) {
+          const order = await orderService.model.findOne({ vnpay_txn_ref: vnpayTxnRef });
+          if (order) {
+            await orderService.updateStatus(order._id, 'cancelled');
+          }
+        }
         res.json({
           success: false,
           message: callbackResult.message,

@@ -186,3 +186,13 @@ export const deleteOrder = async (req, res, next) => {
     res.json({ success: true, message: 'Order deleted successfully' });
   } catch (err) { next(err); }
 };
+
+export const getOrderProducts = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const products = await orderService.getProductsInOrder(orderId);
+    res.json({ success: true, data: products });
+  } catch (err) {
+    next(err);
+  }
+};

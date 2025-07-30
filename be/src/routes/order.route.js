@@ -8,7 +8,8 @@ import {
   updateOrderStatus,
   getOrderStats,
   getRecentOrders,
-  deleteOrder
+  deleteOrder,
+  getOrderProducts
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
@@ -34,6 +35,9 @@ router.put('/:orderId/status', updateOrderStatus);
 
 // Get order by ID (Admin)
 router.get('/:orderId', getOrderById);
+
+// Get products in an order (Admin/User)
+router.get('/:orderId/products', getOrderProducts);
 
 // Delete order (Admin)
 router.delete('/:orderId', deleteOrder);
