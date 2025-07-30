@@ -37,14 +37,17 @@ export const CartProvider = ({ children }) => {
   const addProduct = (product) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
+      
       if (existingItem) {
         // Add the passed quantity or default to 1
         const addQty = typeof product.quantity === 'number' && product.quantity > 0 ? product.quantity : 1;
-        return prevItems.map(item =>
+        const newItems = prevItems.map(item =>
           item.id === product.id ? { ...item, quantity: item.quantity + addQty } : item
         );
+        return newItems;
       } else {
-        return [...prevItems, { ...product, quantity: product.quantity || 1 }];
+        const newItems = [...prevItems, { ...product, quantity: product.quantity || 1 }];
+        return newItems;
       }
     });
   };

@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import Cookies from 'js-cookie';
 import { useNavigate, Link } from 'react-router-dom';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -138,12 +139,7 @@ console.error('No authentication token found, redirecting to login');
   }, [navigate]);
 
   // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount || 0);
-  };
+
 
   // Get order status info
   const getOrderStatusInfo = (status) => {

@@ -1,17 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CalendarDays, BookOpen } from 'lucide-react';
 
 const BlogCard = ({ id, image, title, description, date }) => (
-    <Link to={`/blog/${id}`} className="block h-full">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="h-72 flex items-center justify-center overflow-hidden">
-            <img src={image} alt={title} className="w-full h-full object-cover" />
-        </div>
-        <div className="p-4 flex flex-col flex-grow">
-            <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            <p className="text-gray-600 text-sm mb-2 flex-grow">{description}</p>
-            <p className="text-gray-500 text-xs mt-auto">{date}</p>
-        </div>
+    <Link to={`/blog/${id}`} className="block h-full group">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all h-full flex flex-col border border-gray-100 group-hover:border-blue-300">
+            <div className="h-60 flex items-center justify-center overflow-hidden bg-gray-50">
+                <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            </div>
+            <div className="p-5 flex flex-col flex-grow">
+                <h3 className="text-lg font-bold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3rem]">{title}</h3>
+                <p className="text-gray-600 text-sm mb-3 flex-grow line-clamp-3">{description}</p>
+                <div className="flex items-center gap-2 text-xs text-gray-400 mt-auto">
+                    <CalendarDays className="w-4 h-4" />
+                    <span>{date}</span>
+                </div>
+            </div>
         </div>
     </Link>
 );
@@ -63,27 +67,34 @@ const BlogPage = () => {
     ];
 
     return (
-        <div className="min-h-screen  bg-gray-50">
+        <div className="min-h-screen bg-gray-50">
             {/* Banner Section */}
-            <div className="bg-blue-50  pt-4">
-            <div className="container mx-auto w-[1240px]">
-                    <div className="flex justify-center h-96">
+            <div className="relative bg-blue-50">
+                <div className="max-w-7xl mx-auto px-4 pt-8 pb-12 flex flex-col items-center justify-center">
+                    <div className="relative w-full h-72 md:h-96 flex items-center justify-center rounded-2xl overflow-hidden shadow-md">
                         <img 
                             src="/images/banner1.jpg" 
                             alt="Shopping Banner" 
-                            className="max-w-full max-h-96 object-contain rounded-lg "
+                            className="absolute inset-0 w-full h-full object-cover" 
                         />
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-blue-400/30"></div>
+                        <div className="relative z-10 text-center w-full">
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg flex items-center justify-center gap-3">
+                                <BookOpen className="w-8 h-8 text-orange-300" />
+                                Blog & Tin tức
+                            </h1>
+                            <p className="text-lg text-blue-100 mt-4 max-w-2xl mx-auto">
+                                Cập nhật kiến thức, mẹo sống khỏe và ưu đãi mới nhất từ Tạp Hóa Số!
+                            </p>
+                        </div>
                     </div>
-                    <h1 className="text-2xl font-bold text-center mt-6 mb-8 text-cyan-600">
-                        Thực phẩm tốt cho sức khỏe
-                    </h1>
                 </div>
             </div>
 
             {/* Blog Grid */}
-            <div className="w-[1240px] mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {blogPosts.map((post, index) => (
+            <div className="max-w-7xl mx-auto px-4 py-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {blogPosts.map((post) => (
                         <BlogCard key={post.id} {...post} />
                     ))}
                 </div>

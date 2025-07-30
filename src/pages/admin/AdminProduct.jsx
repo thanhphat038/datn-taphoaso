@@ -17,6 +17,7 @@ import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
 import { getAllCategories } from '../../service/Admin.Service.jsx';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -197,13 +198,7 @@ const AdminProduct = () => {
     startIndex + pageSize
   );
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount || 0);
-  };
+
 
   // Get product status info
   const getProductStatusInfo = (status) => {

@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
 import { getProductById, deleteProduct, toggleProductStatus } from '../../service/Admin.Service.jsx';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -74,13 +75,7 @@ const DetailProduct = () => {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount || 0);
-  };
+
 
   // Get product status info
   const getProductStatusInfo = (status) => {

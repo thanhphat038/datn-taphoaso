@@ -8,6 +8,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getProductById, getOrderDetailsByOrderId } from '../../service/Admin.Service.jsx';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -161,12 +162,7 @@ const OrderPage = () => {
   const paginatedOrders = filteredOrders.slice(startIndex, startIndex + pageSize);
 
   // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount);
-  };
+
 
   // Calculate order total
   const calculateOrderTotal = (order) => {
