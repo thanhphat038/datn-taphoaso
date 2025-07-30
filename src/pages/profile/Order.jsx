@@ -23,6 +23,46 @@ const Order = () => {
   // State để quản lý việc hiển thị sản phẩm trong từng đơn hàng
   const [expandedOrders, setExpandedOrders] = useState(new Set());
 
+  function renderOrderStatusBadge(order_status) {
+    const statusMap = {
+      pending: {
+        label: "Chờ thanh toán",
+        className: "bg-gray-100 text-gray-600",
+      },
+      paid: {
+        label: "Đã thanh toán",
+        className: "bg-blue-100 text-blue-700",
+      },
+      processing: {
+        label: "Đang xử lý",
+        className: "bg-yellow-100 text-yellow-700",
+      },
+      delivered: {
+        label: "Đã giao",
+        className: "bg-green-100 text-green-700",
+      },
+      cancelled: {
+        label: "Đã huỷ",
+        className: "bg-red-100 text-red-600",
+      },
+    };
+
+    const status = statusMap[order_status] || {
+      label: "Không xác định",
+      className: "bg-gray-100 text-gray-600",
+    };
+
+    return (
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-semibold ml-2 ${status.className}`}
+      >
+        {status.label}
+      </span>
+    );
+  }
+
+
+
   useEffect(() => {
     const fetchOrders = async (page = 1, limit = 3) => {
       try {
@@ -140,7 +180,8 @@ const Order = () => {
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <span className="font-bold text-lg text-blue-600">#{order._id.slice(-6).toUpperCase()}</span>
                   <span className="text-gray-500 text-sm">{new Date(order.create_at).toLocaleString()}</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-2 ${order.order_status === 'Đã giao' ? 'bg-green-100 text-green-700' : order.order_status === 'Đang xử lý' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{order.order_status}</span>
+                  {/* <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-2 ${order.order_status === 'Đã giao' ? 'bg-green-100 text-green-700' : order.order_status === 'Đang xử lý' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{order.order_status}</span> */}
+                  <span>{renderOrderStatusBadge(order.order_status)}</span>
                 </div>
                 <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
               </div>
