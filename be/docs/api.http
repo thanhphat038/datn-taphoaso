@@ -1,5 +1,7 @@
 @baseUrl = http://localhost:3000/api
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNjIwNTY0LCJleHAiOjE3NTQyMjUzNjR9.EUGuqw1sc4PnDvNIy1OCjwBZggKVDVWoGISIKRv4DDM
+
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNDU5NTUyLCJleHAiOjE3NTQwNjQzNTJ9.N8Mwo-81Q48q8ykTimYChznEjXpxI7HwIp-3HYqHdp0
+
 ### Variables
 @userId = 685a9ea76875fcf8f499fa9a
 @addressId = 6862dbf5b04329ea26a04112
@@ -215,7 +217,7 @@ Content-Type: application/json
 }
 
 ### Get my orders (User)
-GET {{baseUrl}}/orders/my
+GET {{baseUrl}}/orders/my?page=1&limit=3
 Authorization: Bearer {{authToken}}
 
 ### Update order status (Admin)
@@ -383,14 +385,17 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "user_id": "user685a9ea76875fcf8f499fa9aId",
   "product_id": "6862d1c32df5d5159cc51f08"
-
 }
 
 ### Remove from favorites
-DELETE {{baseUrl}}/favorites/{{productId}}
+DELETE {{baseUrl}}/favorites
 Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
 
 ### Cart ###
 ### Get cart

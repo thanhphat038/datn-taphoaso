@@ -48,8 +48,10 @@ export const getFavoriteById = async (req, res, next) => {
 // Add Product to favorite
 export const addToFavorite = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; // Lấy từ auth middleware
     const { product_id } = req.body;
+
+    console.log('🔍 Debug - addToFavorite:', { userId, product_id });
 
     const favorite = await favoriteService.addToFavorites(userId, product_id);
 
@@ -60,16 +62,19 @@ export const addToFavorite = async (req, res, next) => {
     return res.status(200).json({ success: true, message: 'Sản phẩm đã nằm trong mục yêu thích' });
 
   } catch (error) {
+    console.error('❌ Error - addToFavorite:', error);
     next(error); 
   }
 };
 
 export const removeFromFavorite = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    const productId = req.params.id;
+    const userId = req.user.id; // Lấy từ auth middleware
+    const { product_id } = req.body;
 
-    const deleted = await favoriteService.removeFromFavorites(userId, productId);
+    console.log('🔍 Debug - removeFromFavorite:', { userId, product_id });
+
+    const deleted = await favoriteService.removeFromFavorites(userId, product_id);
 
     if (!deleted) {
       return res.status(404).json({
@@ -83,6 +88,7 @@ export const removeFromFavorite = async (req, res, next) => {
       message: 'Sản phẩm đã được xóa khỏi mục yêu thích'
     });
   } catch (error) {
+    console.error('❌ Error - removeFromFavorite:', error);
     next(error);
   }
 };

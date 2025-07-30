@@ -13,6 +13,8 @@ const CartPage = () => {
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherMessage, setVoucherMessage] = useState("");
   const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [isVoucherApplied, setIsVoucherApplied] = useState(false);
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
 
   // Ref để lưu debounce timer cho từng item
   const debounceTimers = useRef({});
@@ -20,19 +22,24 @@ const CartPage = () => {
   const fetchCartRef = useRef();
 
   // Định nghĩa fetchCart bằng useCallback
-  // Định nghĩa fetchCart bằng useCallback
+  const fetchCart = useCallback(async () => {
+    try {
+      const res = await getCart();
+      setInitialCartItems(res.data.data.items);
+    } catch (err) {
+      setInitialCartItems([]);
+    }
+  }, []); // Bỏ dependency setInitialCartItems
+
+  // Gán fetchCart vào ref
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const res = await getCart();
-        setInitialCartItems(res.data.data.items);
-      } catch (err) {
-        setInitialCartItems([]);
-      }
-    };
+    fetchCartRef.current = fetchCart;
+  }, [fetchCart]);
+
+  // Gọi fetchCart lần đầu - chỉ gọi 1 lần khi mount
+  useEffect(() => {
     fetchCart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Bỏ dependency fetchCart
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,32 +53,59 @@ const CartPage = () => {
     fetchProducts();
   }, []);
 
-  // // Hàm xử lý áp dụng mã giảm giá
-  // const handleApplyVoucher = () => {
-  //   // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k
-  //   if (voucherCode.trim().toUpperCase() === 'GIAM10') {
-  //     setVoucherDiscount(
-  //       Math.floor(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 0.1)
-  //     );
-  //     setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
-  //   } else if (voucherCode.trim().toUpperCase() === 'GIAM50K') {
-  //     setVoucherDiscount(50000);
-  //     setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
-  //   } else {
-  //     setVoucherDiscount(0);
-  //     setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
-  //   }
-  // };
+  // Hàm xử lý áp dụng mã giảm giá
+  const handleApplyVoucher = () => {
+    const subtotal = cartItems.reduce((total, item) => total + item.price * item.qty, 0);
+    
+    // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k, 'GIAM20K' giảm 20k
+    const voucher = voucherCode.trim().toUpperCase();
+    
+    if (voucher === 'GIAM10') {
+      const discount = Math.floor(subtotal * 0.1);
+      setVoucherDiscount(discount);
+      setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
+      setIsVoucherApplied(true);
+      setAppliedVoucher({ code: voucher, type: 'percentage', value: 10, discount });
+    } else if (voucher === 'GIAM50K') {
+      const discount = Math.min(50000, subtotal);
+      setVoucherDiscount(discount);
+      setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
+      setIsVoucherApplied(true);
+      setAppliedVoucher({ code: voucher, type: 'fixed', value: 50000, discount });
+    } else if (voucher === 'GIAM20K') {
+      const discount = Math.min(20000, subtotal);
+      setVoucherDiscount(discount);
+      setVoucherMessage('Áp dụng mã giảm giá 20.000đ thành công!');
+      setIsVoucherApplied(true);
+      setAppliedVoucher({ code: voucher, type: 'fixed', value: 20000, discount });
+    } else {
+      setVoucherDiscount(0);
+      setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+      setIsVoucherApplied(false);
+      setAppliedVoucher(null);
+    }
+  };
+
+  // Hàm xóa voucher
+  const handleRemoveVoucher = () => {
+    setVoucherDiscount(0);
+    setVoucherMessage('');
+    setIsVoucherApplied(false);
+    setAppliedVoucher(null);
+    setVoucherCode('');
+  };
 
   // Sửa updateCartItemQty để dùng fetchCartRef
   const updateCartItemQty = async (itemId, newQty) => {
     try {
       await updateCartItem(itemId, newQty);
       window.dispatchEvent(new Event('cart-updated')); // Phát sự kiện cho Header
-      // Dùng ref để gọi fetchCart
-      if (fetchCartRef.current) await fetchCartRef.current();
+      // Không cần gọi lại fetchCart vì UI đã được cập nhật trong changeQuantity
+      // Header sẽ tự động cập nhật thông qua event cart-updated
     } catch (err) {
       console.error('Lỗi cập nhật số lượng:', err);
+      // Nếu lỗi thì refresh lại để khôi phục trạng thái
+      if (fetchCartRef.current) await fetchCartRef.current();
     }
   };
 
@@ -97,11 +131,18 @@ const CartPage = () => {
 
   const removeItem = async (itemId) => {
     try {
+      // Cập nhật UI ngay lập tức để UX mượt hơn
+      setInitialCartItems(prev => prev.filter(item => item._id !== itemId));
+      
       await removeCartItem(itemId); // Gọi API xóa
       window.dispatchEvent(new Event('cart-updated')); // Phát sự kiện cho Header
-      await fetchCartRef.current();
+      
+      // Không cần gọi lại fetchCart vì đã cập nhật UI rồi
+      // Header sẽ tự động cập nhật thông qua event cart-updated
     } catch (err) {
       console.error("Error removing item:", err);
+      // Nếu lỗi thì refresh lại để khôi phục trạng thái
+      await fetchCartRef.current();
     }
   };
 
@@ -181,57 +222,137 @@ const CartPage = () => {
         })}
       </div>
 
-      {/* Phần nhập mã giảm giá */}
-      {/* <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-        <div className="mb-2 font-medium text-gray-700">Mã giảm giá</div>
-        <div className="flex">
-          <input
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#06AEF4]"
-            placeholder="Nhập mã giảm giá (chỉ áp dụng 1 lần)"
-            value={voucherCode}
-            onChange={(e) => setVoucherCode(e.target.value)}
-          />
-          <button
-            className="ml-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors bg-[#06AEF4] hover:bg-[#70d9ff]"
-            onClick={handleApplyVoucher}
-          >
-            Áp dụng
-          </button>
 
-        </div>
-        {voucherMessage && (
-          <div
-            className={`text-sm mt-2 ${voucherDiscount > 0 ? 'text-green-600' : 'text-red-600'}`}
-          >
-            {voucherMessage}
-          </div>
-        )}
-      </div> */}
 
-      {/* Cart Summary */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-gray-600">Tạm tính:</span>
-          <span className="font-medium text-gray-800">
-            {cartItems.reduce((total, item) => total + item.price * item.qty, 0).toLocaleString()}đ
-          </span>
-        </div>
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-gray-600">Phí vận chuyển:</span>
-<span className="font-medium text-gray-800">0đ</span>
-        </div>
-        {/* Hiển thị giảm giá nếu có */}
-        {voucherDiscount > 0 && (
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-600">Giảm giá:</span>
-            <span className="font-medium text-green-600">- {voucherDiscount.toLocaleString()}đ</span>
+      {/* Cart Summary with Voucher */}
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 bg-[#06AEF4]/10 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#06AEF4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
-        )}
-        <div className="border-t border-dashed pt-4">
+          <h3 className="text-lg font-bold text-gray-800">Tóm tắt đơn hàng</h3>
+        </div>
+        
+        {/* Voucher Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 bg-[#06AEF4]/10 rounded-lg flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#06AEF4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-gray-800">Mã giảm giá</h4>
+          </div>
+          
+          {!isVoucherApplied ? (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent transition-all text-sm"
+                  placeholder="Nhập mã giảm giá..."
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleApplyVoucher()}
+                />
+                <button
+                  className="px-4 py-2 rounded-lg text-white font-medium transition-all bg-[#06AEF4] hover:bg-[#70d9ff] hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  onClick={handleApplyVoucher}
+                  disabled={!voucherCode.trim()}
+                >
+                  Áp dụng
+                </button>
+              </div>
+              
+              {voucherMessage && (
+                <div className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium ${
+                  voucherDiscount > 0 
+                    ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}>
+                  {voucherDiscount > 0 ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                  {voucherMessage}
+                </div>
+              )}
+              
+              <div className="text-xs text-gray-500">
+                <p className="font-medium mb-1">Mã có sẵn:</p>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM10 (10%)</span>
+                  <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM20K</span>
+                  <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM50K</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-green-800 text-sm">Mã {appliedVoucher?.code} đã áp dụng!</p>
+                    <p className="text-xs text-green-600">
+                      {appliedVoucher?.type === 'percentage' 
+                        ? `Giảm ${appliedVoucher?.value}%` 
+                        : `Giảm ${appliedVoucher?.value?.toLocaleString()}đ`
+                      }
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemoveVoucher}
+                  className="text-green-600 hover:text-green-800 transition-colors"
+                  title="Xóa mã giảm giá"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Order Summary */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Tạm tính:</span>
+            <span className="font-medium text-gray-800">
+              {cartItems.reduce((total, item) => total + item.price * item.qty, 0).toLocaleString()}đ
+            </span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Phí vận chuyển:</span>
+            <span className="font-medium text-green-600">Miễn phí</span>
+          </div>
+          
+          {/* Hiển thị giảm giá nếu có */}
+          {voucherDiscount > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Giảm giá:</span>
+              <span className="font-medium text-green-600">- {voucherDiscount.toLocaleString()}đ</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="border-t border-gray-200 pt-4 mt-6">
           <div className="flex justify-between items-center mb-6">
-            <span className="text-gray-800 font-medium">Tổng cộng:</span>
-            <span className="text-xl font-bold text-red-500">
-              {/* Tính tổng cộng sau khi trừ giảm giá */}
+            <span className="text-lg font-bold text-gray-800">Tổng cộng:</span>
+            <span className="text-2xl font-bold text-red-500">
               {(
                 Math.max(
                   cartItems.reduce((total, item) => total + item.price * item.qty, 0) - voucherDiscount,
@@ -240,9 +361,23 @@ const CartPage = () => {
               )}đ
             </span>
           </div>
-          <Link to={`/checkout`}><button className="w-full bg-[#06AEF4] cursor-pointer hover:bg-[#06AEF4]/80 text-white font-medium py-3 rounded-lg transition-colors">
-            Tiến hành thanh toán
-          </button></Link>
+          
+          <Link to={`/checkout`}>
+            <button className="w-full bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold py-4 rounded-xl transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={cartItems.length === 0}>
+              <div className="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Tiến hành thanh toán
+              </div>
+            </button>
+          </Link>
+          
+          <div className="mt-4 text-center">
+            <p className="text-xs text-gray-500">
+              Bằng việc tiếp tục, bạn đồng ý với <span className="text-[#06AEF4] cursor-pointer hover:underline">Điều khoản sử dụng</span> và <span className="text-[#06AEF4] cursor-pointer hover:underline">Chính sách bảo mật</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

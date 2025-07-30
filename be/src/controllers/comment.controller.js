@@ -5,11 +5,14 @@ import { ERROR_CODES } from '../errors/errorDefinitions.js';
 // Create new comment
 export const createComment = async (req, res, next) => {
   try {
-    const { product_id } = req.params;
-    const comment = await commentService.createComment(req.user.id, product_id, req.body);
+    const { product_id, comment } = req.body;
+    if (!product_id || !comment) {
+      return res.status(400).json({ message: 'Thiếu product_id hoặc comment' });
+    }
+    const newComment = await commentService.createComment(req.user.id, product_id, { comment });
     res.status(201).json({
       success: true,
-      data: comment
+      data: newComment
     });
   } catch (error) {
     next(error);
@@ -24,12 +27,8 @@ export const getComments = async (req, res, next) => {
     if (user_id) filters.user_id = user_id;
     if (product_id) filters.product_id = product_id;
 
-    const comments = await commentService.findAll(filters, {
-      populate: [
-        { path: 'user_id', select: 'name email' },
-        { path: 'product_id', select: 'name' }
-      ]
-    });
+    const comments = await commentService.model.find(filters)
+      .populate('user_id', 'full_name avatar username');
     res.json({
       success: true,
       data: comments
@@ -92,7 +91,8 @@ export const getProductComments = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const { page, limit, sort } = req.query;
-    const comments = await commentService.getProductComments(productId, { page, limit, sort });
+    const options = { page: parseInt(page) || 1, limit: parseInt(limit) || 10, sort: sort || { created_at: -1 } };
+    const comments = await commentService.getProductComments(productId, options);
     res.json({
       success: true,
       data: comments
@@ -133,10 +133,9 @@ export const getCommentReplies = async (req, res, next) => {
 export const getAllCommentOfProductId = async (req, res, next) => {
   try {
     const { productId } = req.params;
-    const comments = await commentService.find({ product_id: productId }, {
-      populate: { path: 'user_id', select: 'name email' },
-      sort: { created_at: -1 }
-    });
+    const comments = await commentService.model.find({ product_id: productId })
+      .populate('user_id', 'full_name avatar username')
+      .sort({ created_at: -1 });
     res.json({
       success: true,
       data: comments

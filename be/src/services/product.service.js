@@ -29,8 +29,16 @@ class ProductService extends DBService {
     
     const skip = (page - 1) * limit;
     
+    // Convert categoryId to ObjectId if it's a string
+    let categoryObjectId;
+    try {
+      categoryObjectId = this.toObjectId(categoryId);
+    } catch (error) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Invalid category ID format');
+    }
+    
     const query = { 
-      category_id: categoryId, 
+      category_id: categoryObjectId, 
       status: 'active' 
     };
 

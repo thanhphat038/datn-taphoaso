@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -119,11 +120,13 @@ function Layout() {
 
 function App() {
   return (
-    <Router>
-      <CartProvider>
-        <Layout />
-      </CartProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <CartProvider>
+          <Layout />
+        </CartProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
