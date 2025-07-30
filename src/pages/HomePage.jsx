@@ -115,38 +115,35 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Category Section 1 - THỊT, CÁ, TRỨNG, HẢI SẢN */}
         <div className="relative">
-          {/* Modern Category Header */}
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl blur-lg opacity-30"></div>
-              <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl blur-lg opacity-30"></div>
+              <div className="relative bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-2xl shadow-lg">
                 <div className="flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
                   </svg>
-                  <span className="text-xl font-bold">THỊT, CÁ, TRỨNG, HẢI SẢN</span>
+                  <span className="text-xl font-bold">MÌ ĂN LIỀN</span>
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Products Container */}
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
             <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'>
               {getProductsByCategory("684697023d545550b38460cd", 5)}
             </div>
 
             <div className='mt-8 flex justify-center'>
-              <Link 
-                to="/product?category=684697023d545550b38460cd" 
-                className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
+              <Link
+                to="/product?category=684697023d545550b38460cd"
+                className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
               >
                 <span>Xem thêm</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -157,7 +154,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Category Section 2 - NƯỚC UỐNG */}
         <div className="relative">
           <div className="flex justify-center mb-8">
             <div className="relative">
@@ -197,7 +193,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Middle Banner - Giữ đơn giản như ban đầu */}
         <div className='mb-5'>
           <Swiper
             spaceBetween={20}
@@ -219,7 +214,6 @@ const HomePage = () => {
           </Swiper>
         </div>
 
-        {/* Category Section 3 - MÌ ĂN LIỀN */}
         <div className="relative">
           <div className="flex justify-center mb-8">
             <div className="relative">
