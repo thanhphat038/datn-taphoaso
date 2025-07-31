@@ -58,18 +58,9 @@ const AdminPage = () => {
   // Hàm đếm tổng đơn hàng
   const countOrders = async () => {
     try {
-      const token = Cookies.get('auth_token');
-      if (!token) return 0;
-      
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
-      return data.data?.length || 0;
+      const response = await getAllOrders();
+      const ordersData = response.data.data.ordersWithItems || response.data.data || [];
+      return Array.isArray(ordersData) ? ordersData.length : 0;
     } catch (error) {
       console.error('Error counting orders:', error);
       return 0;
@@ -109,8 +100,8 @@ const AdminPage = () => {
           navigate('/login');
           return;
         }
-        // Gọi các hàm đếm riêng lẻ
-        const [userCount, productCount, orderCount, voucherCount, commentsRes, reviewsRes, ordersRes] = await Promise.all([
+        // Gọi các hàm đếm riêng lẻ với error handling
+        const [userCount, productCount, orderCount, voucherCount, commentsRes, reviewsRes, ordersRes] = await Promise.allSettled([
           countUsers(),
           countProducts(),
           countOrders(),
@@ -118,15 +109,52 @@ const AdminPage = () => {
           getAllComments(),
           getAllReviews(),
           getAllOrders()
-        ]);
-        const comments = commentsRes?.data?.data || [];
-        const reviews = reviewsRes?.data?.data || [];
-        const orders = ordersRes?.data?.data?.orders || ordersRes?.data?.data || [];
-        // Tính tổng doanh thu
-        const totalRevenue = Array.isArray(orders) ? orders.reduce((sum, o) => sum + (o.total_amount || 0), 0) : 0;
+        ]).then(results => results.map(result => 
+          result.status === 'fulfilled' ? result.value : null
+        ));
+        
+        console.log('All API responses:', {
+          commentsRes,
+          reviewsRes,
+          ordersRes
+        });
+        
+        // Xử lý dữ liệu comments - API trả về { success: true, data: [...] }
+        let comments = [];
+        if (commentsRes?.data?.data) {
+          comments = Array.isArray(commentsRes.data.data) ? commentsRes.data.data : [];
+        } else if (commentsRes?.data) {
+          comments = Array.isArray(commentsRes.data) ? commentsRes.data : [];
+        }
+        console.log('Comments response:', commentsRes);
+        console.log('Comments data:', comments);
+        
+        // Xử lý dữ liệu reviews - API trả về trực tiếp array
+        let reviews = [];
+        if (reviewsRes?.data) {
+          reviews = Array.isArray(reviewsRes.data) ? reviewsRes.data : [];
+        } else if (reviewsRes?.data?.data) {
+          reviews = Array.isArray(reviewsRes.data.data) ? reviewsRes.data.data : [];
+        }
+        console.log('Reviews response:', reviewsRes);
+        console.log('Reviews data:', reviews);
+        
+        // Xử lý dữ liệu orders
+        const orders = ordersRes?.data?.data?.ordersWithItems || ordersRes?.data?.data || [];
+        
+        // Tính tổng doanh thu - chỉ tính đơn hàng đã hoàn thành
+        const totalRevenue = Array.isArray(orders) ? orders.reduce((sum, o) => {
+          const orderStatus = o.order_status || o.status;
+          if (orderStatus === 'delivered') {
+            return sum + (o.total_amount || 0);
+          }
+          return sum;
+        }, 0) : 0;
+        
         // Lấy 5 đơn hàng gần nhất (theo ngày tạo mới nhất)
         const sortedOrders = Array.isArray(orders) ? [...orders].sort((a, b) => new Date(b.create_at || b.created_at) - new Date(a.create_at || a.created_at)) : [];
         const recentOrders = sortedOrders.slice(0, 5);
+        
         setStats({
           users: userCount,
           products: productCount,
@@ -137,8 +165,23 @@ const AdminPage = () => {
           totalRevenue,
           recentOrders
         });
+        
+        console.log('Final stats:', {
+          users: userCount,
+          products: productCount,
+          orders: orderCount,
+          vouchers: voucherCount,
+          comments: comments.length,
+          reviews: reviews.length,
+          totalRevenue
+        });
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
       } finally {
         setLoading(false);
       }
@@ -295,36 +338,44 @@ const AdminPage = () => {
           </AdminCard>
         </div>
 
-        {/* Recent Orders */}
-        <AdminCard title="Đơn hàng gần đây">
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center py-4 text-gray-500">Đang tải dữ liệu...</div>
-            ) : stats.recentOrders?.length > 0 ? (
-              stats.recentOrders.map((order) => (
-                <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <FaCalendarAlt className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">#{order._id.slice(-8)}</div>
-                      <div className="text-sm text-gray-500">{order.receiver || 'Không có tên'}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-gray-900">{formatCurrency(order.total)}</div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${getOrderStatusInfo(order.status).color}`}>
-                      {getOrderStatusInfo(order.status).label}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-gray-500">Không có đơn hàng nào</div>
-            )}
-          </div>
-        </AdminCard>
+                 {/* Recent Orders */}
+         <AdminCard title="Đơn hàng gần đây">
+           <div className="space-y-4">
+             {loading ? (
+               <div className="text-center py-4 text-gray-500">Đang tải dữ liệu...</div>
+             ) : stats.recentOrders?.length > 0 ? (
+               stats.recentOrders.map((order) => (
+                 <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                   <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                       <FaCalendarAlt className="w-4 h-4 text-gray-400" />
+                     </div>
+                     <div>
+                       <div className="font-medium text-gray-900">#{order._id.slice(-8)}</div>
+                       <div className="text-sm text-gray-500">{order.receiver || 'Không có tên'}</div>
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-3">
+                     <div className="text-right">
+                       <div className="font-medium text-gray-900">{formatCurrency(order.total_amount)}</div>
+                       <div className={`text-xs px-2 py-1 rounded-full ${getOrderStatusInfo(order.order_status || order.status).color}`}>
+                         {getOrderStatusInfo(order.order_status || order.status).label}
+                       </div>
+                     </div>
+                                           <Link 
+                        to="/admin/order"
+                        className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                      >
+                        Xem chi tiết
+                      </Link>
+                   </div>
+                 </div>
+               ))
+             ) : (
+               <div className="text-center py-4 text-gray-500">Không có đơn hàng nào</div>
+             )}
+           </div>
+         </AdminCard>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

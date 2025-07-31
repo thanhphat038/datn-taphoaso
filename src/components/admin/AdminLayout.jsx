@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   FaHome, 
@@ -11,12 +11,15 @@ import {
   FaStar,
   FaBlog,
   FaChartBar,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaBars,
+  FaTimes
 } from 'react-icons/fa';
 import Cookies from 'js-cookie';
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const menuItems = [
     { path: '/admin', icon: FaHome, label: 'Tổng quan' },
@@ -38,11 +41,29 @@ const AdminLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className="w-80 bg-white shadow-lg flex flex-col h-screen fixed left-0 top-0 z-30">
+      <div className={`
+        w-80 bg-white shadow-lg flex flex-col h-screen fixed left-0 top-0 z-50
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         {/* Logo */}
-        <div className="h-20 flex items-center justify-center border-b border-gray-200">
+        <div className="h-20 flex items-center justify-center border-b border-gray-200 relative">
           <img src="/images/logo_ngang.png" alt="Logo" className="h-10" />
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden absolute right-4 p-2 text-gray-500 hover:text-gray-700"
+          >
+            <FaTimes className="w-5 h-5" />
+          </button>
         </div>
         {/* Navigation */}
         <nav className="p-6 space-y-2 flex-1 ">
@@ -75,14 +96,22 @@ const AdminLayout = ({ children }) => {
         </div>
       </div>
       {/* Main Content */}
-      <div className="ml-80 flex-1 flex flex-col min-h-screen">
+      <div className="lg:ml-80 flex-1 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-10">
-          <h1 className="text-2xl font-bold text-gray-800">
-            {menuItems.find(item => 
-              item.path === location.pathname || 
-              (item.path !== '/admin' && location.pathname.startsWith(item.path)))?.label || ''}
-          </h1>
+        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-4 lg:px-10">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 text-gray-600 hover:text-gray-800"
+            >
+              <FaBars className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
+              {menuItems.find(item => 
+                item.path === location.pathname || 
+                (item.path !== '/admin' && location.pathname.startsWith(item.path)))?.label || ''}
+            </h1>
+          </div>
           <div className="flex items-center gap-5">
             <button className="text-gray-600 hover:text-gray-800">
               <FaChartBar className="w-6 h-6" />
@@ -93,7 +122,7 @@ const AdminLayout = ({ children }) => {
           </div>
         </header>
         {/* Page Content */}
-        <main className="flex-1 p-10 overflow-auto">
+        <main className="flex-1 p-4 lg:p-10 overflow-auto">
           <div className="max-w-full mx-auto">
             {children}
           </div>
