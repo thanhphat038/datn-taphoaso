@@ -13,6 +13,7 @@ import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
 import { useAlertContext } from '../components/AlertProvider';
 import { useToast } from '../components/ToastContainer';
+import ProductPackageSelector from '../components/ProductPackageSelector';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -44,6 +45,15 @@ const ProductDetail = () => {
     const [loadingComments, setLoadingComments] = useState(false);
     const { showWarning, showError } = useAlertContext();
     const { showSuccess, showError: showToastError } = useToast();
+
+    // Thêm state cho package selection
+    const [selectedPackage, setSelectedPackage] = useState(null);
+
+    // Thêm function để xử lý package selection
+    const handlePackageSelect = (pkg) => {
+        setSelectedPackage(pkg);
+        console.log('Selected package:', pkg);
+    };
 
     const COMMENTS_TO_SHOW = 3;
 
@@ -260,11 +270,66 @@ const ProductDetail = () => {
         });
     };
 
+    // Cập nhật handleBuyNow để sử dụng selectedPackage
+    const handleBuyNow = async () => {
+        const userId = getUserId();
+        if (!userId) {
+            showWarning('Vui lòng đăng nhập để mua hàng', 'Yêu cầu đăng nhập');
+            return;
+        }
+
+        if (productData.stock !== undefined && productData.stock <= 0) {
+            showError('Sản phẩm đã hết hàng!', 'Lỗi');
+            return;
+        }
+
+        // Sử dụng thông tin gói đã chọn (nếu có)
+        const finalQuantity = selectedPackage ? selectedPackage.quantity : quantity;
+        const finalPrice = selectedPackage ? selectedPackage.unitPrice : productData.price;
+
+        if (productData.stock && finalQuantity > productData.stock) {
+            showError(`Chỉ còn ${productData.stock} sản phẩm trong kho!`, 'Lỗi');
+            return;
+        }
+
+        try {
+            console.log('🔍 Debug - handleBuyNow: Adding to cart first');
+            
+            // Thêm vào giỏ hàng trước và đợi hoàn thành
+            await addToCart(productData._id, finalQuantity);
+            console.log('✅ Debug - handleBuyNow: Added to cart successfully');
+            
+            // Lưu thông tin sản phẩm để mua ngay vào localStorage
+            const buyNowProduct = {
+                productId: productData._id,
+                name: productData.name,
+                price: finalPrice, // Giá đơn vị
+                quantity: finalQuantity,
+                image: productData.images?.[0],
+                package: selectedPackage,
+                originalPrice: productData.price
+            };
+            
+            localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
+            
+            // Dispatch event để cập nhật giỏ hàng (nếu cần)
+            window.dispatchEvent(new Event('cart-updated'));
+            
+            // Chuyển đến trang thanh toán ngay lập tức
+            console.log('🔍 Debug - handleBuyNow: Navigating to checkout');
+            navigate('/checkout');
+        } catch (error) {
+            console.error('❌ Debug - handleBuyNow: Error adding to cart:', error);
+            showError('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!', 'Lỗi');
+        }
+    };
+
+    // Cập nhật handleAddToCart để sử dụng selectedPackage
     const handleAddToCart = () => {
         console.log('🔍 Debug - handleAddToCart called');
         console.log('🔍 Debug - Product stock:', productData.stock);
         console.log('🔍 Debug - Product ID:', productData._id);
-        console.log('🔍 Debug - Quantity:', quantity);
+        console.log('🔍 Debug - Selected Package:', selectedPackage);
         
         const userId = getUserId();
         console.log('🔍 Debug - User ID:', userId);
@@ -273,6 +338,9 @@ const ProductDetail = () => {
             showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'Yêu cầu đăng nhập');
             return;
         }
+
+        // Sử dụng thông tin gói đã chọn (nếu có)
+        const finalQuantity = selectedPackage ? selectedPackage.quantity : quantity;
 
         // Chỉ kiểm tra stock nếu có thông tin stock và stock = 0
         if (productData.stock !== undefined && productData.stock !== null && productData.stock === 0) {
@@ -287,7 +355,7 @@ const ProductDetail = () => {
 
         console.log('🔍 Debug - Starting add to cart process');
         setLoadingAddToCart(true);
-        pendingAddQtyRef.current += quantity;
+        pendingAddQtyRef.current += finalQuantity; // Sử dụng finalQuantity
         setPendingAddQty(pendingAddQtyRef.current);
 
         if (debounceAddToCart.current) {
@@ -313,11 +381,6 @@ const ProductDetail = () => {
             }
             debounceAddToCart.current = null;
         }, 400);
-    };
-
-    const handleBuyNow = () => {
-        handleAddToCart();
-        navigate('/cart');
     };
 
     const handlePostComment = async () => {
@@ -399,8 +462,8 @@ const ProductDetail = () => {
                         content: comment.comment,
                         replies: comment.replies,
                         repliesCount: comment.replies?.length || 0
-                    });
                 });
+            });
             } else {
                 console.error('❌ Invalid comments response:', commentsResponse);
             }
@@ -520,15 +583,6 @@ const ProductDetail = () => {
                             <p className="text-gray-600 leading-relaxed">{productData.description}</p>
                         </div>
 
-                        {productData.stock !== undefined && (
-                            <div>
-                                <h3 className="text-lg font-semibold mb-2">Tình trạng</h3>
-                                <p className={`font-medium ${productData.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {productData.stock > 0 ? `Còn ${productData.stock} sản phẩm` : 'Hết hàng'}
-                                </p>
-                            </div>
-                        )}
-
                         {productData.category && (
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Danh mục</h3>
@@ -539,15 +593,22 @@ const ProductDetail = () => {
                         )}
                     </div>
 
+                    {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
+                    <ProductPackageSelector
+                        product={productData}
+                        onPackageSelect={handlePackageSelect}
+                        selectedPackage={selectedPackage}
+                    />
+
                     {/* Quantity and Actions */}
                     <div className="space-y-3">
                         {/* Hàng 1: Nút Mua hàng (nổi bật nhất) */}
-                        <button
+                                <button
                             onClick={handleBuyNow}
                             className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
-                        >
+                                >
                             Mua hàng ngay
-                        </button>
+                                </button>
                         
                         {/* Hàng 2: Thêm vào giỏ hàng và Yêu thích */}
                         <div className="flex gap-3">
@@ -739,7 +800,7 @@ const ProductDetail = () => {
                                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
                                                 </svg>
                                                 Trả lời
-                                            </button>
+                                                </button>
                                             </div>
 
                                             {/* Reply Form */}
@@ -853,45 +914,45 @@ const ProductDetail = () => {
                                                         <>
                                                             {/* Hiển thị tất cả replies khi đã mở rộng hoặc chỉ có 1 reply */}
                                                             <div className="space-y-3">
-                                                                {comment.replies.map((reply, replyIndex) => (
-                                                                    <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
-                                                                        <div className="bg-gray-50 rounded-lg p-3">
-                                                                            <div className="flex items-center gap-2 mb-1">
-                                                                                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                                                                    {reply.user_id?.avatar ? (
-                                                                                        <img
-                                                                                            src={reply.user_id.avatar}
-                                                                                            alt="Avatar"
-                                                                                            className="w-full h-full object-cover"
-                                                                                        />
-                                                                                    ) : (
-                                                                                        <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                                                        </svg>
-                                                                                    )}
-                                                                                </div>
-                                                                                <span className="font-medium text-sm">
-                                                                                    {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
-                                                                                </span>
-                                                                                <span className="text-xs text-gray-500">
-                                                                                    {reply.create_at ? 
-                                                                                        new Date(reply.create_at).toLocaleString('vi-VN', {
-                                                                                            year: 'numeric',
-                                                                                            month: '2-digit',
-                                                                                            day: '2-digit',
-                                                                                            hour: '2-digit',
-                                                                                            minute: '2-digit'
-                                                                                        }) : 
-                                                                                        'Vừa xong'
-                                                                                    }
-                                                                                </span>
-                                                                            </div>
-                                                                            <div className="text-sm text-gray-800 ml-8">
-                                                                                {reply.reply || 'Nội dung trả lời'}
-                                                                            </div>
-                                                                        </div>
+                                                    {comment.replies.map((reply, replyIndex) => (
+                                                        <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
+                                                            <div className="bg-gray-50 rounded-lg p-3">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                                                        {reply.user_id?.avatar ? (
+                                                                            <img
+                                                                                src={reply.user_id.avatar}
+                                                                                alt="Avatar"
+                                                                                className="w-full h-full object-cover"
+                                                                            />
+                                                                        ) : (
+                                                                            <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        )}
                                                                     </div>
-                                                                ))}
+                                                                    <span className="font-medium text-sm">
+                                                                        {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
+                                                                    </span>
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {reply.create_at ? 
+                                                                            new Date(reply.create_at).toLocaleString('vi-VN', {
+                                                                                year: 'numeric',
+                                                                                month: '2-digit',
+                                                                                day: '2-digit',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit'
+                                                                            }) : 
+                                                                            'Vừa xong'
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-sm text-gray-800 ml-8">
+                                                                    {reply.reply || 'Nội dung trả lời'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                             </div>
                                                             
                                                             {/* Nút "Thu gọn" nếu đã mở rộng và có nhiều hơn 1 reply */}
