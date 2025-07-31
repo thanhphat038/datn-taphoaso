@@ -19,33 +19,26 @@ class OrderService extends DBService {
   }
 
   async getAllOrders(filter = {}, options = {}) {
-    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
-    const skip = (page - 1) * limit;
+    const { sort = { created_at: -1 } } = options;
 
     const orders = await this.model
       .find(filter)
       .sort(sort)
-      .skip(skip)
-      .limit(limit)
       .populate('user_id', 'name email') // nếu cần thông tin người dùng
       .lean();
 
-      const ordersWithItems = await Promise.all(
-        orders.map(async (order) => {
-          const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-          return { ...order, items };
-        })
-      );
-  
-      const total = await this.model.countDocuments(filter);
-  
-      return {
-        ordersWithItems,
-        total,
-        page,
-        limit
-      };
-    }
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
+        return { ...order, items };
+      })
+    );
+
+    return {
+      ordersWithItems,
+      total: ordersWithItems.length
+    };
+  }
 
   async getOrderById(orderId) {
     return await this.model.findById(orderId).populate('user_id');
