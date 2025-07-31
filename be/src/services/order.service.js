@@ -201,6 +201,20 @@ class OrderService extends DBService {
     totalRevenue: totalRevenue[0]?.total || 0
   };
 }
+
+  async delete(orderId) {
+    const order = await this.findById(orderId);
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+    
+    // Xóa order details trước
+    await OrderDetail.deleteMany({ order_id: orderId });
+    
+    // Xóa order
+    const deletedOrder = await this.model.findByIdAndDelete(orderId);
+    return deletedOrder;
+  }
 }
 
 export default OrderService;
