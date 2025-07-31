@@ -44,6 +44,45 @@ class OrderService extends DBService {
     return await this.model.findById(orderId).populate('user_id');
   }
 
+  async getOrderWithDeadline(orderId) {
+    const order = await this.model.findById(orderId)
+      .populate('user_id')
+      .select('_id total_amount order_status payment_method payment_deadline create_at');
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found');
+    }
+
+    return {
+      id: order._id,
+      total_amount: order.total_amount,
+      order_status: order.order_status,
+      payment_method: order.payment_method,
+      payment_deadline: order.payment_deadline,
+      created_at: order.create_at
+    };
+  }
+
+  async getOrderByVnpayRef(vnpayTxnRef) {
+    const order = await this.model.findOne({ vnpay_txn_ref: vnpayTxnRef })
+      .populate('user_id')
+      .select('_id total_amount order_status payment_method payment_deadline create_at vnpay_txn_ref');
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found with this VNPAY reference');
+    }
+
+    return {
+      id: order._id,
+      total_amount: order.total_amount,
+      order_status: order.order_status,
+      payment_method: order.payment_method,
+      payment_deadline: order.payment_deadline,
+      created_at: order.create_at,
+      vnpay_txn_ref: order.vnpay_txn_ref
+    };
+  }
+
   async createOrder(orderData) {
     const { user_id, address, receiver, sdt, items, voucher_code, payment_method, note } = orderData;
 

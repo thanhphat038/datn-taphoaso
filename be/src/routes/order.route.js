@@ -9,7 +9,10 @@ import {
   getOrderStats,
   getRecentOrders,
   deleteOrder,
-  getOrderProducts
+  getOrderProducts,
+  getOrderWithDeadline,
+  getOrderByVnpayRef,
+  updateOrderVnpayInfo
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
@@ -33,11 +36,20 @@ router.get('/recent', getRecentOrders);
 // Update order status (Admin)
 router.put('/:orderId/status', updateOrderStatus);
 
+// Update VNPAY info for order (admin/debug)
+router.put('/:orderId/vnpay-info', updateOrderVnpayInfo);
+
 // Get order by ID (Admin)
 router.get('/:orderId', getOrderById);
 
 // Get products in an order (Admin/User)
 router.get('/:orderId/products', getOrderProducts);
+
+// Get order with deadline info (Admin/User)
+router.get('/:orderId/deadline', getOrderWithDeadline);
+
+// Get order by VNPAY reference (Admin/User)
+router.get('/find-by-vnpay-ref/:vnpayRef', getOrderByVnpayRef);
 
 // Delete order (Admin)
 router.delete('/:orderId', deleteOrder);

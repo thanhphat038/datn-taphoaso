@@ -61,6 +61,7 @@ GET /payment/find-order/27184919
 
 Model Order đã được cập nhật với các trạng thái:
 - `pending`: Chờ thanh toán
+- `failed`: Thanh toán thất bại (VNPAY thất bại)
 - `paid`: Đã thanh toán (VNPAY thành công)
 - `processing`: Đang xử lý
 - `delivered`: Đã giao hàng

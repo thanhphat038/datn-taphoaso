@@ -196,3 +196,44 @@ export const getOrderProducts = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getOrderWithDeadline = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const orderInfo = await orderService.getOrderWithDeadline(orderId);
+    res.json({ success: true, data: orderInfo });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getOrderByVnpayRef = async (req, res, next) => {
+  try {
+    const { vnpayRef } = req.params;
+    const orderInfo = await orderService.getOrderByVnpayRef(vnpayRef);
+    res.json({ success: true, data: orderInfo });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// API cho phép cập nhật trạng thái, mã lỗi, vnp_TxnRef, error message cho order (admin/debug)
+export const updateOrderVnpayInfo = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { order_status, vnpay_txn_ref, vnpay_response_code, vnpay_transaction_status, vnpay_error_message } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Missing orderId' });
+    }
+    const update = {};
+    if (order_status) update.order_status = order_status;
+    if (vnpay_txn_ref) update.vnpay_txn_ref = vnpay_txn_ref;
+    if (vnpay_response_code) update.vnpay_response_code = vnpay_response_code;
+    if (vnpay_transaction_status) update.vnpay_transaction_status = vnpay_transaction_status;
+    if (vnpay_error_message) update.vnpay_error_message = vnpay_error_message;
+    const result = await orderService.model.updateOne({ _id: orderId }, update);
+    res.json({ success: true, message: 'Order updated', update });
+  } catch (error) {
+    next(error);
+  }
+};

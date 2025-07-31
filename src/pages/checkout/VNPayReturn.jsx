@@ -33,17 +33,51 @@ const VNPayReturn = () => {
           setTimeout(() => {
             navigate('/checkout/payment/success');
           }, 5000);
-        } else {
+          // Tự đóng tab sau 10 giây
           setTimeout(() => {
-            navigate('/profile/order');
-          }, 8000);
+            window.close();
+          }, 10000);
+        } else {
+          // Nếu thanh toán fail, chuyển về trang chờ thanh toán với orderId
+          const orderId = queryParams.vnp_OrderInfo || queryParams.vnp_TxnRef || result.orderId;
+          if (orderId && orderId.trim() !== '') {
+            // Vnp_TxnRef có thể không phải MongoDB ObjectId
+            setTimeout(() => {
+              navigate(`/checkout/payment/waiting?orderId=${orderId}`);
+            }, 3000);
+            // Tự đóng tab sau 10 giây
+            setTimeout(() => {
+              window.close();
+            }, 10000);
+          } else {
+            console.warn('No orderId found in payment result');
+            setTimeout(() => {
+              navigate('/profile/orders');
+            }, 3000);
+            // Tự đóng tab sau 10 giây
+            setTimeout(() => {
+              window.close();
+            }, 10000);
+          }
         }
       } catch (err) {
         console.error('Error processing payment return:', err);
         setError('Có lỗi xảy ra khi xử lý thanh toán');
         setTimeout(() => {
-          navigate('/profile/order');
+          // Thử lấy orderId từ URL params
+          const orderId = searchParams.get('vnp_OrderInfo') || searchParams.get('vnp_TxnRef');
+          if (orderId && orderId.trim() !== '') {
+            // Vnp_TxnRef có thể không phải MongoDB ObjectId
+            navigate(`/checkout/payment/waiting?orderId=${orderId}`);
+          } else {
+            console.warn('No orderId found in error handling');
+            navigate('/profile/orders');
+          }
         }, 8000);
+        // Tự đóng tab sau 10 giây
+        setTimeout(() => {
+          window.close();
+        }, 10000);
       } finally {
         setIsLoading(false);
       }
@@ -71,11 +105,22 @@ const VNPayReturn = () => {
             <div className="text-red-500 text-6xl mb-4">❌</div>
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Lỗi xử lý thanh toán</h2>
             <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-sm text-gray-500 mb-4">
+              <span className="text-blue-600">Tab này sẽ tự đóng sau 10 giây.</span>
+            </p>
             <button
-              onClick={() => navigate('/profile/orders')}
+              onClick={() => {
+                const orderId = searchParams.get('vnp_TxnRef');
+                if (orderId && orderId.trim() !== '') {
+                  // Vnp_TxnRef có thể không phải MongoDB ObjectId
+                  navigate(`/checkout/payment/waiting?orderId=${orderId}`);
+                } else {
+                  navigate('/profile/orders');
+                }
+              }}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Xem đơn hàng
+              Chờ thanh toán
             </button>
           </div>
         </div>
@@ -108,6 +153,8 @@ const VNPayReturn = () => {
               
               <p className="text-sm text-gray-500 mb-4">
                 Bạn sẽ được chuyển hướng về trang thành công trong 5 giây...
+                <br />
+                <span className="text-blue-600">Tab này sẽ tự đóng sau 10 giây.</span>
               </p>
             </>
           ) : (
@@ -125,14 +172,25 @@ const VNPayReturn = () => {
               )}
               
               <p className="text-sm text-gray-500 mb-4">
-                Bạn sẽ được chuyển hướng về trang đơn hàng trong 8 giây...
+                Bạn sẽ được chuyển hướng về trang chờ thanh toán trong 3 giây...
+                <br />
+                <span className="text-blue-600">Tab này sẽ tự đóng sau 10 giây.</span>
               </p>
               
               <button
-                onClick={() => navigate('/profile/orders')}
+                onClick={() => {
+                  const orderId = paymentResult?.orderId || searchParams.get('vnp_OrderInfo') || searchParams.get('vnp_TxnRef');
+                  if (orderId && orderId.trim() !== '') {
+                    // Vnp_TxnRef có thể không phải MongoDB ObjectId
+                    navigate(`/checkout/payment/waiting?orderId=${orderId}`);
+                  } else {
+                    console.warn('No orderId found in button click');
+                    navigate('/profile/orders');
+                  }
+                }}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Xem đơn hàng
+                Chờ thanh toán
               </button>
             </>
           )}
