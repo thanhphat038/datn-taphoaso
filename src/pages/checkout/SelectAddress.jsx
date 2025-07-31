@@ -67,7 +67,9 @@ const SelectAddress = () => {
     // Validate phone number
     const phoneRegex = /^[0-9]{10,11}$/;
     if (!phoneRegex.test(newAddress.phone)) {
-      alert('Số điện thoại không hợp lệ!');
+      setMessage('Số điện thoại không hợp lệ!');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
       return;
     }
     const cityObj = cities.find(c => c.code == newAddress.city);

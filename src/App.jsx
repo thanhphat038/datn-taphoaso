@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import { AlertProvider } from './components/AlertProvider';
+import { ToastProvider } from './components/ToastContainer';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -122,9 +124,13 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <CartProvider>
-          <Layout />
-        </CartProvider>
+        <AlertProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Layout />
+            </CartProvider>
+          </ToastProvider>
+        </AlertProvider>
       </Router>
     </ErrorBoundary>
   );

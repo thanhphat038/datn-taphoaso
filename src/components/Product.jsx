@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
 import Cookies from 'js-cookie';
+import { useAlertContext } from './AlertProvider';
+import { useToast } from './ToastContainer';
 
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -66,6 +68,8 @@ const Product = ({ data: product, isFavorited = false }) => {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
+  const { showAlert } = useAlertContext();
+  const { showWarning } = useToast();
 
   // Lấy user_id từ token
   const getUserId = () => {
@@ -139,7 +143,10 @@ const Product = ({ data: product, isFavorited = false }) => {
     
     const userId = getUserId();
     if (!userId) {
-      alert('Vui lòng đăng nhập để sử dụng tính năng yêu thích');
+      showWarning(
+        'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
+        'Yêu cầu đăng nhập'
+      );
       return;
     }
     
@@ -164,7 +171,11 @@ const Product = ({ data: product, isFavorited = false }) => {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      alert('Có lỗi xảy ra khi thao tác với mục yêu thích');
+      showAlert({
+        title: 'Lỗi',
+        message: 'Có lỗi xảy ra khi thao tác với mục yêu thích',
+        type: 'error'
+      });
     } finally {
       setLoadingFavorite(false);
     }

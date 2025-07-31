@@ -46,7 +46,8 @@ const PaymentProcessing = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
         e.preventDefault();
-        alert('Không thể refresh trang trong quá trình thanh toán!');
+        // Sử dụng console.warn thay vì alert để tránh popup
+        console.warn('Không thể refresh trang trong quá trình thanh toán!');
         return false;
       }
     };
@@ -58,7 +59,8 @@ const PaymentProcessing = () => {
     const handlePopState = (e) => {
       e.preventDefault();
       window.history.pushState(null, '', window.location.pathname);
-      alert('Không thể quay lại trang trước đó trong quá trình thanh toán!');
+      // Sử dụng console.warn thay vì alert để tránh popup
+      console.warn('Không thể quay lại trang trước đó trong quá trình thanh toán!');
     };
 
     // Thêm state vào history để chặn back button
