@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { CartContext } from '../context/CartContext';
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
@@ -28,7 +29,18 @@ const OrderDetailPage = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        
+
+        const handleReorder = (order) => {
+          if (!order || !order.products) return;
+
+          order.products.forEach(item => {
+            const product = item.product;
+            const quantity = item.quantity || 1;
+
+            addToCart(product, quantity);
+          });
+        };
+
         console.log('🔍 Debug - Order detail response:', response.data);
         console.log('🔍 Debug - Order data:', response.data.data);
         console.log('🔍 Debug - Order items:', response.data.data?.items);
@@ -276,13 +288,25 @@ const OrderDetailPage = () => {
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button className="flex-1 bg-[#06AEF4] text-white py-3 rounded-xl hover:bg-[#70d9ff] transition-colors font-semibold">
-              Mua lại
-            </button>
-            <button className="flex-1 border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
-              Liên hệ hỗ trợ
-            </button>
+            {order.order_status === 'delivered' ? (
+              <>
+                <button
+                  onClick={() => handleReorder(order)}
+                  className="w-1/2 bg-[#06AEF4] text-white py-3 rounded-xl hover:bg-[#70d9ff] transition-colors font-semibold"
+                >
+                  Mua lại
+                </button>
+                <button className="w-1/2 border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
+                  Liên hệ hỗ trợ
+                </button>
+              </>
+            ) : (
+              <button className="w-1/2 ml-auto border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
+                Liên hệ hỗ trợ
+              </button>
+            )}
           </div>
+
         </div>
       </div>
     </div>

@@ -194,9 +194,9 @@ const Order = () => {
                 >
                   Xem chi tiết
                 </button>
-                <button className="px-5 py-2 border border-[#06AEF4] bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold rounded-lg shadow-sm transition-colors">
+                {/* <button className="px-5 py-2 border border-[#06AEF4] bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold rounded-lg shadow-sm transition-colors">
                   Liên hệ hỗ trợ
-                </button>
+                </button> */}
               </div>
             </div>
 
