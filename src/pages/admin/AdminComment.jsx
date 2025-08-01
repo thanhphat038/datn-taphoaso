@@ -149,8 +149,10 @@ const AdminComment = () => {
     const matchesSearch = 
       (comment.content && comment.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (comment.user_id?.name && comment.user_id.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'All' || comment.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    // Status filtering disabled
+    // const matchesStatus = statusFilter === 'All' || comment.status === statusFilter;
+    // return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const totalComments = filteredComments.length;
@@ -249,19 +251,19 @@ const AdminComment = () => {
         </div>
       )
     },
-    {
-      title: 'Trạng thái',
-      key: 'status',
-      render: (comment) => {
-        const statusInfo = getCommentStatusInfo(comment.status);
-        return (
-          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
-            <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
-            {statusInfo.label}
-          </span>
-        );
-      }
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   key: 'status',
+    //   render: (comment) => {
+    //     const statusInfo = getCommentStatusInfo(comment.status);
+    //     return (
+    //       <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
+    //         <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+    //         {statusInfo.label}
+    //       </span>
+    //     );
+    //   }
+    // },
     {
       title: '',
       key: 'actions',
@@ -276,12 +278,13 @@ const AdminComment = () => {
                 setShowViewModal(true);
               }
             },
-            {
-              label: comment.status === 'active' ? 'Ẩn bình luận' : 'Hiện bình luận',
-              icon: comment.status === 'active' ? FaEyeSlash : FaEye,
-              variant: comment.status === 'active' ? 'warning' : 'success',
-              onClick: () => handleToggleStatus(comment._id, comment.status)
-            },
+            // Status toggle disabled
+            // {
+            //   label: comment.status === 'active' ? 'Ẩn bình luận' : 'Hiện bình luận',
+            //   icon: comment.status === 'active' ? FaEyeSlash : FaEye,
+            //   variant: comment.status === 'active' ? 'warning' : 'success',
+            //   onClick: () => handleToggleStatus(comment._id, comment.status)
+            // },
             {
               label: 'Xóa bình luận',
               icon: FaTrash,
@@ -297,17 +300,18 @@ const AdminComment = () => {
 
   // Filter options
   const filterOptions = [
-    {
-      key: 'status',
-      label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
-             statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
-      value: statusFilter,
-      options: [
-        { value: 'All', label: 'Tất cả trạng thái' },
-        { value: 'active', label: 'Đang hiển thị' },
-        { value: 'inactive', label: 'Đã ẩn' }
-      ]
-    }
+    // Status filter disabled
+    // {
+    //   key: 'status',
+    //   label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
+    //          statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
+    //   value: statusFilter,
+    //   options: [
+    //     { value: 'All', label: 'Tất cả trạng thái' },
+    //     { value: 'active', label: 'Đang hiển thị' },
+    //     { value: 'inactive', label: 'Đã ẩn' }
+    //   ]
+    // }
   ];
 
   const handleFilterChange = (key, value) => {
@@ -318,8 +322,8 @@ const AdminComment = () => {
   };
 
   // Calculate statistics
-  const activeComments = comments.filter(c => c.status === 'active').length;
-  const inactiveComments = comments.filter(c => c.status === 'inactive').length;
+  // const activeComments = comments.filter(c => c.status === 'active').length;
+  // const inactiveComments = comments.filter(c => c.status === 'inactive').length;
   const todayComments = comments.filter(c => 
     c.createdAt && new Date(c.createdAt).toDateString() === new Date().toDateString()
   ).length;
@@ -349,18 +353,10 @@ const AdminComment = () => {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AdminCard className="text-center">
             <div className="text-2xl font-bold text-[#06AEF4]">{totalComments}</div>
             <div className="text-sm text-gray-600">Tổng bình luận</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-green-600">{activeComments}</div>
-            <div className="text-sm text-gray-600">Đang hiển thị</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-red-600">{inactiveComments}</div>
-            <div className="text-sm text-gray-600">Đã ẩn</div>
           </AdminCard>
           <AdminCard className="text-center">
             <div className="text-2xl font-bold text-purple-600">{todayComments}</div>

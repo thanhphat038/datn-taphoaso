@@ -155,9 +155,11 @@ const AdminReview = () => {
     const matchesSearch = 
       (review.comment && review.comment.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (review.user_id?.username && review.user_id.username.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
+    // Status filtering disabled
+    // const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
     const matchesRating = ratingFilter === 'All' || review.rating === parseInt(ratingFilter);
-    return matchesSearch && matchesStatus && matchesRating;
+    // return matchesSearch && matchesStatus && matchesRating;
+    return matchesSearch && matchesRating;
   });
 
   const totalReviews = filteredReviews.length;
@@ -284,19 +286,19 @@ const AdminReview = () => {
         </div>
       )
     },
-    {
-      title: 'Trạng thái',
-      key: 'status',
-      render: (review) => {
-        const statusInfo = getReviewStatusInfo(review.status);
-        return (
-          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
-            <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
-            {statusInfo.label}
-          </span>
-        );
-      }
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   key: 'status',
+    //   render: (review) => {
+    //     const statusInfo = getReviewStatusInfo(review.status);
+    //     return (
+    //       <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
+    //         <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+    //         {statusInfo.label}
+    //       </span>
+    //     );
+    //   }
+    // },
     {
       title: '',
       key: 'actions',
@@ -311,12 +313,13 @@ const AdminReview = () => {
                 setShowViewModal(true);
               }
             },
-            {
-              label: review.status === 'active' ? 'Ẩn đánh giá' : 'Hiện đánh giá',
-              icon: review.status === 'active' ? FaEyeSlash : FaEye,
-              variant: review.status === 'active' ? 'warning' : 'success',
-              onClick: () => handleToggleStatus(review._id, review.status)
-            },
+            // Status toggle disabled
+            // {
+            //   label: review.status === 'active' ? 'Ẩn đánh giá' : 'Hiện đánh giá',
+            //   icon: review.status === 'active' ? FaEyeSlash : FaEye,
+            //   variant: review.status === 'active' ? 'warning' : 'success',
+            //   onClick: () => handleToggleStatus(review._id, review.status)
+            // },
             {
               label: 'Xóa đánh giá',
               icon: FaTrash,
@@ -332,17 +335,18 @@ const AdminReview = () => {
 
   // Filter options
   const filterOptions = [
-    {
-      key: 'status',
-      label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
-             statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
-      value: statusFilter,
-      options: [
-        { value: 'All', label: 'Tất cả trạng thái' },
-        { value: 'active', label: 'Đang hiển thị' },
-        { value: 'inactive', label: 'Đã ẩn' }
-      ]
-    },
+    // Status filter disabled
+    // {
+    //   key: 'status',
+    //   label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
+    //          statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
+    //   value: statusFilter,
+    //   options: [
+    //     { value: 'All', label: 'Tất cả trạng thái' },
+    //     { value: 'active', label: 'Đang hiển thị' },
+    //     { value: 'inactive', label: 'Đã ẩn' }
+    //   ]
+    // },
     {
       key: 'rating',
       label: ratingFilter === 'All' ? 'Tất cả đánh giá' : `${ratingFilter} sao`,
@@ -368,8 +372,8 @@ const AdminReview = () => {
   };
 
   // Calculate statistics
-  const activeReviews = reviews.filter(r => r.status === 'active').length;
-  const inactiveReviews = reviews.filter(r => r.status === 'inactive').length;
+  // const activeReviews = reviews.filter(r => r.status === 'active').length;
+  // const inactiveReviews = reviews.filter(r => r.status === 'inactive').length;
   const averageRating = reviews.length > 0 
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
@@ -402,14 +406,10 @@ const AdminReview = () => {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AdminCard className="text-center">
             <div className="text-2xl font-bold text-[#06AEF4]">{totalReviews}</div>
             <div className="text-sm text-gray-600">Tổng đánh giá</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-green-600">{activeReviews}</div>
-            <div className="text-sm text-gray-600">Đang hiển thị</div>
           </AdminCard>
           <AdminCard className="text-center">
             <div className="flex items-center justify-center gap-1">

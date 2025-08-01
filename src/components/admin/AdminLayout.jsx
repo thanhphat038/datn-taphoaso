@@ -15,11 +15,12 @@ import {
   FaBars,
   FaTimes
 } from 'react-icons/fa';
-import Cookies from 'js-cookie';
+import { useAdminAuth } from '../../hooks/useAdminAuth';
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAdmin, loading, user, logout } = useAdminAuth();
 
   const menuItems = [
     { path: '/admin', icon: FaHome, label: 'Tổng quan' },
@@ -34,9 +35,7 @@ const AdminLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.clear();
-    Cookies.remove('auth_token');
-    window.location.href = '/login';
+    logout();
   };
 
   return (
@@ -117,7 +116,7 @@ const AdminLayout = ({ children }) => {
               <FaChartBar className="w-6 h-6" />
             </button>
             <div className="w-10 h-10 rounded-full bg-[#06AEF4] text-white flex items-center justify-center font-bold text-lg">
-              A
+              {user?.username?.charAt(0)?.toUpperCase() || 'A'}
             </div>
           </div>
         </header>

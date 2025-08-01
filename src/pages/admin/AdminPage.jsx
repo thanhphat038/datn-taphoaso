@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaBox, FaShoppingCart, FaTicketAlt, FaChartLine, FaCalendarAlt, FaComments, FaStar } from 'react-icons/fa';
+import { FaUsers, FaBox, FaShoppingCart, FaTicketAlt, FaChartLine, FaCalendarAlt, FaComments, FaStar, FaEye } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import Cookies from 'js-cookie';
@@ -339,43 +339,95 @@ const AdminPage = () => {
         </div>
 
                  {/* Recent Orders */}
-         <AdminCard title="Đơn hàng gần đây">
-           <div className="space-y-4">
-             {loading ? (
-               <div className="text-center py-4 text-gray-500">Đang tải dữ liệu...</div>
-             ) : stats.recentOrders?.length > 0 ? (
-               stats.recentOrders.map((order) => (
-                 <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                   <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                       <FaCalendarAlt className="w-4 h-4 text-gray-400" />
-                     </div>
-                     <div>
-                       <div className="font-medium text-gray-900">#{order._id.slice(-8)}</div>
-                       <div className="text-sm text-gray-500">{order.receiver || 'Không có tên'}</div>
-                     </div>
-                   </div>
-                   <div className="flex items-center gap-3">
-                     <div className="text-right">
-                       <div className="font-medium text-gray-900">{formatCurrency(order.total_amount)}</div>
-                       <div className={`text-xs px-2 py-1 rounded-full ${getOrderStatusInfo(order.order_status || order.status).color}`}>
-                         {getOrderStatusInfo(order.order_status || order.status).label}
-                       </div>
-                     </div>
-                                           <Link 
-                        to="/admin/order"
-                        className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
-                      >
-                        Xem chi tiết
-                      </Link>
-                   </div>
-                 </div>
-               ))
-             ) : (
-               <div className="text-center py-4 text-gray-500">Không có đơn hàng nào</div>
-             )}
-           </div>
-         </AdminCard>
+        <AdminCard title="Đơn hàng gần đây">
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#06AEF4]"></div>
+                <span className="ml-3 text-gray-600">Đang tải dữ liệu...</span>
+              </div>
+            ) : stats.recentOrders?.length > 0 ? (
+              <div className="grid gap-3">
+                {stats.recentOrders.map((order, index) => (
+                  <div key={order._id} className="group relative overflow-hidden bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-[#06AEF4] transition-all duration-300">
+                    {/* Order number badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        #{order._id.slice(-8)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        {/* Order icon with status color */}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm ${
+                          (order.order_status || order.status) === 'delivered' 
+                            ? 'bg-green-100 text-green-600' 
+                            : (order.order_status || order.status) === 'cancelled'
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-blue-100 text-blue-600'
+                        }`}>
+                          <FaShoppingCart className="w-5 h-5" />
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-gray-900">
+                              {order.receiver || 'Khách hàng ẩn danh'}
+                            </h4>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              getOrderStatusInfo(order.order_status || order.status).color
+                            }`}>
+                              {getOrderStatusInfo(order.order_status || order.status).label}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <FaCalendarAlt className="w-3 h-3" />
+                              {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }) : 'N/A'}
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              {formatCurrency(order.total_amount)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Action button */}
+                      <div className="flex items-center gap-2">
+                        <Link 
+                          to={`/admin/order?orderId=${order._id}`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#06AEF4] text-white text-sm font-medium rounded-lg hover:bg-[#0590d8] transition-all duration-200 shadow-sm hover:shadow-md group-hover:scale-105"
+                        >
+                          <FaEye className="w-3 h-3" />
+                          Xem chi tiết
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    {/* Hover effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#06AEF4]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaShoppingCart className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đơn hàng nào</h3>
+                <p className="text-gray-500">Khi có đơn hàng mới, chúng sẽ xuất hiện ở đây</p>
+              </div>
+            )}
+          </div>
+        </AdminCard>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

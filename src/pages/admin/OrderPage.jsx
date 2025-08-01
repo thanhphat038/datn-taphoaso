@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaEye, FaShoppingCart, FaUser, FaMapMarkerAlt, FaCalendar, FaDollarSign } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminTable from '../../components/admin/AdminTable';
@@ -12,6 +13,7 @@ import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrde
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const OrderPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -29,6 +31,16 @@ const OrderPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editStatus, setEditStatus] = useState('');
   const [currentEditOrder, setCurrentEditOrder] = useState(null);
+
+  // Check for order ID in URL parameters on component mount
+  useEffect(() => {
+    const orderId = searchParams.get('orderId');
+    if (orderId) {
+      setSearchQuery(orderId);
+      // Clear the URL parameter after setting the search query
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   // Status options with beautiful styling
   const statusOptions = [
