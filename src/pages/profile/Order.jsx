@@ -45,6 +45,10 @@ const Order = () => {
         label: "Đã huỷ",
         className: "bg-red-100 text-red-600",
       },
+      failed: {
+        label: "Thanh toán thất bại",
+        className: "bg-red-100 text-red-600",
+      },
     };
 
     const status = statusMap[order_status] || {
