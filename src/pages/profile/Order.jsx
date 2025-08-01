@@ -188,6 +188,14 @@ const Order = () => {
                 <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
               </div>
               <div className="flex gap-2 mt-2 sm:mt-0">
+                {order.order_status === 'failed' && (
+                  <button
+                    onClick={() => navigate(`/checkout/${order._id}`)}
+                    className="px-5 py-2 border border-red-600 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg shadow-sm transition-colors"
+                  >
+                    Tiếp tục thanh toán
+                  </button>
+                )}
                 <button
                   onClick={() => navigate(`/order/${order._id}`)}
                   className="px-5 py-2 border border-blue-600 bg-white hover:bg-blue-50 text-blue-600 font-semibold rounded-lg shadow-sm transition-colors"
