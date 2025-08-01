@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import routes from './routes/index.js';
 import { connectDB } from './config/database.js';
+import './models/reply.model.js'; // Import Reply model để đảm bảo nó được register
 
 import { globalErrorHandler } from './middlewares/error.middleware.js';
 

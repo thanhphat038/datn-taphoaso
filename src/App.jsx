@@ -1,11 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
+import { AlertProvider } from './components/AlertProvider';
+import { ToastProvider } from './components/ToastContainer';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Checkout from './pages/checkout/Checkout';
 import SelectAddress from './pages/checkout/SelectAddress';
 import PaymentSuccess from './pages/checkout/PaymentSuccess';
+import PaymentProcessing from './pages/checkout/PaymentProcessing';
+import PaymentWaiting from './pages/checkout/PaymentWaiting';
+import VNPayReturn from './pages/checkout/VNPayReturn';
 
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
@@ -26,7 +32,8 @@ import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
-import { CartProvider } from './context/CartContext';
+import { CartProvider, CartContext } from './context/CartContext';
+import CheckoutGuard from './components/CheckoutGuard';
 import AddProductPage from './pages/admin/AddProductPage';
 import AdminPage from './pages/admin/AdminPage';
 import VoucherPage from './pages/admin/VoucherPage';
@@ -46,7 +53,7 @@ function Layout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   
-  const noFooterRoutes = ['/checkout', '/select-address'];
+  const noFooterRoutes = ['/checkout', '/select-address', '/checkout/payment/processing', '/checkout/payment/success', '/checkout/payment/waiting', '/checkout/payment/vnpay_return'];
 
   const showFooter = !isAdminRoute && !noFooterRoutes.includes(location.pathname);
 
@@ -65,9 +72,20 @@ function Layout() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/profile/*" element={<ProfilePage />} />
               <Route path="/order/:id" element={<OrderDetailPage />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/select-address" element={<SelectAddress />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/checkout" element={
+                <CheckoutGuard>
+                  <Checkout />
+                </CheckoutGuard>
+              } />
+              <Route path="/select-address" element={
+                <CheckoutGuard>
+                  <SelectAddress />
+                </CheckoutGuard>
+              } />
+              <Route path="/checkout/payment/success" element={<PaymentSuccess />} />
+              <Route path="/checkout/payment/processing" element={<PaymentProcessing />} />
+              <Route path="/checkout/payment/waiting" element={<PaymentWaiting />} />
+              <Route path="/checkout/payment/vnpay_return" element={<VNPayReturn />} />
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -110,11 +128,17 @@ function Layout() {
 
 function App() {
   return (
-    <Router>
-      <CartProvider>
-        <Layout />
-      </CartProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AlertProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Layout />
+            </CartProvider>
+          </ToastProvider>
+        </AlertProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

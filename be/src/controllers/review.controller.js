@@ -90,4 +90,26 @@ export const getReviewsByProductId = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+// Toggle is_hidden của review
+export const toggleReviewHidden = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const review = await reviewService.findById(id);
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    const newHiddenState = !review.is_hidden;
+    const updated = await reviewService.update(id, { is_hidden: newHiddenState });
+
+    res.json({
+      message: `Review visibility updated: now ${newHiddenState ? 'hidden' : 'visible'}.`,
+      data: updated
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

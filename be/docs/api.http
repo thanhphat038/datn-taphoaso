@@ -1,14 +1,13 @@
 @baseUrl = http://localhost:3000/api
+
 @authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNDU5NTUyLCJleHAiOjE3NTQwNjQzNTJ9.N8Mwo-81Q48q8ykTimYChznEjXpxI7HwIp-3HYqHdp0
+
 ### Variables
 @userId = 685a9ea76875fcf8f499fa9a
-
 @addressId = 6862dbf5b04329ea26a04112
 @productId = 6862d1c32df5d5159cc51ef2
 @categoryId = 684312904b15be945ea7a436
 @orderId = 686366fbbd9300db3933df53
-@addressId = 684694371aaf49d7a7259201
-
 @commentId = 687f9fadc0647b5a2ec6e3d7
 @reviewId = 687fb9d1add96fdef96b888e
 
@@ -33,8 +32,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "username": "thanh phat test",
-  "password": "Phat1234567890"
+  "username": "user1",
+  "password": "newpassword123"
 }
 
 ### Get Profile
@@ -218,7 +217,7 @@ Content-Type: application/json
 }
 
 ### Get my orders (User)
-GET {{baseUrl}}/orders/my
+GET {{baseUrl}}/orders/my?page=1&limit=3
 Authorization: Bearer {{authToken}}
 
 ### Update order status (Admin)
@@ -233,6 +232,19 @@ Content-Type: application/json
 ### Get order stats (Admin)
 GET {{baseUrl}}/orders/stats
 Authorization: Bearer {{authToken}}
+
+### Update VNPAY info for order (admin/debug)
+PUT {{baseUrl}}/orders/{{orderId}}/vnpay-info
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "order_status": "cancelled",
+  "vnpay_txn_ref": "31152240",
+  "vnpay_response_code": "24",
+  "vnpay_transaction_status": "02",
+  "vnpay_error_message": "Giao dịch không thành công do: Khách hàng hủy giao dịch"
+}
 
 ### Get recent orders (Admin)
 GET {{baseUrl}}/orders/recent?limit=10
@@ -322,6 +334,10 @@ Authorization: Bearer {{authToken}}
 DELETE {{baseUrl}}/reviews/{{reviewId}}
 Authorization: Bearer {{authToken}}
 
+### Toggle is_hidden for review
+PATCH {{baseUrl}}/reviews/{{reviewId}}/toggle-hidden
+Authorization: Bearer {{authToken}}
+
 ### Comments ###
 
 ### Get all comments
@@ -366,6 +382,10 @@ GET {{baseUrl}}/products/{{productId}}/comments
 DELETE {{baseUrl}}/comments/{{commentId}}
 Authorization: Bearer {{authToken}}
 
+### Toggle is_hidden for comment
+PATCH {{baseUrl}}/comments/{{commentId}}/toggle-hidden
+Authorization: Bearer {{authToken}}
+
 ### Favorites ###
 
 ### Get all favorites
@@ -378,14 +398,17 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "user_id": "user685a9ea76875fcf8f499fa9aId",
   "product_id": "6862d1c32df5d5159cc51f08"
-
 }
 
 ### Remove from favorites
-DELETE {{baseUrl}}/favorites/{{productId}}
+DELETE {{baseUrl}}/favorites
 Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
 
 ### Cart ###
 ### Get cart
@@ -480,4 +503,110 @@ Content-Type: application/json
 
 ### Get voucher stats (Admin only)
 GET {{baseUrl}}/vouchers/stats
+Authorization: Bearer {{authToken}} 
+
+
+### Payment - Create VNPAY payment URL
+POST {{baseUrl}}/payment/create
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "amount": 100000,
+  "bankCode": "",
+  "language": "vn"
+}
+
+### Payment - Handle return from VNPAY
+GET {{baseUrl}}/payment/return?method=vnpay&vnp_TxnRef=...&vnp_Amount=...&vnp_ResponseCode=...&vnp_SecureHash=...
+
+### Payment - Handle IPN from VNPAY
+GET {{baseUrl}}/payment/ipn?method=vnpay&vnp_TxnRef=...&vnp_Amount=...&vnp_ResponseCode=...&vnp_SecureHash=...
+
+### Payment - Query transaction
+POST {{baseUrl}}/payment/query
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "orderId": "...",
+  "transDate": "...",
+  "ipAddr": "..."
+}
+
+### Payment - Refund transaction
+POST {{baseUrl}}/payment/refund
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "orderId": "...",
+  "transDate": "...",
+  "amount": 100000,
+  "transType": "...",
+  "user": "...",
+  "ipAddr": "..."
+} 
+
+### Test Create Order with VNPAY
+POST {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "address": "Số 123, Quận ABC, TP XYZ",
+    "receiver": "Nguyễn Văn AAAAAA",
+    "sdt": "0123456789",
+    "items": [
+        {
+            "product_id": "6862d1c32df5d5159cc51ef2",
+            "qty": 1
+        }
+    ],
+    "payment_method": "vnpay",
+    "note": "Vui lòng giao buổi sáng",
+    "total_amount": 11000
+}
+
+### Test Create VNPAY Payment with Order ID
+POST {{baseUrl}}/payment/create
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "method": "vnpay",
+    "amount": 11000,
+    "bankCode": "",
+    "language": "vn",
+    "orderId": "6886207fbbcbae9e3fd8fa44"
+}
+
+### Test Update Order Status
+POST {{baseUrl}}/payment/test-update-status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "orderId": "6886207fbbcbae9e3fd8fa44",
+  "status": "paid"
+}
+
+### Test Find Order by VNPAY TxnRef
+GET {{baseUrl}}/payment/find-order/27193316
+
+### Get All Orders with VNPAY Ref
+GET {{baseUrl}}/payment/all-orders-with-vnpay-ref
+
+### Payment Return Test (VNPAY Callback)
+GET {{baseUrl}}/payment/return?vnp_ResponseCode=00&vnp_TxnRef=27193316&vnp_Amount=1100000&vnp_BankCode=VNPAY&vnp_CardType=QRCODE&vnp_PayDate=20250727175916&vnp_TransactionStatus=00&vnp_TransactionNo=123456&vnp_SecureHash=test_hash
+
+### Payment Return Test (VNPAY Failed)
+GET {{baseUrl}}/payment/return?vnp_ResponseCode=24&vnp_TxnRef=27193316&vnp_Amount=1100000&vnp_BankCode=VNPAY&vnp_CardType=QRCODE&vnp_PayDate=20250727175916&vnp_TransactionStatus=02&vnp_TransactionNo=0&vnp_SecureHash=test_hash 
+
+### Get products in an order
+GET {{baseUrl}}/orders/{{orderId}}/products
+Authorization: Bearer {{authToken}}
+
+### Get order with deadline info
+GET {{baseUrl}}/orders/{{orderId}}/deadline
 Authorization: Bearer {{authToken}} 

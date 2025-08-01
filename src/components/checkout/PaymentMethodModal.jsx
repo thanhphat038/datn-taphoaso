@@ -6,11 +6,13 @@ const paymentMethods = [
   {
     key: 'cod',
     label: 'Tiền mặt khi nhận hàng',
+    description: 'Thanh toán khi nhận hàng',
     icon: <FaWallet size={24} style={{ marginRight: 12 }} />,
   },
   {
     key: 'vnpay',
     label: 'Thanh toán qua VNPAY',
+    description: 'Thẻ ATM, thẻ quốc tế, QR Code',
     icon: <img src="/img/vnpay.png" alt="VNPAY" className="pm-modal-vnpay-img" />,
   },
 ];
@@ -42,7 +44,10 @@ const PaymentMethodModal = ({ open, onClose, selected, onSelect }) => {
                 className="pm-modal-radio-native"
               />
               {m.icon}
-              <span className="pm-modal-label">{m.label}</span>
+              <div className="pm-modal-content">
+                <span className="pm-modal-label">{m.label}</span>
+                <span className="pm-modal-description">{m.description}</span>
+              </div>
             </label>
           ))}
         </div>

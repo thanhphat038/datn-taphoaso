@@ -5,19 +5,20 @@ import {
   getFavoriteById,
   removeFromFavorite
 } from '../controllers/favorite.controller.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 // Create new favorite
-router.post('/', addToFavorite);
+router.post('/', authMiddleware, addToFavorite);
 
 // Get all favorites
-router.get('/', getFavorites);
+router.get('/', authMiddleware, getFavorites);
 
 // Get favorite by id
-router.get('/:id', getFavoriteById);
+router.get('/:id', authMiddleware, getFavoriteById);
 
 // Delete favorite
-router.delete('/:id', removeFromFavorite);
+router.delete('/', authMiddleware, removeFromFavorite);
 
 export default router; 

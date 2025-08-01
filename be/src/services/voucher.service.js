@@ -8,7 +8,7 @@ class VoucherService extends DBService {
     super(Voucher);
   }
 
-  async validateVoucher(code, userId, orderAmount) {
+  async validateVoucherCode(code, userId, orderAmount) {
     const voucher = await this.model.findOne({ code });
     
     if (!voucher) {
@@ -44,7 +44,7 @@ class VoucherService extends DBService {
   }
 
   async applyVoucher(code, userId, orderAmount) {
-    const voucher = await this.validateVoucher(code, userId, orderAmount);
+    const voucher = await this.validateVoucherCode(code, userId, orderAmount);
     
     let discountAmount = 0;
     if (voucher.type === 'percentage') {

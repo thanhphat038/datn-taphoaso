@@ -14,6 +14,10 @@ const commentSchema = new mongoose.Schema({
   comment: {
     type: String,
     required: true
+  },
+  is_hidden: {
+    type: Boolean,
+    default: false 
   }
 }, {
   timestamps: {

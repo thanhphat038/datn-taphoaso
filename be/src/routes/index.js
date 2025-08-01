@@ -12,13 +12,18 @@ import addressRouter from './address.route.js';
 
 import reviewRouter from './review.route.js';
 import commentRouter from './comment.route.js';
+import replyRouter from './reply.route.js';
 import favoriteRouter from './favorite.route.js';
 
 import cartRouter from './cart.route.js';
 
 import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
+
 import uploadRouter from './upload.route.js';
+
+import paymentRouter from './payment.route.js';
+
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -34,6 +39,7 @@ router.use('/addresses', authMiddleware, addressRouter);
 
 router.use('/reviews', authMiddleware,reviewRouter);
 router.use('/comments', authMiddleware, commentRouter);
+router.use('/replies', authMiddleware, replyRouter);
 router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes
@@ -49,7 +55,8 @@ router.use('/carts', authMiddleware, cartRouter);
 
 router.use('/vouchers', authMiddleware, voucherRouter);
 
-// Upload routes (public)
+
 router.use('/upload', uploadRouter);
 
 export default router;
+
