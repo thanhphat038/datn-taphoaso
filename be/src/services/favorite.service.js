@@ -6,7 +6,23 @@ class FavoriteService extends DBService {
   constructor() {
     super(Favorite);
   }
-
+  async find(filters = {}, options = {}) {
+    const { populate } = options;
+    
+    let query = this.model.find(filters);
+    
+    if (populate) {
+      if (Array.isArray(populate)) {
+        populate.forEach(pop => {
+          query = query.populate(pop);
+        });
+      } else {
+        query = query.populate(populate);
+      }
+    }
+    
+    return await query;
+  }
   async getUserFavorites(userId, options = {}) {
     const { page = 1, limit = 10 } = options;
     const skip = (page - 1) * limit;

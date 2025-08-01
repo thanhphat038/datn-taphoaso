@@ -20,6 +20,8 @@ const VoucherPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   // Fetch vouchers and auto-update expired ones
   useEffect(() => {
@@ -61,8 +63,13 @@ const VoucherPage = () => {
       await deleteVoucherService(voucherId);
 
       setVouchers(vouchers.filter(v => v._id !== voucherId));
+      setMessage('Xóa voucher thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert('Lỗi khi xóa voucher: ' + (error.response?.data?.message || error.message));
+      setMessage('Lỗi khi xóa voucher: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -87,12 +94,17 @@ const VoucherPage = () => {
         setVouchers(vouchers.map(v => 
           v._id === voucherId ? { ...v, status: newStatus } : v
         ));
+        setMessage(`Đã ${actionText} voucher thành công!`);
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 2000);
       } else {
         const errorData = response.data;
         throw new Error(errorData.message || 'Failed to update voucher status');
       }
     } catch (error) {
-      alert(`Lỗi khi ${actionText} voucher: ` + (error.response?.data?.message || error.message));
+      setMessage(`Lỗi khi ${actionText} voucher: ` + (error.response?.data?.message || error.message));
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -302,6 +314,12 @@ const VoucherPage = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

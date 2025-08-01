@@ -51,9 +51,15 @@ export async function updateProfile(userData) {
     const token = Cookies.get("auth_token");
     if (!token) throw new Error("No auth token found");
     
-    const response = await axios.patch(`${API_URL}/profile`, userData, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // Check if userData is FormData (for file upload)
+    const isFormData = userData instanceof FormData;
+    
+    const headers = { 
+      Authorization: `Bearer ${token}`,
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+    };
+    
+    const response = await axios.patch(`${API_URL}/profile`, userData, { headers });
     return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Cập nhật profile thất bại");
@@ -205,16 +211,28 @@ export async function resetPassword(token, newPassword) {
   }
 }
 
-// Lấy danh sách đơn hàng của user
-export async function getMyOrders() {
+export async function getMyOrders(page = 1, limit = 10) {
   try {
     const token = Cookies.get("auth_token");
     if (!token) throw new Error("No auth token found");
-    const response = await axios.get(`${BASE_URL}/orders/my`, {
+    const response = await axios.get(`${BASE_URL}/orders/my?page=${page}&limit=${limit}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Lấy danh sách đơn hàng thất bại");
+  }
+}
+
+export async function createReview(data) {
+  try {
+    const token = Cookies.get("auth_token");
+    if (!token) throw new Error("No auth token found");
+    const response = await axios.post(`${BASE_URL}/reviews`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Tạo đánh giá thất bại");
   }
 }

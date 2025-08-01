@@ -33,7 +33,6 @@ export const useProductDetailData = (id) => {
         };
         fetchProductDetail();
     }, [id]);
-    console.log(product);
     return product;
 };
 

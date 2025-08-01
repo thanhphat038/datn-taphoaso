@@ -190,7 +190,7 @@ const Checkout = () => {
   };
 
   // Tính tổng tiền tạm tính
-  const shippingFee = 15000;
+  const shippingFee = 0;
   const total = productsToDisplay.reduce((total, item) => total + (item.price || item.product_id.price) * (item.quantity || item.qty), 0);
   const subtotal = total + shippingFee;
 
@@ -372,7 +372,7 @@ const Checkout = () => {
           <div className="flex justify-between items-center mb-2">
             <span className="text-[13px] text-[#959595]">Phí vận chuyển:</span>
             <span className="checkout-shipping-fee text-[13px] text-[#959595] font-medium">
-              15.000 đ
+            {shippingFee.toLocaleString()} đ
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">

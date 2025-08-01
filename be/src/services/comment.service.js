@@ -55,7 +55,7 @@ class CommentService extends DBService {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate('user_id', 'username');
+      .populate('user_id', 'full_name avatar username');
   }
 
   async getUserComments(userId, options = {}) {

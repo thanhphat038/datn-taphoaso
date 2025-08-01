@@ -35,6 +35,8 @@ const AdminProduct = () => {
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
   const navigate = useNavigate();
 
@@ -97,8 +99,13 @@ const AdminProduct = () => {
       }
 
       setProducts(products.filter((p) => p._id !== productId));
+      setMessage('Xóa sản phẩm thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert("Lỗi khi xóa sản phẩm: " + error.message);
+      setMessage('Lỗi khi xóa sản phẩm: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -135,8 +142,13 @@ const AdminProduct = () => {
           p._id === productId ? { ...p, status: newStatus } : p
         )
       );
+      setMessage(`Đã ${actionText} sản phẩm thành công!`);
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
     } catch (error) {
-      alert(`Lỗi khi ${actionText} sản phẩm: ` + error.message);
+      setMessage(`Lỗi khi ${actionText} sản phẩm: ` + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
     } finally {
       setLoading(false);
     }
@@ -473,6 +485,12 @@ const AdminProduct = () => {
 
   return (
     <AdminLayout>
+      {message && (
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

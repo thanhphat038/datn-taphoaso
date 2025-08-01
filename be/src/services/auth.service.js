@@ -67,6 +67,22 @@ class AuthService {
     }
   }
 
+  async updateProfile(userId, updateData) {
+    try {
+      const updatedUser = await userService.updateProfile(userId, updateData);
+      if (!updatedUser) {
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'User not found');
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new Error('Error updating profile: ' + error.message);
+    }
+  }
+
   async changePassword(userId, currentPassword, newPassword) {
     try {
       // Find user with password field
@@ -86,6 +102,7 @@ class AuthService {
       }
 
       const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      
       if (!isValidPassword) {
         throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Current password is incorrect');
       }

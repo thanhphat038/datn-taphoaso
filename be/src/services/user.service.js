@@ -69,9 +69,7 @@ class UserService extends DBService {
   }
 
   async updateProfile(id, data) {
-    // Don't allow updating email or username through profile update
-    delete data.email;
-    delete data.username;
+    // Don't allow updating password through profile update
     delete data.password;
 
     return await this.update(id, data);

@@ -9,28 +9,38 @@ import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 const orderService = new OrderService();
 const cartService = new CartService();
+const voucherService = new VoucherService();
 const productService = new ProductService();
 
 export const createOrder = async (req, res, next) => {
   try {
     const { address, receiver, sdt, items, payment_method, note, voucher_code } = req.body;
 
+    console.log('🔍 Debug - createOrder called with items:', items);
+    console.log('🔍 Debug - items type:', typeof items);
+    console.log('🔍 Debug - items length:', items?.length);
+
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
     }
 
     const userId = req.user.id;
+    console.log('🔍 Debug - User ID:', userId);
+    
     const cart = await cartService.getCart(userId);
+    console.log('🔍 Debug - Cart:', cart);
 
     if (!cart || !cart.items?.length) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
     }
 
     for (const item of items) {
-      console.log('Item:', item);
-      console.log('Product ID:', item.product_id);
+      console.log('🔍 Debug - Processing item:', item);   
+      console.log('🔍 Debug - Product ID:', item.product_id);   
 
       const product = await productService.findById(item.product_id);
+      console.log('🔍 Debug - Found product:', product?.name);
+      
       if (!product) {
         throw new AppError(ERROR_CODES.NOT_FOUND, `Product with ID ${item.product_id} not found`);
       }
@@ -44,6 +54,7 @@ export const createOrder = async (req, res, next) => {
       }
     }
 
+    console.log('🔍 Debug - Calling orderService.createOrder with items:', items);
     const order = await orderService.createOrder({
       user_id: userId,
       address,
@@ -56,10 +67,12 @@ export const createOrder = async (req, res, next) => {
       voucher, // optional, may be null
     });
 
+    console.log('🔍 Debug - Created order:', order._id);
     await cartService.clearCart(userId);
 
     res.json({ success: true, data: order });
   } catch (err) {
+    console.error('🔍 Debug - Error in createOrder:', err);
     next(err);
   }
 };
@@ -132,9 +145,15 @@ export const getOrders = async (req, res, next) => {
 
 export const getUserOrders = async (req, res, next) => {
   try {
-    const orders = await orderService.getOrdersByUser(req.user.id);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const orders = await orderService.getOrdersByUser(req.user.id, { page, limit });
+
     res.json({ success: true, data: orders });
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getOrderById = async (req, res, next) => {

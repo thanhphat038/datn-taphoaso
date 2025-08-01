@@ -16,12 +16,17 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  avatar: { String },
+  avatar: { type: String },
   full_name: {
     type: String
   },
   phone: {
     type: String
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other'],
+    default: 'male'
   },
   role: {
     type: String,

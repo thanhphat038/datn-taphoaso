@@ -72,12 +72,25 @@ class ReviewService extends DBService {
     const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
     const skip = (page - 1) * limit;
 
-    return await this.model
-      .find({ product_id: productId })
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .populate('user_id', 'username');
+    const [reviews, total] = await Promise.all([
+      this.model
+        .find({ product_id: productId })
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate('user_id', 'name email'),
+      this.model.countDocuments({ product_id: productId })
+    ]);
+
+    return {
+      data: reviews,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 
   async getUserReviews(userId, options = {}) {

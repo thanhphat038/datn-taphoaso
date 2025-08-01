@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createReview, getMyOrders } from '../../service/UserService';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';
@@ -21,7 +23,7 @@ const fetchOrderProducts = async (orderId) => {
 };
 
 const Order = () => {
-  const { orderId } = useParams(); // Lấy orderId từ URL
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,20 +33,34 @@ const Order = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 3,
+    totalPages: 1
+  });
+
+  // State để quản lý việc hiển thị sản phẩm trong từng đơn hàng
+  const [expandedOrders, setExpandedOrders] = useState(new Set());
+
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrders = async (page = 1, limit = 3) => {
       try {
         setLoading(true);
         setError(null);
-        const ordersData = await getMyOrders();
-        // Lấy products cho từng order
-        const ordersWithProducts = await Promise.all(
-          ordersData.data.map(async (order) => {
-            const items = await fetchOrderProducts(order._id);
-            return { ...order, items };
-          })
-        );
-        setOrders(ordersWithProducts);
+        const ordersData = await getMyOrders(page, limit);
+        console.log('ordersData:', ordersData.data.data);
+        setOrders(ordersData.data.data);
+        setPagination(ordersData.data.pagination);
+//         const ordersData = await getMyOrders();
+//         // Lấy products cho từng order
+//         const ordersWithProducts = await Promise.all(
+//           ordersData.data.map(async (order) => {
+//             const items = await fetchOrderProducts(order._id);
+//             return { ...order, items };
+//           })
+//         );
+//         setOrders(ordersWithProducts);
       } catch (err) {
         setOrders([]);
         setError(err?.message || 'Đã xảy ra lỗi khi lấy đơn hàng.');
@@ -53,8 +69,8 @@ const Order = () => {
         setLoading(false);
       }
     };
-    fetchOrders();
-  }, []);
+    fetchOrders(pagination.page, pagination.limit);
+  }, [pagination.page]);
 
   const handleOpenPopup = (product) => {
     setSelectedProduct(product);
@@ -64,12 +80,45 @@ const Order = () => {
   };
 
   const handleSubmitReview = () => {
-    console.log('Đánh giá:', {
-      product: selectedProduct,
+    const data = {
+      product_id: selectedProduct._id,
       rating,
-      comment
-    });
+      content: comment
+    }
+    console.log('Đánh giá:', data);
+    createReview(data);
     setShowPopup(false);
+  };
+
+  const handlePageChange = (newPage) => {
+    console.log('newPage:', newPage);
+    console.log('pagination.totalPages:', pagination.totalPages);
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    setPagination((prev) => ({
+      ...prev,
+      page: newPage
+    }));
+  };
+
+  // Hàm để toggle hiển thị tất cả sản phẩm của một đơn hàng
+  const toggleOrderExpansion = (orderId) => {
+    setExpandedOrders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId);
+      } else {
+        newSet.add(orderId);
+      }
+      return newSet;
+    });
+  };
+
+  // Hàm để lấy danh sách sản phẩm cần hiển thị
+  const getDisplayItems = (items, orderId) => {
+    if (!items || items.length === 0) return [];
+    
+    const isExpanded = expandedOrders.has(orderId);
+    return isExpanded ? items : items.slice(0, 3);
   };
 
   if (loading) {
@@ -136,23 +185,71 @@ const Order = () => {
                 <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
               </div>
               <div className="flex gap-2 mt-2 sm:mt-0">
+                <button 
+                  onClick={() => navigate(`/order/${order._id}`)}
+                  className="px-5 py-2 border border-blue-600 bg-white hover:bg-blue-50 text-blue-600 font-semibold rounded-lg shadow-sm transition-colors"
+                >
+                  Xem chi tiết
+                </button>
                 <button className="px-5 py-2 border border-[#06AEF4] bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold rounded-lg shadow-sm transition-colors">
                   Liên hệ hỗ trợ
                 </button>
               </div>
             </div>
-            <div className="space-y-2 mb-4">
-              {order.items?.length > 0 ? order.items.map((item) => (
-                <OrderProductItem key={item._id} item={item} onReview={handleOpenPopup} />
-              )) : (
+            
+            <div className="space-y-3 mb-4">
+              {order.items?.length > 0 ? (
+                <>
+                  {getDisplayItems(order.items, order._id).map((item) => (
+                    <OrderProductItem key={item._id} item={item} onReview={handleOpenPopup} />
+                  ))}
+                  {order.items.length > 3 && !expandedOrders.has(order._id) && (
+                    <div className="bg-gray-100 rounded-lg p-3 text-center">
+                      <p className="text-gray-600 text-sm mb-2">
+                        Và {order.items.length - 3} sản phẩm khác
+                      </p>
+                      <button
+                        onClick={() => toggleOrderExpansion(order._id)}
+                        className="text-[#06AEF4] hover:text-[#70d9ff] font-medium text-sm transition-colors"
+                      >
+                        Xem tất cả {order.items.length} sản phẩm
+                      </button>
+                    </div>
+                  )}
+                  {order.items.length > 3 && expandedOrders.has(order._id) && (
+                    <div className="text-center pt-2">
+                      <button
+                        onClick={() => toggleOrderExpansion(order._id)}
+                        className="text-[#06AEF4] hover:text-[#70d9ff] font-medium text-sm transition-colors"
+                      >
+                        Thu gọn
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div className="text-gray-400 italic">Không có sản phẩm nào trong đơn hàng này.</div>
               )}
             </div>
-            <div className="bg-gray-50 rounded-lg p-4 mb-2">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="grid grid-cols-3 gap-4 text-sm">
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Tổng tiền</p>
-                  <p className="font-bold text-gray-800 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
+                  <p className="font-semibold text-gray-800">
+                    {(order?.total_amount ?? 0).toLocaleString()}đ
+                  </p>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                  <p className="font-semibold text-green-600">
+                    {(order?.originalTotal ?? 0).toLocaleString()}đ
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
+                  <p className="font-semibold text-red-600">0đ</p>
                 </div>
                 {order.order_status !== 'cancelled' && (
                   <div className="text-center">
@@ -166,18 +263,69 @@ const Order = () => {
         ))}
       </div>
 
+      {/* Pagination controls */}
+      {pagination.totalPages > 1 && (
+        <div className="w-full">
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 ${
+                pagination.page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            
+            {/* Hiển thị số trang thông minh */}
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`w-10 h-10 flex items-center justify-center rounded-lg border ${
+                  pagination.page === pageNum
+                    ? 'bg-[#06AEF4] text-white border-[#06AEF4]'
+                    : 'border-gray-300 hover:bg-gray-100'
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 ${
+                pagination.page === pagination.totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* Thông tin phân trang */}
+          <div className="text-center mt-4 text-sm text-gray-600">
+            Trang {pagination.page} / {pagination.totalPages} - Tổng {pagination.total} đơn hàng
+          </div>
+        </div>
+      )}
+
       {/* Popup đánh giá */}
       {showPopup && selectedProduct && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative border border-blue-100">
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative">
             <button
-              className="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl"
+              className="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl cursor-pointer"
               onClick={() => setShowPopup(false)}
             >
               &times;
             </button>
             <div className="flex items-center gap-6 mb-6">
-              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
+              <img src={selectedProduct.images?.[0]} alt={selectedProduct.name} className="w-20 h-20 rounded-xl object-cover" />
               <div>
                 <h3 className="font-semibold text-2xl text-gray-800">{selectedProduct.name}</h3>
               </div>
@@ -208,7 +356,7 @@ const Order = () => {
             </div>
             <button
               onClick={handleSubmitReview}
-              className="w-full bg-gradient-to-r from-sky-400 to-blue-400 hover:from-sky-500 hover:to-blue-500 text-white py-3 rounded-lg text-base font-semibold shadow transition-colors"
+              className="w-full bg-[#06AEF4] hover:bg-[#70d9ff] text-white py-3 rounded-lg text-base font-semibold transition-colors"
             >
               Gửi đánh giá
             </button>
