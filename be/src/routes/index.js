@@ -19,7 +19,11 @@ import cartRouter from './cart.route.js';
 
 import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
+
+import uploadRouter from './upload.route.js';
+
 import paymentRouter from './payment.route.js';
+
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -51,4 +55,8 @@ router.use('/carts', authMiddleware, cartRouter);
 
 router.use('/vouchers', authMiddleware, voucherRouter);
 
+
+router.use('/upload', uploadRouter);
+
 export default router;
+

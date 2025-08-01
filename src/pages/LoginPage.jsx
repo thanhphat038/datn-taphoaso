@@ -38,7 +38,7 @@ const handleSubmit = async (e) => {
             setTimeout(() => {
                 setMessage("");
                 // Store user information in local storage
-                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('userData', JSON.stringify(user));
                 if (user.role === 'admin') {
                     navigate('/admin');
                 } else {

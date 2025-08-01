@@ -14,46 +14,25 @@ import {
   getRelatedProducts,
 } from '../controllers/product.controller.js';
 import { getReviewsByProductId } from '../controllers/review.controller.js';
+import { authMiddleware, isAdmin } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Create new product
-router.post('/', createProduct);
-
-// Get all products (hỗ trợ filter, search, sort, pagination)
+// Public routes
 router.get('/', getProducts);
-
-// Search products
 router.get('/search', searchProducts);
-
-// Get products by category
 router.get('/category/:categoryId', getProductsByCategory);
-
-// Get top rated products
 router.get('/top-rated', getTopRatedProducts);
-
-// Get new arrivals
 router.get('/new-arrivals', getNewArrivals);
-
-// Get related products
 router.get('/:id/related', getRelatedProducts);
-
-// Lấy review theo productId
 router.get('/:productId/reviews', getReviewsByProductId);
-
-// Get product by id
 router.get('/:id', getProductById);
 
-// Update product
-router.put('/:id', updateProduct);
-
-// Delete product
-router.delete('/:id', deleteProduct);
-
-// Activate product
-router.patch('/:id/activate', activateProduct);
-
-// Deactivate product
-router.patch('/:id/deactivate', deactivateProduct);
+// Admin only routes
+router.post('/', authMiddleware, isAdmin, createProduct);
+router.put('/:id', authMiddleware, isAdmin, updateProduct);
+router.delete('/:id', authMiddleware, isAdmin, deleteProduct);
+router.patch('/:id/activate', authMiddleware, isAdmin, activateProduct);
+router.patch('/:id/deactivate', authMiddleware, isAdmin, deactivateProduct);
 
 export default router;

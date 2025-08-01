@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaEye, FaShoppingCart, FaUser, FaMapMarkerAlt, FaCalendar, FaDollarSign } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminTable from '../../components/admin/AdminTable';
@@ -12,6 +13,7 @@ import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrde
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const OrderPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -29,6 +31,16 @@ const OrderPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editStatus, setEditStatus] = useState('');
   const [currentEditOrder, setCurrentEditOrder] = useState(null);
+
+  // Check for order ID in URL parameters on component mount
+  useEffect(() => {
+    const orderId = searchParams.get('orderId');
+    if (orderId) {
+      setSearchQuery(orderId);
+      // Clear the URL parameter after setting the search query
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   // Status options with beautiful styling
   const statusOptions = [
@@ -94,8 +106,16 @@ const OrderPage = () => {
             };
           })
         );
-        setOrders(ordersWithDetails);
-        console.log('All orders with details:', ordersWithDetails);
+        
+        // Sắp xếp theo thời gian tạo mới nhất đầu tiên
+        const sortedOrders = ordersWithDetails.sort((a, b) => {
+          const dateA = new Date(a.created_at || a.create_at || 0);
+          const dateB = new Date(b.created_at || b.create_at || 0);
+          return dateB - dateA; // Giảm dần (mới nhất trước)
+        });
+        
+        setOrders(sortedOrders);
+        console.log('All orders with details:', sortedOrders);
       } catch (error) {
         setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);
@@ -113,7 +133,7 @@ const OrderPage = () => {
       setLoading(true);
       await updateOrderStatusService(currentEditOrder._id, editStatus);
       setOrders(orders.map(order => 
-        order._id === currentEditOrder._id ? { ...order, status: editStatus } : order
+        order._id === currentEditOrder._id ? { ...order, order_status: editStatus } : order
       ));
       setShowEditModal(false);
       setCurrentEditOrder(null);
@@ -152,6 +172,14 @@ const OrderPage = () => {
     }
   };
 
+    // Calculate statistics for filter tabs
+  const allOrders = orders.length;
+  const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
+  const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
+  const shippedOrders = orders.filter(order => (order.order_status || order.status) === 'shipped').length;
+  const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
+  const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
+
   // Filter and pagination logic
   const filteredOrders = orders.filter(order => {
     // Kiểm tra order có tồn tại không
@@ -159,7 +187,7 @@ const OrderPage = () => {
     
     const matchesSearch = 
       (order._id && order._id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-(order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (order.address && order.address.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = selectedStatus === 'All' || (order.order_status || order.status) === selectedStatus;
     return matchesSearch && matchesStatus;
@@ -370,12 +398,26 @@ const OrderPage = () => {
           <div className="flex justify-between items-center">
             <span>Trạng thái</span>
             <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border bg-green-100 text-green-800 border-green-200">
-              {getStatusInfo(order.status).label}
+              {getStatusInfo(order.order_status || order.status).label}
             </span>
           </div>
           <div className="flex gap-3 mt-4">
-            <button className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">Chỉnh đơn hàng</button>
-            <button className="flex-1 px-4 py-2 rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition">Hủy bỏ</button>
+            <button 
+              className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
+              onClick={() => {
+                setCurrentEditOrder(order);
+                setEditStatus(order.order_status || order.status);
+                setShowEditModal(true);
+              }}
+            >
+              Chỉnh trạng thái
+            </button>
+            <button 
+              className="flex-1 px-4 py-2 rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition"
+              onClick={() => handleDeleteOrder(order._id)}
+            >
+              Hủy bỏ
+            </button>
           </div>
         </div>
       </div>
@@ -406,16 +448,80 @@ const OrderPage = () => {
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <AdminCard>
-          <AdminSearchFilter
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder="Tìm kiếm theo ID đơn hàng, tên khách hàng hoặc địa chỉ..."
-            filters={filterOptions}
-            onFilterChange={handleFilterChange}
-          />
-        </AdminCard>
+                 {/* Search and Filters */}
+         <AdminCard>
+           <AdminSearchFilter
+             searchValue={searchQuery}
+             onSearchChange={setSearchQuery}
+             searchPlaceholder="Tìm kiếm theo ID đơn hàng, tên khách hàng hoặc địa chỉ..."
+             filters={filterOptions}
+             onFilterChange={handleFilterChange}
+           />
+         </AdminCard>
+
+         {/* Filter Tabs */}
+         <div className="flex flex-wrap gap-2">
+           <button
+             onClick={() => setSelectedStatus('All')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'All'
+                 ? 'bg-blue-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Tất cả ({allOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('pending')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'pending'
+                 ? 'bg-yellow-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Chờ xử lý ({pendingOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('processing')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'processing'
+                 ? 'bg-blue-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đang xử lý ({processingOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('shipped')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'shipped'
+                 ? 'bg-purple-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đã giao hàng ({shippedOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('delivered')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'delivered'
+                 ? 'bg-green-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Hoàn thành ({deliveredOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('cancelled')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'cancelled'
+                 ? 'bg-red-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đã hủy ({cancelledOrders})
+           </button>
+         </div>
 
         {/* Orders Table */}
         <AdminCard noPadding>
@@ -487,6 +593,12 @@ setEditStatus('');
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="text-sm text-gray-600">Đơn hàng</div>
               <div className="font-semibold text-gray-900">#{currentEditOrder?._id?.slice(-8)}</div>
+              <div className="text-sm text-gray-600 mt-1">
+                Trạng thái hiện tại: 
+                <span className="font-medium text-gray-900 ml-1">
+                  {currentEditOrder ? getStatusInfo(currentEditOrder.order_status || currentEditOrder.status).label : ''}
+                </span>
+              </div>
             </div>
             
             <div>

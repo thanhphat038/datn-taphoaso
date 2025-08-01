@@ -20,33 +20,26 @@ class OrderService extends DBService {
   }
 
   async getAllOrders(filter = {}, options = {}) {
-    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
-    const skip = (page - 1) * limit;
+    const { sort = { created_at: -1 } } = options;
 
     const orders = await this.model
       .find(filter)
       .sort(sort)
-      .skip(skip)
-      .limit(limit)
       .populate('user_id', 'name email') // nếu cần thông tin người dùng
       .lean();
 
-      const ordersWithItems = await Promise.all(
-        orders.map(async (order) => {
-          const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-          return { ...order, items };
-        })
-      );
-  
-      const total = await this.model.countDocuments(filter);
-  
-      return {
-        ordersWithItems,
-        total,
-        page,
-        limit
-      };
-    }
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
+        return { ...order, items };
+      })
+    );
+
+    return {
+      ordersWithItems,
+      total: ordersWithItems.length
+    };
+  }
 
   async getOrderById(orderId) {
     console.log('🔍 Debug - getOrderById called with orderId:', orderId);
@@ -291,6 +284,20 @@ class OrderService extends DBService {
     totalRevenue: totalRevenue[0]?.total || 0
   };
 }
+
+  async delete(orderId) {
+    const order = await this.findById(orderId);
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+    
+    // Xóa order details trước
+    await OrderDetail.deleteMany({ order_id: orderId });
+    
+    // Xóa order
+    const deletedOrder = await this.model.findByIdAndDelete(orderId);
+    return deletedOrder;
+  }
 }
 
 export default OrderService;

@@ -6,6 +6,7 @@ import AdminCard from '../../components/admin/AdminCard';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
+import ConfirmModal from '../../components/admin/ConfirmModal';
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -19,6 +20,8 @@ const AdminBlogPage = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' | 'error'
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const navigate = useNavigate();
 
@@ -63,15 +66,23 @@ const AdminBlogPage = () => {
     navigate(`/admin/addblog/${blogId}`);
   };
 
+  // Handle view blog detail
+  const handleViewBlogDetail = (blogId) => {
+    navigate(`/admin/blog/detail/${blogId}`);
+  };
+
   // Handle delete blog
-  const handleDeleteBlog = async (blogId, blogTitle) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa blog "${blogTitle}"?`)) {
-      return;
-    }
+  const handleDeleteBlog = (blogId, blogTitle) => {
+    setPendingDelete({ blogId, blogTitle });
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
+      const response = await fetch(`${API_BASE_URL}/blogs/${pendingDelete.blogId}`, {
         method: "DELETE",
       });
 
@@ -79,7 +90,7 @@ const AdminBlogPage = () => {
         throw new Error("Failed to delete blog");
       }
 
-      setBlogs(blogs.filter(b => b._id !== blogId));
+      setBlogs(blogs.filter(b => b._id !== pendingDelete.blogId));
       setMessage("Xóa blog thành công!");
       setMessageType("success");
       setTimeout(() => setMessage(""), 2000);
@@ -89,6 +100,7 @@ const AdminBlogPage = () => {
       setTimeout(() => setMessage(""), 2000);
     } finally {
       setLoading(false);
+      setPendingDelete(null);
     }
   };
 
@@ -165,6 +177,11 @@ const AdminBlogPage = () => {
       render: (blog) => (
         <AdminActionDropdown
           actions={[
+            {
+              label: "Xem chi tiết",
+              icon: "FaEye",
+              onClick: () => handleViewBlogDetail(blog._id),
+            },
             {
               label: "Chỉnh sửa",
               icon: "FaEdit",
@@ -249,11 +266,26 @@ const AdminBlogPage = () => {
               setPageSize(size);
               setCurrentPage(1);
             }}
-          />
-        </AdminCard>
-      </div>
-    </AdminLayout>
-  );
-};
+                     />
+         </AdminCard>
+       </div>
+
+       {/* Delete Confirmation Modal */}
+       <ConfirmModal
+         isOpen={showDeleteModal}
+         onClose={() => {
+           setShowDeleteModal(false);
+           setPendingDelete(null);
+         }}
+         onConfirm={handleConfirmDelete}
+         title="Xác nhận xóa"
+         message={pendingDelete ? `Bạn có chắc chắn muốn xóa blog "${pendingDelete.blogTitle}"?` : ''}
+         confirmText="Xóa blog"
+         cancelText="Hủy bỏ"
+         type="danger"
+       />
+     </AdminLayout>
+   );
+ };
 
 export default AdminBlogPage;

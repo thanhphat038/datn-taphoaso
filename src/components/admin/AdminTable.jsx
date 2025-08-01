@@ -18,7 +18,7 @@ const AdminTable = ({
   tableClassName = ''
 }) => {
   return (
-    <div className={`overflow-x-auto ${tableClassName}`}>
+    <div className={`overflow-x-auto relative ${tableClassName}`}>
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-200">

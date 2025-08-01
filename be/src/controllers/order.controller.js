@@ -174,6 +174,10 @@ export const updateOrderStatus = async (req, res, next) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
+    if (!status) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Status is required');
+    }
+
     const order = await orderService.updateStatus(orderId, status);
     res.json({ success: true, data: order });
   } catch (err) { next(err); }

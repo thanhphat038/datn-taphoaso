@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FaEllipsisV } from 'react-icons/fa';
 
 const AdminActionDropdown = ({ 
@@ -8,7 +9,10 @@ const AdminActionDropdown = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState('bottom');
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -22,6 +26,44 @@ const AdminActionDropdown = ({
     };
   }, []);
 
+  // Kiểm tra vị trí để quyết định dropdown hiển thị ở trên hay dưới
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const dropdownHeight = 200; // Ước tính chiều cao dropdown
+      
+      // Kiểm tra không gian ở dưới
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      // Kiểm tra không gian ở trên
+      const spaceAbove = buttonRect.top;
+      
+      // Tính toán vị trí dropdown
+      let position = 'bottom';
+      let top = buttonRect.bottom + 8;
+      let left = buttonRect.right - 192; // 192px = w-48
+      
+      // Nếu không đủ không gian ở dưới và có đủ không gian ở trên, hiển thị ở trên
+      if (spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight) {
+        position = 'top';
+        top = buttonRect.top - dropdownHeight - 8;
+      } else if (spaceBelow >= dropdownHeight) {
+        position = 'bottom';
+      } else {
+        // Nếu cả hai đều không đủ, ưu tiên hiển thị ở dưới nhưng với scroll
+        position = 'bottom';
+      }
+      
+      setDropdownPosition(position);
+      setDropdownStyle({
+        position: 'fixed',
+        top: `${top}px`,
+        left: `${left}px`,
+        zIndex: 9999
+      });
+    }
+  }, [isOpen]);
+
   const handleActionClick = (action, event) => {
     event.stopPropagation();
     setIsOpen(false);
@@ -33,6 +75,7 @@ const AdminActionDropdown = ({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
+        ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
@@ -43,8 +86,12 @@ const AdminActionDropdown = ({
         <FaEllipsisV className="w-4 h-4" />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+      {isOpen && createPortal(
+        <div 
+          className="w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto"
+          style={dropdownStyle}
+          ref={dropdownRef}
+        >
           {actions.map((action, index) => (
             <button
               key={index}
@@ -66,7 +113,8 @@ const AdminActionDropdown = ({
               <span className="font-medium">{action.label}</span>
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
