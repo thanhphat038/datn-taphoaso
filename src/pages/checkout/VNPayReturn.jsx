@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { processPaymentReturn } from '../../service/Checkout.service.jsx';
+import { processPaymentReturn } from '../../service/Checkout.service.js';
 
 const VNPayReturn = () => {
   const [searchParams] = useSearchParams();
@@ -30,9 +30,17 @@ const VNPayReturn = () => {
         
         // Redirect sau khi xử lý
         if (result.success) {
-          setTimeout(() => {
-            navigate('/checkout/payment/success');
-          }, 5000);
+          // Chuyển đến trang waiting để hiển thị trạng thái và cho phép hủy đơn hàng
+          const orderId = queryParams.vnp_OrderInfo || queryParams.vnp_TxnRef || result.orderId;
+          if (orderId && orderId.trim() !== '') {
+            setTimeout(() => {
+              navigate(`/checkout/payment/waiting?orderId=${orderId}`);
+            }, 2000);
+          } else {
+            setTimeout(() => {
+              navigate('/checkout/payment/success');
+            }, 2000);
+          }
           // Tự đóng tab sau 10 giây
           setTimeout(() => {
             window.close();
@@ -73,7 +81,7 @@ const VNPayReturn = () => {
             console.warn('No orderId found in error handling');
             navigate('/profile/orders');
           }
-        }, 8000);
+        }, 3000);
         // Tự đóng tab sau 10 giây
         setTimeout(() => {
           window.close();

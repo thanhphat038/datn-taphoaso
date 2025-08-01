@@ -159,10 +159,23 @@ export const getUserOrders = async (req, res, next) => {
 export const getOrderById = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    const userId = req.user.id;
     const order = await orderService.getOrderById(orderId);
 
     if (!order) {
       throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    // Kiểm tra xem order có thuộc về user hiện tại không
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only view your own orders');
     }
 
     res.json({ success: true, data: order });
@@ -173,9 +186,28 @@ export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+    const userId = req.user.id;
 
-    const order = await orderService.updateStatus(orderId, status);
-    res.json({ success: true, data: order });
+    // Kiểm tra xem order có tồn tại và thuộc về user hiện tại không
+    const order = await orderService.getOrderById(orderId);
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only update your own orders');
+    }
+
+    const updatedOrder = await orderService.updateStatus(orderId, status);
+    res.json({ success: true, data: updatedOrder });
   } catch (err) { next(err); }
 };
 
@@ -196,6 +228,26 @@ export const getRecentOrders = async (req, res, next) => {
 export const deleteOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    const userId = req.user.id;
+
+    // Kiểm tra xem order có tồn tại và thuộc về user hiện tại không
+    const order = await orderService.getOrderById(orderId);
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only delete your own orders');
+    }
+
     const deleted = await orderService.delete(orderId);
 
     if (!deleted) {
@@ -209,6 +261,26 @@ export const deleteOrder = async (req, res, next) => {
 export const getOrderProducts = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    const userId = req.user.id;
+
+    // Kiểm tra xem order có tồn tại và thuộc về user hiện tại không
+    const order = await orderService.getOrderById(orderId);
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only view products from your own orders');
+    }
+
     const products = await orderService.getProductsInOrder(orderId);
     res.json({ success: true, data: products });
   } catch (err) {
@@ -219,6 +291,26 @@ export const getOrderProducts = async (req, res, next) => {
 export const getOrderWithDeadline = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    const userId = req.user.id;
+
+    // Kiểm tra xem order có tồn tại và thuộc về user hiện tại không
+    const order = await orderService.getOrderById(orderId);
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only view your own orders');
+    }
+
     const orderInfo = await orderService.getOrderWithDeadline(orderId);
     res.json({ success: true, data: orderInfo });
   } catch (err) {
@@ -254,5 +346,68 @@ export const updateOrderVnpayInfo = async (req, res, next) => {
     res.json({ success: true, message: 'Order updated', update });
   } catch (error) {
     next(error);
+  }
+};
+
+export const cancelOrder = async (req, res, next) => {
+  try {
+    console.log('🔍 Debug - cancelOrder function started');
+    const { orderId } = req.params;
+    const userId = req.user.id;
+
+    console.log('🔍 Debug - cancelOrder called with orderId:', orderId, 'userId:', userId);
+
+    // Kiểm tra xem đơn hàng có tồn tại và thuộc về user hiện tại không
+    const order = await orderService.getOrderById(orderId);
+    
+    console.log('🔍 Debug - Found order:', order);
+    console.log('🔍 Debug - Order user_id:', order?.user_id);
+    console.log('🔍 Debug - Order status:', order?.order_status);
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    }
+    
+    if (!order.user_id) {
+      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order user_id not found');
+    }
+
+    // Kiểm tra xem đơn hàng có thuộc về user hiện tại không
+    let orderUserId;
+    if (typeof order.user_id === 'object' && order.user_id._id) {
+      orderUserId = order.user_id._id;
+    } else {
+      orderUserId = order.user_id;
+    }
+    
+    console.log('🔍 Debug - orderUserId:', orderUserId, 'userId:', userId);
+    console.log('🔍 Debug - orderUserId.toString():', orderUserId.toString(), 'userId.toString():', userId.toString());
+    console.log('🔍 Debug - typeof orderUserId:', typeof orderUserId);
+    console.log('🔍 Debug - typeof userId:', typeof userId);
+    
+    if (orderUserId.toString() !== userId.toString()) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only cancel your own orders');
+    }
+
+    // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang pending)
+    if (order.order_status !== 'pending') {
+      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Order cannot be cancelled. Only pending orders can be cancelled.');
+    }
+
+    // Cập nhật trạng thái thành cancelled
+    const updatedOrder = await orderService.updateStatus(orderId, 'cancelled');
+    
+    console.log('🔍 Debug - Order cancelled successfully:', updatedOrder);
+    
+    res.json({ 
+      success: true, 
+      message: 'Order cancelled successfully',
+      data: updatedOrder 
+    });
+  } catch (err) { 
+    console.error('🔍 Debug - Error in cancelOrder:', err);
+    console.error('🔍 Debug - Error message:', err.message);
+    console.error('🔍 Debug - Error stack:', err.stack);
+    next(err); 
   }
 };

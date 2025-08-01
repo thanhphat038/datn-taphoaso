@@ -10,6 +10,7 @@
 @orderId = 686366fbbd9300db3933df53
 @commentId = 687f9fadc0647b5a2ec6e3d7
 @reviewId = 687fb9d1add96fdef96b888e
+@vnpayTxnRef = 27193316
 
 # chưa làm 
 @voucherId = 1
@@ -609,4 +610,47 @@ Authorization: Bearer {{authToken}}
 
 ### Get order with deadline info
 GET {{baseUrl}}/orders/{{orderId}}/deadline
-Authorization: Bearer {{authToken}} 
+Authorization: Bearer {{authToken}}
+
+### Cancel Order (User)
+PUT {{baseUrl}}/orders/{{orderId}}/cancel
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Update Order Status (User/Admin)
+PUT {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "paid"
+}
+
+### Update Order Status to Failed
+PUT {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "failed"
+}
+
+### Find Order by VNPAY TxnRef
+GET {{baseUrl}}/orders/find-by-vnpay-ref/{{vnpayTxnRef}}
+Authorization: Bearer {{authToken}}
+
+### Create Payment with Order Data
+POST {{baseUrl}}/payment/create
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "amount": 100000,
+  "orderId": "{{orderId}}",
+  "orderData": {
+    "orderId": "{{orderId}}",
+    "total_amount": 100000,
+    "payment_method": "vnpay"
+  }
+} 

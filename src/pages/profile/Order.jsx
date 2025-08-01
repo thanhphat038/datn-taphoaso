@@ -4,7 +4,6 @@ import { createReview, getMyOrders } from '../../service/UserService';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';
-import { getMyOrders } from '../../service/UserService';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -129,9 +128,7 @@ const Order = () => {
     return <div className="text-center py-10 text-red-500">{error}</div>;
   }
 
-  if (orders.length === 0 && !loading) {
-    return <div className="text-center py-10 text-red-500">Không có đơn hàng nào.</div>;
-  }
+
 
   // Thêm component con cho từng sản phẩm trong đơn hàng
   const OrderProductItem = ({ item, onReview }) => {
@@ -170,10 +167,37 @@ const Order = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-2 sm:p-6 shadow border border-gray-100 min-h-[60vh]">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Lịch sử đơn hàng</h2>
-      <div className="space-y-8">
-        {orders.map((order) => (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 w-full">
+      <h2 className="text-xl font-semibold mb-4">Lịch sử đơn hàng</h2>
+      
+      {/* Loading state */}
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <span className="ml-2">Đang tải đơn hàng...</span>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !loading && (
+        <div className="text-red-500 text-center py-8">{error}</div>
+      )}
+
+      {/* Empty state - khi chưa có order nào */}
+      {!loading && !error && orders.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <p className="mt-2">Chưa có đơn hàng nào</p>
+          <p className="text-sm text-gray-400">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
+        </div>
+      )}
+
+      {/* Orders list */}
+      {!loading && !error && orders.length > 0 && (
+        <div className="space-y-8">
+          {orders.map((order) => (
           <div key={order._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 hover:border-[#06AEF4] transition-all">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
               <div>
@@ -240,28 +264,27 @@ const Order = () => {
                     {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+                {order.order_status !== 'cancelled' && (
 
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Đã thanh toán</p>
                   <p className="font-semibold text-green-600">
-                    {(order?.originalTotal ?? 0).toLocaleString()}đ
+                    {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+                )}
+
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
                   <p className="font-semibold text-red-600">0đ</p>
                 </div>
-                {order.order_status !== 'cancelled' && (
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-1">Đã thanh toán</p>
-                    <p className="font-bold text-green-600 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
-                  </div>
-                )}
+              
               </div>
             </div>
           </div>
         ))}
       </div>
+      )}
 
       {/* Pagination controls */}
       {pagination.totalPages > 1 && (

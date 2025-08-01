@@ -47,6 +47,7 @@ import AdminReview from './pages/admin/AdminReview';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import { PaymentRedirectModalTest } from './components/checkout/PaymentRedirectModal';
 
 function Layout() {
   const location = useLocation();
@@ -92,6 +93,7 @@ function Layout() {
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/test/modal" element={<PaymentRedirectModalTest />} />
             </Routes>
           </div>
           {showFooter && <Footer />}

@@ -3,10 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEdit } from 'react-icons/fa';
 import './Checkout.css';
 import PaymentMethodModal from '../../components/checkout/PaymentMethodModal';
+import PaymentRedirectModal from '../../components/checkout/PaymentRedirectModal';
 import { CartContext } from '../../context/CartContext';
 import { getAllAddress } from '../../service/Address.service';
 import { getVoucherByCode } from '../../service/Voucher.service';
-import { createOrder, createVNPayPayment } from '../../service/Checkout.service';
+import { createOrder, createVNPayPayment } from '../../service/Checkout.service.js';
 
 // Xử lý mã voucher
 
@@ -22,6 +23,12 @@ const Checkout = () => {
   const [voucher, setVoucher] = useState(null);
   const [note, setNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // State cho payment redirect modal
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [redirectData, setRedirectData] = useState({ paymentUrl: '', orderId: '' });
+  
+
 
   const productFromState = location.state?.product;
   const productsToDisplay = productFromState ? [productFromState] : cartItems;
@@ -158,11 +165,12 @@ const Checkout = () => {
           console.log('Payment URL:', paymentResponse.url);
           
           if (paymentResponse.success && paymentResponse.url) {
-            // Mở VNPAY trong tab mới
-            window.open(paymentResponse.url, '_blank');
-            
-            // Chuyển hướng đến trang chờ thanh toán với orderId
-            navigate(`/checkout/payment/waiting?orderId=${orderResponse.data._id}`);
+            // Hiển thị modal chuyển hướng
+            setRedirectData({
+              paymentUrl: paymentResponse.url,
+              orderId: orderResponse.data._id
+            });
+            setShowRedirectModal(true);
           } else {
             setVoucherMessage('Không thể tạo thanh toán VNPAY, vui lòng thử lại!');
           }
@@ -412,6 +420,14 @@ const Checkout = () => {
             setPaymentMethod(key);
             setOpenPaymentModal(false);
           }}
+        />
+        
+        {/* Payment Redirect Modal */}
+        <PaymentRedirectModal
+          isOpen={showRedirectModal}
+          onClose={() => setShowRedirectModal(false)}
+          paymentUrl={redirectData.paymentUrl}
+          orderId={redirectData.orderId}
         />
       </div>
     </div>

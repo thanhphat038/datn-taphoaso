@@ -33,12 +33,21 @@ const ProfilePage = () => {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const token = localStorage.getItem('token') || Cookies.get("auth_token");
+        const token = localStorage.getItem('token') || Cookies.get("auth_token") || localStorage.getItem('authToken') || localStorage.getItem('accessToken');
         console.log('🔍 Debug - Token:', token);
         console.log('🔍 Debug - localStorage token:', localStorage.getItem('token'));
         console.log('🔍 Debug - Cookies token:', Cookies.get("auth_token"));
+        console.log('🔍 Debug - authToken:', localStorage.getItem('authToken'));
+        console.log('🔍 Debug - accessToken:', localStorage.getItem('accessToken'));
         
-        const res = await axios.get('/api/auth/profile', {
+        if (!token) {
+          console.error('🔍 Debug - No token found');
+          // Redirect to login if no token
+          navigate('/login');
+          return;
+        }
+        
+        const res = await axios.get('http://localhost:3000/api/auth/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
