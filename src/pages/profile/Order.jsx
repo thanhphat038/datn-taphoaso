@@ -4,7 +4,6 @@ import { createReview, getMyOrders } from '../../service/UserService';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';
-import { getMyOrders } from '../../service/UserService';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
 
 const API_BASE_URL = 'http://localhost:3000/api';

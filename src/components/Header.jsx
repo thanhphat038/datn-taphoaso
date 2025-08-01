@@ -1,50 +1,32 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import axios from "axios";
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useMemo, useRef, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import { dataProduct } from '../service/Product.service';
+import { getAllAddress } from '../service/Address.service';
+import { getAllCategories } from '../service/Admin.Service';
 import Cookies from "js-cookie";
-import { getCart } from '../service/Cart.service';
+import { Search, ShoppingCart, User, Menu, LogOut, MapPin } from 'lucide-react';
+import { CartContext } from '../context/CartContext';
 
 const Header = () => {
     const token = Cookies.get("auth_token");
-    const [cartItems, setCartItems] = useState([]);
+    const { cartItems } = useContext(CartContext);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const searchRef = useRef(null);
+    const userMenuRef = useRef(null);
+    const addressDropdownRef = useRef(null);
 
-    useEffect(() => {
-        const fetchCart = async () => {
-            try {
-                const res = await getCart();
-                setCartItems(res.data.data.items); // hoặc res.data.items tùy API trả về
-            } catch (err) {
-                setCartItems([]);
-            }
-        };
-        fetchCart();
-
-        // Debounce để tránh gọi API quá nhiều
-        let debounceTimer;
-        const handleCartUpdate = () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                fetchCart();
-            }, 300);
-        };
-        
-        window.addEventListener('cart-updated', handleCartUpdate);
-        return () => {
-            window.removeEventListener('cart-updated', handleCartUpdate);
-            clearTimeout(debounceTimer);
-        };
-    }, []);
-    
-
-    const totalQuantity = cartItems.reduce((total, item) => total + (item.qty || item.quantity || 0), 0);
     const [query, setQuery] = useState("");
     const [products, setProducts] = useState([]);
-    const [isFocused, setIsFocused] = useState(false);
-    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [deliveryAddress, setDeliveryAddress] = useState("Chọn địa chỉ giao hàng");
+    const [addresses, setAddresses] = useState([]);
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
+    const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
+    const [categories, setCategories] = useState([]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const item = await dataProduct();
@@ -70,10 +52,68 @@ const Header = () => {
         };
         fetchProduct();
     }, []);
-// console.log(products.data[0]);
-    // const filteredProducts = products.filter((product) =>
-    //     product.data.name.toLowerCase().includes(query.toLowerCase())
-    // );
+
+    // Fetch địa chỉ khi user đã đăng nhập
+    React.useEffect(() => {
+        const fetchAddresses = async () => {
+            if (token) {
+                try {
+                    const res = await getAllAddress();
+                    const addressData = res.data.data || [];
+                    setAddresses(addressData);
+                    
+                    // Tìm địa chỉ mặc định hoặc lấy địa chỉ đầu tiên
+                    const defaultAddress = addressData.find(addr => addr.is_default) || addressData[0];
+                    if (defaultAddress) {
+                        const fullAddress = `${defaultAddress.address_detail}, ${defaultAddress.ward}, ${defaultAddress.district}, ${defaultAddress.city}`;
+                        setDeliveryAddress(fullAddress);
+                        setSelectedAddressId(defaultAddress._id);
+                    }
+                } catch (error) {
+                    console.error('❌ Lỗi khi tải địa chỉ:', error);
+                }
+            }
+        };
+        fetchAddresses();
+    }, [token]);
+
+    // Fetch danh mục sản phẩm
+    React.useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await getAllCategories();
+                const categoryData = res.data.data || [];
+                // Chỉ lấy các danh mục có status active
+                const activeCategories = categoryData.filter(cat => cat.status === 'active');
+                setCategories(activeCategories);
+            } catch (error) {
+                console.error('❌ Lỗi khi tải danh mục:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    // Close menus when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setIsSearchFocused(false);
+            }
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false);
+            }
+            if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target)) {
+                setIsAddressDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const totalQuantity = cartItems.reduce((total, item) => total + (item.qty || item.quantity || 0), 0);
+
     const filteredProducts = useMemo(() => {
         if (!query.trim() || !Array.isArray(products)) {
             return [];
@@ -122,159 +162,146 @@ const Header = () => {
     const handleSearch = () => {
         if (query.trim()) {
             navigate(`/search/${encodeURIComponent(query.trim())}`);
+            setQuery("");
+            setIsSearchFocused(false);
         }
     };
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            if (selectedIndex >= 0 && filteredProducts[selectedIndex]) {
-                // Navigate to selected product
-                navigate(`/product/${filteredProducts[selectedIndex]._id || filteredProducts[selectedIndex].id}`);
-                setQuery("");
-                setSelectedIndex(-1);
-            } else {
                 handleSearch();
-            }
-        } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setSelectedIndex(prev => 
-                prev < filteredProducts.length - 1 ? prev + 1 : prev
-            );
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
-        } else if (e.key === "Escape") {
-            setQuery("");
-            setSelectedIndex(-1);
-            setIsFocused(false);
         }
     };
 
+    const handleLogout = () => {
+        Cookies.remove("auth_token");
+        window.location.reload();
+    };
+
+    const handleAddressClick = () => {
+        if (token) {
+            if (addresses.length > 0) {
+                setIsAddressDropdownOpen(!isAddressDropdownOpen);
+            } else {
+                // Nếu chưa có địa chỉ nào, chuyển đến trang thêm địa chỉ
+                navigate('/profile/address');
+            }
+        } else {
+            // Nếu chưa đăng nhập, chuyển đến trang đăng nhập
+            navigate('/login');
+        }
+    };
+
+    const handleSelectAddress = (address) => {
+        const fullAddress = `${address.address_detail}, ${address.ward}, ${address.district}, ${address.city}`;
+        setDeliveryAddress(fullAddress);
+        setSelectedAddressId(address._id);
+        setIsAddressDropdownOpen(false);
+    };
+
+    const handleManageAddresses = () => {
+        setIsAddressDropdownOpen(false);
+        navigate('/profile/address');
+    };
 
     return (
-        <header className='h-[80px] w-full border-b-1 border-[#9F9F9F]'>
-            <div className='w-[1240px] h-full m-auto flex place-content-between place-items-center gap-20'>
-
-                <Link to="/">
-                    <img className='w-[500px] hover:opacity-90 transition-opacity' src="/images/logo_ngang.png" alt="Logo" />
-                </Link>
-
-                <Navbar />
-
-                <div className='flex place-content-end place-items-center gap-10'>
-
-
-
-
-                    <div className='z-10'>
-
-                        <div className='bg-white border-1 border-[#9F9F9F] rounded-full w-[265px] h-[40px] flex overflow-hidden'>
-
-                            <input 
-                                className='w-full px-4 outline-0 text-gray-800 placeholder-gray-500 font-medium [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-results-button]:appearance-none' 
-                                placeholder='Tìm kiếm sản phẩm...' 
-                                type="search"
-                                value={query}
-                                onChange={(e) => {
-                                    setQuery(e.target.value);
-                                    setSelectedIndex(-1);
-                                }}
-                                onKeyDown={handleKeyDown}
-                                onFocus={() => setIsFocused(true)}
-                                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                                autoComplete="off"
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+            {/* Top Band - Main Header */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center py-3">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                        <Link to="/" className="flex items-center">
+                            <img 
+                                className="h-8 w-auto hover:opacity-80 transition-opacity" 
+                                src="/images/logo_ngang.png" 
+                                alt="Logo" 
                             />
+                        </Link>
+                    </div>
 
-                            {query && (
-                                <button 
-                                    className='px-2 cursor-pointer hover:bg-[#06AEF4]/10 text-gray-400 hover:text-[#06AEF4] transition-colors rounded-full' 
-                                    onClick={() => setQuery("")}
-                                    title="Xóa tìm kiếm"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            )}
+                    {/* Desktop Navigation */}
+                    <nav className="hidden md:flex space-x-8">
+                        <Link 
+                            to="/" 
+                            className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+                        >
+                            Trang chủ
+                        </Link>
+                        <Link 
+                            to="/product" 
+                            className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+                        >
+                            Sản phẩm
+                        </Link>
+                        <Link 
+                            to="/about" 
+                            className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+                        >
+                            Giới thiệu
+                        </Link>
+                        <Link 
+                            to="/blog" 
+                            className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+                        >
+                            Blog
+                </Link>
+                    </nav>
 
-                            <button 
-                                className='px-3 cursor-pointer hover:bg-[#06AEF4]/10 text-gray-600 hover:text-[#06AEF4] transition-colors' 
-                                onClick={handleSearch}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        {query === "" || !isFocused ? null :
-                            <div className='absolute bg-white border border-gray-200 rounded-xl w-[320px] shadow-xl top-[50px] z-20 max-h-96 overflow-hidden backdrop-blur-sm bg-white/95'>
-                                <div className='p-3'>
+                                        {/* Search Bar */}
+                    <div className="hidden md:block flex-1 max-w-md mx-8" ref={searchRef}>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input 
+                                type="text"
+                                className="block w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+                                placeholder="Tìm kiếm sản phẩm..."
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setIsSearchFocused(true)}
+                            />
+                            {isSearchFocused && query.trim() && (
+                                <div className="absolute z-10 w-full mt-2 bg-white shadow-xl rounded-lg border border-gray-200 max-h-60 overflow-auto">
                                     {filteredProducts.length === 0 ? (
-                                        <div className='flex items-center gap-3 p-4 text-gray-500'>
-                                            <div className='w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center'>
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                </svg>
-                                            </div>
-                                            <span className='text-sm font-medium'>Không tìm thấy sản phẩm</span>
+                                        <div className="px-4 py-3 text-sm text-gray-500">
+                                            Không tìm thấy sản phẩm
                                         </div>
                                     ) : (
-                                        <>
-                                            <div className='text-xs text-gray-500 px-3 py-2 border-b border-gray-100 bg-gray-50/50 rounded-t-lg -mx-3 -mt-3 mb-2'>
-                                                <div className='flex items-center gap-2'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                    </svg>
-                                                    Tìm thấy {filteredProducts.length} sản phẩm
-                                                </div>
-                                            </div>
-                                            <div className='space-y-1 max-h-64 overflow-y-auto'>
-                                                {filteredProducts.slice(0, 6).map((product, index) => (
+                                        <div>
+                                            {filteredProducts.slice(0, 6).map((product) => (
                                                     <Link 
                                                         key={product._id || product.id} 
-                                                        className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group border-2 ${
-                                                            index === selectedIndex 
-                                                                ? 'bg-[#06AEF4]/10 border-[#06AEF4] shadow-sm' 
-                                                                : 'border-transparent hover:bg-gray-50 hover:border-gray-200'
-                                                        }`}
                                                         to={`/product/${product._id || product.id}`}
+                                                    className="block px-4 py-3 hover:bg-gray-50 transition-colors"
                                                         onClick={() => {
                                                             setQuery("");
-                                                            setSelectedIndex(-1);
+                                                        setIsSearchFocused(false);
                                                         }}
-                                                        onMouseEnter={() => setSelectedIndex(index)}
                                                     >
-                                                        <div className='w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 shadow-sm'>
+                                                    <div className="flex items-center space-x-3">
                                                             <img 
-                                                                src={product.images?.[0] || '/images/image_product.png'} 
+                                                            src={product.images?.[0] || product.image || "/images/image_product.png"} 
                                                                 alt={product.name}
-                                                                className='w-full h-full object-cover'
-                                                                onError={(e) => {
-                                                                    e.target.src = '/images/image_product.png';
-                                                                }}
+                                                            className="w-10 h-10 object-cover rounded"
                                                             />
-                                                        </div>
-                                                        <div className='flex-1 min-w-0'>
-                                                            <div className='font-medium text-gray-800 group-hover:text-[#06AEF4] transition-colors truncate text-sm'>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900 truncate">
                                                                 {product.name}
-                                                            </div>
-                                                            <div className='text-sm text-red-500 font-semibold mt-1'>
-                                                                {product.price?.toLocaleString()}₫
-                                                            </div>
+                                                            </p>
+                                                            <p className="text-sm text-gray-500">
+                                                                {product.price?.toLocaleString('vi-VN')}đ
+                                                            </p>
                                                         </div>
-                                                        <div className='text-gray-400 group-hover:text-[#06AEF4] transition-colors'>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
                                                         </div>
                                                     </Link>
                                                 ))}
-                                            </div>
                                             {filteredProducts.length > 6 && (
-                                                <div className='border-t border-gray-100 p-3 -mx-3 -mb-3 bg-gray-50/30 rounded-b-lg'>
+                                                <div className="border-t border-gray-100 p-3">
                                                     <Link 
-                                                        className='w-full text-center text-sm text-[#06AEF4] hover:text-[#70d9ff] font-medium block py-2 rounded-lg hover:bg-[#06AEF4]/5 transition-colors'
+                                                        className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium block py-2 rounded-lg hover:bg-gray-50 transition-colors"
                                                         to={`/search/${encodeURIComponent(query.trim())}`}
                                                         onClick={() => setQuery("")}
                                                     >
@@ -282,58 +309,283 @@ const Header = () => {
                                                     </Link>
                                                 </div>
                                             )}
-                                        </>
+                                        </div>
                                     )}
                                 </div>
+                            )}
                             </div>
-                        }
-
                     </div>
 
-
-
-
-
-
-
+                    {/* Right side icons */}
+                    <div className="flex items-center space-x-4">
+                        {/* Cart - Only show when logged in */}
                     {token && (
-                        <Link to="/cart" className="relative group">
-                            <div className="flex place-content-end place-items-center cursor-pointer hover:text-blue-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                                </svg>
+                            <Link to="/cart" className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors">
+                                <ShoppingCart className="h-6 w-6" />
                                 {totalQuantity > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                         {totalQuantity}
                                     </span>
                                 )}
-                            </div>
                         </Link>
                     )}
+
+                        {/* User Menu */}
                      {token ? (
-                    <div>
-                        <Link to="/profile" className="relative group">
-                            <div className='flex place-content-end place-items-center cursor-pointer'>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            <div className="relative" ref={userMenuRef}>
+                                <button
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                    className="p-2 text-gray-700 hover:text-blue-600 transition-colors rounded-full hover:bg-gray-100"
+                                >
+                                    <User className="h-6 w-6" />
+                                </button>
+                                {isUserMenuOpen && (
+                                    <div className="absolute top-full -right-2 mt-1 w-48 bg-white rounded-xl shadow-lg py-2 z-50 border border-gray-100 transform transition-all duration-200 ease-out">
+                                        {/* Menu Items */}
+                                        <div className="py-1">
+                                            <Link
+                                                to="/profile"
+                                                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                            >
+                                                <div className="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                                                    <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                </div>
+                                                <span>Thông tin cá nhân</span>
+                                            </Link>
+
+                                            <Link
+                                                to="/profile/orders"
+                                                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 group"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                            >
+                                                <div className="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center mr-3 group-hover:bg-green-200 transition-colors">
+                                                    <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </div>
+                                                <span>Đơn hàng của tôi</span>
+                                            </Link>
+
+                                            <Link
+                                                to="/profile/favorites"
+                                                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                            >
+                                                <div className="w-6 h-6 bg-red-100 rounded-md flex items-center justify-center mr-3 group-hover:bg-red-200 transition-colors">
+                                                    <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
+                                                </div>
+                                                <span>Sản phẩm yêu thích</span>
+                                            </Link>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="border-t border-gray-100 mx-3"></div>
+
+                                        {/* Logout Button */}
+                                        <div className="pt-1">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
+                                            >
+                                                <div className="w-6 h-6 bg-red-100 rounded-md flex items-center justify-center mr-3 group-hover:bg-red-200 transition-colors">
+                                                    <LogOut className="h-3 w-3 text-red-600" />
+                                                </div>
+                                                <span>Đăng xuất</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+                            >
+                                Đăng nhập
                         </Link>
+                        )}
+
+                        {/* Mobile menu button */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="md:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
+                        >
+                            <Menu className="h-6 w-6" />
+                        </button>
                     </div>
-                    ) : (
-                    <div>
-                        <Link to="/login" className="relative group">
-                            <div className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] text-white rounded-lg hover:from-[#70d9ff] hover:to-[#06AEF4] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium whitespace-nowrap'>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-5 flex-shrink-0">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                </svg>
-                                <span className="font-semibold whitespace-nowrap">Đăng nhập</span>
                             </div>
+
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden">
+                        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
+                            <Link
+                                to="/"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Trang chủ
+                            </Link>
+                            <Link
+                                to="/product"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Sản phẩm
+                            </Link>
+                            <Link
+                                to="/about"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Giới thiệu
+                            </Link>
+                            <Link
+                                to="/blog"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Blog
                         </Link>
+                        </div>
+                    </div>
+                )}
+
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden">
+                        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
+                            <Link
+                                to="/"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Trang chủ
+                            </Link>
+                            <Link
+                                to="/product"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Sản phẩm
+                            </Link>
+                            <Link
+                                to="/about"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Giới thiệu
+                            </Link>
+                            <Link
+                                to="/blog"
+                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Blog
+                            </Link>
+                        </div>
                     </div>
                     )}
                 </div>
 
+            {/* Bottom Band - Categories and Address */}
+            <div className="border-t border-gray-100 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-2">
+                        {/* Categories */}
+                        <div className="hidden md:flex space-x-6 text-sm">
+                            {categories.map((category) => (
+                                <Link 
+                                    key={category._id}
+                                    to={`/product?category=${category._id}`} 
+                                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                                >
+                                    {category.name}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Delivery Address */}
+                        <div className="hidden md:block" ref={addressDropdownRef}>
+                            <div className="relative">
+                                <div 
+                                    className="flex items-center text-sm text-gray-600 hover:text-blue-600 cursor-pointer transition-colors group"
+                                    onClick={handleAddressClick}
+                                >
+                                    <div className="flex items-center px-2 py-1 rounded-md transition-colors group-hover:bg-white group-hover:shadow-sm">
+                                        <MapPin className="h-4 w-4 mr-1 text-gray-500 group-hover:text-blue-500" />
+                                        <span className="font-medium text-gray-700 group-hover:text-blue-600">Giao đến:</span>
+                                        <span className="ml-1 text-gray-600 group-hover:text-blue-600 max-w-xs truncate underline">
+                                            {token ? deliveryAddress : "Đăng nhập để chọn địa chỉ"}
+                                        </span>
+                                        {token && addresses.length > 0 && (
+                                            <svg className="h-4 w-4 ml-1 text-gray-400 group-hover:text-blue-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Address Dropdown */}
+                                {isAddressDropdownOpen && token && addresses.length > 0 && (
+                                    <div className="absolute z-20 w-80 mt-1 bg-white shadow-xl rounded-lg border border-gray-200 max-h-60 overflow-auto right-0">
+                                        <div className="p-3">
+                                            <div className="text-sm font-medium text-gray-700 mb-2">Chọn địa chỉ giao hàng:</div>
+                                            {addresses.map((address) => (
+                                                <div
+                                                    key={address._id}
+                                                    className={`flex items-start p-2 rounded-md cursor-pointer transition-colors ${
+                                                        selectedAddressId === address._id 
+                                                            ? 'bg-blue-50 border border-blue-200' 
+                                                            : 'hover:bg-gray-50'
+                                                    }`}
+                                                    onClick={() => handleSelectAddress(address)}
+                                                >
+                                                    <div className="flex-shrink-0 mt-0.5">
+                                                        <div className={`w-3 h-3 rounded-full border-2 ${
+                                                            selectedAddressId === address._id 
+                                                                ? 'border-blue-500 bg-blue-500' 
+                                                                : 'border-gray-300'
+                                                        }`}></div>
+                                                    </div>
+                                                    <div className="ml-3 flex-1 min-w-0">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {address.receiver} - {address.phone}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            {address.address_detail}, {address.ward}, {address.district}, {address.city}
+                                                        </div>
+                                                        {address.is_default && (
+                                                            <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                                                                Mặc định
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <div className="border-t border-gray-100 mt-2 pt-2">
+                                                <button
+                                                    onClick={handleManageAddresses}
+                                                    className="w-full text-left px-2 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors flex items-center"
+                                                >
+                                                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                    </svg>
+                                                    Quản lý địa chỉ
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
     );

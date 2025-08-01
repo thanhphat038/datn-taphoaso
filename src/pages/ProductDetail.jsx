@@ -52,7 +52,6 @@ const ProductDetail = () => {
     // Thêm function để xử lý package selection
     const handlePackageSelect = (pkg) => {
         setSelectedPackage(pkg);
-        console.log('Selected package:', pkg);
     };
 
     const COMMENTS_TO_SHOW = 3;
@@ -293,11 +292,8 @@ const ProductDetail = () => {
         }
 
         try {
-            console.log('🔍 Debug - handleBuyNow: Adding to cart first');
-            
             // Thêm vào giỏ hàng trước và đợi hoàn thành
             await addToCart(productData._id, finalQuantity);
-            console.log('✅ Debug - handleBuyNow: Added to cart successfully');
             
             // Lưu thông tin sản phẩm để mua ngay vào localStorage
             const buyNowProduct = {
@@ -316,7 +312,6 @@ const ProductDetail = () => {
             window.dispatchEvent(new Event('cart-updated'));
             
             // Chuyển đến trang thanh toán ngay lập tức
-            console.log('🔍 Debug - handleBuyNow: Navigating to checkout');
             navigate('/checkout');
         } catch (error) {
             console.error('❌ Debug - handleBuyNow: Error adding to cart:', error);
@@ -326,13 +321,7 @@ const ProductDetail = () => {
 
     // Cập nhật handleAddToCart để sử dụng selectedPackage
     const handleAddToCart = () => {
-        console.log('🔍 Debug - handleAddToCart called');
-        console.log('🔍 Debug - Product stock:', productData.stock);
-        console.log('🔍 Debug - Product ID:', productData._id);
-        console.log('🔍 Debug - Selected Package:', selectedPackage);
-        
         const userId = getUserId();
-        console.log('🔍 Debug - User ID:', userId);
         
         if (!userId) {
             showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'Yêu cầu đăng nhập');
@@ -349,11 +338,9 @@ const ProductDetail = () => {
         }
 
         if (loadingAddToCart) {
-            console.log('🔍 Debug - Already loading, ignoring click');
             return;
         }
 
-        console.log('🔍 Debug - Starting add to cart process');
         setLoadingAddToCart(true);
         pendingAddQtyRef.current += finalQuantity; // Sử dụng finalQuantity
         setPendingAddQty(pendingAddQtyRef.current);
@@ -364,9 +351,7 @@ const ProductDetail = () => {
         debounceAddToCart.current = setTimeout(async () => {
             if (pendingAddQtyRef.current > 0) {
                 try {
-                    console.log('🔍 Debug - Adding to cart:', productData._id, 'quantity:', pendingAddQtyRef.current);
                     await addToCart(productData._id, pendingAddQtyRef.current);
-                    console.log('✅ Debug - Added to cart successfully');
                     
                     window.dispatchEvent(new Event('cart-updated'));
                     showNotification(`Đã thêm ${pendingAddQtyRef.current} sản phẩm vào giỏ hàng!`, 'success');
@@ -557,7 +542,36 @@ const ProductDetail = () => {
                 {/* Product Info */}
                 <div className="space-y-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
+                        <div className="flex items-start justify-between mb-2">
+                            <h1 className="text-3xl font-bold text-gray-900 flex-1">{productData.name}</h1>
+                            
+                            {/* Favorite Button - Next to Product Name */}
+                            <button
+                                onClick={handleToggleFavorite}
+                                disabled={loadingFavorite}
+                                className={`ml-4 p-3 rounded-lg border transition-colors flex items-center gap-2 flex-shrink-0 ${
+                                    isFavorite
+                                        ? 'bg-red-50 border-red-200 text-red-600'
+                                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600'
+                                }`}
+                            >
+                                <svg
+                                    className="w-5 h-5"
+                                    fill={isFavorite ? 'currentColor' : 'none'}
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                                {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
+                            </button>
+                        </div>
+                        
                         <div className="flex items-center gap-4">
                             <div className="flex items-center">
                                 <span className="text-2xl font-bold text-red-500">
@@ -603,49 +617,30 @@ const ProductDetail = () => {
                     {/* Quantity and Actions */}
                     <div className="space-y-3">
                         {/* Hàng 1: Nút Mua hàng (nổi bật nhất) */}
-                                <button
-                            onClick={handleBuyNow}
-                            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
-                                >
-                            Mua hàng ngay
-                                </button>
+                       
                         
-                        {/* Hàng 2: Thêm vào giỏ hàng và Yêu thích */}
+                        {/* Hàng 2: Thêm vào giỏ hàng (icon) và Mua ngay */}
                         <div className="flex gap-3">
                             <button
                                 onClick={handleAddToCart}
                                 disabled={loadingAddToCart}
-                                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed text-sm border border-gray-300"
+                                className="w-16 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed border border-gray-300 flex items-center justify-center py-4"
+                                title="Thêm vào giỏ hàng"
                             >
                                 {loadingAddToCart ? (
-                                    <div className="animate-spin h-4 w-4 border-b-2 border-gray-600"></div>
+                                    <div className="animate-spin h-5 w-5 border-b-2 border-gray-600"></div>
                                 ) : (
-                                    'Thêm vào giỏ hàng'
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                    </svg>
                                 )}
                             </button>
+                            
                             <button
-                                onClick={handleToggleFavorite}
-                                disabled={loadingFavorite}
-                                className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
-                                    isFavorite
-                                        ? 'bg-red-50 border-red-200 text-red-600'
-                                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600'
-                                }`}
+                                onClick={handleBuyNow}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-400 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
                             >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill={isFavorite ? 'currentColor' : 'none'}
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                                {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
+                                Mua ngay
                             </button>
                         </div>
                     </div>

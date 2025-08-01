@@ -13,7 +13,6 @@ const ProfilePage = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
-  console.log('profile:', profile); // Đặt ở đây
 
   const handleLogout = () => {
     Cookies.remove("auth_token");
@@ -34,16 +33,12 @@ const ProfilePage = () => {
     async function fetchProfile() {
       try {
         const token = localStorage.getItem('token') || Cookies.get("auth_token");
-        console.log('🔍 Debug - Token:', token);
-        console.log('🔍 Debug - localStorage token:', localStorage.getItem('token'));
-        console.log('🔍 Debug - Cookies token:', Cookies.get("auth_token"));
         
         const res = await axios.get('/api/auth/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log('🔍 Debug - Profile response:', res.data);
         // Nếu response là { data: { ...user } }
         setProfile(res.data.data || res.data);
       } catch (err) {

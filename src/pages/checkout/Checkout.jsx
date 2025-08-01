@@ -29,12 +29,16 @@ const Checkout = () => {
   useEffect(() => {
     // Kiểm tra sản phẩm trong giỏ hàng trước khi cho phép thanh toán
     if (productsToDisplay.length === 0) {
-      setVoucherMessage('Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi thanh toán.');
-      // Redirect về trang chủ sau 2 giây
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-      return;
+      // Kiểm tra xem có phải mua ngay không
+      const buyNowProduct = localStorage.getItem('buyNowProduct');
+      if (!buyNowProduct) {
+        setVoucherMessage('Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi thanh toán.');
+        // Redirect về trang chủ sau 2 giây
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+        return;
+      }
     }
 
     // Xử lý error message từ VNPayLoading
@@ -158,11 +162,13 @@ const Checkout = () => {
           console.log('Payment URL:', paymentResponse.url);
           
           if (paymentResponse.success && paymentResponse.url) {
-            // Mở VNPAY trong tab mới
-            window.open(paymentResponse.url, '_blank');
-            
-            // Chuyển hướng đến trang chờ thanh toán với orderId
-            navigate(`/checkout/payment/waiting?orderId=${orderResponse.data._id}`);
+            // Chuyển hướng đến trang processing payment
+            navigate('/checkout/payment/processing', { 
+              state: { 
+                paymentUrl: paymentResponse.url,
+                orderData: paymentData // Truyền paymentData có _id thay vì orderData
+              } 
+            });
           } else {
             setVoucherMessage('Không thể tạo thanh toán VNPAY, vui lòng thử lại!');
           }

@@ -1,52 +1,72 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { getCart } from '../service/Cart.service';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(() => {
-    // Load cart items from localStorage if available
-    const savedCart = localStorage.getItem('cartItems');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch cart from backend with debounce
+  const fetchCartFromBackend = async () => {
+    if (loading) return; // Prevent multiple simultaneous requests
+    
+    try {
+      setLoading(true);
+      const response = await getCart();
+      if (response.data?.data?.items) {
+        setCartItems(response.data.data.items);
+      } else {
+        setCartItems([]);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Listen for cart-updated events
   useEffect(() => {
-    // Save cart items to localStorage whenever they change
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
+    let debounceTimer;
+    
+    const handleCartUpdate = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetchCartFromBackend();
+      }, 300); // Debounce 300ms
+    };
+
+    window.addEventListener('cart-updated', handleCartUpdate);
+    
+    // Initial fetch
+    fetchCartFromBackend();
+
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+      clearTimeout(debounceTimer);
+    };
+  }, []);
 
   const incrementQuantity = (id) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+    // This will be handled by backend API calls
+    fetchCartFromBackend();
   };
 
   const decrementQuantity = (id) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-      )
-    );
+    // This will be handled by backend API calls
+    fetchCartFromBackend();
   };
 
   const removeItem = (id) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+    // This will be handled by backend API calls
+    fetchCartFromBackend();
   };
 
   const addProduct = (product) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
-      if (existingItem) {
-        // Add the passed quantity or default to 1
-        const addQty = typeof product.quantity === 'number' && product.quantity > 0 ? product.quantity : 1;
-        return prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + addQty } : item
-        );
-      } else {
-        return [...prevItems, { ...product, quantity: product.quantity || 1 }];
-      }
-    });
+    // This will be handled by backend API calls
+    fetchCartFromBackend();
   };
 
   const setInitialCartItems = (items) => {
@@ -56,11 +76,13 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{
       cartItems,
+      loading,
       incrementQuantity,
       decrementQuantity,
       removeItem,
       addProduct,
-      setInitialCartItems
+      setInitialCartItems,
+      fetchCartFromBackend
     }}>
       {children}
     </CartContext.Provider>
