@@ -158,13 +158,11 @@ const Checkout = () => {
           console.log('Payment URL:', paymentResponse.url);
           
           if (paymentResponse.success && paymentResponse.url) {
-            // Chuyển hướng đến trang processing payment
-            navigate('/checkout/payment/processing', { 
-              state: { 
-                paymentUrl: paymentResponse.url,
-                orderData: paymentData // Truyền paymentData có _id thay vì orderData
-              } 
-            });
+            // Mở VNPAY trong tab mới
+            window.open(paymentResponse.url, '_blank');
+            
+            // Chuyển hướng đến trang chờ thanh toán với orderId
+            navigate(`/checkout/payment/waiting?orderId=${orderResponse.data._id}`);
           } else {
             setVoucherMessage('Không thể tạo thanh toán VNPAY, vui lòng thử lại!');
           }

@@ -1,6 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createReview, getMyOrders } from '../../service/UserService';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { useParams } from 'react-router-dom';
+import { getMyOrders } from '../../service/UserService';
+import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
+
+const API_BASE_URL = 'http://localhost:3000/api';
+
+const fetchOrderProducts = async (orderId) => {
+  let token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token') || '';
+  if (!token) {
+    console.warn('Không tìm thấy token, bỏ qua gọi API products');
+    return [];
+  }
+  console.log('Token dùng cho API:', token);
+  const res = await axios.get(`${API_BASE_URL}/orders/${orderId}/products`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data.data;
+};
 
 const Order = () => {
   const navigate = useNavigate();
@@ -32,6 +52,15 @@ const Order = () => {
         console.log('ordersData:', ordersData.data.data);
         setOrders(ordersData.data.data);
         setPagination(ordersData.data.pagination);
+//         const ordersData = await getMyOrders();
+//         // Lấy products cho từng order
+//         const ordersWithProducts = await Promise.all(
+//           ordersData.data.map(async (order) => {
+//             const items = await fetchOrderProducts(order._id);
+//             return { ...order, items };
+//           })
+//         );
+//         setOrders(ordersWithProducts);
       } catch (err) {
         setOrders([]);
         setError(err?.message || 'Đã xảy ra lỗi khi lấy đơn hàng.');
@@ -105,29 +134,40 @@ const Order = () => {
   }
 
   // Thêm component con cho từng sản phẩm trong đơn hàng
-  const OrderProductItem = ({ item, onReview }) => (
-    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-200">
-      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-        <img src={item.product_id?.images?.[0]} alt={item.product_id?.name} className="w-full h-full object-cover" />
+  const OrderProductItem = ({ item, onReview }) => {
+    // Lấy ảnh đầu tiên từ mảng images nếu có
+    const product = item.product_id;
+    const imageUrl = Array.isArray(product?.images) && product.images.length > 0
+      ? product.images[0]
+      : '/images/image_product.png';
+    return (
+      <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm mb-3 transition hover:shadow-md">
+        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
+          <img src={imageUrl} alt={product?.name} className="w-full h-full object-cover" />
+        </div>
+        <div className="flex-grow min-w-0 w-full">
+          <h4 className="font-semibold text-gray-800 mb-1 truncate text-base sm:text-lg" title={product?.name}>{product?.name}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-red-500 font-bold text-base">{item.cur_price?.toLocaleString()}đ</span>
+            <span className="text-gray-400 text-sm line-through">{item.old_price ? item.old_price.toLocaleString() + 'đ' : ''}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600 text-sm">Số lượng:</span>
+            <span className="font-medium text-gray-800">{item.qty}</span>
+          </div>
+          <button
+            onClick={() => onReview(product)}
+            className="mt-2 px-4 py-2 text-xs sm:text-sm rounded-md text-white font-semibold bg-gradient-to-r from-yellow-400 to-yellow-300 shadow hover:from-yellow-500 hover:to-yellow-400 transition-colors"
+          >
+            Đánh giá sản phẩm
+          </button>
+        </div>
+        <div className="text-right flex-shrink-0 w-24 hidden sm:block">
+          <div className="font-semibold text-gray-800 text-base">{(item.cur_price * item.qty).toLocaleString()}đ</div>
+        </div>
       </div>
-      <div className="flex-grow min-w-0">
-        <h4 className="font-medium text-gray-800 mb-1 truncate" title={item.product_id?.name}>{item.product_id?.name}</h4>
-        <p className="text-red-500 font-medium">{item.cur_price?.toLocaleString()}đ</p>
-      </div>
-      <button
-        onClick={() => onReview(item.product_id)}
-        className="mt-2 px-4 py-2 text-sm rounded-md text-white font-medium transition-colors bg-[#fcd34d] hover:bg-[#fbbf24] cursor-pointer"
-      >
-        Đánh giá
-      </button>
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <span className="w-8 text-center font-medium">{item.qty}</span>
-      </div>
-      <div className="text-right flex-shrink-0 w-24">
-        <div className="font-semibold text-gray-800">{(item.cur_price * item.qty).toLocaleString()}đ</div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl p-2 sm:p-6 shadow border border-gray-100 min-h-[60vh]">
@@ -200,6 +240,7 @@ const Order = () => {
                     {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Đã thanh toán</p>
                   <p className="font-semibold text-green-600">
@@ -210,6 +251,12 @@ const Order = () => {
                   <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
                   <p className="font-semibold text-red-600">0đ</p>
                 </div>
+                {order.order_status !== 'cancelled' && (
+                  <div className="text-center">
+                    <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                    <p className="font-bold text-green-600 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

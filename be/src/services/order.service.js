@@ -82,6 +82,45 @@ class OrderService extends DBService {
     return order;
   }
 
+  async getOrderWithDeadline(orderId) {
+    const order = await this.model.findById(orderId)
+      .populate('user_id')
+      .select('_id total_amount order_status payment_method payment_deadline create_at');
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found');
+    }
+
+    return {
+      id: order._id,
+      total_amount: order.total_amount,
+      order_status: order.order_status,
+      payment_method: order.payment_method,
+      payment_deadline: order.payment_deadline,
+      created_at: order.create_at
+    };
+  }
+
+  async getOrderByVnpayRef(vnpayTxnRef) {
+    const order = await this.model.findOne({ vnpay_txn_ref: vnpayTxnRef })
+      .populate('user_id')
+      .select('_id total_amount order_status payment_method payment_deadline create_at vnpay_txn_ref');
+    
+    if (!order) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found with this VNPAY reference');
+    }
+
+    return {
+      id: order._id,
+      total_amount: order.total_amount,
+      order_status: order.order_status,
+      payment_method: order.payment_method,
+      payment_deadline: order.payment_deadline,
+      created_at: order.create_at,
+      vnpay_txn_ref: order.vnpay_txn_ref
+    };
+  }
+
   async createOrder(orderData) {
     const { user_id, address, receiver, sdt, items, voucher_code, payment_method, note } = orderData;
 
@@ -99,7 +138,8 @@ class OrderService extends DBService {
       if (product.stock < item.qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
       total_amount += product.price * item.qty;
     }
-
+    // Luôn cộng phí ship 15000
+    total_amount += 15000;
     let voucher_id = null;
     if (voucher_code) {
       const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
@@ -190,6 +230,11 @@ class OrderService extends DBService {
 
     const items = await OrderDetail.find({ order_id: orderId }).populate('product_id');
     return { ...order.toObject(), items };
+  }
+
+  async getProductsInOrder(orderId) {
+    // Lấy tất cả OrderDetail theo orderId và populate product_id
+    return await OrderDetail.find({ order_id: orderId }).populate('product_id');
   }
 
   async calculateOrderStats() {
