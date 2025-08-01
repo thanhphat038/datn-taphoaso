@@ -280,7 +280,7 @@ const AdminBlogDetail = () => {
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className="w-4 h-4" />
                     <span>
-                      {new Date(blog.createdAt).toLocaleDateString('vi-VN', {
+                      {new Date(blog.create_at).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric'
@@ -378,7 +378,7 @@ const AdminBlogDetail = () => {
                   <div>
                     <div className="text-sm text-gray-600">Ngày tạo</div>
                     <div className="font-medium">
-                      {new Date(blog.createdAt).toLocaleDateString('vi-VN', {
+                      {new Date(blog.create_at).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -412,7 +412,7 @@ const AdminBlogDetail = () => {
                   <div>
                     <div className="text-sm text-gray-600">Cập nhật lần cuối</div>
                     <div className="font-medium">
-                      {new Date(blog.updatedAt || blog.createdAt).toLocaleDateString('vi-VN', {
+                      {new Date(blog.updatedAt || blog.create_at).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

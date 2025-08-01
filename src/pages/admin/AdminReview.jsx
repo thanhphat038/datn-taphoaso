@@ -320,12 +320,12 @@ const AdminReview = () => {
             //   variant: review.status === 'active' ? 'warning' : 'success',
             //   onClick: () => handleToggleStatus(review._id, review.status)
             // },
-            {
-              label: 'Xóa đánh giá',
-              icon: FaTrash,
-              variant: 'danger',
-              onClick: () => handleDeleteReview(review._id)
-            }
+            // {
+            //   label: 'Xóa đánh giá',
+            //   icon: FaTrash,
+            //   variant: 'danger',
+            //   onClick: () => handleDeleteReview(review._id)
+            // }
           ]}
           onActionClick={(action) => action.onClick()}
         />
@@ -545,7 +545,7 @@ const AdminReview = () => {
                 >
                   Đóng
                 </ModalButton>
-                <ModalButton
+                {/* <ModalButton
                   variant={currentReview.status === 'active' ? 'warning' : 'success'}
                   onClick={() => {
                     handleToggleStatus(currentReview._id, currentReview.status);
@@ -554,7 +554,7 @@ const AdminReview = () => {
                   }}
                 >
                   {currentReview.status === 'active' ? 'Ẩn đánh giá' : 'Hiện đánh giá'}
-                </ModalButton>
+                </ModalButton> */}
               </div>
             </div>
           )}
