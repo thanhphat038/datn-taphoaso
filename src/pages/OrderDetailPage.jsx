@@ -4,6 +4,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { CartContext } from '../context/CartContext';
 
+
+
 const OrderDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -31,15 +33,17 @@ const OrderDetailPage = () => {
         });
 
         const handleReorder = (order) => {
-          if (!order || !order.products) return;
+          if (!order || !order.items) return;
 
-          order.products.forEach(item => {
-            const product = item.product;
-            const quantity = item.quantity || 1;
-
+          order.items.forEach(item => {
+            const product = item.product_id;
+            const quantity = item.qty || 1;
             addToCart(product, quantity);
           });
+
+          navigate('/checkout');
         };
+
 
         console.log('🔍 Debug - Order detail response:', response.data);
         console.log('🔍 Debug - Order data:', response.data.data);
@@ -296,6 +300,7 @@ const OrderDetailPage = () => {
                 >
                   Mua lại
                 </button>
+
                 <button className="w-1/2 border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
                   Liên hệ hỗ trợ
                 </button>

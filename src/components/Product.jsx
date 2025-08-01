@@ -121,7 +121,7 @@ const Product = ({ data: product, isFavorited = false }) => {
     navigate('/checkout', {
       state: {
         product: {
-          id: product._id,
+          id: product.product_id,
           name: productName,
           image: imageUrl,
           price: productPrice,
