@@ -32,7 +32,7 @@ const PaymentSuccess = () => {
             cursor: 'pointer',
             boxShadow: '0 2px 8px 0 rgba(33,150,243,0.08)',
           }}
-          onClick={() => navigate('/profile/order')}
+          onClick={() => navigate('/profile/orders')}
         >
           Xem đơn hàng
         </button>

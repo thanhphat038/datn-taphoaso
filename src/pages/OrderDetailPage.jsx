@@ -119,12 +119,13 @@ const OrderDetailPage = () => {
                     }
                   });
                   console.log('🔍 Debug - Test order created:', response.data);
-                  alert('Đã tạo đơn hàng test thành công!');
+                  // Sử dụng console.log thay vì alert để tránh popup
+                  console.log('Đã tạo đơn hàng test thành công!');
                   // Reload page to show new order
                   window.location.reload();
                 } catch (error) {
                   console.error('Error creating test order:', error);
-                  alert('Lỗi tạo đơn hàng test: ' + error.message);
+                  console.error('Lỗi tạo đơn hàng test: ' + error.message);
                 }
               }}
               className="px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all font-bold"

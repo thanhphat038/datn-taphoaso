@@ -129,6 +129,30 @@ const seedData = async () => {
         status: 'active',
         description: 'Tiêu đen',
         images: ['https://example.com/tieu.jpg']
+      },
+      {
+        category_id: categories[1]._id,
+        name: 'Pepsi Cola',
+        price: 12000,
+        status: 'active',
+        description: 'Nước ngọt Pepsi Cola tươi mát',
+        images: ['https://example.com/pepsi.jpg']
+      },
+      {
+        category_id: categories[1]._id,
+        name: 'Pepsi Max',
+        price: 15000,
+        status: 'active',
+        description: 'Pepsi Max không đường',
+        images: ['https://example.com/pepsi-max.jpg']
+      },
+      {
+        category_id: categories[1]._id,
+        name: 'Pepsi Twist',
+        price: 13000,
+        status: 'active',
+        description: 'Pepsi Twist vị chanh',
+        images: ['https://example.com/pepsi-twist.jpg']
       }
     ]);
 

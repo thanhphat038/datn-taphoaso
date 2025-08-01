@@ -15,7 +15,6 @@ export const getCart = () => {
 
 // Thêm sản phẩm vào giỏ hàng
 export const addToCart = (productId, quantity = 1) => {
-    console.log(productId, quantity);
 
     return axios.post(
         `${api}/carts/items`,
@@ -29,7 +28,6 @@ export const addToCart = (productId, quantity = 1) => {
 
 // Cập nhật số lượng sản phẩm trong giỏ hàng
 export const updateCartItem = (cartItemId, quantity) => {
-    console.log(cartItemId, quantity);
     
     return axios.put(
         `${api}/carts/items/${cartItemId}`,

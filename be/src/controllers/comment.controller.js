@@ -1,4 +1,6 @@
 import { commentService } from '../services/index.js';
+import Reply from '../models/reply.model.js';
+import mongoose from 'mongoose';
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
@@ -133,14 +135,63 @@ export const getCommentReplies = async (req, res, next) => {
 export const getAllCommentOfProductId = async (req, res, next) => {
   try {
     const { productId } = req.params;
+    
+    console.log('=== DEBUG: getAllCommentOfProductId ===');
+    console.log('Product ID:', productId);
+    
+    // Lấy comments
     const comments = await commentService.model.find({ product_id: productId })
       .populate('user_id', 'full_name avatar username')
-      .sort({ created_at: -1 });
+      .sort({ create_at: -1 });
+    
+    console.log('Comments found:', comments.length);
+    
+    // Lấy replies cho mỗi comment
+    const commentsWithReplies = [];
+    
+    for (let comment of comments) {
+      try {
+        console.log(`Processing comment: ${comment._id}`);
+        
+        // Tìm replies cho comment này
+        const replies = await Reply.find({ 
+          comment_id: comment._id,
+          is_hidden: false 
+        }).populate('user_id', 'full_name username avatar')
+        .sort({ create_at: 1 });
+        
+        console.log(`Found ${replies.length} replies for comment ${comment._id}`);
+        
+        // Chuyển đổi thành plain object
+        const commentObj = comment.toObject();
+        commentObj.replies = replies.map(reply => reply.toObject());
+        
+        commentsWithReplies.push(commentObj);
+      } catch (error) {
+        console.error(`Error processing replies for comment ${comment._id}:`, error);
+        const commentObj = comment.toObject();
+        commentObj.replies = [];
+        commentsWithReplies.push(commentObj);
+      }
+    }
+    
+    console.log('=== FINAL RESULT ===');
+    console.log('Total comments with replies:', commentsWithReplies.length);
+    commentsWithReplies.forEach((comment, index) => {
+      console.log(`Comment ${index + 1}:`, {
+        id: comment._id,
+        content: comment.comment,
+        repliesCount: comment.replies?.length || 0,
+        replies: comment.replies?.map(r => ({ id: r._id, content: r.reply })) || []
+      });
+    });
+    
     res.json({
       success: true,
-      data: comments
+      data: commentsWithReplies
     });
   } catch (error) {
+    console.error('Error in getAllCommentOfProductId:', error);
     next(error);
   }
 };

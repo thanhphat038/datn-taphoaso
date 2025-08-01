@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createReview, getMyOrders } from '../../service/UserService';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { useParams } from 'react-router-dom';
+import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
+
+const API_BASE_URL = 'http://localhost:3000/api';
+
+const fetchOrderProducts = async (orderId) => {
+  let token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token') || '';
+  if (!token) {
+    console.warn('Không tìm thấy token, bỏ qua gọi API products');
+    return [];
+  }
+  console.log('Token dùng cho API:', token);
+  const res = await axios.get(`${API_BASE_URL}/orders/${orderId}/products`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data.data;
+};
 
 const Order = () => {
   const navigate = useNavigate();
@@ -76,6 +95,15 @@ const Order = () => {
         console.log('ordersData:', ordersData.data.data);
         setOrders(ordersData.data.data);
         setPagination(ordersData.data.pagination);
+//         const ordersData = await getMyOrders();
+//         // Lấy products cho từng order
+//         const ordersWithProducts = await Promise.all(
+//           ordersData.data.map(async (order) => {
+//             const items = await fetchOrderProducts(order._id);
+//             return { ...order, items };
+//           })
+//         );
+//         setOrders(ordersWithProducts);
       } catch (err) {
         setOrders([]);
         setError(err?.message || 'Đã xảy ra lỗi khi lấy đơn hàng.');
@@ -255,6 +283,7 @@ const Order = () => {
                     {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Đã thanh toán</p>
                   <p className="font-semibold text-green-600">
@@ -265,6 +294,12 @@ const Order = () => {
                   <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
                   <p className="font-semibold text-red-600">0đ</p>
                 </div>
+                {order.order_status !== 'cancelled' && (
+                  <div className="text-center">
+                    <p className="text-gray-600 mb-1">Đã thanh toán</p>
+                    <p className="font-bold text-green-600 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
