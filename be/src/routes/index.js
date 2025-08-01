@@ -12,6 +12,7 @@ import addressRouter from './address.route.js';
 
 import reviewRouter from './review.route.js';
 import commentRouter from './comment.route.js';
+import replyRouter from './reply.route.js';
 import favoriteRouter from './favorite.route.js';
 
 import cartRouter from './cart.route.js';
@@ -34,6 +35,7 @@ router.use('/addresses', authMiddleware, addressRouter);
 
 router.use('/reviews', authMiddleware,reviewRouter);
 router.use('/comments', authMiddleware, commentRouter);
+router.use('/replies', authMiddleware, replyRouter);
 router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes

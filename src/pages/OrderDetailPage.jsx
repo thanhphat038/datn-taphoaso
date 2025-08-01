@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { CartContext } from '../context/CartContext';
+
+
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
@@ -28,7 +31,20 @@ const OrderDetailPage = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        
+
+        const handleReorder = (order) => {
+          if (!order || !order.items) return;
+
+          order.items.forEach(item => {
+            const product = item.product_id;
+            const quantity = item.qty || 1;
+            addToCart(product, quantity);
+          });
+
+          navigate('/checkout');
+        };
+
+
         console.log('🔍 Debug - Order detail response:', response.data);
         console.log('🔍 Debug - Order data:', response.data.data);
         console.log('🔍 Debug - Order items:', response.data.data?.items);
@@ -103,12 +119,13 @@ const OrderDetailPage = () => {
                     }
                   });
                   console.log('🔍 Debug - Test order created:', response.data);
-                  alert('Đã tạo đơn hàng test thành công!');
+                  // Sử dụng console.log thay vì alert để tránh popup
+                  console.log('Đã tạo đơn hàng test thành công!');
                   // Reload page to show new order
                   window.location.reload();
                 } catch (error) {
                   console.error('Error creating test order:', error);
-                  alert('Lỗi tạo đơn hàng test: ' + error.message);
+                  console.error('Lỗi tạo đơn hàng test: ' + error.message);
                 }
               }}
               className="px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all font-bold"
@@ -276,13 +293,26 @@ const OrderDetailPage = () => {
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button className="flex-1 bg-[#06AEF4] text-white py-3 rounded-xl hover:bg-[#70d9ff] transition-colors font-semibold">
-              Mua lại
-            </button>
-            <button className="flex-1 border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
-              Liên hệ hỗ trợ
-            </button>
+            {order.order_status === 'delivered' ? (
+              <>
+                <button
+                  onClick={() => handleReorder(order)}
+                  className="w-1/2 bg-[#06AEF4] text-white py-3 rounded-xl hover:bg-[#70d9ff] transition-colors font-semibold"
+                >
+                  Mua lại
+                </button>
+
+                <button className="w-1/2 border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
+                  Liên hệ hỗ trợ
+                </button>
+              </>
+            ) : (
+              <button className="w-1/2 ml-auto border border-[#06AEF4] text-[#06AEF4] py-3 rounded-xl hover:bg-[#06AEF4] hover:text-white transition-colors font-semibold">
+                Liên hệ hỗ trợ
+              </button>
+            )}
           </div>
+
         </div>
       </div>
     </div>

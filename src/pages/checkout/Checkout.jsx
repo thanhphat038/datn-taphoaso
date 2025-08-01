@@ -29,12 +29,16 @@ const Checkout = () => {
   useEffect(() => {
     // Kiểm tra sản phẩm trong giỏ hàng trước khi cho phép thanh toán
     if (productsToDisplay.length === 0) {
-      setVoucherMessage('Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi thanh toán.');
-      // Redirect về trang chủ sau 2 giây
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-      return;
+      // Kiểm tra xem có phải mua ngay không
+      const buyNowProduct = localStorage.getItem('buyNowProduct');
+      if (!buyNowProduct) {
+        setVoucherMessage('Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi thanh toán.');
+        // Redirect về trang chủ sau 2 giây
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+        return;
+      }
     }
 
     // Xử lý error message từ VNPayLoading
