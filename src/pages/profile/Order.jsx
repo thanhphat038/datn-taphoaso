@@ -346,6 +346,33 @@ const Order = () => {
     }));
   };
 
+  // Hàm xử lý hủy đơn hàng
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token') || '';
+      if (!token) {
+        alert('Vui lòng đăng nhập để thực hiện thao tác này');
+        return;
+      }
+
+      const confirmed = window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');
+      if (!confirmed) return;
+
+      const response = await axios.patch(`${API_BASE_URL}/orders/${orderId}/cancel`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data.success) {
+        alert('Hủy đơn hàng thành công!');
+        // Refresh lại danh sách đơn hàng
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Lỗi khi hủy đơn hàng:', error);
+      alert('Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.');
+    }
+  };
+
   // Loading state
   if (loading) {
     return <div className="text-center py-10 text-gray-500">Đang tải đơn hàng...</div>;
@@ -402,6 +429,16 @@ const Order = () => {
                     Tiếp tục thanh toán
                   </button>
                 )}
+                
+                {order.order_status === 'pending' && (
+                  <button
+                    onClick={() => handleCancelOrder(order._id)}
+                    className="px-5 py-2 border border-gray-500 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-sm transition-colors"
+                  >
+                    Hủy đơn
+                  </button>
+                )}
+                
                 <button
                   onClick={() => navigate(`/order/${order._id}`)}
                   className="px-5 py-2 border border-blue-600 bg-white hover:bg-blue-50 text-blue-600 font-semibold rounded-lg shadow-sm transition-colors"
