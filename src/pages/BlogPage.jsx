@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllBlogs } from '../service/Blog.service.jsx';
 
-const BlogCard = ({ id, image, title, description, date }) => (
-    <Link to={`/blog/${id}`} className="block h-full">
+const BlogCard = ({ _id, image, title, description, create_at }) => (
+    <Link to={`/blog/${_id}`} className="block h-full">
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
         <div className="h-72 flex items-center justify-center overflow-hidden">
             <img src={image} alt={title} className="w-full h-full object-cover" />
@@ -10,57 +11,56 @@ const BlogCard = ({ id, image, title, description, date }) => (
         <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-lg font-semibold mb-2">{title}</h3>
             <p className="text-gray-600 text-sm mb-2 flex-grow">{description}</p>
-            <p className="text-gray-500 text-xs mt-auto">{date}</p>
+            <p className="text-gray-500 text-xs mt-auto">
+                {new Date(create_at).toLocaleDateString('vi-VN')}
+            </p>
         </div>
         </div>
     </Link>
 );
 
 const BlogPage = () => {
-    const blogPosts = [
-        {
-            id: 1,
-            image: "/images/healthy-food.jpg",
-            title: "Top 10 Thực Phẩm Tốt Cho Sức Khỏe Bạn Nên Bổ Sung Hàng Ngày",
-            description: "Khám phá 10 loại thực phẩm giàu dinh dưỡng nên có trong thực đơn hàng ngày của bạn. Từ cá hồi giàu omega-3 đến các loại rau xanh bổ dưỡng.",
-            date: "20/01/2024"
-        },
-        {
-            id: 2,
-            image: "/images/promo1.png",
-            title: "Chế độ ăn Địa Trung Hải - Bí quyết sống khỏe từ thiên nhiên",
-            description: "Tìm hiểu về chế độ ăn Địa Trung Hải và những lợi ích sức khỏe tuyệt vời từ phương pháp ăn uống này.",
-            date: "19/01/2024"
-        },
-        {
-            id: 3,
-            image: "/images/promo2.png",
-            title: "5 Loại Hạt Dinh Dưỡng Cần Có Trong Bữa Ăn Hàng Ngày",
-            description: "Khám phá các loại hạt giàu dinh dưỡng và cách kết hợp chúng vào chế độ ăn hàng ngày của bạn.",
-            date: "18/01/2024"
-        },
-        {
-            id: 4,
-            image: "/images/promo3.png",
-            title: "Nguồn Protein Thực Vật Tốt Cho Sức Khỏe",
-            description: "Tìm hiểu về các nguồn protein thực vật phong phú và cách đưa chúng vào thực đơn hàng ngày.",
-            date: "17/01/2024"
-        },
-        {
-            id: 5,
-            image: "/images/blog5.jpg",
-            title: "Lợi Ích Của Việc Uống Nước Đúng Cách Mỗi Ngày",
-            description: "Khám phá những lợi ích sức khỏe khi bạn duy trì thói quen uống nước đúng cách hàng ngày.",
-            date: "16/01/2024"
-        },
-        {
-            id: 6,
-            image: "/images/blog6.jpg",
-            title: "Các Bài Tập Thể Dục Giúp Tăng Cường Sức Khỏe Tim Mạch",
-            description: "Tổng hợp các bài tập thể dục hiệu quả giúp cải thiện sức khỏe tim mạch và tăng cường thể lực.",
-            date: "15/01/2024"
-        }
-    ];
+    const [blogPosts, setBlogPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                setLoading(true);
+                const response = await getAllBlogs(1, 20); // Lấy 20 bài viết đầu tiên
+                setBlogPosts(response.data.data || []);
+            } catch (err) {
+                console.error('Error fetching blogs:', err);
+                setError('Không thể tải dữ liệu blog');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBlogs();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Đang tải...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-600">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen  bg-gray-50">
@@ -82,11 +82,17 @@ const BlogPage = () => {
 
             {/* Blog Grid */}
             <div className="w-[1240px] mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {blogPosts.map((post, index) => (
-                        <BlogCard key={post.id} {...post} />
-                    ))}
-                </div>
+                {blogPosts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 text-lg">Chưa có bài viết nào</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {blogPosts.map((post) => (
+                            <BlogCard key={post._id} {...post} />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

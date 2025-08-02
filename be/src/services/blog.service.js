@@ -45,6 +45,16 @@ class BlogService extends DBService {
     }
     return blog;
   }
+
+  async getBlogsByCategory(categoryId, options = {}) {
+    const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
+    const skip = (page - 1) * limit;
+    return await this.model
+      .find({ blog_category_id: categoryId })
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+  }
 }
 
 export default BlogService; 
