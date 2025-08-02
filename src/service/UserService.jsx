@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { clearAuthData } from "../utils/auth";
 const API_URL = "http://localhost:3000/api/auth";
 const BASE_URL = "http://localhost:3000/api";
 
@@ -19,16 +20,54 @@ export async function registerUser({ username, email, password }) {
 
 export async function loginUser({ username, password }) {
   try {
+    console.log('🔍 Login attempt for:', username);
+    
     const response = await axios.post(`${API_URL}/login`, { username, password });
-    const { token } = response.data.data;
+    console.log('📥 Login response:', response.data);
+    
+    // Kiểm tra cấu trúc response và lấy token an toàn
+    let token = null;
+    let user = null;
+    
+    // Thử các cấu trúc response khác nhau
+    if (response.data && response.data.data && response.data.data.token) {
+      token = response.data.data.token;
+      user = response.data.data.user || response.data.user;
+    } else if (response.data && response.data.token) {
+      token = response.data.token;
+      user = response.data.user;
+    } else if (response.data && response.data.data && response.data.data.user) {
+      user = response.data.data.user;
+      // Có thể token ở nơi khác
+      token = response.data.token || response.data.data.token;
+    }
+    
+    console.log('🔑 Token found:', !!token);
+    console.log('👤 User found:', !!user);
     
     if (token) {
       Cookies.set("auth_token", token, { expires: 7 });
+      console.log('✅ Token saved to cookies');
+    } else {
+      console.warn('⚠️ No token found in response');
     }
+    
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
+    console.error('❌ Login error:', error);
+    console.error('❌ Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || error.message || "Đăng nhập thất bại");
   }
+}
+
+// Logout function
+export function logoutUser() {
+  // Clear tất cả dữ liệu authentication
+  clearAuthData();
+  // Dispatch event để các component khác biết user đã logout
+  window.dispatchEvent(new CustomEvent('user-logout'));
+  // Force reload trang để reset toàn bộ state và cache
+  window.location.href = '/login';
 }
 
 // Profile management

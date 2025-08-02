@@ -13,7 +13,7 @@ import {
   FaChartBar,
   FaSignOutAlt
 } from 'react-icons/fa';
-import Cookies from 'js-cookie';
+import { logoutUser } from '../../service/UserService';
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
@@ -31,9 +31,7 @@ const AdminLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.clear();
-    Cookies.remove('auth_token');
-    window.location.href = '/login';
+    logoutUser();
   };
 
   return (

@@ -9,7 +9,7 @@ function getAuthHeaders() {
 }
 
 export const getAllAddress = () => {
-    return axios.get(`${api}/addresses`, { headers: getAuthHeaders() });
+    return axios.get(`${api}/addresses/user/me`, { headers: getAuthHeaders() });
 };
 
 export const getAddressById = (id) => {

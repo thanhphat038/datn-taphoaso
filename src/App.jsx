@@ -33,7 +33,9 @@ import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
+
 import CheckoutGuard from './components/CheckoutGuard';
+import ProtectedRoute from './components/ProtectedRoute';
 import AddProductPage from './pages/admin/AddProductPage';
 import AdminPage from './pages/admin/AdminPage';
 import VoucherPage from './pages/admin/VoucherPage';
@@ -69,7 +71,11 @@ function Layout() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile/*" element={<ProfilePage />} />
+              <Route path="/profile/*" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
               <Route path="/order/:id" element={<OrderDetailPage />} />
               <Route path="/checkout" element={
                 <CheckoutGuard>

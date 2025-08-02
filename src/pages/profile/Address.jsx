@@ -8,6 +8,8 @@ import {
   getDistricts,
   getWards
 } from '../../service/Address.service';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const Address = () => {
   const [addresses, setAddresses] = useState([]);
@@ -28,18 +30,123 @@ const Address = () => {
   const [editDistricts, setEditDistricts] = useState([]);
   const [editWards, setEditWards] = useState([]);
 
+  const navigate = useNavigate();
+
+  // Reset tất cả state
+  const resetAllState = () => {
+    console.log('🔄 Resetting all address state...');
+    setAddresses([]);
+    setShowAddForm(false);
+    setEditId(null);
+    setNewAddress({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
+    setEditAddress({ receiver: '', phone: '', city: '', district: '', ward: '', address_detail: '', is_default: false });
+    setDistricts([]);
+    setWards([]);
+    setEditDistricts([]);
+    setEditWards([]);
+    setMessage('');
+    setError('');
+    setPhoneError('');
+    console.log('✅ Address state reset completed');
+  };
+
+  // Kiểm tra authentication
+  const checkAuth = () => {
+    const token = Cookies.get('auth_token');
+    if (!token) {
+      resetAllState();
+      navigate('/login');
+      return false;
+    }
+    return true;
+  };
+
+  // Reset state khi component mount và khi token thay đổi
   useEffect(() => {
+    if (!checkAuth()) return;
+    
+    // Reset state trước khi fetch
+    resetAllState();
+    
+    // Fetch dữ liệu
     fetchAddresses();
     getProvinces().then(res => setCities(res.data));
+  }, [Cookies.get('auth_token')]); // Thêm dependency để re-run khi token thay đổi
+
+  // Listen for logout event
+  useEffect(() => {
+    const handleUserLogout = () => {
+      console.log('🚪 User logout detected, resetting addresses...');
+      resetAllState();
+    };
+
+    const handleUserLogin = () => {
+      console.log('🚪 User login detected, refreshing addresses...');
+      resetAllState();
+      setTimeout(() => {
+        if (checkAuth()) {
+          fetchAddresses();
+        }
+      }, 100);
+    };
+
+    window.addEventListener('user-logout', handleUserLogout);
+    window.addEventListener('user-login', handleUserLogin);
+    
+    return () => {
+      window.removeEventListener('user-logout', handleUserLogout);
+      window.removeEventListener('user-login', handleUserLogin);
+    };
   }, []);
 
+  // Listen for token changes và user changes
+  useEffect(() => {
+    const token = Cookies.get('auth_token');
+    if (!token) {
+      resetAllState();
+      return;
+    }
+    
+    // Force refresh addresses khi token thay đổi
+    console.log('🔄 Token changed, refreshing addresses...');
+    resetAllState();
+    setTimeout(() => {
+      if (checkAuth()) {
+        fetchAddresses();
+        getProvinces().then(res => setCities(res.data));
+      }
+    }, 100);
+  }, [Cookies.get('auth_token')]);
+
   const fetchAddresses = async () => {
+    // Kiểm tra authentication trước khi fetch
+    if (!checkAuth()) return;
+    
     setLoading(true);
     setError('');
     try {
+      console.log('🔄 Fetching addresses for current user...');
+      
       const res = await getAllAddress();
-      setAddresses(res.data.data);
+      const addresses = res.data.data || [];
+      
+      console.log(`📦 Found ${addresses.length} addresses for current user`);
+      
+      // Đảm bảo chỉ set địa chỉ của user hiện tại
+      setAddresses(addresses);
+      
+      // Log để debug
+      if (addresses.length > 0) {
+        console.log('📍 Addresses:', addresses.map(addr => ({
+          id: addr._id,
+          receiver: addr.receiver,
+          address: `${addr.address_detail}, ${addr.ward}, ${addr.district}, ${addr.city}`
+        })));
+      }
+      
     } catch (err) {
+      console.error('❌ Lỗi fetch addresses:', err);
+      setAddresses([]);
       setMessage('Không thể tải địa chỉ');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
@@ -263,6 +370,29 @@ const Address = () => {
         </h2>
         <p className="text-gray-600 mt-2">Quản lý địa chỉ giao hàng của bạn</p>
       </div>
+
+      {/* Check if user is logged in */}
+      {!Cookies.get('auth_token') && (
+        <div className="text-center py-12">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">Vui lòng đăng nhập</h3>
+          <p className="text-gray-600 mb-6">Bạn cần đăng nhập để quản lý địa chỉ giao hàng</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="px-6 py-3 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+          >
+            Đăng nhập ngay
+          </button>
+        </div>
+      )}
+
+      {/* Content for logged in users */}
+      {Cookies.get('auth_token') && (
+        <>
 
       {/* Notifications */}
       {message && (
@@ -615,6 +745,8 @@ const Address = () => {
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
