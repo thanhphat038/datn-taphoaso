@@ -6,22 +6,17 @@ import {
   updateUser,
   deleteUser
 } from '../controllers/user.controller.js';
+import { authMiddleware, isAdmin } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Create new user
+// Create new user (public)
 router.post('/', createUser);
 
-// Get all users
-router.get('/', getUsers);
-
-// Get user by id
-router.get('/:id', getUserById);
-
-// Update user
-router.put('/:id', updateUser);
-
-// Delete user
-router.delete('/:id', deleteUser);
+// Admin only routes
+router.get('/', authMiddleware, isAdmin, getUsers);
+router.get('/:id', authMiddleware, isAdmin, getUserById);
+router.put('/:id', authMiddleware, isAdmin, updateUser);
+router.delete('/:id', authMiddleware, isAdmin, deleteUser);
 
 export default router;
