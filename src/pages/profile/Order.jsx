@@ -45,7 +45,7 @@ const ORDER_STATUS_CONFIG = {
 const FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả', color: 'blue' },
   { value: 'paid', label: 'Đã thanh toán', color: 'blue' },
-  { value: 'processing', label: 'Đang xử lý', color: 'yellow' },
+  { value: 'processing', label: 'Đang xử lý ', color: 'yellow' },
   { value: 'pending', label: 'Chờ xử lý', color: 'gray' },
   { value: 'delivered', label: 'Đã giao', color: 'green' },
   { value: 'cancelled', label: 'Đã huỷ', color: 'red' },
