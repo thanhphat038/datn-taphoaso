@@ -88,13 +88,13 @@ const HomePage = () => {
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-12'>
 
         {/* Hero Banner Section - Giữ đơn giản như ban đầu */}
-        <div className='flex gap-5 mb-5'>
+        <div className='flex gap-0 mb-5'>
           <div className='grow-2'>
             <Swiper
               spaceBetween={20}
               slidesPerView={1}
               loop={true}
-              className='rounded-lg w-full max-w-[800px] mx-auto'
+              className='rounded-lg w-full max-w-[860px] mx-auto'
               autoplay={{ delay: 3000, disableOnInteraction: false }}
               modules={[Autoplay]}
             >
@@ -109,9 +109,9 @@ const HomePage = () => {
               </SwiperSlide>
             </Swiper>
           </div>
-          <div className='grow-1 grid gap-5'>
-            <img className='rounded-lg h-[190px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
-            <img className='rounded-lg h-[190px] w-full object-cover' src="./images/banner_3.png" alt="" />
+          <div className='grow-1 grid gap-3'>
+            <img className='rounded-lg h-[195px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
+            <img className='rounded-lg h-[195px] w-full object-cover' src="./images/banner_3.png" alt="" />
           </div>
         </div>
 
