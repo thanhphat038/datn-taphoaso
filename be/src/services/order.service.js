@@ -186,7 +186,7 @@ class OrderService extends DBService {
   }
 
   async getOrdersByUser(userId, options = {}) {
-    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
+    const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
     const skip = (page - 1) * limit;
 
     const query = { user_id: userId };
