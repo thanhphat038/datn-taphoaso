@@ -320,6 +320,50 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Features Section */}
+        <section className="mt-16 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Tại Sao Chọn Chúng Tôi?</h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Chúng tôi cam kết mang đến những sản phẩm chất lượng cao với dịch vụ tốt nhất
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🚚</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giao Hàng Nhanh</h3>
+              <p className="text-gray-600">Giao hàng trong vòng 2-4 giờ</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Chất Lượng Cao</h3>
+              <p className="text-gray-600">Sản phẩm tươi ngon, đảm bảo vệ sinh</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giá Cả Hợp Lý</h3>
+              <p className="text-gray-600">Giá cả cạnh tranh, nhiều ưu đãi</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🛡️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Bảo Mật Thông Tin</h3>
+              <p className="text-gray-600">Thông tin cá nhân được bảo vệ an toàn</p>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
   );
