@@ -71,6 +71,9 @@ const AddBlog = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [categoryLoading, setCategoryLoading] = useState(false);
 
   // Fetch categories
   useEffect(() => {
@@ -114,7 +117,9 @@ const AddBlog = () => {
           });
 
           if (blog.image) {
-            setImagePreview(blog.image);
+            // Xử lý đường dẫn tương đối cho preview
+            const imagePath = blog.image.startsWith('http') ? blog.image : `http://localhost:3000${blog.image}`;
+            setImagePreview(imagePath);
           }
           if (editor && blog.content) {
             editor.commands.setContent(blog.content);
@@ -180,7 +185,6 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
         } catch (parseError) {
-          // Nếu không parse được JSON, sử dụng status text
           errorMessage = `HTTP ${response.status}: ${response.statusText}`;
         }
         throw new Error(errorMessage);
@@ -193,11 +197,10 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
         throw new Error('Response không hợp lệ từ server');
       }
 
-      // Đảm bảo URL là đầy đủ
-      const imageUrl = result.url.startsWith('http') ? result.url : `http://localhost:3000${result.url}`;
-      
-      console.log('Upload result:', result);
-      console.log('Image URL:', imageUrl);
+      // Lưu đường dẫn tương đối thay vì URL tuyệt đối
+      const imageUrl = result.url.startsWith('http') 
+        ? result.url.replace(/^https?:\/\/[^\/]+/, '') // Loại bỏ protocol và host
+        : result.url;
       
       setFormData(prev => ({
         ...prev,
@@ -239,6 +242,82 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
   //   
   //   return updatedContent;
   // };
+
+  // Function để tạo danh mục mới
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    
+    if (!newCategory.name.trim()) {
+      setError('Vui lòng nhập tên danh mục');
+      return;
+    }
+
+    // Kiểm tra danh mục đã tồn tại
+    const existingCategory = categories.find(
+      cat => cat.name.toLowerCase() === newCategory.name.trim().toLowerCase()
+    );
+    if (existingCategory) {
+      setError('Danh mục này đã tồn tại');
+      return;
+    }
+
+    try {
+      setCategoryLoading(true);
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/blogs_categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newCategory.name.trim(),
+          description: newCategory.description.trim(),
+          status: 'active'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create category');
+      }
+
+      const result = await response.json();
+      console.log('Category created:', result);
+
+      // Thêm danh mục mới vào danh sách
+      setCategories(prev => [...prev, result.data]);
+      
+      // Chọn danh mục mới vừa tạo
+      setFormData(prev => ({
+        ...prev,
+        blog_category_id: result.data._id
+      }));
+
+      // Reset form và đóng modal
+      setNewCategory({ name: '', description: '' });
+      setShowCategoryModal(false);
+
+      // Hiển thị thông báo thành công
+      setUploadSuccess(true);
+      setTimeout(() => {
+        setUploadSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Create category error:', error);
+      setError('Lỗi khi tạo danh mục: ' + error.message);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  const handleCategoryInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewCategory(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const validateForm = () => {
     if (!formData.title.trim()) {
@@ -397,21 +476,33 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                 </div>
               ) : (
                 <>
-                  <select
-                    name="blog_category_id"
-                    value={formData.blog_category_id}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
-                  >
-                    <option value="">Chọn danh mục</option>
-                    {categories.map((category) => (
-                      <option key={category._id} value={category._id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Chọn danh mục phù hợp cho bài viết
+                  <div className="flex gap-2 mb-3">
+                    <select
+                      name="blog_category_id"
+                      value={formData.blog_category_id}
+                      onChange={handleChange}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                    >
+                      <option value="">Chọn danh mục</option>
+                      {categories.map((category) => (
+                        <option key={category._id} value={category._id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryModal(true)}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                      title="Tạo danh mục mới"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Chọn danh mục phù hợp cho bài viết hoặc tạo danh mục mới
                   </p>
                   {formData.blog_category_id && (
                     <div className="mt-2 p-2 bg-blue-50 rounded-lg">
@@ -437,19 +528,29 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                 )}
                 
                                  {imagePreview ? (
-                   <div className="relative group">
-                     <img
-                       src={imagePreview}
-                       alt="Preview"
-                       className="w-full h-48 object-cover rounded-lg"
-                       onError={(e) => {
-                         console.error('Image load error:', e.target.src);
-                         setError('Không thể tải hình ảnh. Vui lòng thử lại.');
-                       }}
-                       onLoad={() => {
-                         console.log('Image loaded successfully:', imagePreview);
-                       }}
-                     />
+                  <div className="relative group">
+                    <img
+                      src={imagePreview.startsWith('http') ? imagePreview : `http://localhost:3000${imagePreview}`}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                      onError={(e) => {
+                        setError('Không thể tải hình ảnh. Vui lòng thử lại.');
+                        e.target.style.display = 'none';
+                        const placeholder = e.target.nextElementSibling;
+                        if (placeholder) {
+                          placeholder.style.display = 'flex';
+                        }
+                      }}
+                    />
+                    <div 
+                      className="hidden w-full h-48 bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ display: 'none' }}
+                    >
+                      <div className="text-center text-gray-500">
+                        <FaImage className="w-16 h-16 mx-auto mb-2" />
+                        <p>Không thể tải hình ảnh</p>
+                      </div>
+                    </div>
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
                       <button
                         onClick={() => {
@@ -515,28 +616,28 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                   </div>
                 )}
                 
-                                 {uploadSuccess && (
-                   <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-                     <p className="text-xs text-green-800 font-medium">
-                       ✅ Hình ảnh đã được tải lên thành công!
-                     </p>
-                   </div>
-                 )}
-                 
-                 {formData.image && !uploadSuccess && (
-                   <div className="text-xs text-gray-500">
-                     <p>Hình ảnh đã được tải lên thành công</p>
-                     <p className="text-xs text-blue-600 mt-1 break-all">
-                       URL: {formData.image}
-                     </p>
-                     <button 
-                       onClick={() => window.open(formData.image, '_blank')}
-                       className="text-xs text-blue-600 underline mt-1"
-                     >
-                       Mở hình ảnh trong tab mới
-                     </button>
-                   </div>
-                 )}
+                {uploadSuccess && (
+                  <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-xs text-green-800 font-medium">
+                      ✅ Hình ảnh đã được tải lên thành công!
+                    </p>
+                  </div>
+                )}
+                
+                {formData.image && !uploadSuccess && (
+                  <div className="text-xs text-gray-500">
+                    <p>Hình ảnh đã được tải lên thành công</p>
+                    <p className="text-xs text-blue-600 mt-1 break-all">
+                      Đường dẫn: {formData.image}
+                    </p>
+                    <button 
+                      onClick={() => window.open(`http://localhost:3000${formData.image}`, '_blank')}
+                      className="text-xs text-blue-600 underline mt-1"
+                    >
+                      Mở hình ảnh trong tab mới
+                    </button>
+                  </div>
+                )}
               </div>
             </AdminCard>
 
@@ -599,6 +700,94 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
         cancelText="Tiếp tục chỉnh sửa"
         type="warning"
       />
+
+      {/* Category Creation Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 backdrop-sepia-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Tạo danh mục mới</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategory({ name: '', description: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCategory} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tên danh mục <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={newCategory.name}
+                  onChange={handleCategoryInputChange}
+                  placeholder="Nhập tên danh mục"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mô tả
+                </label>
+                <textarea
+                  name="description"
+                  value={newCategory.description}
+                  onChange={handleCategoryInputChange}
+                  placeholder="Nhập mô tả cho danh mục (tùy chọn)"
+                  rows="3"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={categoryLoading}
+                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {categoryLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Đang tạo...
+                    </div>
+                  ) : (
+                    'Tạo danh mục'
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCategoryModal(false);
+                    setNewCategory({ name: '', description: '' });
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

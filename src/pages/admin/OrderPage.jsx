@@ -69,10 +69,16 @@ const OrderPage = () => {
       dotColor: 'bg-green-500'
     },
     { 
-      value: 'cancelled', 
-      label: 'Đã hủy', 
+      value: 'payment_failed', 
+      label: 'Thanh toán thất bại', 
       color: 'bg-red-100 text-red-800 border-red-200',
       dotColor: 'bg-red-500'
+    },
+    { 
+      value: 'cancelled', 
+      label: 'Đã hủy', 
+      color: 'bg-gray-100 text-gray-800 border-gray-200',
+      dotColor: 'bg-gray-500'
     }
   ];
 
@@ -178,6 +184,7 @@ const OrderPage = () => {
   const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
   const shippedOrders = orders.filter(order => (order.order_status || order.status) === 'shipped').length;
   const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
+  const paymentFailedOrders = orders.filter(order => (order.order_status || order.status) === 'payment_failed').length;
   const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
 
   // Filter and pagination logic
@@ -284,36 +291,47 @@ const OrderPage = () => {
     {
       title: '',
       key: 'actions',
-      render: (order) => (
-        <AdminActionDropdown
-          actions={[
-            {
-              label: 'Xem chi tiết',
-              icon: FaEye,
-              onClick: () => {
-                console.log('Xem chi tiết:', order._id);
-                setExpandedOrderId(expandedOrderId === order._id ? null : order._id);
+      render: (order) => {
+        const isCompleted = (order.order_status || order.status) === 'delivered';
+        return (
+          <AdminActionDropdown
+            actions={[
+              {
+                label: 'Xem chi tiết',
+                icon: FaEye,
+                onClick: () => {
+                  console.log('Xem chi tiết:', order._id);
+                  setExpandedOrderId(expandedOrderId === order._id ? null : order._id);
+                }
+              },
+              {
+                label: 'Sửa trạng thái',
+                icon: FaEdit,
+                disabled: isCompleted,
+                onClick: () => {
+                  if (!isCompleted) {
+                    setCurrentEditOrder(order);
+                    setEditStatus(order.order_status || order.status);
+                    setShowEditModal(true);
+                  }
+                }
+              },
+              {
+                label: 'Xóa đơn hàng',
+                icon: FaTrash,
+                variant: 'danger',
+                disabled: isCompleted,
+                onClick: () => {
+                  if (!isCompleted) {
+                    handleDeleteOrder(order._id);
+                  }
+                }
               }
-            },
-            {
-              label: 'Sửa trạng thái',
-              icon: FaEdit,
-              onClick: () => {
-                setCurrentEditOrder(order);
-                setEditStatus(order.order_status || order.status);
-                setShowEditModal(true);
-              }
-            },
-            {
-              label: 'Xóa đơn hàng',
-              icon: FaTrash,
-              variant: 'danger',
-              onClick: () => handleDeleteOrder(order._id)
-            }
-          ]}
-          onActionClick={(action) => action.onClick()}
-        />
-      )
+            ]}
+            onActionClick={(action) => action.onClick()}
+          />
+        );
+      }
     }
   ];
 
@@ -403,18 +421,34 @@ const OrderPage = () => {
           </div>
           <div className="flex gap-3 mt-4">
             <button 
-              className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+                (order.order_status || order.status) === 'delivered'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+              disabled={(order.order_status || order.status) === 'delivered'}
               onClick={() => {
-                setCurrentEditOrder(order);
-                setEditStatus(order.order_status || order.status);
-                setShowEditModal(true);
+                if ((order.order_status || order.status) !== 'delivered') {
+                  setCurrentEditOrder(order);
+                  setEditStatus(order.order_status || order.status);
+                  setShowEditModal(true);
+                }
               }}
             >
               Chỉnh trạng thái
             </button>
             <button 
-              className="flex-1 px-4 py-2 rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition"
-              onClick={() => handleDeleteOrder(order._id)}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+                (order.order_status || order.status) === 'delivered'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-red-100 text-red-600 hover:bg-red-200'
+              }`}
+              disabled={(order.order_status || order.status) === 'delivered'}
+              onClick={() => {
+                if ((order.order_status || order.status) !== 'delivered') {
+                  handleDeleteOrder(order._id);
+                }
+              }}
             >
               Hủy bỏ
             </button>
@@ -512,10 +546,20 @@ const OrderPage = () => {
              Hoàn thành ({deliveredOrders})
            </button>
            <button
+             onClick={() => setSelectedStatus('payment_failed')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'payment_failed'
+                 ? 'bg-red-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Thanh toán thất bại ({paymentFailedOrders})
+           </button>
+           <button
              onClick={() => setSelectedStatus('cancelled')}
              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                selectedStatus === 'cancelled'
-                 ? 'bg-red-500 text-white shadow-lg'
+                 ? 'bg-gray-500 text-white shadow-lg'
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >

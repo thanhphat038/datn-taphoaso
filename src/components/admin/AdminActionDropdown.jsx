@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { FaEllipsisV } from 'react-icons/fa';
 
 const AdminActionDropdown = ({ 
@@ -10,7 +9,6 @@ const AdminActionDropdown = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState('bottom');
-  const [dropdownStyle, setDropdownStyle] = useState({});
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -38,29 +36,12 @@ const AdminActionDropdown = ({
       // Kiểm tra không gian ở trên
       const spaceAbove = buttonRect.top;
       
-      // Tính toán vị trí dropdown
-      let position = 'bottom';
-      let top = buttonRect.bottom + 8;
-      let left = buttonRect.right - 192; // 192px = w-48
-      
-      // Nếu không đủ không gian ở dưới và có đủ không gian ở trên, hiển thị ở trên
+      // Quyết định vị trí dropdown
       if (spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight) {
-        position = 'top';
-        top = buttonRect.top - dropdownHeight - 8;
-      } else if (spaceBelow >= dropdownHeight) {
-        position = 'bottom';
+        setDropdownPosition('top');
       } else {
-        // Nếu cả hai đều không đủ, ưu tiên hiển thị ở dưới nhưng với scroll
-        position = 'bottom';
+        setDropdownPosition('bottom');
       }
-      
-      setDropdownPosition(position);
-      setDropdownStyle({
-        position: 'fixed',
-        top: `${top}px`,
-        left: `${left}px`,
-        zIndex: 9999
-      });
     }
   }, [isOpen]);
 
@@ -86,11 +67,13 @@ const AdminActionDropdown = ({
         <FaEllipsisV className="w-4 h-4" />
       </button>
 
-      {isOpen && createPortal(
+      {isOpen && (
         <div 
-          className="w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto"
-          style={dropdownStyle}
-          ref={dropdownRef}
+          className={`absolute w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-50 ${
+            dropdownPosition === 'top' 
+              ? 'bottom-full mb-2' 
+              : 'top-full mt-2'
+          } right-0`}
         >
           {actions.map((action, index) => (
             <button
@@ -113,8 +96,7 @@ const AdminActionDropdown = ({
               <span className="font-medium">{action.label}</span>
             </button>
           ))}
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

@@ -185,16 +185,21 @@ const AdminBlogDetail = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/admin/blog')}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 title="Quay lại danh sách"
               >
-                ←
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium">Quay lại</span>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Chi tiết bài viết</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                  Chi tiết bài viết
+                </h1>
                 <p className="text-gray-600 mt-1">Xem thông tin chi tiết bài viết</p>
               </div>
             </div>
