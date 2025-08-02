@@ -357,7 +357,7 @@ const OrderDetailPage = () => {
 
           {/* Actions */}
           <div className="flex gap-3">
-            {order.order_status === 'delivered' ? (
+            {(order.order_status === 'delivered' || order.order_status === 'cancelled') ? (
               <>
                 <button
                   onClick={() => handleReorder(order)}
