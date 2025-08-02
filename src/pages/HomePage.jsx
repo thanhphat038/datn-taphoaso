@@ -94,24 +94,24 @@ const HomePage = () => {
               spaceBetween={20}
               slidesPerView={1}
               loop={true}
-              className='rounded-[30px] w-full max-w-[800px] mx-auto'
+              className='rounded-lg w-full max-w-[800px] mx-auto'
               autoplay={{ delay: 3000, disableOnInteraction: false }}
               modules={[Autoplay]}
             >
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[400px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[400px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[400px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
               </SwiperSlide>
             </Swiper>
           </div>
           <div className='grow-1 grid gap-5'>
-            <img className='rounded-[30px] h-[190px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
-            <img className='rounded-[30px] h-[190px] w-full object-cover' src="./images/banner_3.png" alt="" />
+            <img className='rounded-lg h-[190px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
+            <img className='rounded-lg h-[190px] w-full object-cover' src="./images/banner_3.png" alt="" />
           </div>
         </div>
 
