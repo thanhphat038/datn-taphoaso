@@ -84,7 +84,7 @@ const HomePage = () => {
   }, [products]);
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50'>
+    <main className='min-h-screen bg-[#F5FBFB]'>
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-12'>
 
         {/* Hero Banner Section - Giữ đơn giản như ban đầu */}

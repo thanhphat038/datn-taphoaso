@@ -62,7 +62,7 @@ const BlogDetailPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+            <div className="min-h-screen bg-[#F5FBFB] flex items-center justify-center">
                 <div className="text-center">
                     <div className="relative">
                         <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
@@ -76,7 +76,7 @@ const BlogDetailPage = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+            <div className="min-h-screen bg-[#F5FBFB] flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
                     <div className="bg-white rounded-2xl shadow-lg p-8">
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -97,7 +97,7 @@ const BlogDetailPage = () => {
 
     if (!blogDetail) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+            <div className="min-h-screen bg-[#F5FBFB] flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
                     <div className="bg-white rounded-2xl shadow-lg p-8">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -117,7 +117,7 @@ const BlogDetailPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        <div className="min-h-screen bg-[#F5FBFB]">
             {/* Navigation */}
             <div className="container mx-auto max-w-7xl px-4 py-6">
                 <button
