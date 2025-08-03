@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllCategories, createCategory } from '../../service/Admin.Service.jsx';
+import Cookies from "js-cookie";
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -292,13 +293,17 @@ const AddProductPage = () => {
       const url = id ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
       const method = id ? 'PUT' : 'POST';
       
+      const token = Cookies.get('auth_token');
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(productData),
       });
+
 
       if (!response.ok) {
         const errorData = await response.json();
