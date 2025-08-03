@@ -25,7 +25,6 @@ const OrderDetailPage = () => {
           return;
         }
 
-        console.log('🔍 Debug - Fetching order detail for ID:', id);
         const response = await axios.get(`http://localhost:3000/api/orders/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -45,9 +44,6 @@ const OrderDetailPage = () => {
         };
 
 
-        console.log('🔍 Debug - Order detail response:', response.data);
-        console.log('🔍 Debug - Order data:', response.data.data);
-        console.log('🔍 Debug - Order items:', response.data.data?.items);
         setOrder(response.data.data);
       } catch (err) {
         console.error('Lỗi khi lấy chi tiết đơn hàng:', err);

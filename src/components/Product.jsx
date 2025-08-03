@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
 import { addToCart } from '../service/Cart.service';
 import Cookies from 'js-cookie';
-import { useAlertContext } from './AlertProvider';
+import { useToast } from './ToastContainer';
 
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -18,7 +18,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingAddToCart, setLoadingAddToCart] = useState(false);
-  const { showAlert } = useAlertContext();
+  const { showSuccess, showError, showWarning } = useToast();
   
   // Lấy user_id từ token
   const getUserId = () => {
@@ -147,19 +147,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
       
       // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showAlert({
-        title: 'Yêu cầu đăng nhập',
-        message: 'Vui lòng đăng nhập để mua sản phẩm',
-        type: 'warning',
-        actions: [
-          {
-            label: 'Đăng nhập ngay',
-            onClick: () => {
-              navigate('/login');
-            }
-          }
-        ]
-      });
+      showWarning('Vui lòng đăng nhập để mua sản phẩm');
       
       return;
     }
@@ -190,11 +178,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       }, 500);
     } catch (error) {
       console.error('Error in handleBuyNow:', error);
-      showAlert({
-        title: 'Lỗi',
-        message: 'Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.',
-        type: 'error'
-      });
+      showError('Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.');
     }
   };
 
@@ -206,19 +190,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       console.log('🔒 User not logged in, showing login prompt for add to cart');
       
       // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showAlert({
-        title: 'Yêu cầu đăng nhập',
-        message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
-        type: 'warning',
-        actions: [
-          {
-            label: 'Đăng nhập ngay',
-            onClick: () => {
-              navigate('/login');
-            }
-          }
-        ]
-      });
+      showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
       return;
     }
 
@@ -230,12 +202,8 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       if (onAddToCartSuccess) {
         onAddToCartSuccess('Đã thêm sản phẩm vào giỏ hàng!', 'success');
       } else {
-        // Fallback cho showAlert nếu không có callback
-        showAlert({
-          title: 'Thành công',
-          message: 'Đã thêm sản phẩm vào giỏ hàng!',
-          type: 'success'
-        });
+        // Fallback cho showSuccess nếu không có callback
+        showSuccess('Đã thêm sản phẩm vào giỏ hàng!');
       }
       
       // Dispatch event để cập nhật cart context
@@ -247,12 +215,8 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       if (onAddToCartSuccess) {
         onAddToCartSuccess('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!', 'error');
       } else {
-        // Fallback cho showAlert nếu không có callback
-        showAlert({
-          title: 'Lỗi',
-          message: 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!',
-          type: 'error'
-        });
+        // Fallback cho showError nếu không có callback
+        showError('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!');
       }
     } finally {
       setLoadingAddToCart(false);
@@ -270,19 +234,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       console.log('🔒 User not logged in, showing login prompt for favorite');
       
       // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showAlert({
-        title: 'Yêu cầu đăng nhập',
-        message: 'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
-        type: 'warning',
-        actions: [
-          {
-            label: 'Đăng nhập ngay',
-            onClick: () => {
-              navigate('/login');
-            }
-          }
-        ]
-      });
+      showWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích');
       return;
     }
     
@@ -307,11 +259,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      showAlert({
-        title: 'Lỗi',
-        message: 'Có lỗi xảy ra khi thao tác với mục yêu thích',
-        type: 'error'
-      });
+      showError('Có lỗi xảy ra khi thao tác với mục yêu thích');
     } finally {
       setLoadingFavorite(false);
     }

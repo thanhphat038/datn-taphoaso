@@ -25,7 +25,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import OrderDetailPage from './pages/OrderDetailPage';
 
-import ProductsPage from './pages/products';
+import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
@@ -136,13 +136,11 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <AlertProvider>
-          <ToastProvider>
-            <CartProvider>
-              <Layout />
-            </CartProvider>
-          </ToastProvider>
-        </AlertProvider>
+        <ToastProvider>
+          <CartProvider>
+            <Layout />
+          </CartProvider>
+        </ToastProvider>
       </Router>
     </ErrorBoundary>
   );

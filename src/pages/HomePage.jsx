@@ -11,6 +11,7 @@ const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -70,8 +71,20 @@ const HomePage = () => {
       );
     }
 
+    // Hàm hiển thị notification
+    const showNotification = (message, type = 'success') => {
+      setNotification({ show: true, message, type });
+      setTimeout(() => {
+        setNotification({ show: false, message: '', type: 'success' });
+      }, 3000);
+    };
+
     return filteredProducts.slice(0, limit).map((product, index) => (
-      <Product key={product._id || index} data={product} />
+      <Product 
+        key={product._id || index} 
+        data={product} 
+        onAddToCartSuccess={showNotification}
+      />
     ));
   };
 
@@ -84,7 +97,7 @@ const HomePage = () => {
   }, [products]);
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50'>
+    <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-12'>
 
         {/* Hero Banner Section - Giữ đơn giản như ban đầu */}
@@ -214,45 +227,6 @@ const HomePage = () => {
           </Swiper>
         </div>
 
-        <div className="relative">
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl blur-lg opacity-30"></div>
-              <div className="relative bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-2xl shadow-lg">
-                <div className="flex items-center gap-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
-                  </svg>
-                  <span className="text-xl font-bold">MÌ ĂN LIỀN</span>
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
-            <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'>
-              {getProductsByCategory("684697023d545550b38460cd", 5)}
-            </div>
-
-            <div className='mt-8 flex justify-center'>
-              <Link 
-                to="/product?category=684697023d545550b38460cd" 
-                className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
-              >
-                <span>Xem thêm</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Section */}
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
           <div className='lg:col-span-1'>
@@ -321,6 +295,46 @@ const HomePage = () => {
         </div>
 
       </div>
+
+      {/* Custom Notification */}
+      {notification.show && (
+        <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+          notification.type === 'success' ? 'border-green-500' : 'border-red-500'
+        } transform transition-all duration-300 ease-in-out`}>
+          <div className="p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {notification.type === 'success' ? (
+                  <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+              <div className="ml-3 w-0 flex-1">
+                <p className={`text-sm font-medium ${
+                  notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {notification.message}
+                </p>
+              </div>
+              <div className="ml-4 flex-shrink-0 flex">
+                <button
+                  className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                  onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                >
+                  <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

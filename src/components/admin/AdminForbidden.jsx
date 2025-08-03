@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const AdminForbidden = () => {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
         <div className="flex items-center justify-center mb-6">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">

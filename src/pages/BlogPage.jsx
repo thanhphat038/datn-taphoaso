@@ -63,9 +63,9 @@ const BlogPage = () => {
     ];
 
     return (
-        <div className="min-h-screen  bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20">
             {/* Banner Section */}
-            <div className="bg-blue-50  pt-4">
+            <div className="bg-blue-50/40 pt-4">
             <div className="container mx-auto w-[1240px]">
                     <div className="flex justify-center h-96">
                         <img 

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { searchProducts, getProductsByCategory } from '../service/Product.service';
 import Product from '../components/Product';
+import { useToast } from '../components/ToastContainer';
 import axios from 'axios';
 
 const ProductsSearch = () => {
     const api = "http://localhost:3000/api";
+    const { showSuccess, showError } = useToast();
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,26 +29,15 @@ const ProductsSearch = () => {
                 setLoading(true);
                 setError(null);
                 
-                console.log('🔍 Debug - ProductsSearch useEffect:', {
-                    value,
-                    selectedCategoryId,
-                    currentPage,
-                    sortBy,
-                    sortOrder
-                });
-                
                 let response;
                 if (selectedCategoryId) {
                     // Nếu có chọn danh mục, lấy sản phẩm theo danh mục
-                    console.log('🔍 Debug - Fetching by category:', selectedCategoryId);
                     response = await getProductsByCategory(selectedCategoryId, currentPage, productsPerPage);
                 } else if (value) {
                     // Nếu có từ khóa, tìm kiếm theo từ khóa
-                    console.log('🔍 Debug - Searching for:', value);
                     try {
                         response = await searchProducts(value, currentPage, productsPerPage, sortBy, sortOrder);
                     } catch (searchError) {
-                        console.log('🔍 Debug - Search failed, using fallback:', searchError.message);
                         // Fallback: sử dụng getAllProducts và lọc client-side
                         const allProductsResponse = await axios.get(`${api}/products`);
                         const allProducts = allProductsResponse.data.data || allProductsResponse.data.products || [];
@@ -67,7 +58,6 @@ const ProductsSearch = () => {
                     }
                 } else {
                     // Nếu không có gì, lấy tất cả sản phẩm
-                    console.log('🔍 Debug - Fetching all products');
                     response = await axios.get(`${api}/products`);
                 }
                 
@@ -133,9 +123,22 @@ const ProductsSearch = () => {
     // Lọc sản phẩm theo giá
     const filteredProducts = filterProductsByPrice(products);
 
+    // Callback để hiển thị thông báo khi thêm vào giỏ hàng thành công
+    const handleAddToCartSuccess = (message, type = 'success') => {
+        if (type === 'success') {
+            showSuccess(message);
+        } else {
+            showError(message);
+        }
+    };
+
     // Tạo danh sách sản phẩm hiển thị
     const currentProducts = filteredProducts.map((element, index) => (
-        <Product key={element._id || index} data={element} />
+        <Product 
+            key={element._id || index} 
+            data={element} 
+            onAddToCartSuccess={handleAddToCartSuccess}
+        />
     ));
 
     // Reset page khi thay đổi filter
@@ -180,7 +183,7 @@ const ProductsSearch = () => {
     // Hiển thị loading state
     if (loading) {
         return (
-            <main className='w-full bg-gray-50 min-h-screen'>
+            <main className='w-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 min-h-screen'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-64'>
                         <div className='text-center'>
@@ -196,7 +199,7 @@ const ProductsSearch = () => {
     // Hiển thị error state
     if (error) {
         return (
-            <main className='w-full bg-gray-50 min-h-screen'>
+            <main className='w-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 min-h-screen'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-64'>
                         <div className='text-center'>
@@ -221,7 +224,7 @@ const ProductsSearch = () => {
     }
 
     return (
-        <main className='w-full bg-gray-50 min-h-screen'>
+        <main className='w-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 min-h-screen'>
             <div className='max-w-7xl mx-auto px-4 py-8'>
                 <div className='flex flex-col lg:flex-row gap-6'>
                     {/* Sidebar Filters */}
