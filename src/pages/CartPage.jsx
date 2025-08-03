@@ -4,6 +4,7 @@ import { getCart } from '../service/Cart.service';
 import { dataProduct } from '../service/Product.service';
 import { updateCartItem, removeCartItem } from '../service/Cart.service';
 import { CartContext } from '../context/CartContext';
+import { FaShoppingCart, FaTrash, FaGift, FaTruck, FaCreditCard } from 'react-icons/fa';
 
 const CartPage = () => {
   const { cartItems, setInitialCartItems } = useContext(CartContext);
@@ -146,168 +147,144 @@ const CartPage = () => {
     }
   };
 
+  // Tính tổng tiền
+  const subtotal = cartItems.reduce((total, item) => total + item.price * item.qty, 0);
+  const shippingFee = 0;
+  const total = subtotal + shippingFee - voucherDiscount;
+
   return (
     <div className="min-h-screen bg-[#F5FBFB]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Cart Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Giỏ hàng của bạn</h1>
-        <span className="text-gray-500">{cartItems.length} sản phẩm</span>
-      </div>
-
-      {/* Empty Cart State */}
-      {cartItems.length === 0 ? (
-        <div className="text-center py-16">
-          {/* Empty Cart Icon */}
-          <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-            <svg 
-              className="w-12 h-12 text-gray-400" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" 
-              />
-            </svg>
-          </div>
-          
-          {/* Empty Cart Message */}
-          <h2 className="text-xl font-medium text-gray-700 mb-2">
-            Chưa có sản phẩm nào trong giỏ hàng
-          </h2>
-          <p className="text-gray-500 mb-8">
-            Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm
-          </p>
-          
-          {/* Shop Now Button */}
-          <Link 
-            to="/product" 
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
-          >
-            <svg 
-              className="w-5 h-5" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" 
-              />
-            </svg>
-            Mua sắm ngay
-          </Link>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Giỏ hàng của bạn</h1>
+          <p className="text-gray-600">{cartItems.length} sản phẩm trong giỏ hàng</p>
         </div>
-      ) : (
-        <>
-          {/* Cart Items */}
-          <div className="space-y-4 mb-8">
-            {cartItems.map((item) => {
-              const product = item.product_id;
-              if (!product) return null;
 
-              return (
-                <div key={item._id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-200 transition-all">
-                  <div className="flex gap-4">
-                    {/* Product Image */}
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                      <Link to={`/product/${product._id}`}>
-                        <img
-                          src={product.images?.[0] || ''}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </Link>
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="flex-grow">
-                      <h3 className="font-medium text-gray-800 mb-1 cursor-pointer">
-                        <Link to={`/product/${product._id}`}>
-                          {product.name}
-                        </Link>
-                      </h3>
-                      <div className="text-red-500 font-medium">
-                        {product.price?.toLocaleString()}đ
-                      </div>
-                    </div>
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => changeQuantity(product._id, item.qty - 1, item._id)}
-                        className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-[#06AEF4] transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center">{item.qty}</span>
-                      <button
-                        onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
-                        className="cursor-pointer w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-[#06AEF4] transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    {/* Total & Remove */}
-                    <div className="flex flex-col items-end justify-between">
-                      <div className="font-semibold text-gray-800">
-                        {(product.price * item.qty).toLocaleString()}đ
-                      </div>
-                      <button
-                        onClick={() => removeItem(product._id)}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Cart Summary with Voucher */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-[#06AEF4]/10 rounded-lg flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#06AEF4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-800">Tóm tắt đơn hàng</h3>
+        {/* Empty Cart State */}
+        {cartItems.length === 0 ? (
+          <div className="text-center py-16">
+            {/* Empty Cart Icon */}
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <FaShoppingCart className="w-12 h-12 text-gray-400" />
             </div>
             
-            {/* Voucher Section */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-[#06AEF4]/10 rounded-lg flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#06AEF4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                  </svg>
+            {/* Empty Cart Message */}
+            <h2 className="text-xl font-medium text-gray-700 mb-2">
+              Chưa có sản phẩm nào trong giỏ hàng
+            </h2>
+            <p className="text-gray-500 mb-8">
+              Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm
+            </p>
+            
+            {/* Shop Now Button */}
+            <Link 
+              to="/product" 
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            >
+              <FaShoppingCart className="w-5 h-5" />
+              Mua sắm ngay
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Cart Items */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FaShoppingCart className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800">Sản phẩm trong giỏ hàng</h2>
                 </div>
-                <h4 className="font-semibold text-gray-800">Mã giảm giá</h4>
+                
+                <div className="space-y-4">
+                  {cartItems.map((item) => {
+                    const product = item.product_id;
+                    if (!product) return null;
+
+                    return (
+                      <div key={item._id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        {/* Product Image */}
+                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                          <Link to={`/product/${product._id}`}>
+                            <img
+                              src={product.images?.[0] || ''}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </Link>
+                        </div>
+
+                        {/* Product Details */}
+                        <div className="flex-grow">
+                          <h3 className="font-medium text-gray-800 mb-1 cursor-pointer">
+                            <Link to={`/product/${product._id}`} className="hover:text-blue-600 transition-colors">
+                              {product.name}
+                            </Link>
+                          </h3>
+                          <div className="text-red-500 font-medium">
+                            {product.price?.toLocaleString()}đ
+                          </div>
+                        </div>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => changeQuantity(product._id, item.qty - 1, item._id)}
+                            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-100 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="w-8 text-center font-medium">{item.qty}</span>
+                          <button
+                            onClick={() => changeQuantity(product._id, item.qty + 1, item._id)}
+                            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-100 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        {/* Total & Remove */}
+                        <div className="flex flex-col items-end justify-between">
+                          <div className="font-semibold text-gray-800">
+                            {(product.price * item.qty).toLocaleString()}đ
+                          </div>
+                          <button
+                            onClick={() => removeItem(product._id)}
+                            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Xóa sản phẩm"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              
-              {!isVoucherApplied ? (
+
+              {/* Mã giảm giá */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <FaGift className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800">Mã giảm giá</h2>
+                </div>
+                
                 <div className="space-y-3">
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <input
-                      className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent transition-all text-sm"
+                      className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Nhập mã giảm giá..."
                       value={voucherCode}
                       onChange={(e) => setVoucherCode(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleApplyVoucher()}
                     />
-                    <button
-                      className="px-4 py-2 rounded-lg text-white font-medium transition-all bg-[#06AEF4] hover:bg-[#70d9ff] hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    <button 
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleApplyVoucher}
                       disabled={!voucherCode.trim()}
                     >
@@ -316,21 +293,46 @@ const CartPage = () => {
                   </div>
                   
                   {voucherMessage && (
-                    <div className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium ${
+                    <div className={`flex items-center gap-2 p-3 rounded-xl text-sm font-medium ${
                       voucherDiscount > 0 
                         ? 'bg-green-50 text-green-700 border border-green-200' 
                         : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                       {voucherDiscount > 0 ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       )}
                       {voucherMessage}
+                    </div>
+                  )}
+                  
+                  {isVoucherApplied && appliedVoucher && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-green-800">Mã {appliedVoucher.code} đã áp dụng!</div>
+                          <div className="text-sm text-green-600">
+                            {appliedVoucher.type === 'percentage' 
+                              ? `Giảm ${appliedVoucher.value}%` 
+                              : `Giảm ${appliedVoucher.value?.toLocaleString()}đ`
+                            }
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleRemoveVoucher}
+                          className="text-green-600 hover:text-green-700 transition-colors"
+                          title="Xóa mã giảm giá"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   )}
                   
@@ -343,95 +345,65 @@ const CartPage = () => {
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="font-medium text-green-800 text-sm">Mã {appliedVoucher?.code} đã áp dụng!</p>
-                        <p className="text-xs text-green-600">
-                          {appliedVoucher?.type === 'percentage' 
-                            ? `Giảm ${appliedVoucher?.value}%` 
-                            : `Giảm ${appliedVoucher?.value?.toLocaleString()}đ`
-                          }
-                        </p>
-                      </div>
+              </div>
+            </div>
+
+            {/* Sidebar - Tổng tiền */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <FaTruck className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800">Tóm tắt đơn hàng</h3>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Tạm tính:</span>
+                    <span className="font-medium text-gray-800">
+                      {subtotal.toLocaleString()} đ
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Phí vận chuyển:</span>
+                    <span className="font-medium text-green-600">Miễn phí</span>
+                  </div>
+                  
+                  {voucherDiscount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Giảm giá:</span>
+                      <span className="font-medium text-green-600">- {voucherDiscount.toLocaleString()} đ</span>
                     </div>
-                    <button
-                      onClick={handleRemoveVoucher}
-                      className="text-green-600 hover:text-green-800 transition-colors"
-                      title="Xóa mã giảm giá"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                  )}
+                </div>
+                
+                <div className="border-t border-gray-200 pt-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold text-gray-800">Thành tiền:</span>
+                    <span className="text-2xl font-bold text-red-500">
+                      {total.toLocaleString()} đ
+                    </span>
                   </div>
                 </div>
-              )}
-            </div>
-            
-            {/* Order Summary */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Tạm tính:</span>
-                <span className="font-medium text-gray-800">
-                  {cartItems.reduce((total, item) => total + item.price * item.qty, 0).toLocaleString()}đ
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Phí vận chuyển:</span>
-                <span className="font-medium text-green-600">Miễn phí</span>
-              </div>
-              
-              {/* Hiển thị giảm giá nếu có */}
-              {voucherDiscount > 0 && (
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Giảm giá:</span>
-                  <span className="font-medium text-green-600">- {voucherDiscount.toLocaleString()}đ</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="border-t border-gray-200 pt-4 mt-6">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-lg font-bold text-gray-800">Tổng cộng:</span>
-                <span className="text-2xl font-bold text-red-500">
-                  {(
-                    Math.max(
-                      cartItems.reduce((total, item) => total + item.price * item.qty, 0) - voucherDiscount,
-                      0
-                    ).toLocaleString()
-                  )}đ
-                </span>
-              </div>
-              
-              <Link to={`/checkout`}>
-                <button className="w-full bg-[#06AEF4] hover:bg-[#70d9ff] text-white font-semibold py-4 rounded-xl transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={cartItems.length === 0}>
-                  <div className="flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
+                
+                <Link to="/checkout">
+                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2" disabled={cartItems.length === 0}>
+                    <FaCreditCard className="w-5 h-5" />
                     Tiến hành thanh toán
-                  </div>
-                </button>
-              </Link>
-              
-              <div className="mt-4 text-center">
-                <p className="text-xs text-gray-500">
-                  Bằng việc tiếp tục, bạn đồng ý với <span className="text-[#06AEF4] cursor-pointer hover:underline">Điều khoản sử dụng</span> và <span className="text-[#06AEF4] cursor-pointer hover:underline">Chính sách bảo mật</span>
-                </p>
+                  </button>
+                </Link>
+                
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">
+                    Bằng việc tiếp tục, bạn đồng ý với <span className="text-blue-600 cursor-pointer hover:underline">Điều khoản sử dụng</span> và <span className="text-blue-600 cursor-pointer hover:underline">Chính sách bảo mật</span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </>
-      )}
+        )}
       </div>
     </div>
   );

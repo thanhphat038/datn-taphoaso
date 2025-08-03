@@ -266,11 +266,10 @@ const Address = () => {
 
       {/* Notifications */}
       {message && (
-        <div className={`mb-6 p-4 rounded-xl shadow-lg font-medium flex items-center justify-between ${
-          messageType === 'error' 
-            ? 'bg-red-50 border-l-4 border-red-500 text-red-700' 
+        <div className={`mb-6 p-4 rounded-xl shadow-lg font-medium flex items-center justify-between ${messageType === 'error'
+            ? 'bg-red-50 border-l-4 border-red-500 text-red-700'
             : 'bg-green-50 border-l-4 border-green-500 text-green-700'
-        }`}>
+          }`}>
           <div className="flex items-center gap-2">
             {messageType === 'error' ? (
               <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,8 +282,8 @@ const Address = () => {
             )}
             <span>{message}</span>
           </div>
-          <button 
-            className="text-gray-400 hover:text-gray-600 transition-colors" 
+          <button
+            className="text-gray-400 hover:text-gray-600 transition-colors"
             onClick={() => setMessage('')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,12 +307,12 @@ const Address = () => {
           <div key={address._id || address.id || idx} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                                 <div className="flex items-center gap-4 mb-3">
-                   <div className="w-10 h-10 bg-[#06AEF4] rounded-full flex items-center justify-center">
-                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                     </svg>
-                   </div>
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-10 h-10 bg-[#06AEF4] rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 text-lg">{address.receiver}</h3>
                     <p className="text-blue-600 font-medium">{address.phone}</p>
@@ -331,14 +330,14 @@ const Address = () => {
               <div className="flex gap-2 ml-4">
                 {editId == address._id ? (
                   <>
-                                         <button 
-                       onClick={handleSaveEdit} 
-                       className="px-4 py-2 rounded-lg bg-[#06AEF4] text-white font-medium hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
-                     >
-                       Lưu
-                     </button>
-                    <button 
-                      onClick={handleCancelEdit} 
+                    <button
+                      onClick={handleSaveEdit}
+                      className="px-4 py-2 rounded-lg bg-[#06AEF4] text-white font-medium hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+                    >
+                      Lưu
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
                       className="px-4 py-2 rounded-lg border-2 border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition-all"
                     >
                       Hủy
@@ -346,12 +345,12 @@ const Address = () => {
                   </>
                 ) : (
                   <>
-                                         <button
-                       onClick={() => handleStartEdit(address)}
-                       className="px-4 py-2 rounded-lg bg-[#06AEF4] text-white font-medium hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
-                     >
-                       Sửa
-                     </button>
+                    <button
+                      onClick={() => handleStartEdit(address)}
+                      className="px-4 py-2 rounded-lg bg-[#06AEF4] text-white font-medium hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+                    >
+                      Sửa
+                    </button>
                     <button
                       onClick={() => handleDeleteAddress(address._id)}
                       className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg"
@@ -380,12 +379,12 @@ const Address = () => {
                       </svg>
                       Tên người nhận
                     </label>
-                    <input 
-                      type="text" 
-                      value={editAddress.receiver} 
-                      onChange={e => setEditAddress({ ...editAddress, receiver: e.target.value })} 
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                      placeholder="Nhập tên người nhận" 
+                    <input
+                      type="text"
+                      value={editAddress.receiver}
+                      onChange={e => setEditAddress({ ...editAddress, receiver: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                      placeholder="Nhập tên người nhận"
                     />
                   </div>
                   <div className="group">
@@ -395,12 +394,12 @@ const Address = () => {
                       </svg>
                       Số điện thoại
                     </label>
-                    <input 
-                      type="tel" 
-                      value={editAddress.phone} 
-                      onChange={e => setEditAddress({ ...editAddress, phone: e.target.value })} 
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                      placeholder="Nhập số điện thoại" 
+                    <input
+                      type="tel"
+                      value={editAddress.phone}
+                      onChange={e => setEditAddress({ ...editAddress, phone: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                      placeholder="Nhập số điện thoại"
                     />
                   </div>
                   <div className="group">
@@ -410,9 +409,9 @@ const Address = () => {
                       </svg>
                       Tỉnh/Thành phố
                     </label>
-                    <select 
-                      value={editAddress.city} 
-                      onChange={handleEditCityChange} 
+                    <select
+                      value={editAddress.city}
+                      onChange={handleEditCityChange}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                     >
                       <option value="">Chọn tỉnh/thành phố</option>
@@ -426,10 +425,10 @@ const Address = () => {
                       </svg>
                       Quận/Huyện
                     </label>
-                    <select 
-                      value={editAddress.district} 
-                      onChange={handleEditDistrictChange} 
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
+                    <select
+                      value={editAddress.district}
+                      onChange={handleEditDistrictChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                       disabled={!editDistricts.length}
                     >
                       <option value="">Chọn quận/huyện</option>
@@ -443,10 +442,10 @@ const Address = () => {
                       </svg>
                       Phường/Xã
                     </label>
-                    <select 
-                      value={editAddress.ward} 
-                      onChange={handleEditWardChange} 
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
+                    <select
+                      value={editAddress.ward}
+                      onChange={handleEditWardChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                       disabled={!editWards.length}
                     >
                       <option value="">Chọn phường/xã</option>
@@ -460,12 +459,12 @@ const Address = () => {
                       </svg>
                       Địa chỉ chi tiết
                     </label>
-                    <input 
-                      type="text" 
-                      value={editAddress.address_detail} 
-                      onChange={e => setEditAddress({ ...editAddress, address_detail: e.target.value })} 
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                      placeholder="Nhập địa chỉ chi tiết" 
+                    <input
+                      type="text"
+                      value={editAddress.address_detail}
+                      onChange={e => setEditAddress({ ...editAddress, address_detail: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                      placeholder="Nhập địa chỉ chi tiết"
                     />
                   </div>
                 </div>
@@ -475,11 +474,11 @@ const Address = () => {
         ))}
       </div>
 
-             {/* Add New Address Button */}
-       <button 
-         onClick={() => setShowAddForm(true)} 
-         className="w-full py-4 px-6 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
-       >
+      {/* Add New Address Button */}
+      <button
+        onClick={() => setShowAddForm(true)}
+        className="w-full py-4 px-6 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+      >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
@@ -489,14 +488,14 @@ const Address = () => {
       {/* Add Address Form */}
       {showAddForm && (
         <div className="mt-6 bg-gradient-to-r from-gray-50 to-white rounded-2xl p-6 border-2 border-dashed border-blue-300">
-                     <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-             <div className="w-8 h-8 bg-[#06AEF4] rounded-full flex items-center justify-center">
-               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-               </svg>
-             </div>
-             Thêm địa chỉ mới
-           </h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#06AEF4] rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            Thêm địa chỉ mới
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="group">
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -505,12 +504,12 @@ const Address = () => {
                 </svg>
                 Tên người nhận
               </label>
-              <input 
-                type="text" 
-                value={newAddress.receiver} 
-                onChange={e => setNewAddress({ ...newAddress, receiver: e.target.value })} 
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                placeholder="Nhập tên người nhận" 
+              <input
+                type="text"
+                value={newAddress.receiver}
+                onChange={e => setNewAddress({ ...newAddress, receiver: e.target.value })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                placeholder="Nhập tên người nhận"
               />
             </div>
             <div className="group">
@@ -520,12 +519,12 @@ const Address = () => {
                 </svg>
                 Số điện thoại
               </label>
-              <input 
-                type="tel" 
-                value={newAddress.phone} 
-                onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} 
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                placeholder="Nhập số điện thoại" 
+              <input
+                type="tel"
+                value={newAddress.phone}
+                onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                placeholder="Nhập số điện thoại"
               />
               {phoneError && <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -541,9 +540,9 @@ const Address = () => {
                 </svg>
                 Tỉnh/Thành phố
               </label>
-              <select 
-                value={newAddress.city} 
-                onChange={handleCityChange} 
+              <select
+                value={newAddress.city}
+                onChange={handleCityChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
               >
                 <option value="">Chọn tỉnh/thành phố</option>
@@ -557,10 +556,10 @@ const Address = () => {
                 </svg>
                 Quận/Huyện
               </label>
-              <select 
-                value={newAddress.district} 
-                onChange={handleDistrictChange} 
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
+              <select
+                value={newAddress.district}
+                onChange={handleDistrictChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                 disabled={!districts.length}
               >
                 <option value="">Chọn quận/huyện</option>
@@ -574,10 +573,10 @@ const Address = () => {
                 </svg>
                 Phường/Xã
               </label>
-              <select 
-                value={newAddress.ward} 
-                onChange={handleWardChange} 
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
+              <select
+                value={newAddress.ward}
+                onChange={handleWardChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                 disabled={!wards.length}
               >
                 <option value="">Chọn phường/xã</option>
@@ -591,24 +590,24 @@ const Address = () => {
                 </svg>
                 Địa chỉ chi tiết
               </label>
-              <input 
-                type="text" 
-                value={newAddress.address_detail} 
-                onChange={e => setNewAddress({ ...newAddress, address_detail: e.target.value })} 
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white" 
-                placeholder="Nhập địa chỉ chi tiết" 
+              <input
+                type="text"
+                value={newAddress.address_detail}
+                onChange={e => setNewAddress({ ...newAddress, address_detail: e.target.value })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                placeholder="Nhập địa chỉ chi tiết"
               />
             </div>
           </div>
           <div className="flex gap-4 mt-6">
-                         <button 
-               onClick={handleAddAddress} 
-               className="flex-1 px-6 py-3 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
-             >
-               Lưu địa chỉ
-             </button>
-            <button 
-              onClick={() => setShowAddForm(false)} 
+            <button
+              onClick={handleAddAddress}
+              className="flex-1 px-6 py-3 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+            >
+              Lưu địa chỉ
+            </button>
+            <button
+              onClick={() => setShowAddForm(false)}
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:bg-gray-50 transition-all"
             >
               Hủy
