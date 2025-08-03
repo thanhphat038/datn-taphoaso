@@ -7,6 +7,7 @@ import { getAllCategories } from '../service/Admin.Service';
 import Cookies from "js-cookie";
 import { Search, ShoppingCart, User, Menu, LogOut, MapPin } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
+import { logoutUser } from '../service/UserService';
 
 const Header = () => {
     const token = Cookies.get("auth_token");
@@ -174,8 +175,7 @@ const Header = () => {
     };
 
     const handleLogout = () => {
-        Cookies.remove("auth_token");
-        window.location.reload();
+        logoutUser();
     };
 
     const handleAddressClick = () => {

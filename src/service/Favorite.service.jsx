@@ -30,6 +30,13 @@ function getUserId() {
 export const getFavorites = (userId) => {
     const now = Date.now();
     
+    // Kiểm tra authentication trước
+    const token = Cookies.get('auth_token');
+    if (!token) {
+        console.log('🔒 No auth token found, skipping favorites fetch');
+        return Promise.reject(new Error('No authentication token'));
+    }
+    
     // Kiểm tra cache
     if (favoritesCache && (now - cacheTimestamp) < CACHE_DURATION) {
         console.log('🔍 Debug - Using cached favorites');
@@ -45,11 +52,28 @@ export const getFavorites = (userId) => {
         favoritesCache = response;
         cacheTimestamp = now;
         return response;
+    }).catch(error => {
+        // Xử lý lỗi 401 một cách im lặng
+        if (error.response?.status === 401) {
+            console.log('🔒 Unauthorized access to favorites - user not logged in');
+            // Clear cache khi có lỗi auth
+            favoritesCache = null;
+            cacheTimestamp = 0;
+        }
+        throw error;
     });
 };
 
 export const addToFavorite = (productId) => {
     console.log('🔍 Debug - Frontend addToFavorite:', { productId });
+    
+    // Kiểm tra authentication trước
+    const token = Cookies.get('auth_token');
+    if (!token) {
+        console.log('🔒 No auth token found, cannot add to favorites');
+        return Promise.reject(new Error('No authentication token'));
+    }
+    
     // Clear cache khi thêm favorite
     favoritesCache = null;
     cacheTimestamp = 0;
@@ -61,6 +85,14 @@ export const addToFavorite = (productId) => {
 
 export const removeFromFavorite = (productId) => {
     console.log('🔍 Debug - Frontend removeFromFavorite:', { productId });
+    
+    // Kiểm tra authentication trước
+    const token = Cookies.get('auth_token');
+    if (!token) {
+        console.log('🔒 No auth token found, cannot remove from favorites');
+        return Promise.reject(new Error('No authentication token'));
+    }
+    
     // Clear cache khi xóa favorite
     favoritesCache = null;
     cacheTimestamp = 0;
