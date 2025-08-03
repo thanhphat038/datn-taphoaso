@@ -461,6 +461,7 @@ const ProductDetail = () => {
                     </li>
                 </ol>
             </nav>
+            
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                 {/* Product Images */}
@@ -472,6 +473,7 @@ const ProductDetail = () => {
                             className="w-full h-full object-cover"
                         />
                     </div>
+                    
                     {productData.images && productData.images.length > 1 && (
                         <div className="grid grid-cols-5 gap-2">
                             {productData.images.map((image, index) => (
@@ -531,12 +533,14 @@ const ProductDetail = () => {
                                 <span className="text-2xl font-bold text-red-500">
                                     {formatCurrency(productData.price)}
                                 </span>
+                                
                                 {productData.original_price && productData.original_price > productData.price && (
                                     <span className="ml-2 text-lg text-gray-500 line-through">
                                         {formatCurrency(productData.original_price)}
                                     </span>
                                 )}
                             </div>
+                            
                             {productData.original_price && productData.original_price > productData.price && (
                                 <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
                                     -{Math.round(((productData.original_price - productData.price) / productData.original_price) * 100)}%
@@ -544,7 +548,14 @@ const ProductDetail = () => {
                             )}
                         </div>
                     </div>
-
+                    <div className="flex items-center gap-2">
+                            <span className="text-gray-600 font-medium">Trạng thái:</span>
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                productData.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                                {productData.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                            </span>
+                        </div>
                     <div className="space-y-4">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
@@ -560,6 +571,7 @@ const ProductDetail = () => {
                             </div>
                         )}
                     </div>
+                    
 
                     {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
                     <ProductPackageSelector
@@ -606,6 +618,7 @@ const ProductDetail = () => {
                 <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-gray-200 pb-4">Mô tả sản phẩm</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
+                        
                         {productData.images && productData.images.length > 0 && (
                             <img
                                 src={productData.images[0]}
@@ -626,14 +639,7 @@ const ProductDetail = () => {
                             </div>
                         )}
                         
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-600 font-medium">Trạng thái:</span>
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                productData.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                                {productData.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
-                            </span>
-                        </div>
+                      
                     </div>
                 </div>
             </div>
