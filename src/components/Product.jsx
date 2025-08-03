@@ -4,6 +4,7 @@ import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favo
 import { addToCart } from '../service/Cart.service';
 import Cookies from 'js-cookie';
 import { useToast } from './ToastContainer';
+import { useAlertContext } from './AlertProvider';
 
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -19,6 +20,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingAddToCart, setLoadingAddToCart] = useState(false);
   const { showSuccess, showError, showWarning } = useToast();
+  const { showAlert, hideAlert } = useAlertContext();
   
   // Lấy user_id từ token
   const getUserId = () => {
@@ -146,8 +148,22 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
       }
       localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
       
-      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showWarning('Vui lòng đăng nhập để mua sản phẩm');
+      // Hiện alert với các nút hành động
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để mua sản phẩm',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              hideAlert(); // Tắt alert
+              navigate('/login');
+            }
+          }
+        ],
+        autoClose: false
+      });
       
       return;
     }
@@ -189,8 +205,22 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
     if (!userId) {
       console.log('🔒 User not logged in, showing login prompt for add to cart');
       
-      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+      // Hiện alert với các nút hành động
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              hideAlert(); // Tắt alert
+              navigate('/login');
+            }
+          }
+        ],
+        autoClose: false
+      });
       return;
     }
 
@@ -233,8 +263,22 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
     if (!userId) {
       console.log('🔒 User not logged in, showing login prompt for favorite');
       
-      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
-      showWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích');
+      // Hiện alert với các nút hành động
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              hideAlert(); // Tắt alert
+              navigate('/login');
+            }
+          }
+        ],
+        autoClose: false
+      });
       return;
     }
     

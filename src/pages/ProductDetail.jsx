@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProductDetailData, useRelatedProducts } from '../controller/Product.controller';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../components/Product';
@@ -11,6 +11,7 @@ import Product from '../components/Product';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
+import { useAlertContext } from '../components/AlertProvider';
 import { useToast } from '../components/ToastContainer';
 import ProductPackageSelector from '../components/ProductPackageSelector';
 
@@ -18,7 +19,6 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [mainImage, setMainImage] = useState(null);
-    const [quantity] = useState(1); // Default quantity, không cần setter
     const [loadingAddToCart, setLoadingAddToCart] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(false);
@@ -31,7 +31,6 @@ const ProductDetail = () => {
     const [postingReply, setPostingReply] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
-    const [_pendingAddQty, setPendingAddQty] = useState(0);
     const pendingAddQtyRef = useRef(0);
     const debounceAddToCart = useRef(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
@@ -39,15 +38,18 @@ const ProductDetail = () => {
     const [loadingComments, setLoadingComments] = useState(false);
     const [relatedProductsByCategory, setRelatedProductsByCategory] = useState([]);
     const [loadingRelatedProducts, setLoadingRelatedProducts] = useState(false);
-    const { showWarning } = useToast();
+    const [quantity] = useState(1);
+    const [, setPendingAddQty] = useState(0);
+    const { showAlert, showError, hideAlert } = useAlertContext();
+    const { showSuccess } = useToast();
 
     // Thêm state cho package selection
     const [selectedPackage, setSelectedPackage] = useState(null);
 
     // Thêm function để xử lý package selection
-    const handlePackageSelect = useCallback((pkg) => {
+    const handlePackageSelect = (pkg) => {
         setSelectedPackage(pkg);
-    }, []);
+    };
 
     const COMMENTS_TO_SHOW = 3;
 
@@ -59,7 +61,7 @@ const ProductDetail = () => {
     const [expandedReplies, setExpandedReplies] = useState(new Set());
 
     // Thêm function để toggle replies
-    const toggleReplies = useCallback((commentId) => {
+    const toggleReplies = (commentId) => {
         setExpandedReplies(prev => {
             const newSet = new Set(prev);
             if (newSet.has(commentId)) {
@@ -69,23 +71,23 @@ const ProductDetail = () => {
             }
             return newSet;
         });
-    }, []);
+    };
 
     // Thêm function để kiểm tra xem replies có được mở rộng không
-    const isRepliesExpanded = useCallback((commentId) => {
+    const isRepliesExpanded = (commentId) => {
         return expandedReplies.has(commentId);
-    }, [expandedReplies]);
+    };
 
     // Hàm hiển thị notification
-    const showNotification = useCallback((message, type = 'success') => {
+    const showNotification = (message, type = 'success') => {
         setNotification({ show: true, message, type });
         setTimeout(() => {
             setNotification({ show: false, message: '', type: 'success' });
         }, 3000);
-    }, []);
+    };
 
     // Lấy user_id từ token
-    const getUserId = useCallback(() => {
+    const getUserId = () => {
         const token = Cookies.get('auth_token');
         if (token) {
             try {
@@ -97,7 +99,7 @@ const ProductDetail = () => {
             }
         }
         return null;
-    }, []);
+    };
 
     // Kiểm tra trạng thái yêu thích khi component mount
     useEffect(() => {
@@ -126,6 +128,19 @@ const ProductDetail = () => {
         setLoadingComments(true);
         getProductComments(productData._id)
             .then(data => {
+                console.log('=== FRONTEND DEBUG: Comments data received ===');
+                console.log('Raw data:', data);
+                console.log('Comments array:', data.data);
+                if (data.data && Array.isArray(data.data)) {
+                    data.data.forEach((comment, index) => {
+                        console.log(`Comment ${index + 1}:`, {
+                            id: comment._id,
+                            content: comment.comment,
+                            replies: comment.replies,
+                            repliesCount: comment.replies?.length || 0
+                        });
+                    });
+                }
                 setComments(data.data || []);
             })
             .catch(err => {
@@ -137,6 +152,53 @@ const ProductDetail = () => {
             });
     }, [productData._id]);
 
+    // Debug: Log khi comments state thay đổi
+    useEffect(() => {
+        if (comments && Array.isArray(comments) && comments.length > 0) {
+            console.log('=== COMMENTS STATE CHANGED ===');
+            console.log('Comments state:', comments);
+            comments.forEach((comment, index) => {
+                console.log(`Comment ${index + 1}:`, {
+                    id: comment._id,
+                    content: comment.comment,
+                    replies: comment.replies,
+                    repliesCount: comment.replies?.length || 0
+                });
+            });
+        }
+    }, [comments]);
+
+    // Thêm debug log chi tiết hơn
+    useEffect(() => {
+        if (comments && Array.isArray(comments) && comments.length > 0) {
+            console.log('=== COMMENTS STATE CHANGED ===');
+            console.log('Comments state:', comments);
+            comments.forEach((comment, index) => {
+                console.log(`Comment ${index + 1}:`, {
+                    id: comment._id,
+                    content: comment.comment,
+                    replies: comment.replies,
+                    repliesType: typeof comment.replies,
+                    repliesIsArray: Array.isArray(comment.replies),
+                    repliesLength: comment.replies?.length || 0,
+                    repliesKeys: comment.replies ? Object.keys(comment.replies) : 'NO_REPLIES'
+                });
+                
+                // Debug từng reply nếu có
+                if (comment.replies && Array.isArray(comment.replies)) {
+                    comment.replies.forEach((reply, replyIndex) => {
+                        console.log(`  Reply ${replyIndex + 1}:`, {
+                            id: reply._id,
+                            content: reply.reply,
+                            user: reply.user_id?.full_name,
+                            created: reply.create_at
+                        });
+                    });
+                }
+            });
+        }
+    }, [comments]);
+
     // Fetch reviews when product changes or tab changes to reviews
     useEffect(() => {
         if (productData._id) {
@@ -144,7 +206,29 @@ const ProductDetail = () => {
         }
     }, [activeTab, productData._id]);
 
-    const fetchRelatedProductsByCategory = useCallback(async () => {
+    // Fetch related products by category when product changes
+    useEffect(() => {
+        if (productData._id && productData.category_id) {
+            fetchRelatedProductsByCategory();
+        }
+    }, [productData._id, productData.category_id]);
+
+    const fetchReviews = async () => {
+        if (!productData._id) return;
+        
+        try {
+            setReviewsLoading(true);
+            const response = await getReviewsByProductId(productData._id);
+            setReviews((response.data || []).reverse());
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            setReviews([]);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
+
+    const fetchRelatedProductsByCategory = async () => {
         if (!productData.category_id) return;
         
         try {
@@ -160,36 +244,28 @@ const ProductDetail = () => {
         } finally {
             setLoadingRelatedProducts(false);
         }
-    }, [productData.category_id, productData._id]);
-
-    // Fetch related products by category when product changes
-    useEffect(() => {
-        if (productData._id && productData.category_id) {
-            fetchRelatedProductsByCategory();
-        }
-    }, [productData._id, productData.category_id, fetchRelatedProductsByCategory]);
-
-    const fetchReviews = useCallback(async () => {
-        if (!productData._id) return;
-        
-        try {
-            setReviewsLoading(true);
-            const response = await getReviewsByProductId(productData._id);
-            setReviews((response.data || []).reverse());
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-            setReviews([]);
-        } finally {
-            setReviewsLoading(false);
-        }
-    }, [productData._id]);
+    };
 
     const handleToggleFavorite = async () => {
         if (loadingFavorite) return;
         
         const userId = getUserId();
         if (!userId) {
-            showWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
         
@@ -214,7 +290,7 @@ const ProductDetail = () => {
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
-            showNotification('Có lỗi xảy ra khi thao tác với mục yêu thích', 'error');
+            showError('Có lỗi xảy ra khi thao tác với mục yêu thích', 'Lỗi');
         } finally {
             setLoadingFavorite(false);
         }
@@ -238,12 +314,26 @@ const ProductDetail = () => {
             }
             localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
             
-            showWarning('Vui lòng đăng nhập để mua hàng');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để mua hàng',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
 
         if (productData.stock !== undefined && productData.stock <= 0) {
-            showNotification('Sản phẩm đã hết hàng!', 'error');
+            showError('Sản phẩm đã hết hàng!', 'Lỗi');
             return;
         }
 
@@ -252,7 +342,7 @@ const ProductDetail = () => {
         const finalPrice = selectedPackage ? selectedPackage.unitPrice : productData.price;
 
         if (productData.stock && finalQuantity > productData.stock) {
-            showNotification(`Chỉ còn ${productData.stock} sản phẩm trong kho!`, 'error');
+            showError(`Chỉ còn ${productData.stock} sản phẩm trong kho!`, 'Lỗi');
             return;
         }
 
@@ -280,7 +370,7 @@ const ProductDetail = () => {
             navigate('/checkout');
         } catch (error) {
             console.error('❌ Debug - handleBuyNow: Error adding to cart:', error);
-            showNotification('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!', 'error');
+            showError('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!', 'Lỗi');
         }
     };
 
@@ -289,7 +379,21 @@ const ProductDetail = () => {
         const userId = getUserId();
         
         if (!userId) {
-            showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
 
@@ -298,7 +402,11 @@ const ProductDetail = () => {
 
         // Chỉ kiểm tra stock nếu có thông tin stock và stock = 0
         if (productData.stock !== undefined && productData.stock !== null && productData.stock === 0) {
-            showWarning('Sản phẩm hiện tại hết hàng!');
+            showAlert({
+                title: 'Hết hàng',
+                message: 'Sản phẩm hiện tại hết hàng!',
+                type: 'warning'
+            });
             return;
         }
 
@@ -338,7 +446,21 @@ const ProductDetail = () => {
         
         const userId = getUserId();
         if (!userId) {
-            showWarning('Vui lòng đăng nhập để gửi bình luận');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để gửi bình luận',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
         
@@ -353,27 +475,37 @@ const ProductDetail = () => {
             }
             
             setNewComment('');
-            showNotification('Bình luận đã được gửi thành công!', 'success');
+            showSuccess('Bình luận đã được gửi thành công!');
         } catch (err) {
             console.log("Lỗi khi gửi bình luận", err);
-            showNotification('Không thể gửi bình luận. Vui lòng thử lại!', 'error');
+            showError('Không thể gửi bình luận. Vui lòng thử lại!', 'Lỗi');
         } finally {
             setPostingComment(false);
         }
     };
 
-    const handleReply = (commentId, userName, replyToUserName = null) => {
+    const handleReply = (commentId, userName) => {
         const userId = getUserId();
         if (!userId) {
-            showWarning('Vui lòng đăng nhập để trả lời bình luận');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để trả lời bình luận',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
-        // Nếu có replyToUserName (trả lời reply), thì hiển thị tên người viết reply
-        // Nếu không có (trả lời comment gốc), thì hiển thị tên người viết comment
-        const displayName = replyToUserName || userName;
-        setReplyingTo({ id: commentId, userName: displayName });
-        // Tự động điền @tên người dùng vào textarea
-        setReplyText(`@${displayName} `);
+        setReplyingTo({ id: commentId, userName });
+        setReplyText('');
     };
 
     const handleCancelReply = () => {
@@ -386,38 +518,68 @@ const ProductDetail = () => {
         
         const userId = getUserId();
         if (!userId) {
-            showWarning('Vui lòng đăng nhập để trả lời bình luận');
+            showAlert({
+                title: 'Yêu cầu đăng nhập',
+                message: 'Vui lòng đăng nhập để trả lời bình luận',
+                type: 'warning',
+                actions: [
+                    {
+                        label: 'Đăng nhập ngay',
+                        onClick: () => {
+                            hideAlert(); // Tắt alert
+                            navigate('/login');
+                        }
+                    }
+                ],
+                autoClose: false
+            });
             return;
         }
         
         setPostingReply(true);
         try {
-            await postReply(replyingTo.id, replyText);
+            console.log('🔍 Sending reply for comment:', replyingTo.id);
+            console.log('🔍 Reply content:', replyText);
+            
+            const response = await postReply(replyingTo.id, replyText);
+            console.log('✅ Reply sent successfully:', response);
             
             // Thêm delay nhỏ để đảm bảo database đã được cập nhật
             await new Promise(resolve => setTimeout(resolve, 500));
             
+            console.log('🔄 Fetching updated comments...');
             const commentsResponse = await getProductComments(productData._id);
+            console.log('📦 Comments response:', commentsResponse);
             
             if (commentsResponse.data && Array.isArray(commentsResponse.data)) {
+                console.log('📝 Setting comments state:', commentsResponse.data);
                 setComments(commentsResponse.data);
+                
+                // Debug: Kiểm tra replies trong mỗi comment
+                commentsResponse.data.forEach((comment, index) => {
+                    console.log(`Comment ${index + 1}:`, {
+                        id: comment._id,
+                        content: comment.comment,
+                        replies: comment.replies,
+                        repliesCount: comment.replies?.length || 0
+                });
+            });
+            } else {
+                console.error('❌ Invalid comments response:', commentsResponse);
             }
             
             setReplyText('');
             setReplyingTo(null);
-            showNotification('Trả lời đã được gửi thành công!', 'success');
+            showSuccess('Trả lời đã được gửi thành công!');
         } catch (err) {
             console.error("❌ Lỗi khi gửi trả lời", err);
-            showNotification('Không thể gửi trả lời. Vui lòng thử lại!', 'error');
+            showError('Không thể gửi trả lời. Vui lòng thử lại!', 'Lỗi');
         } finally {
             setPostingReply(false);
         }
     };
 
-    const displayedComments = useMemo(() => 
-        showAllComments ? comments : comments.slice(0, COMMENTS_TO_SHOW), 
-        [showAllComments, comments]
-    );
+    const displayedComments = showAllComments ? comments : comments.slice(0, COMMENTS_TO_SHOW);
 
     if (!productData._id) {
         return (
@@ -461,7 +623,6 @@ const ProductDetail = () => {
                     </li>
                 </ol>
             </nav>
-            
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                 {/* Product Images */}
@@ -473,7 +634,6 @@ const ProductDetail = () => {
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    
                     {productData.images && productData.images.length > 1 && (
                         <div className="grid grid-cols-5 gap-2">
                             {productData.images.map((image, index) => (
@@ -533,14 +693,12 @@ const ProductDetail = () => {
                                 <span className="text-2xl font-bold text-red-500">
                                     {formatCurrency(productData.price)}
                                 </span>
-                                
                                 {productData.original_price && productData.original_price > productData.price && (
                                     <span className="ml-2 text-lg text-gray-500 line-through">
                                         {formatCurrency(productData.original_price)}
                                     </span>
                                 )}
                             </div>
-                            
                             {productData.original_price && productData.original_price > productData.price && (
                                 <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
                                     -{Math.round(((productData.original_price - productData.price) / productData.original_price) * 100)}%
@@ -548,6 +706,7 @@ const ProductDetail = () => {
                             )}
                         </div>
                     </div>
+
                     <div className="flex items-center gap-2">
                             <span className="text-gray-600 font-medium">Trạng thái:</span>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -559,6 +718,7 @@ const ProductDetail = () => {
                     <div className="space-y-4">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
+                            
                             <p className="text-gray-600 leading-relaxed">{productData.description}</p>
                         </div>
 
@@ -571,7 +731,6 @@ const ProductDetail = () => {
                             </div>
                         )}
                     </div>
-                    
 
                     {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
                     <ProductPackageSelector
@@ -618,7 +777,6 @@ const ProductDetail = () => {
                 <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-gray-200 pb-4">Mô tả sản phẩm</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
-                        
                         {productData.images && productData.images.length > 0 && (
                             <img
                                 src={productData.images[0]}
@@ -639,7 +797,6 @@ const ProductDetail = () => {
                             </div>
                         )}
                         
-                      
                     </div>
                 </div>
             </div>
@@ -672,22 +829,22 @@ const ProductDetail = () => {
                         <div className="space-y-6">
                             {/* Comment input box */}
                             {getUserId() ? (
-                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-                                    <h3 className="text-base font-semibold text-gray-800 mb-3">💭 Viết bình luận của bạn</h3>
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">💭 Viết bình luận của bạn</h3>
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="Chia sẻ cảm nhận của bạn về sản phẩm này..."
-                                        className="w-full border border-gray-300 rounded-md p-3 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        rows="3"
+                                        className="w-full border border-gray-300 rounded-lg p-4 text-[16px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        rows="4"
                                     />
-                                    <div className="flex justify-end mt-3">
+                                    <div className="flex justify-end mt-4">
                                         <button 
                                             onClick={handlePostComment}
                                             disabled={!newComment.trim() || postingComment}
-                                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-sm hover:shadow-md transition-all duration-200 text-sm"
+                                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transition-all duration-200"
                                         >
-                                            <svg key="main-send-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                            <svg key="main-send-icon" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                                             </svg>
                                             <span key="main-send-text">{postingComment ? 'Đang gửi...' : 'Gửi bình luận'}</span>
@@ -695,19 +852,19 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-6 text-center">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <svg key="comment-section-icon" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-xl p-8 text-center">
+                                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg key="comment-section-icon" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Đăng nhập để bình luận</h3>
-                                    <p className="text-gray-600 mb-4 text-sm">Bạn cần đăng nhập để có thể gửi bình luận về sản phẩm này.</p>
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-3">Đăng nhập để bình luận</h3>
+                                    <p className="text-gray-600 mb-6 text-lg">Bạn cần đăng nhập để có thể gửi bình luận về sản phẩm này.</p>
                                     <Link 
                                         to="/login" 
-                                        className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-md transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 font-medium text-sm"
+                                        className="inline-flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium text-lg"
                                     >
-                                        <svg key="login-icon" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg key="login-icon" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                         </svg>
                                         Đăng nhập ngay
@@ -716,28 +873,28 @@ const ProductDetail = () => {
                             )}
 
                             {/* Comments List */}
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {loadingComments ? (
-                                    <div className="text-center py-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                                        <p className="mt-3 text-gray-600 text-sm">Đang tải bình luận...</p>
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                                        <p className="mt-4 text-gray-600 text-lg">Đang tải bình luận...</p>
                                     </div>
                                 ) : comments.length === 0 ? (
-                                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg className="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                             </svg>
                                         </div>
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Chưa có bình luận nào</h3>
-                                        <p className="text-gray-600 text-sm">Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này!</p>
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Chưa có bình luận nào</h3>
+                                        <p className="text-gray-600 text-lg">Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này!</p>
                                     </div>
                                 ) : (
                                     displayedComments && Array.isArray(displayedComments) && displayedComments.map((comment) => (
-                                        <div key={`comment-${comment._id}-${comment.replies?.length || 0}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                        <div key={`comment-${comment._id}-${comment.replies?.length || 0}`} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                                             {/* User info */}
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden shadow-sm">
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden shadow-md">
                                                     {comment.user_id?.avatar ? (
                                                         <img
                                                             src={comment.user_id.avatar}
@@ -745,16 +902,16 @@ const ProductDetail = () => {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <svg key={`comment-avatar-${comment._id}`} className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <svg key={`comment-avatar-${comment._id}`} className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                                         </svg>
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <div className="font-semibold text-base text-gray-800">
+                                                    <div className="font-semibold text-lg text-gray-800">
                                                         {comment.user_id?.full_name || comment.user_id?.username || 'Người dùng'}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-sm text-gray-500">
                                                         {comment.create_at ? 
                                                             new Date(comment.create_at).toLocaleString('vi-VN', {
                                                                 year: 'numeric',
@@ -769,16 +926,16 @@ const ProductDetail = () => {
                                                 </div>
                                             </div>
                                             {/* Comment content */}
-                                            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-md p-3 ml-13 mb-3 border-l-4 border-blue-200">
-                                                <p className="text-gray-800 text-sm leading-relaxed">{comment.comment || 'Nội dung bình luận'}</p>
+                                            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 ml-16 mb-4 border-l-4 border-blue-200">
+                                                <p className="text-gray-800 text-lg leading-relaxed">{comment.comment || 'Nội dung bình luận'}</p>
                                             </div>
                                             {/* Actions */}
-                                            <div className="flex items-center gap-4 ml-13">
+                                            <div className="flex items-center gap-6 ml-16">
                                                 <button 
                                                     onClick={() => handleReply(comment._id, comment.user_id?.full_name || comment.user_id?.username || 'Người dùng')}
-                                                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
+                                                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                                                 >
-                                                    <svg key="reply-icon" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                    <svg key="reply-icon" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
                                                     </svg>
                                                     Trả lời
@@ -787,39 +944,38 @@ const ProductDetail = () => {
 
                                             {/* Reply Form */}
                                             {replyingTo && replyingTo.id === comment._id && (
-                                                <div className="ml-10 mt-2 border-l-2 border-blue-200 pl-3">
-                                                    <div className="bg-white rounded-md border border-blue-200 p-2">
-                                                        <div className="text-xs text-gray-600 mb-1">
+                                                <div className="ml-12 mt-3 border-l-2 border-blue-200 pl-4">
+                                                    <div className="bg-white rounded-lg border border-blue-200 p-3">
+                                                        <div className="text-sm text-gray-600 mb-2">
                                                             Trả lời <span className="font-medium text-blue-600">@{replyingTo.userName}</span>
                                                         </div>
                                                         <textarea
                                                             value={replyText}
                                                             onChange={(e) => setReplyText(e.target.value)}
                                                             placeholder="Viết trả lời của bạn..."
-                                                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                                                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                                                             rows="2"
-                                                            autoFocus
                                                         />
                                                         <div className="flex justify-end gap-2 mt-2">
                                                             <button
                                                                 onClick={handleCancelReply}
-                                                                className="px-2 py-1 text-gray-600 hover:text-gray-800 text-xs"
+                                                                className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm"
                                                             >
                                                                 Hủy
                                                             </button>
                                                             <button
                                                                 onClick={handlePostReply}
                                                                 disabled={!replyText.trim() || postingReply}
-                                                                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                                                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
                                                             >
                                                                 {postingReply ? (
                                                                     <>
-                                                                        <div key="loading-spinner" className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin"></div>
+                                                                        <div key="loading-spinner" className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
                                                                         <span key="loading-text">Đang gửi...</span>
                                                                     </>
                                                                 ) : (
                                                                     <>
-                                                                        <svg key="send-icon" width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <svg key="send-icon" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                                                                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                                                                         </svg>
                                                                         <span key="send-text">Gửi</span>
@@ -872,20 +1028,8 @@ const ProductDetail = () => {
                                                                                     }
                                                                                 </span>
                                                                             </div>
-                                                                            <div className="text-sm text-gray-800 ml-8 mb-2">
+                                                                            <div className="text-sm text-gray-800 ml-8">
                                                                                 {reply.reply || 'Nội dung trả lời'}
-                                                                            </div>
-                                                                            {/* Reply action for replies */}
-                                                                            <div className="flex items-center gap-4 ml-8">
-                                                                                <button 
-                                                                                    onClick={() => handleReply(comment._id, comment.user_id?.full_name || comment.user_id?.username || 'Người dùng', reply.user_id?.full_name || reply.user_id?.username || 'Người dùng')}
-                                                                                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors text-xs"
-                                                                                >
-                                                                                    <svg key={`reply-reply-icon-${reply._id || replyIndex}`} width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                                                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
-                                                                                    </svg>
-                                                                                    Trả lời
-                                                                                </button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -942,20 +1086,8 @@ const ProductDetail = () => {
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                <div className="text-sm text-gray-800 ml-8 mb-2">
+                                                                <div className="text-sm text-gray-800 ml-8">
                                                                     {reply.reply || 'Nội dung trả lời'}
-                                                                </div>
-                                                                {/* Reply action for replies */}
-                                                                <div className="flex items-center gap-4 ml-8">
-                                                                    <button 
-                                                                        onClick={() => handleReply(comment._id, comment.user_id?.full_name || comment.user_id?.username || 'Người dùng', reply.user_id?.full_name || reply.user_id?.username || 'Người dùng')}
-                                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors text-xs"
-                                                                    >
-                                                                        <svg key={`reply-reply-icon-${reply._id || replyIndex}`} width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
-                                                                        </svg>
-                                                                        Trả lời
-                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -989,10 +1121,10 @@ const ProductDetail = () => {
                                 )}
                                 
                                 {comments.length > COMMENTS_TO_SHOW && (
-                                    <div className="text-center pt-3">
+                                    <div className="text-center pt-4">
                                         <button
                                             onClick={() => setShowAllComments(!showAllComments)}
-                                            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                                            className="text-blue-600 hover:text-blue-700 font-medium"
                                         >
                                             {showAllComments ? 'Thu gọn' : `Xem thêm ${comments.length - COMMENTS_TO_SHOW} bình luận`}
                                         </button>
@@ -1138,10 +1270,7 @@ const ProductDetail = () => {
                     >
                         {relatedProducts.map((item) => (
                             <SwiperSlide key={item._id}>
-                                <Product 
-                                    data={item} 
-                                    onAddToCartSuccess={showNotification}
-                                />
+                                <Product data={item} />
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -1149,47 +1278,47 @@ const ProductDetail = () => {
             )}
 
             {/* Custom Notification */}
-                            {notification.show && (
-                    <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
-                        notification.type === 'success' ? 'border-green-500' : 'border-red-500'
-                    } transform transition-all duration-300 ease-in-out`}>
-                        <div className="p-4">
-                            <div className="flex items-start">
-                                <div className="flex-shrink-0">
-                                    {notification.type === 'success' ? (
-                                        <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    ) : (
-                                        <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    )}
-                                </div>
-                                <div className="ml-3 w-0 flex-1">
-                                    <p className={`text-sm font-medium ${
-                                        notification.type === 'success' ? 'text-green-800' : 'text-red-800'
-                                    }`}>
-                                        {notification.message}
-                                    </p>
-                                </div>
-                                <div className="ml-4 flex-shrink-0 flex">
-                                    <button
-                                        className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
-                                        onClick={() => setNotification({ show: false, message: '', type: 'success' })}
-                                    >
-                                        <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
+            {notification.show && (
+                <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+                    notification.type === 'success' ? 'border-green-500' : 'border-red-500'
+                } transform transition-all duration-300 ease-in-out`}>
+                    <div className="p-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                {notification.type === 'success' ? (
+                                    <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                ) : (
+                                    <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                            </div>
+                            <div className="ml-3 w-0 flex-1">
+                                <p className={`text-sm font-medium ${
+                                    notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}>
+                                    {notification.message}
+                                </p>
+                            </div>
+                            <div className="ml-4 flex-shrink-0 flex">
+                                <button
+                                    className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                                    onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                                >
+                                    <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
-        </>
-    );
+                </div>
+            )}
+        </div>
+    </>
+);
 };
 
 export default ProductDetail;

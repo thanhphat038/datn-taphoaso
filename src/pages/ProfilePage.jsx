@@ -72,7 +72,11 @@ const ProfilePage = () => {
   useEffect(() => {
     const checkAuthAndRedirect = () => {
       const token = Cookies.get("auth_token");
-      const userData = localStorage.getItem('user');
+      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
+      
+      console.log('🔍 ProfilePage Debug:');
+      console.log('🔍 Token:', token ? 'exists' : 'missing');
+      console.log('🔍 UserData:', userData ? 'exists' : 'missing');
       
       if (!token || !userData) {
         console.log('🚫 No authentication found, redirecting to login...');
@@ -84,15 +88,32 @@ const ProfilePage = () => {
       
       try {
         const user = JSON.parse(userData);
-        if (!user.username) {
+        // Kiểm tra các trường có thể có của user
+        const hasValidUser = user && (
+          user.username || 
+          user.email || 
+          user.id || 
+          user._id ||
+          user.full_name ||
+          user.name
+        );
+        
+        if (!hasValidUser) {
           console.log('🚫 Invalid user data, redirecting to login...');
+          console.log('🔍 User object keys:', Object.keys(user || {}));
           setIsAuthenticated(false);
           setIsLoading(false);
           navigate('/login');
           return false;
         }
         
-        console.log('✅ User authenticated:', user.username);
+        console.log('✅ ProfilePage: User authenticated successfully');
+        console.log('🔍 User info:', {
+          id: user.id || user._id,
+          username: user.username,
+          email: user.email,
+          name: user.full_name || user.name
+        });
         setIsAuthenticated(true);
         setIsLoading(false);
         return true;

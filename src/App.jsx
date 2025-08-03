@@ -25,7 +25,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import OrderDetailPage from './pages/OrderDetailPage';
 
-import ProductsPage from './pages/Products';
+import ProductsPage from './pages/products';
 import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
