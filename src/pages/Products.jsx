@@ -410,9 +410,39 @@ const ProductsPage = () => {
                         </div> */}
 
                         {/* Products Grid */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
-                            {currentProducts}
-                        </div>
+                        {filteredProducts.length === 0 ? (
+                            <div className='bg-white rounded-2xl shadow-lg p-8 border border-gray-100 text-center'>
+                                <div className='text-gray-400 text-6xl mb-4'>🔍</div>
+                                <h3 className='text-xl font-bold text-gray-800 mb-2'>Không tìm thấy sản phẩm</h3>
+                                <p className='text-gray-600 mb-6'>
+                                    Không có sản phẩm nào phù hợp với bộ lọc hiện tại. 
+                                    {selectedCategoryId && (
+                                        <span> Hãy thử chọn danh mục khác hoặc </span>
+                                    )}
+                                    {selectedPriceRange && (
+                                        <span> Hãy thử chọn khoảng giá khác hoặc </span>
+                                    )}
+                                    <span> xóa bộ lọc để xem tất cả sản phẩm.</span>
+                                </p>
+                                <div className='flex justify-center gap-3'>
+                                    {(selectedCategoryId || selectedPriceRange) && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCategoryId(null);
+                                                setSelectedPriceRange(null);
+                                            }}
+                                            className='px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors duration-200 font-medium'
+                                        >
+                                            Xóa tất cả bộ lọc
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
+                                {currentProducts}
+                            </div>
+                        )}
 
                         {/* Pagination */}
                         {totalPages > 1 && (

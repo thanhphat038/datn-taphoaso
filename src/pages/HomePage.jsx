@@ -101,30 +101,30 @@ const HomePage = () => {
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-12'>
 
         {/* Hero Banner Section - Giữ đơn giản như ban đầu */}
-        <div className='flex gap-5 mb-5'>
+        <div className='flex gap-0 mb-5'>
           <div className='grow-2'>
             <Swiper
               spaceBetween={20}
               slidesPerView={1}
               loop={true}
-              className='rounded-[30px] w-full max-w-[800px] mx-auto'
+              className='rounded-lg w-full max-w-[860px] mx-auto'
               autoplay={{ delay: 3000, disableOnInteraction: false }}
               modules={[Autoplay]}
             >
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
               </SwiperSlide>
             </Swiper>
           </div>
-          <div className='grow-1 grid gap-5'>
-            <img className='rounded-[30px]' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
-            <img className='rounded-[30px]' src="./images/banner_3.png" alt="" />
+          <div className='grow-1 grid gap-3'>
+            <img className='rounded-lg h-[195px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
+            <img className='rounded-lg h-[195px] w-full object-cover' src="./images/banner_3.png" alt="" />
           </div>
         </div>
 
@@ -293,6 +293,50 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Features Section */}
+        <section className="mt-16 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Tại Sao Chọn Chúng Tôi?</h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Chúng tôi cam kết mang đến những sản phẩm chất lượng cao với dịch vụ tốt nhất
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🚚</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giao Hàng Nhanh</h3>
+              <p className="text-gray-600">Giao hàng trong vòng 2-4 giờ</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Chất Lượng Cao</h3>
+              <p className="text-gray-600">Sản phẩm tươi ngon, đảm bảo vệ sinh</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giá Cả Hợp Lý</h3>
+              <p className="text-gray-600">Giá cả cạnh tranh, nhiều ưu đãi</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🛡️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Bảo Mật Thông Tin</h3>
+              <p className="text-gray-600">Thông tin cá nhân được bảo vệ an toàn</p>
+            </div>
+          </div>
+        </section>
 
       </div>
 
