@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000/api
 
-@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNDU5NTUyLCJleHAiOjE3NTQwNjQzNTJ9.N8Mwo-81Q48q8ykTimYChznEjXpxI7HwIp-3HYqHdp0
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MTI3NDQ0LCJleHAiOjE3NTQ3MzIyNDR9.ITuKGr1FNmggjG6xi523DK7L8GqngWrvYQQymRy9L0U
 
 ### Variables
 @userId = 685a9ea76875fcf8f499fa9a
@@ -653,4 +653,59 @@ Content-Type: application/json
     "total_amount": 100000,
     "payment_method": "vnpay"
   }
-} 
+}
+
+### Shipping APIs ###
+
+### Calculate Shipping
+POST {{baseUrl}}/shipping/calculate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "address": "75 Vĩnh Viễn, Phường 2, Quận 10, Hồ Chí Minh"
+}
+
+# Response includes:
+# - distance: khoảng cách từ cửa hàng đến địa chỉ KH (đơn vị: km)
+# - shippingFee: phí ship (đơn vị: VND)
+# - deliveryAddress: địa chỉ giao hàng (được chuẩn hóa)
+# - storeAddress: địa chỉ cửa hàng
+# - storeCoordinates: tọa độ cửa hàng (lat, lon)
+# - deliveryCoordinates: tọa độ địa chỉ giao hàng (lat, lon)
+
+# CHUẨN ĐỊA CHỈ ĐỂ TÌM KIẾM NHANH NHẤT:
+# ✅ TỐT NHẤT: "Số nhà + Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
+#    Ví dụ: "75 Vĩnh Viễn, Phường 2, Quận 10, Hồ Chí Minh"
+#    Ví dụ: "159 Nam Kỳ Khởi Nghĩa, Phường Võ Thị Sáu, Quận 3, Hồ Chí Minh"
+#
+# ✅ TỐT: "Tên đường, Quận/Huyện, Tỉnh/Thành phố"
+#    Ví dụ: "Vĩnh Viễn, Quận 10, Hồ Chí Minh"
+#    Ví dụ: "Nam Kỳ Khởi Nghĩa, Quận 3, Hồ Chí Minh"
+#
+# ✅ CHẤP NHẬN ĐƯỢC: "Quận/Huyện, Tỉnh/Thành phố"
+#    Ví dụ: "Quận 10, Hồ Chí Minh"
+#    Ví dụ: "Quận 3, Hồ Chí Minh"
+#
+# ❌ KHÔNG NÊN: Địa chỉ quá chi tiết hoặc không chuẩn
+#    Ví dụ: "75-31 Vĩnh Viễn, Phường 2, Quận 10, Hồ Chí Minh" (có thể không tìm thấy)
+#    Ví dụ: "Nhà số 75, đường Vĩnh Viễn, phường 2, quận 10, TP.HCM" (quá dài)
+#
+# Lưu ý: API sẽ tự động tìm kiếm địa chỉ với nhiều cách khác nhau nếu địa chỉ chi tiết không tìm thấy
+
+### Calculate Shipping from Coordinates
+POST {{baseUrl}}/shipping/calculate-from-coordinates
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "lat": 10.7769,
+  "lon": 106.7009
+}
+
+### Get Address from Coordinates
+GET {{baseUrl}}/shipping/get-address-from-coordinates?lat=10.7769&lon=106.7009
+Authorization: Bearer {{authToken}}
+
+### Get Store Info
+GET {{baseUrl}}/shipping/store-info

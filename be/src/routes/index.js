@@ -17,6 +17,7 @@ import cartRouter from './cart.route.js';
 import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
 import paymentRouter from './payment.route.js';
+import shippingRouter from './shipping.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -45,5 +46,8 @@ router.use('/vouchers', authMiddleware, voucherRouter);
 
 // Payment routes
 router.use('/payment', paymentRouter);
+
+// Shipping routes
+router.use('/shipping', shippingRouter);
 
 export default router;
