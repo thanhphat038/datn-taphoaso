@@ -37,15 +37,9 @@ const ProductDetail = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [activeTab, setActiveTab] = useState('comments'); // 'comments' or 'reviews'
     const [loadingComments, setLoadingComments] = useState(false);
-// <<<<<<< devThai
-    const { showAlert, showError } = useAlertContext();
-    const { showSuccess } = useToast();
-// =======
     const [relatedProductsByCategory, setRelatedProductsByCategory] = useState([]);
     const [loadingRelatedProducts, setLoadingRelatedProducts] = useState(false);
-    const { showWarning, showError } = useAlertContext();
-    const { showSuccess, showError: showToastError } = useToast();
-// >>>>>>> dev
+    const { showWarning } = useToast();
 
     // Thêm state cho package selection
     const [selectedPackage, setSelectedPackage] = useState(null);
@@ -150,33 +144,7 @@ const ProductDetail = () => {
         }
     }, [activeTab, productData._id]);
 
-// <<<<<<< devThai
-    const fetchReviews = async () => {
-// =======
-    // Fetch related products by category when product changes
-    useEffect(() => {
-        if (productData._id && productData.category_id) {
-            fetchRelatedProductsByCategory();
-        }
-    }, [productData._id, productData.category_id]);
-
-    const fetchReviews = async (page = 1) => {
-// >>>>>>> dev
-        if (!productData._id) return;
-        
-        try {
-            setReviewsLoading(true);
-            const response = await getReviewsByProductId(productData._id);
-            setReviews((response.data || []).reverse());
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-            setReviews([]);
-        } finally {
-            setReviewsLoading(false);
-        }
-    }, [productData._id]);
-
-    const fetchRelatedProductsByCategory = async () => {
+    const fetchRelatedProductsByCategory = useCallback(async () => {
         if (!productData.category_id) return;
         
         try {
@@ -192,7 +160,29 @@ const ProductDetail = () => {
         } finally {
             setLoadingRelatedProducts(false);
         }
-    };
+    }, [productData.category_id, productData._id]);
+
+    // Fetch related products by category when product changes
+    useEffect(() => {
+        if (productData._id && productData.category_id) {
+            fetchRelatedProductsByCategory();
+        }
+    }, [productData._id, productData.category_id, fetchRelatedProductsByCategory]);
+
+    const fetchReviews = useCallback(async () => {
+        if (!productData._id) return;
+        
+        try {
+            setReviewsLoading(true);
+            const response = await getReviewsByProductId(productData._id);
+            setReviews((response.data || []).reverse());
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            setReviews([]);
+        } finally {
+            setReviewsLoading(false);
+        }
+    }, [productData._id]);
 
     const handleToggleFavorite = async () => {
         if (loadingFavorite) return;
