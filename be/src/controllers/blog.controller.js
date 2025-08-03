@@ -45,6 +45,21 @@ export const getBlogById = async (req, res, next) => {
   }
 };
 
+// Get blogs by category
+export const getBlogsByCategory = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+    const { page, limit, sort } = req.query;
+    const blogs = await blogService.getBlogsByCategory(categoryId, { page, limit, sort });
+    res.json({
+      success: true,
+      data: blogs
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Update blog
 export const updateBlog = async (req, res, next) => {
   try {

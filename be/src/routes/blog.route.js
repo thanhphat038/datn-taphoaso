@@ -3,6 +3,7 @@ import {
   createBlog,
   getBlogs,
   getBlogById,
+  getBlogsByCategory,
   updateBlog,
   deleteBlog
 } from '../controllers/blog.controller.js';
@@ -14,6 +15,9 @@ router.post('/', createBlog);
 
 // Get all blogs
 router.get('/', getBlogs);
+
+// Get blogs by category
+router.get('/category/:categoryId', getBlogsByCategory);
 
 // Get blog by id
 router.get('/:id', getBlogById);

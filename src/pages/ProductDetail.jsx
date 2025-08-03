@@ -5,7 +5,7 @@ import { formatCurrency } from '../components/Product';
 import { addToCart } from '../service/Cart.service';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
 import { getProductComments, postComment, postReply } from '../service/Comment.service';
-import { getReviewsByProductId } from '../service/Product.service';
+import { getReviewsByProductId, getProductsByCategory } from '../service/Product.service';
 import Cookies from 'js-cookie';
 import Product from '../components/Product';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -40,8 +40,15 @@ const ProductDetail = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [activeTab, setActiveTab] = useState('comments'); // 'comments' or 'reviews'
     const [loadingComments, setLoadingComments] = useState(false);
+// <<<<<<< devThai
     const { showAlert, showError } = useAlertContext();
     const { showSuccess } = useToast();
+// =======
+    const [relatedProductsByCategory, setRelatedProductsByCategory] = useState([]);
+    const [loadingRelatedProducts, setLoadingRelatedProducts] = useState(false);
+    const { showWarning, showError } = useAlertContext();
+    const { showSuccess, showError: showToastError } = useToast();
+// >>>>>>> dev
 
     // Thêm state cho package selection
     const [selectedPackage, setSelectedPackage] = useState(null);
@@ -206,7 +213,18 @@ const ProductDetail = () => {
         }
     }, [activeTab, productData._id]);
 
+// <<<<<<< devThai
     const fetchReviews = async () => {
+// =======
+    // Fetch related products by category when product changes
+    useEffect(() => {
+        if (productData._id && productData.category_id) {
+            fetchRelatedProductsByCategory();
+        }
+    }, [productData._id, productData.category_id]);
+
+    const fetchReviews = async (page = 1) => {
+// >>>>>>> dev
         if (!productData._id) return;
         
         try {
@@ -218,6 +236,24 @@ const ProductDetail = () => {
             setReviews([]);
         } finally {
             setReviewsLoading(false);
+        }
+    };
+
+    const fetchRelatedProductsByCategory = async () => {
+        if (!productData.category_id) return;
+        
+        try {
+            setLoadingRelatedProducts(true);
+            const response = await getProductsByCategory(productData.category_id, 1, 10);
+            
+            // Lọc bỏ sản phẩm hiện tại khỏi danh sách liên quan
+            const filteredProducts = response.data?.data?.filter(product => product._id !== productData._id) || [];
+            setRelatedProductsByCategory(filteredProducts);
+        } catch (error) {
+            console.error('Error fetching related products by category:', error);
+            setRelatedProductsByCategory([]);
+        } finally {
+            setLoadingRelatedProducts(false);
         }
     };
 
@@ -1155,7 +1191,70 @@ const ProductDetail = () => {
                         </div>
                     )}
 
-            {/* Related Products */}
+            {/* Related Products by Category */}
+            {relatedProductsByCategory && relatedProductsByCategory.length > 0 && (
+                <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold">Sản phẩm cùng danh mục</h2>
+                        <Link 
+                            to={`/product?category=${productData.category_id}`}
+                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+                        >
+                            Xem tất cả
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
+                    </div>
+                    
+                    {loadingRelatedProducts ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            {[...Array(5)].map((_, index) => (
+                                <div key={index} className="animate-pulse">
+                                    <div className="bg-gray-200 rounded-lg h-48 mb-2"></div>
+                                    <div className="bg-gray-200 h-4 rounded mb-1"></div>
+                                    <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <Swiper
+                            spaceBetween={20}
+                            slidesPerView={1}
+                            breakpoints={{
+                                640: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 20,
+                                },
+                                768: {
+                                    slidesPerView: 3,
+                                    spaceBetween: 20,
+                                },
+                                1024: {
+                                    slidesPerView: 4,
+                                    spaceBetween: 20,
+                                },
+                                1280: {
+                                    slidesPerView: 5,
+                                    spaceBetween: 20,
+                                },
+                            }}
+                            loop={relatedProductsByCategory.length > 5}
+                            autoplay={{ delay: 2000, disableOnInteraction: false }}
+                            modules={[Autoplay]}
+                            className="w-full"
+                        >
+                            {relatedProductsByCategory.map((item) => (
+                                <SwiperSlide key={item._id}>
+                                    <Product data={item} />
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                    )}
+                </div>
+            )}
+
+            {/* Original Related Products (if any) */}
             {relatedProducts && relatedProducts.length > 0 && (
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                     <h2 className="text-2xl font-bold mb-4">Sản phẩm liên quan</h2>
