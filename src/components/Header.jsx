@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from './NavBar';
 import { dataProduct } from '../service/Product.service';
 import { getAllAddress } from '../service/Address.service';
 import { getAllCategories } from '../service/Admin.Service';
