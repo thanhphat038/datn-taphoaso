@@ -18,9 +18,7 @@ import ProductPackageSelector from '../components/ProductPackageSelector';
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    // Removed unused state variables
     const [mainImage, setMainImage] = useState(null);
-    const [quantity, setQuantity] = useState(1);
     const [loadingAddToCart, setLoadingAddToCart] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(false);
@@ -33,22 +31,17 @@ const ProductDetail = () => {
     const [postingReply, setPostingReply] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
-    // Removed unused state variables
-    const [pendingAddQty, setPendingAddQty] = useState(0);
     const pendingAddQtyRef = useRef(0);
     const debounceAddToCart = useRef(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [activeTab, setActiveTab] = useState('comments'); // 'comments' or 'reviews'
     const [loadingComments, setLoadingComments] = useState(false);
-// <<<<<<< devThai
-    const { showAlert, showError } = useAlertContext();
-    const { showSuccess } = useToast();
-// =======
     const [relatedProductsByCategory, setRelatedProductsByCategory] = useState([]);
     const [loadingRelatedProducts, setLoadingRelatedProducts] = useState(false);
-    const { showWarning, showError } = useAlertContext();
-    const { showSuccess, showError: showToastError } = useToast();
-// >>>>>>> dev
+    const [quantity] = useState(1);
+    const [, setPendingAddQty] = useState(0);
+    const { showAlert, showError } = useAlertContext();
+    const { showSuccess } = useToast();
 
     // Thêm state cho package selection
     const [selectedPackage, setSelectedPackage] = useState(null);
@@ -213,9 +206,6 @@ const ProductDetail = () => {
         }
     }, [activeTab, productData._id]);
 
-// <<<<<<< devThai
-    const fetchReviews = async () => {
-// =======
     // Fetch related products by category when product changes
     useEffect(() => {
         if (productData._id && productData.category_id) {
@@ -223,8 +213,7 @@ const ProductDetail = () => {
         }
     }, [productData._id, productData.category_id]);
 
-    const fetchReviews = async (page = 1) => {
-// >>>>>>> dev
+    const fetchReviews = async () => {
         if (!productData._id) return;
         
         try {
@@ -1143,7 +1132,7 @@ const ProductDetail = () => {
                                     <div className="text-center py-12 bg-gray-50 rounded-xl">
                                         <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <svg className="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                             </svg>
                                         </div>
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">Chưa có đánh giá nào</h3>
@@ -1276,47 +1265,47 @@ const ProductDetail = () => {
             )}
 
             {/* Custom Notification */}
-                            {notification.show && (
-                    <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
-                        notification.type === 'success' ? 'border-green-500' : 'border-red-500'
-                    } transform transition-all duration-300 ease-in-out`}>
-                        <div className="p-4">
-                            <div className="flex items-start">
-                                <div className="flex-shrink-0">
-                                    {notification.type === 'success' ? (
-                                        <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    ) : (
-                                        <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    )}
-                                </div>
-                                <div className="ml-3 w-0 flex-1">
-                                    <p className={`text-sm font-medium ${
-                                        notification.type === 'success' ? 'text-green-800' : 'text-red-800'
-                                    }`}>
-                                        {notification.message}
-                                    </p>
-                                </div>
-                                <div className="ml-4 flex-shrink-0 flex">
-                                    <button
-                                        className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
-                                        onClick={() => setNotification({ show: false, message: '', type: 'success' })}
-                                    >
-                                        <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
+            {notification.show && (
+                <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+                    notification.type === 'success' ? 'border-green-500' : 'border-red-500'
+                } transform transition-all duration-300 ease-in-out`}>
+                    <div className="p-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                {notification.type === 'success' ? (
+                                    <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                ) : (
+                                    <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                            </div>
+                            <div className="ml-3 w-0 flex-1">
+                                <p className={`text-sm font-medium ${
+                                    notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}>
+                                    {notification.message}
+                                </p>
+                            </div>
+                            <div className="ml-4 flex-shrink-0 flex">
+                                <button
+                                    className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                                    onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                                >
+                                    <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
-        </>
-    );
+                </div>
+            )}
+        </div>
+    </>
+);
 };
 
 export default ProductDetail;
