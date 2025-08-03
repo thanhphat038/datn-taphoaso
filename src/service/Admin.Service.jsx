@@ -130,3 +130,8 @@ export const getMyOrders = () => {
 export const getOrdersByUserId = (userId) => {
     return axios.get(`${api}/orders?user_id=${userId}`, { headers: getAuthHeaders() });
 };
+
+// Get all products (Admin)
+export const getAllProducts = () => {
+    return axios.get(`${api}/products`, { headers: getAuthHeaders() });
+};

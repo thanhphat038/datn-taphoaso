@@ -46,6 +46,8 @@ import AddBlog from './pages/admin/AddBlog';
 import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
 import AdminReview from './pages/admin/AdminReview';
+import AdminVariant from './pages/admin/AdminVariant';
+import AddVariantPage from './pages/admin/AddVariantPage';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -124,6 +126,9 @@ function Layout() {
             <Route path="/admin/blog/detail/:id" element={<AdminBlogDetail />} />
             <Route path="/admin/comment" element={<AdminComment />} />
             <Route path="/admin/review" element={<AdminReview />} />
+            <Route path="/admin/variant" element={<AdminVariant />} />
+            <Route path="/admin/addvariant" element={<AddVariantPage />} />
+            <Route path="/admin/addvariant/:id" element={<AddVariantPage />} />
             <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
           </Routes>
         </AdminProtected>

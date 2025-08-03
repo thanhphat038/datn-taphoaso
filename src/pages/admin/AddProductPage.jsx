@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUpload, FaTrash, FaImage, FaPlus } from 'react-icons/fa';
+import { FaUpload, FaTrash, FaImage, FaPlus, FaCubes, FaEdit, FaEye } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllCategories, createCategory } from '../../service/Admin.Service.jsx';
+import { getVariantsByProduct } from '../../service/Variant.service.jsx';
 import Cookies from "js-cookie";
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -52,6 +53,10 @@ const AddProductPage = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
 
+  // Variants
+  const [variants, setVariants] = useState([]);
+  const [variantsLoading, setVariantsLoading] = useState(false);
+
   // Fetch product data if editing
   useEffect(() => {
     if (id) {
@@ -80,6 +85,9 @@ const AddProductPage = () => {
           if (product.images && product.images.length > 0) {
             setImagePreviews(product.images);
           }
+
+          // Fetch variants for this product
+          await fetchVariants(id);
         } catch (error) {
           setError('Không thể tải thông tin sản phẩm: ' + error.message);
         } finally {
@@ -105,6 +113,20 @@ const AddProductPage = () => {
     };
     fetchCategories();
   }, []);
+
+  // Fetch variants for a product
+  const fetchVariants = async (productId) => {
+    try {
+      setVariantsLoading(true);
+      const response = await getVariantsByProduct(productId);
+      setVariants(response.data || []);
+    } catch (error) {
+      console.error('Error fetching variants:', error);
+      setVariants([]);
+    } finally {
+      setVariantsLoading(false);
+    }
+  };
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -223,6 +245,27 @@ const AddProductPage = () => {
     }
   };
 
+  // Navigate to variant creation page
+  const handleCreateVariant = () => {
+    if (!id) {
+      // For new products, navigate to variant creation without productId
+      // The variant page will handle the case when no productId is provided
+      navigate('/admin/addvariant');
+      return;
+    }
+    navigate(`/admin/addvariant?productId=${id}`);
+  };
+
+  // Navigate to variant edit page
+  const handleEditVariant = (variantId) => {
+    navigate(`/admin/addvariant/${variantId}`);
+  };
+
+  // Navigate to variant listing page
+  const handleViewVariants = () => {
+    navigate('/admin/variant');
+  };
+
   // Validate form
   const validateForm = () => {
     if (!formData.name.trim()) {
@@ -310,6 +353,14 @@ const AddProductPage = () => {
         throw new Error(errorData.message || 'Failed to save product');
       }
 
+      const result = await response.json();
+      const savedProductId = result.data._id || id;
+
+      // If this was a new product, refresh variants
+      if (!id) {
+        await fetchVariants(savedProductId);
+      }
+
       navigate('/admin/product');
     } catch (error) {
       setError(error.message);
@@ -395,6 +446,108 @@ const AddProductPage = () => {
                     />
                     <p className="text-xs text-gray-500 mt-1">Ngày tạo sản phẩm (tự động điền ngày hôm nay)</p>
                   </div>
+                </div>
+              </AdminCard>
+
+              {/* Variants Section - Always show */}
+              <AdminCard title="Biến thể sản phẩm">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FaCubes className="w-5 h-5 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Biến thể của sản phẩm ({variants.length})
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCreateVariant}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <FaPlus className="w-4 h-4" />
+                        Thêm biến thể
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleViewVariants}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <FaEye className="w-4 h-4" />
+                        Xem tất cả
+                      </button>
+                    </div>
+                  </div>
+
+                  {!id ? (
+                    <div className="text-center py-8">
+                      <FaCubes className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 mb-3">Lưu sản phẩm trước để quản lý biến thể</p>
+                      <button
+                        type="button"
+                        onClick={handleCreateVariant}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <FaPlus className="w-4 h-4" />
+                        Tạo biến thể
+                      </button>
+                    </div>
+                  ) : variantsLoading ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500">Đang tải biến thể...</div>
+                    </div>
+                  ) : variants.length > 0 ? (
+                    <div className="space-y-3">
+                      {variants.slice(0, 3).map((variant) => (
+                        <div key={variant._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">{variant.name}</span>
+                              {variant.is_default && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                  Mặc định
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {variant.unit} • {variant.quantity_per_unit} • {variant.price.toLocaleString('vi-VN')}đ
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleEditVariant(variant._id)}
+                            className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                          >
+                            <FaEdit className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                      {variants.length > 3 && (
+                        <div className="text-center py-2">
+                          <button
+                            type="button"
+                            onClick={handleViewVariants}
+                            className="text-blue-600 hover:text-blue-700 text-sm"
+                          >
+                            Xem thêm {variants.length - 3} biến thể khác
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <FaCubes className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 mb-3">Chưa có biến thể nào</p>
+                      <button
+                        type="button"
+                        onClick={handleCreateVariant}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <FaPlus className="w-4 h-4" />
+                        Tạo biến thể đầu tiên
+                      </button>
+                    </div>
+                  )}
                 </div>
               </AdminCard>
 
