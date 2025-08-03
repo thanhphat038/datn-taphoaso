@@ -12,6 +12,11 @@ const variantSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Tên biến thể không được vượt quá 100 ký tự']
   },
+  sku: {
+    type: String,
+    trim: true,
+    sparse: true // Allows multiple null values
+  },
   unit: {
     type: String,
     enum: ['thùng', 'lốc', 'gói', 'chai', 'lon', 'túi', 'hộp', 'kg', 'gram'],

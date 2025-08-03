@@ -71,7 +71,7 @@ const AdminComment = () => {
         return {
           _id: c._id,
           content: c.comment || c.content || '',
-          createdAt: c.create_at || c.createdAt || '',
+          create_at: c.create_at || c.create_at || '',
           status: c.is_hidden ? 'inactive' : 'active',
           user_id: user,
           product_id: product,
@@ -240,7 +240,7 @@ const AdminComment = () => {
     },
     {
       title: 'Ngày tạo',
-      key: 'createdAt',
+      key: 'create_at',
       render: (comment) => (
         <div className="text-sm text-gray-600">
           {comment.create_at ? new Date(comment.create_at).toLocaleDateString('vi-VN', {

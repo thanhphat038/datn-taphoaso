@@ -30,6 +30,7 @@ import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
+import AdminBlogCategory from './pages/admin/AdminBlogCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
@@ -116,6 +117,7 @@ function Layout() {
             <Route path="/admin/addproduct" element={<AddProductPage />} />
             <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
             <Route path="/admin/category" element={<AdminCategory />} />
+            <Route path="/admin/blogcategory" element={<AdminBlogCategory />} />
             <Route path="/admin/voucher" element={<VoucherPage />} />
             <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
             <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />

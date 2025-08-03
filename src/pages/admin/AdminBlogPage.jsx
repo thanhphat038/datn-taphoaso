@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaPlus, FaEye, FaFileAlt, FaEye as FaEyeIcon, FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaEye, FaFileAlt, FaEye as FaEyeIcon, FaPencilAlt, FaTrashAlt, FaListAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
@@ -278,6 +278,13 @@ const AdminBlogPage = () => {
               <div className="text-sm text-gray-600">Đã xuất bản</div>
               <div className="text-2xl font-bold text-green-600">{publishedBlogs}</div>
             </div>
+            <NavLink
+              to="/admin/blogcategory"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <FaListAlt className="w-5 h-5" />
+              Quản lý danh mục
+            </NavLink>
             <NavLink
               to="/admin/addblog"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
