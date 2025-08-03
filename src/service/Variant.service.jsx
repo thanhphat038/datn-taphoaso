@@ -5,18 +5,10 @@ const API_BASE_URL = "http://localhost:3000/api";
 
 const getAuthHeaders = () => {
   const token = Cookies.get("auth_token");
-  console.log("=== AUTH HEADERS ===");
-  console.log("Token from cookies:", token);
-  console.log("Token type:", typeof token);
-  console.log("Token valid:", token && token !== "undefined" && token !== "null");
-  
-  const headers = {
+  return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
-  
-  console.log("Final headers:", headers);
-  return headers;
 };
 
 // Get all variants with filters and pagination
@@ -95,29 +87,13 @@ export const toggleVariantStatus = async (id) => {
 // Get variants by product ID
 export const getVariantsByProduct = async (productId, params = {}) => {
   try {
-    console.log("=== GET VARIANTS BY PRODUCT SERVICE ===");
-    console.log("Product ID:", productId);
-    console.log("Params:", params);
-    console.log("API URL:", `${API_BASE_URL}/variants/product/${productId}`);
-    console.log("Auth headers:", getAuthHeaders());
-    
     const response = await axios.get(`${API_BASE_URL}/variants/product/${productId}`, {
       headers: getAuthHeaders(),
       params,
     });
     
-    console.log("Service response:", response);
-    console.log("Service response data:", response.data);
-    console.log("=== GET VARIANTS BY PRODUCT SERVICE SUCCESS ===");
-    
     return response.data;
   } catch (error) {
-    console.error("=== GET VARIANTS BY PRODUCT SERVICE ERROR ===");
-    console.error("Error:", error);
-    console.error("Error message:", error.message);
-    console.error("Error response:", error.response);
-    console.error("Error response data:", error.response?.data);
-    console.error("Error response status:", error.response?.status);
     throw error;
   }
 };

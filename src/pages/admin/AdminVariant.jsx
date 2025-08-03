@@ -36,6 +36,8 @@ const AdminVariant = () => {
   const [productFilter, setProductFilter] = useState("All");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -47,6 +49,23 @@ const AdminVariant = () => {
   const [currentVariant, setCurrentVariant] = useState(null);
 
   const navigate = useNavigate();
+
+  // Helper function to refresh variants list
+  const refreshVariantsList = async () => {
+    const params = {
+      page: currentPage,
+      limit: pageSize,
+      name: searchQuery || undefined,
+      status: statusFilter !== "All" ? statusFilter : undefined,
+      product_id: productFilter !== "All" ? productFilter : undefined,
+    };
+    const response = await getAllVariants(params);
+    setVariants(response.data || []);
+    if (response.pagination) {
+      setTotalItems(response.pagination.total || 0);
+      setTotalPages(response.pagination.pages || 0);
+    }
+  };
 
   // Fetch variants
   useEffect(() => {
@@ -63,6 +82,16 @@ const AdminVariant = () => {
 
         const response = await getAllVariants(params);
         setVariants(response.data || []);
+        
+        // Update pagination info
+        if (response.pagination) {
+          setTotalItems(response.pagination.total || 0);
+          setTotalPages(response.pagination.pages || 0);
+        } else {
+          // Fallback if no pagination info
+          setTotalItems(response.data?.length || 0);
+          setTotalPages(Math.ceil((response.data?.length || 0) / pageSize));
+        }
       } catch (error) {
         setError("Không thể tải danh sách biến thể: " + error.message);
         console.error("Error fetching variants:", error);
@@ -116,7 +145,8 @@ const AdminVariant = () => {
       setLoading(true);
       await deleteVariant(variantId);
 
-      setVariants(variants.filter(v => v._id !== variantId));
+      // Refresh the list
+      await refreshVariantsList();
       setMessage("Xóa biến thể thành công!");
       setMessageType("success");
       setTimeout(() => setMessage(""), 3000);
@@ -141,11 +171,8 @@ const AdminVariant = () => {
       setLoading(true);
       await toggleVariantStatus(variantId);
 
-      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      setVariants(variants.map(v => 
-        v._id === variantId ? { ...v, status: newStatus } : v
-      ));
-
+      // Refresh the list
+      await refreshVariantsList();
       setMessage(`Đã ${actionText} biến thể thành công!`);
       setMessageType("success");
       setTimeout(() => setMessage(""), 3000);
@@ -276,6 +303,12 @@ const AdminVariant = () => {
       default:
         break;
     }
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
   };
 
   // Table columns
@@ -568,10 +601,11 @@ const AdminVariant = () => {
       <div className="mt-6">
         <AdminPagination
           currentPage={currentPage}
+          totalPages={totalPages}
           pageSize={pageSize}
-          total={variants.length}
+          totalItems={totalItems}
           onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
+          onPageSizeChange={handlePageSizeChange}
         />
       </div>
 
