@@ -4,7 +4,8 @@ import { getCart } from '../service/Cart.service';
 import { dataProduct } from '../service/Product.service';
 import { updateCartItem, removeCartItem } from '../service/Cart.service';
 import { CartContext } from '../context/CartContext';
-import { FaShoppingCart, FaTrash, FaGift, FaTruck, FaCreditCard } from 'react-icons/fa';
+import { FaShoppingCart, FaTrash, FaGift, FaTruck, FaCreditCard, FaChevronDown } from 'react-icons/fa';
+import { getAllVouchers } from '../service/Admin.Service';
 
 const CartPage = () => {
   const { cartItems, setInitialCartItems } = useContext(CartContext);
@@ -16,6 +17,11 @@ const CartPage = () => {
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [isVoucherApplied, setIsVoucherApplied] = useState(false);
   const [appliedVoucher, setAppliedVoucher] = useState(null);
+
+  // State cho dropdown voucher
+  const [showVoucherDropdown, setShowVoucherDropdown] = useState(false);
+  const [availableVouchers, setAvailableVouchers] = useState([]);
+  const [loadingVouchers, setLoadingVouchers] = useState(false);
 
   // Ref để lưu debounce timer cho từng item
   const debounceTimers = useRef({});
@@ -52,6 +58,27 @@ const CartPage = () => {
       }
     };
     fetchProducts();
+  }, []);
+
+  // Fetch available vouchers
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        setLoadingVouchers(true);
+        const response = await getAllVouchers();
+        const allVouchers = response.data.data || [];
+        
+        // Lọc chỉ những voucher có status active
+        const activeVouchers = allVouchers.filter(voucher => voucher.status === 'active');
+        setAvailableVouchers(activeVouchers);
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+        setAvailableVouchers([]);
+      } finally {
+        setLoadingVouchers(false);
+      }
+    };
+    fetchVouchers();
   }, []);
 
   // Hàm xử lý áp dụng mã giảm giá
@@ -94,6 +121,12 @@ const CartPage = () => {
     setIsVoucherApplied(false);
     setAppliedVoucher(null);
     setVoucherCode('');
+  };
+
+  // Hàm chọn voucher từ dropdown
+  const handleSelectVoucher = (voucher) => {
+    setVoucherCode(voucher.code);
+    setShowVoucherDropdown(false);
   };
 
   // Sửa updateCartItemQty để dùng fetchCartRef
@@ -276,13 +309,68 @@ const CartPage = () => {
                 
                 <div className="space-y-3">
                   <div className="flex gap-3">
-                    <input
-                      className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Nhập mã giảm giá..."
-                      value={voucherCode}
-                      onChange={(e) => setVoucherCode(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleApplyVoucher()}
-                    />
+                    <div className="flex-1 relative">
+                      <input
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Nhập mã giảm giá..."
+                        value={voucherCode}
+                        onChange={(e) => setVoucherCode(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleApplyVoucher()}
+                        onFocus={() => setShowVoucherDropdown(true)}
+                      />
+                      <button
+                        onClick={() => setShowVoucherDropdown(!showVoucherDropdown)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <FaChevronDown className={`w-4 h-4 transition-transform ${showVoucherDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* Dropdown Vouchers */}
+                      {showVoucherDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                          {loadingVouchers ? (
+                            <div className="p-4 text-center text-gray-500">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                              <p className="mt-2 text-sm">Đang tải voucher...</p>
+                            </div>
+                          ) : availableVouchers.length === 0 ? (
+                            <div className="p-4 text-center text-gray-500">
+                              <p className="text-sm">Không có voucher nào khả dụng</p>
+                            </div>
+                          ) : (
+                            <div className="py-2">
+                              {availableVouchers.map((voucher) => (
+                                <button
+                                  key={voucher._id}
+                                  onClick={() => handleSelectVoucher(voucher)}
+                                  className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className="font-medium text-gray-800">{voucher.code}</div>
+                                      <div className="text-sm text-gray-600">
+                                        {voucher.discount_type === 'percentage' 
+                                          ? `Giảm ${voucher.discount_value}%` 
+                                          : `Giảm ${voucher.discount_value?.toLocaleString()}đ`
+                                        }
+                                      </div>
+                                      {voucher.min_order_value && (
+                                        <div className="text-xs text-gray-500">
+                                          Đơn hàng tối thiểu: {voucher.min_order_value?.toLocaleString()}đ
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="text-xs text-green-600 font-medium">
+                                      {voucher.discount_type === 'percentage' ? 'Phần trăm' : 'Số tiền'}
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <button 
                       className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleApplyVoucher}
@@ -335,15 +423,6 @@ const CartPage = () => {
                       </div>
                     </div>
                   )}
-                  
-                  <div className="text-xs text-gray-500">
-                    <p className="font-medium mb-1">Mã có sẵn:</p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM10 (10%)</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM20K</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs">GIAM50K</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
