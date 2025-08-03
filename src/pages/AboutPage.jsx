@@ -12,7 +12,8 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
+    <div className="min-h-screen bg-[#F5FBFB]">
+      <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
       {/* Top Welcome Section with pink background */}
       <section className="bg-sky-50 rounded-2xl p-8 mb-16">
         <div className="flex flex-col md:flex-row gap-8">
@@ -321,6 +322,7 @@ const AboutPage = () => {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 };
