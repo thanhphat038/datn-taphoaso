@@ -48,9 +48,15 @@ export async function loginUser({ username, password }) {
     if (token) {
       Cookies.set("auth_token", token, { expires: 7 });
       console.log('✅ Token saved to cookies');
+      console.log('🔍 Token value:', token.substring(0, 20) + '...');
+      console.log('🔍 Cookie check:', Cookies.get("auth_token") ? 'exists' : 'missing');
     } else {
       console.warn('⚠️ No token found in response');
     }
+    
+    // Kiểm tra lại token sau khi lưu
+    const savedToken = Cookies.get("auth_token");
+    console.log('🔍 Final token check:', savedToken ? 'saved successfully' : 'failed to save');
     
     return response.data;
   } catch (error) {
