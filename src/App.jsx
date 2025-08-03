@@ -33,6 +33,7 @@ import AdminCategory from './pages/admin/AdminCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
 import CheckoutGuard from './components/CheckoutGuard';
 import AddProductPage from './pages/admin/AddProductPage';
 import AdminPage from './pages/admin/AdminPage';
@@ -130,9 +131,11 @@ function App() {
       <Router>
         <AlertProvider>
           <ToastProvider>
-            <CartProvider>
-              <Layout />
-            </CartProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Layout />
+              </CartProvider>
+            </AuthProvider>
           </ToastProvider>
         </AlertProvider>
       </Router>

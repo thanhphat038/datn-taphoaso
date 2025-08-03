@@ -18,6 +18,8 @@ import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
 import paymentRouter from './payment.route.js';
 import shippingRouter from './shipping.route.js';
+import productVariantRouter from './productVariant.route.js';
+import recentViewsRouter from './recentViews.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -49,5 +51,11 @@ router.use('/payment', paymentRouter);
 
 // Shipping routes
 router.use('/shipping', shippingRouter);
+
+// Product Variant routes
+router.use('/product-variants', productVariantRouter);
+
+// Recent Views routes
+router.use('/recent-views', recentViewsRouter);
 
 export default router;

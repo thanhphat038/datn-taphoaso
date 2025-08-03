@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Cookies from "js-cookie";
+import { useAuth } from '../context/AuthContext';
 import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
@@ -9,6 +10,7 @@ import ChangePassword from './profile/ChangePassword';
 import axios from 'axios';
 
 const ProfilePage = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
@@ -16,8 +18,8 @@ const ProfilePage = () => {
   console.log('profile:', profile); // Đặt ở đây
 
   const handleLogout = () => {
-    Cookies.remove("auth_token");
-    window.location.href = "/login";
+    logout();
+    navigate('/login');
   };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
@@ -31,18 +33,25 @@ const ProfilePage = () => {
   }, [currentTab]);
 
   useEffect(() => {
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     async function fetchProfile() {
       try {
+        // Sử dụng user từ AuthContext nếu có
+        if (user) {
+          setProfile(user);
+          return;
+        }
+
+        // Fallback: gọi API để lấy profile
         const token = localStorage.getItem('token') || Cookies.get("auth_token") || localStorage.getItem('authToken') || localStorage.getItem('accessToken');
-        console.log('🔍 Debug - Token:', token);
-        console.log('🔍 Debug - localStorage token:', localStorage.getItem('token'));
-        console.log('🔍 Debug - Cookies token:', Cookies.get("auth_token"));
-        console.log('🔍 Debug - authToken:', localStorage.getItem('authToken'));
-        console.log('🔍 Debug - accessToken:', localStorage.getItem('accessToken'));
         
         if (!token) {
           console.error('🔍 Debug - No token found');
-          // Redirect to login if no token
           navigate('/login');
           return;
         }
@@ -53,14 +62,16 @@ const ProfilePage = () => {
           },
         });
         console.log('🔍 Debug - Profile response:', res.data);
-        // Nếu response là { data: { ...user } }
         setProfile(res.data.data || res.data);
       } catch (err) {
         console.error('Lỗi lấy profile:', err);
+        // Nếu API fail, logout user
+        logout();
+        navigate('/login');
       }
     }
     fetchProfile();
-  }, []);
+  }, [isAuthenticated, user, navigate, logout]);
 
 
 

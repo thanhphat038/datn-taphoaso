@@ -1,0 +1,302 @@
+@baseUrl = http://localhost:3000/api
+
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MTI3NDQ0LCJleHAiOjE3NTQ3MzIyNDR9.ITuKGr1FNmggjG6xi523DK7L8GqngWrvYQQymRy9L0U
+
+### Variables
+@productId = 6862d1c32df5d5159cc51ef2
+@categoryId = 684312904b15be945ea7a436
+@variantId = 687f9fadc0647b5a2ec6e3d8
+@reviewId = 687fb9d1add96fdef96b888e
+@commentId = 687f9fadc0647b5a2ec6e3d7
+
+### Products ###
+
+### Get all products
+GET {{baseUrl}}/products
+
+### Get product by ID
+GET {{baseUrl}}/products/{{productId}}
+
+### Create product (Admin only)
+POST {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "category_id": "{{categoryId}}",
+  "name": "Sữa tươi Vinamilk",
+  "price": 120000,
+  "original_price": 150000,
+  "in_stock": 100,
+  "description": "Sữa tươi Vinamilk 100% tự nhiên",
+  "images": [
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.jpg"
+  ]
+}
+
+### Update product (Admin only)
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Sữa tươi Vinamilk - Cập nhật",
+  "price": 125000,
+  "in_stock": 150
+}
+
+### Delete product (Admin only)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Search products
+GET {{baseUrl}}/products/search?q=vinamilk&category={{categoryId}}&min_price=100000&max_price=200000
+
+### Get products by category
+GET {{baseUrl}}/products/category/{{categoryId}}
+
+### Get featured products
+GET {{baseUrl}}/products/featured
+
+### Get products with pagination
+GET {{baseUrl}}/products?page=1&limit=10&sort=price_asc
+
+### Product Variants ###
+
+### Create Product Variant (Admin only)
+POST {{baseUrl}}/product-variants
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "name": "Sữa tươi Vinamilk 180ml",
+  "unit": "thùng",
+  "quantity_per_unit": 48,
+  "price": 120000,
+  "original_price": 150000,
+  "in_stock": 100,
+  "is_default": true,
+  "description": "Thùng 48 hộp sữa tươi 180ml",
+  "weight": 8.5,
+  "dimensions": {
+    "length": 30,
+    "width": 20,
+    "height": 15
+  }
+}
+
+### Get All Variants by Product
+GET {{baseUrl}}/product-variants/product/{{productId}}
+
+### Get Variant by ID
+GET {{baseUrl}}/product-variants/{{variantId}}
+
+### Update Product Variant (Admin only)
+PUT {{baseUrl}}/product-variants/{{variantId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Sữa tươi Vinamilk 180ml - Thùng 48 hộp",
+  "price": 125000,
+  "in_stock": 150
+}
+
+### Delete Product Variant (Admin only)
+DELETE {{baseUrl}}/product-variants/{{variantId}}
+Authorization: Bearer {{authToken}}
+
+### Get Default Variant
+GET {{baseUrl}}/product-variants/product/{{productId}}/default
+
+### Get Variants by Unit
+GET {{baseUrl}}/product-variants/product/{{productId}}/unit?unit=thùng
+
+### Update Stock (Admin only)
+PATCH {{baseUrl}}/product-variants/{{variantId}}/stock
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "quantity": 50
+}
+
+### Get Available Units
+GET {{baseUrl}}/product-variants/units/available
+
+### Search Variants
+GET {{baseUrl}}/product-variants/product/{{productId}}/search?search=vinamilk&unit=thùng
+
+### Categories ###
+
+### Get all categories
+GET {{baseUrl}}/categories
+
+### Get category by ID
+GET {{baseUrl}}/categories/{{categoryId}}
+
+### Create category (Admin only)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Sữa và các sản phẩm từ sữa",
+  "description": "Các sản phẩm sữa tươi, sữa chua, phô mai"
+}
+
+### Update category (Admin only)
+PUT {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Sữa và các sản phẩm từ sữa - Cập nhật",
+  "description": "Các sản phẩm sữa tươi, sữa chua, phô mai, bơ"
+}
+
+### Delete category (Admin only)
+DELETE {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+
+### Product Reviews ###
+
+### Get reviews by product
+GET {{baseUrl}}/reviews/product/{{productId}}
+
+### Create review
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "rating": 5,
+  "comment": "Sản phẩm rất tốt, giao hàng nhanh!"
+}
+
+### Update review
+PUT {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "comment": "Sản phẩm tốt, nhưng giá hơi cao"
+}
+
+### Delete review
+DELETE {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{authToken}}
+
+### Product Comments ###
+
+### Get comments by product
+GET {{baseUrl}}/comments/product/{{productId}}
+
+### Create comment
+POST {{baseUrl}}/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "content": "Sản phẩm này có hết hàng không?"
+}
+
+### Update comment
+PUT {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "content": "Sản phẩm này có hết hàng không? Tôi muốn mua 10 thùng"
+}
+
+### Delete comment
+DELETE {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
+
+### Product Favorites ###
+
+### Get user favorites
+GET {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+
+### Add to favorites
+POST {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
+
+### Remove from favorites
+DELETE {{baseUrl}}/favorites/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Check if product is favorited
+GET {{baseUrl}}/favorites/check/{{productId}}
+Authorization: Bearer {{authToken}}
+
+# Product Variant Units:
+# - thùng: Thùng hàng (ví dụ: thùng 48 hộp sữa)
+# - lốc: Lốc sản phẩm (thường 6-12 sản phẩm)
+# - gói: Gói sản phẩm
+# - chai: Chai đơn lẻ
+# - lon: Lon đơn lẻ
+# - túi: Túi sản phẩm
+# - hộp: Hộp đơn lẻ
+# - kg: Kilogram
+# - gram: Gram
+
+# Product Status:
+# - active: Sản phẩm đang bán
+# - inactive: Sản phẩm tạm ngưng bán
+
+# Variant Status:
+# - active: Biến thể đang bán
+# - inactive: Biến thể tạm ngưng bán
+
+# Sort Options:
+# - price_asc: Giá tăng dần
+# - price_desc: Giá giảm dần
+# - name_asc: Tên A-Z
+# - name_desc: Tên Z-A
+# - create_at_asc: Mới nhất
+# - create_at_desc: Cũ nhất
+# - rating_desc: Đánh giá cao nhất
+
+### Recent Views ###
+
+### Add Product to Recent Views
+POST {{baseUrl}}/recent-views/add
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}"
+}
+
+### Get Recent Views
+GET {{baseUrl}}/recent-views?limit=10
+Authorization: Bearer {{authToken}}
+
+### Get Recent Views Count
+GET {{baseUrl}}/recent-views/count
+Authorization: Bearer {{authToken}}
+
+### Remove Product from Recent Views
+DELETE {{baseUrl}}/recent-views/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Clear All Recent Views
+DELETE {{baseUrl}}/recent-views
+Authorization: Bearer {{authToken}}
+
+### Get Similar Products
+GET {{baseUrl}}/recent-views/similar/{{productId}}?limit=5
+Authorization: Bearer {{authToken}} 

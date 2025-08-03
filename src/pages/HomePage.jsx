@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import Product from '../components/Product';
+import ChatBot from '../components/ChatBot';
 import 'swiper/css';
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -327,6 +328,9 @@ const HomePage = () => {
         </div>
 
       </div>
+      
+      {/* ChatBot Component */}
+      <ChatBot />
     </main>
   );
 };
