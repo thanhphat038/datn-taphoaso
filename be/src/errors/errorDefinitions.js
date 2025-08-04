@@ -29,6 +29,7 @@ export const ERROR_CODES = {
   VALIDATION_INVALID_DATE: 2004,
   VALIDATION_INVALID_NUMBER: 2005,
   VALIDATION_INVALID_RATING: 2006,
+  VALIDATION_ERROR: 2007,
 
   // Resource Errors (3000-3999)
   RESOURCE_NOT_FOUND: 3000,
@@ -53,7 +54,10 @@ export const ERROR_CODES = {
   // External Service Errors (6000-6999)
   EXTERNAL_SERVICE_ERROR: 6000,
   EXTERNAL_SERVICE_TIMEOUT: 6001,
-  EXTERNAL_SERVICE_UNAVAILABLE: 6002
+  EXTERNAL_SERVICE_UNAVAILABLE: 6002,
+  
+  // Configuration Errors (7000-7999)
+  CONFIGURATION_ERROR: 7000
 };
 
 // Error Messages
@@ -75,6 +79,7 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.VALIDATION_INVALID_DATE]: 'Ngày tháng không đúng định dạng',
   [ERROR_CODES.VALIDATION_INVALID_NUMBER]: 'Giá trị số không hợp lệ',
   [ERROR_CODES.VALIDATION_INVALID_RATING]: 'Đánh giá phải từ 1 đến 5 sao',
+  [ERROR_CODES.VALIDATION_ERROR]: 'Dữ liệu đầu vào không hợp lệ',
 
   // Resource Messages
   [ERROR_CODES.RESOURCE_NOT_FOUND]: 'Không tìm thấy thông tin yêu cầu',
@@ -99,7 +104,8 @@ export const ERROR_MESSAGES = {
   // External Service Messages
   [ERROR_CODES.EXTERNAL_SERVICE_ERROR]: 'Lỗi kết nối dịch vụ bên ngoài',
   [ERROR_CODES.EXTERNAL_SERVICE_TIMEOUT]: 'Dịch vụ bên ngoài không phản hồi',
-  [ERROR_CODES.EXTERNAL_SERVICE_UNAVAILABLE]: 'Dịch vụ bên ngoài không khả dụng'
+  [ERROR_CODES.EXTERNAL_SERVICE_UNAVAILABLE]: 'Dịch vụ bên ngoài không khả dụng',
+  [ERROR_CODES.CONFIGURATION_ERROR]: 'Lỗi cấu hình hệ thống'
 };
 
 // Error Descriptions
@@ -121,6 +127,7 @@ export const ERROR_DESCRIPTIONS = {
   [ERROR_CODES.VALIDATION_INVALID_DATE]: 'Ngày tháng phải có định dạng DD/MM/YYYY',
   [ERROR_CODES.VALIDATION_INVALID_NUMBER]: 'Giá trị phải là số và lớn hơn 0',
   [ERROR_CODES.VALIDATION_INVALID_RATING]: 'Đánh giá phải từ 1 đến 5 sao, với 5 sao là cao nhất',
+  [ERROR_CODES.VALIDATION_ERROR]: 'Dữ liệu đầu vào không hợp lệ. Vui lòng kiểm tra lại thông tin bạn đã nhập',
 
   // Resource Descriptions
   [ERROR_CODES.RESOURCE_NOT_FOUND]: 'Không tìm thấy thông tin bạn yêu cầu. Vui lòng kiểm tra lại ID hoặc thông tin tìm kiếm',
@@ -145,5 +152,6 @@ export const ERROR_DESCRIPTIONS = {
   // External Service Descriptions
   [ERROR_CODES.EXTERNAL_SERVICE_ERROR]: 'Không thể kết nối đến dịch vụ bên ngoài. Vui lòng thử lại sau',
   [ERROR_CODES.EXTERNAL_SERVICE_TIMEOUT]: 'Dịch vụ bên ngoài không phản hồi. Vui lòng thử lại sau',
-  [ERROR_CODES.EXTERNAL_SERVICE_UNAVAILABLE]: 'Dịch vụ bên ngoài hiện không khả dụng. Vui lòng thử lại sau'
+  [ERROR_CODES.EXTERNAL_SERVICE_UNAVAILABLE]: 'Dịch vụ bên ngoài hiện không khả dụng. Vui lòng thử lại sau',
+  [ERROR_CODES.CONFIGURATION_ERROR]: 'Hệ thống đang gặp lỗi cấu hình. Vui lòng liên hệ admin để được hỗ trợ'
 };

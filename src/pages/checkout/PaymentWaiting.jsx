@@ -4,7 +4,7 @@ import { Clock, CreditCard, Package, AlertCircle, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { cancelOrder, updateOrderStatus, getOrderInfo, retryVNPayPayment } from '../../service/Checkout.service.js';
+import { cancelOrder, updateOrderStatus, getOrderInfo, retryVNPayPayment, createVNPayPayment } from '../../service/Checkout.service.js';
 
 const PaymentWaiting = () => {
   const [searchParams] = useSearchParams();
@@ -12,7 +12,8 @@ const PaymentWaiting = () => {
   // Lấy orderId từ vnp_OrderInfo (VNPAY trả về) hoặc orderId (fallback)
   const orderId = searchParams.get('vnp_OrderInfo') || searchParams.get('orderId');
   
-  const [timeLeft, setTimeLeft] = useState(600); // 10 phút = 600 giây
+  const [timeLeft, setTimeLeft] = useState(0); // Sẽ được tính toán từ payment_deadline
+  console.log('Component render - timeLeft:', timeLeft);
   const [orderInfo, setOrderInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
@@ -113,6 +114,9 @@ const PaymentWaiting = () => {
           try {
             await updateOrderStatus(orderId, 'failed');
             console.log('Đã cập nhật trạng thái đơn hàng thành failed');
+            
+            // Không chuyển về trang orders ngay, để người dùng có thời gian thử lại
+            // Chỉ cập nhật trạng thái và hiển thị thông báo
           } catch (error) {
             console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
           }
@@ -135,10 +139,17 @@ const PaymentWaiting = () => {
     // Fetch thông tin đơn hàng
     const fetchOrderInfo = async () => {
       try {
+        console.log('Fetching order info for orderId:', orderId);
         const response = await getOrderInfo(orderId);
+        console.log('API response:', response);
+        console.log('API response.data:', response.data);
+        console.log('API response.success:', response.success);
+        console.log('API response.data:', response.data);
 
-        if (response.data.success) {
-          const orderData = response.data.data;
+        if (response.success) {
+          const orderData = response.data;
+          console.log('Raw orderData from API:', orderData);
+          
           // Kiểm tra xem order có tồn tại không
           if (!orderData || !orderData.id) {
             toast.error('Không tìm thấy đơn hàng. Chuyển về trang đơn hàng.');
@@ -157,6 +168,15 @@ const PaymentWaiting = () => {
             return;
           }
 
+          console.log('Setting orderInfo with data:', {
+            id: orderData.id,
+            total_amount: orderData.total_amount,
+            order_status: orderData.order_status,
+            payment_method: orderData.payment_method,
+            created_at: orderData.created_at,
+            payment_deadline: orderData.payment_deadline
+          });
+          
           setOrderInfo({
             id: orderData.id,
             total_amount: orderData.total_amount,
@@ -165,15 +185,11 @@ const PaymentWaiting = () => {
             created_at: new Date(orderData.created_at).toLocaleString('vi-VN'),
             payment_deadline: new Date(orderData.payment_deadline)
           });
-
-          // Tính thời gian còn lại từ payment_deadline
-          const now = new Date();
-          const deadline = new Date(orderData.payment_deadline);
-          const remainingTime = Math.max(0, Math.floor((deadline - now) / 1000));
-          setTimeLeft(remainingTime);
         }
       } catch (error) {
         console.error('Lỗi khi lấy thông tin đơn hàng:', error);
+        console.error('Error response:', error.response);
+        console.error('Error message:', error.message);
         // Kiểm tra loại lỗi
         if (error.response?.status === 404) {
           toast.error('Không tìm thấy đơn hàng. Chuyển về trang đơn hàng.');
@@ -204,24 +220,79 @@ const PaymentWaiting = () => {
     fetchOrderInfo();
   }, [orderId, navigate]);
 
+  // Tính toán lại timeLeft khi orderInfo thay đổi
   useEffect(() => {
+    console.log('orderInfo changed:', orderInfo);
+    
+    if (orderInfo && orderInfo.payment_deadline) {
+      const now = new Date();
+      const deadline = new Date(orderInfo.payment_deadline);
+      const remainingTime = Math.max(0, Math.floor((deadline - now) / 1000));
+      
+      console.log('Debug timeLeft calculation:', {
+        now: now.toISOString(),
+        deadline: deadline.toISOString(),
+        remainingTime,
+        orderStatus: orderInfo.order_status,
+        orderStatusType: typeof orderInfo.order_status
+      });
+      
+      // Chỉ khi đơn hàng failed thì cho 10 phút để thử lại, còn lại tính thời gian thực
+      if (orderInfo.order_status === 'failed' || orderInfo.order_status === "failed") {
+        console.log('Order is failed, setting timeLeft to 600 seconds (10 minutes) for retry');
+        setTimeLeft(600); // 10 phút = 600 giây để thử lại
+      } else if (remainingTime <= 0) {
+        console.log('Time expired, setting timeLeft to 0');
+        setTimeLeft(0);
+      } else {
+        console.log('Setting timeLeft to remaining time:', remainingTime);
+        setTimeLeft(remainingTime);
+      }
+    } else {
+      console.log('orderInfo or payment_deadline is null/undefined');
+    }
+  }, [orderInfo]);
+
+  useEffect(() => {
+    console.log('Timer useEffect - timeLeft:', timeLeft);
+    
     if (timeLeft <= 0) {
+      console.log('Time is up! Showing error message');
       // Hiển thị thông báo thanh toán thất bại
       toast.error('Thanh toán thất bại! Hết thời gian thanh toán.');
       
-      // Chuyển về orders sau 2 giây
-      setTimeout(() => {
-        navigate('/profile/orders');
-      }, 2000);
+      // Cập nhật trạng thái đơn hàng thành failed nếu chưa phải
+      if (orderInfo && orderInfo.order_status !== 'failed') {
+        const updateOrderStatusToFailed = async () => {
+          try {
+            await updateOrderStatus(orderId, 'failed');
+            console.log('Đã cập nhật trạng thái đơn hàng thành failed');
+          } catch (error) {
+            console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
+          }
+        };
+        updateOrderStatusToFailed();
+      }
+      
+      // Không chuyển về orders ngay, để người dùng có thể thử lại
+      // Chỉ hiển thị thông báo và cập nhật trạng thái
       return;
     }
 
+    console.log('Starting timer with timeLeft:', timeLeft);
     const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
+      setTimeLeft(prev => {
+        const newTime = prev - 1;
+        console.log('Timer tick - new time:', newTime);
+        return newTime;
+      });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [timeLeft, navigate]);
+    return () => {
+      console.log('Clearing timer');
+      clearInterval(timer);
+    };
+  }, [timeLeft, navigate, orderInfo, orderId]);
 
   // Tự động kiểm tra trạng thái đơn hàng mỗi 10 giây
   useEffect(() => {
@@ -302,8 +373,8 @@ const PaymentWaiting = () => {
 
   const handleRetryPayment = async () => {
     try {
-      // Kiểm tra xem có orderId không
-      if (!orderId) {
+      // Kiểm tra xem có orderInfo không
+      if (!orderInfo) {
         toast.error('Không tìm thấy thông tin đơn hàng');
         return;
       }
@@ -311,13 +382,25 @@ const PaymentWaiting = () => {
       // Hiển thị loading
       toast.info('Đang tạo thanh toán mới...');
 
-      // Gọi API để tạo lại payment URL
-      const response = await retryVNPayPayment(orderId, orderInfo?.total_amount || 0);
+      // Tạo order data mới từ order hiện tại
+      const orderData = {
+        total_amount: orderInfo.total_amount,
+        payment_method: 'vnpay',
+        address: orderInfo.address || '',
+        receiver: orderInfo.receiver || '',
+        sdt: orderInfo.sdt || '',
+        note: orderInfo.note || ''
+      };
+
+      console.log('Creating new order with data:', orderData);
+
+      // Gọi API để tạo order mới
+      const response = await createVNPayPayment(orderData);
 
       if (response.data.success && response.data.url) {
-        // Mở VNPAY trong tab mới
-        window.open(response.data.url, '_blank');
-        toast.success('Đã mở trang thanh toán mới. Vui lòng hoàn tất thanh toán.');
+        // Chuyển hướng đến trang thanh toán
+        window.location.href = response.data.url;
+        toast.success('Đang chuyển đến trang thanh toán...');
       } else {
         toast.error('Không thể tạo thanh toán mới');
       }
@@ -335,6 +418,22 @@ const PaymentWaiting = () => {
           navigate('/profile/orders');
         }, 2000);
         return;
+      }
+
+      // Kiểm tra trạng thái đơn hàng
+      if (orderInfo?.order_status === 'paid') {
+        toast.error('Không thể hủy đơn hàng đã thanh toán thành công');
+        return;
+      }
+
+      if (orderInfo?.order_status === 'cancelled') {
+        toast.error('Đơn hàng đã được hủy trước đó');
+        return;
+      }
+
+      // Đơn hàng failed vẫn có thể hủy để chuyển thành cancelled
+      if (orderInfo?.order_status === 'failed') {
+        // Không return, cho phép hủy đơn hàng failed
       }
 
       // Hiển thị confirm dialog
@@ -404,8 +503,8 @@ const PaymentWaiting = () => {
           <div className="flex flex-col gap-6">
             {/* Header */}
             <div className="text-center flex flex-col items-center gap-2">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                <Clock className="w-8 h-8 text-blue-600" />
+              <div className="w-16 h-16 bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] rounded-full flex items-center justify-center mb-2 shadow-lg">
+                <Clock className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Chờ thanh toán</h1>
               <p className="text-gray-600 text-sm sm:text-base">Vui lòng hoàn tất thanh toán trong thời gian quy định</p>
@@ -439,7 +538,7 @@ const PaymentWaiting = () => {
             )}
 
             {/* Countdown Timer */}
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-6 flex flex-col items-center gap-2">
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4 sm:p-6 flex flex-col items-center gap-2 shadow-md">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="w-5 h-5 text-red-600" />
                 <span className="text-sm font-medium text-red-600">Thời gian còn lại</span>
@@ -449,10 +548,10 @@ const PaymentWaiting = () => {
             </div>
 
             {/* Order Info */}
-            {orderInfo && (
-              <div className="bg-gray-50 rounded-xl p-4 sm:p-6 flex flex-col gap-3 mb-4">
+            {orderInfo && orderInfo.id && (
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 sm:p-6 flex flex-col gap-3 mb-4 shadow-md">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2 mb-2">
-                  <Package className="w-5 h-5" />
+                  <Package className="w-5 h-5 text-[#06AEF4]" />
                   Thông tin đơn hàng
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -462,7 +561,7 @@ const PaymentWaiting = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tổng tiền:</span>
-                    <span className="font-bold text-green-600">{orderInfo.total_amount.toLocaleString()}đ</span>
+                    <span className="font-bold text-green-600">{orderInfo.total_amount ? orderInfo.total_amount.toLocaleString() : '0'}đ</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Trạng thái:</span>
@@ -494,73 +593,119 @@ const PaymentWaiting = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Hạn thanh toán:</span>
-                    <span className="font-medium text-red-600 text-right">{orderInfo.payment_deadline.toLocaleString('vi-VN')}</span>
+                    <span className="font-medium text-red-600 text-right">{orderInfo.payment_deadline ? orderInfo.payment_deadline.toLocaleString('vi-VN') : 'N/A'}</span>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              {orderInfo?.order_status === 'cancelled' || orderInfo?.order_status === 'failed' ? (
-                <>
-                  <button
-                    onClick={handleRetryPayment}
-                    className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 transition-colors cursor-pointer"
-                  >
-                    Thử lại thanh toán
-                  </button>
-                  <button
-                    onClick={() => navigate('/checkout')}
-                    className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    Đổi phương thức thanh toán
-                  </button>
-                </>
-              ) : orderInfo?.order_status === 'pending' ? (
+            {console.log('Debug full orderInfo:', orderInfo)}
+            <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl p-4 sm:p-6 shadow-md">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 bg-[#06AEF4] rounded-full"></div>
+                Thao tác
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Nút hủy đơn hàng - luôn hiển thị */}
                 <button
                   onClick={handleCancelOrder}
-                  className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                 >
                   <X className="w-4 h-4" />
                   Hủy đơn hàng
                 </button>
-              ) : null}
+                
+                {/* Hiển thị nút Thử lại nếu đã thất bại hoặc hủy */}
+                {console.log('Debug order status for retry button:', orderInfo?.order_status, 'Type:', typeof orderInfo?.order_status, 'Condition:', (orderInfo?.order_status === 'failed' || orderInfo?.order_status === "failed"))}
+                {(orderInfo?.order_status === 'failed' || orderInfo?.order_status === "failed") && (
+                  <button
+                    onClick={handleRetryPayment}
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg"
+                  >
+                    Thử lại thanh toán
+                  </button>
+                )}
+                
+                {/* Hiển thị nút Đổi phương thức nếu đã thất bại hoặc hủy */}
+                {console.log('Debug order status for change method:', orderInfo?.order_status, 'Type:', typeof orderInfo?.order_status, 'Condition:', (orderInfo?.order_status === 'failed' || orderInfo?.order_status === "failed"))}
+                {(orderInfo?.order_status === 'failed' || orderInfo?.order_status === "failed") && (
+                  <button
+                    onClick={() => navigate('/checkout')}
+                    className="bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] text-white py-3 px-4 rounded-lg font-medium hover:from-[#70d9ff] hover:to-[#06AEF4] transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg"
+                  >
+                    Đổi phương thức thanh toán
+                  </button>
+                )}
+                
+                {/* Hiển thị nút Kiểm tra trạng thái cho tất cả trạng thái */}
+                <button
+                  onClick={handleCheckPaymentStatus}
+                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-4 rounded-lg font-medium hover:from-gray-600 hover:to-gray-700 transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg"
+                >
+                  Kiểm tra trạng thái
+                </button>
+              </div>
             </div>
           </div>
           {/* Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
+          <div className="bg-gradient-to-r from-blue-50 to-[#06AEF4]/10 border border-blue-200 rounded-xl p-4 sm:p-6 shadow-md">
             <h3 className="text-base sm:text-lg font-semibold text-blue-900 flex items-center gap-2 mb-2">
-              <CreditCard className="w-5 h-5" />
+              <CreditCard className="w-5 h-5 text-[#06AEF4]" />
               Hướng dẫn thanh toán
             </h3>
             <div className="flex flex-col gap-2 text-sm text-blue-800">
-              <div className="flex items-start gap-2">
-                <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
-                <p>Tab thanh toán VNPAY đã được mở. Vui lòng chuyển sang tab đó để hoàn tất thanh toán.</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
-                <p>Sau khi thanh toán thành công, bạn sẽ được chuyển về trang này và thấy thông báo thành công.</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
-                <p>Nếu thanh toán thất bại, bạn có thể thử lại hoặc đổi phương thức thanh toán.</p>
-              </div>
+              {(orderInfo?.order_status === 'failed' || orderInfo?.order_status === "failed") ? (
+                <>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
+                    <p>Đơn hàng đã thất bại. Bạn có 10 phút để thử lại thanh toán.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
+                    <p>Sử dụng nút "Thử lại thanh toán" để tạo thanh toán mới với VNPAY.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
+                    <p>Hoặc sử dụng "Đổi phương thức thanh toán" để thử cách khác.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
+                    <p>Tab thanh toán VNPAY đã được mở. Vui lòng chuyển sang tab đó để hoàn tất thanh toán.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
+                    <p>Sau khi thanh toán thành công, bạn sẽ được chuyển về trang này và thấy thông báo thành công.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
+                    <p>Nếu thanh toán thất bại, bạn có thể thử lại hoặc đổi phương thức thanh toán.</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {/* Warning */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 sm:p-6">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4 sm:p-6 shadow-md">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-yellow-800">
                 <p className="font-medium mb-1">Lưu ý quan trọng:</p>
-                {orderInfo?.order_status === 'cancelled' || orderInfo?.order_status === 'failed' ? (
+                {orderInfo?.order_status === 'cancelled' ? (
                   <>
-                    <p>• Đơn hàng đã bị hủy/thất bại do thanh toán không thành công hoặc hết thời gian</p>
+                    <p>• Đơn hàng đã bị hủy</p>
                     <p>• Bạn có thể thử lại thanh toán bằng nút "Thử lại thanh toán"</p>
                     <p>• Hoặc tạo đơn hàng mới từ giỏ hàng</p>
+                  </>
+                ) : orderInfo?.order_status === 'failed' ? (
+                  <>
+                    <p>• Thanh toán thất bại, nhưng bạn vẫn có thời gian để thử lại</p>
+                    <p>• Sử dụng nút "Thử lại thanh toán" để thanh toán lại</p>
+                    <p>• Hoặc "Đổi phương thức thanh toán" để thử cách khác</p>
                   </>
                 ) : (
                   <>

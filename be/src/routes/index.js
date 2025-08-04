@@ -18,6 +18,7 @@ import voucherRouter from './voucher.route.js';
 import authRouter from './auth.route.js';
 import paymentRouter from './payment.route.js';
 import shippingRouter from './shipping.route.js';
+import vietmapShippingRouter from './vietmapShipping.route.js';
 import productVariantRouter from './productVariant.route.js';
 import recentViewsRouter from './recentViews.route.js';
 
@@ -51,6 +52,9 @@ router.use('/payment', paymentRouter);
 
 // Shipping routes
 router.use('/shipping', shippingRouter);
+
+// Vietmap Shipping routes
+router.use('/vietmap-shipping', vietmapShippingRouter);
 
 // Product Variant routes
 router.use('/product-variants', productVariantRouter);

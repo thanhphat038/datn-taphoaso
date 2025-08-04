@@ -187,7 +187,7 @@ const ProductDetail = () => {
                     repliesLength: comment.replies?.length || 0,
                     repliesKeys: comment.replies ? Object.keys(comment.replies) : 'NO_REPLIES'
                 });
-                
+
                 // Debug từng reply nếu có
                 if (comment.replies && Array.isArray(comment.replies)) {
                     comment.replies.forEach((reply, replyIndex) => {
@@ -212,7 +212,7 @@ const ProductDetail = () => {
 
     const fetchReviews = async (page = 1) => {
         if (!productData._id) return;
-        
+
         try {
             setReviewsLoading(true);
             const response = await getReviewsByProductId(productData._id);
@@ -227,13 +227,13 @@ const ProductDetail = () => {
 
     const handleToggleFavorite = async () => {
         if (loadingFavorite) return;
-        
+
         const userId = getUserId();
         if (!userId) {
             showWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích', 'Yêu cầu đăng nhập');
             return;
         }
-        
+
         setLoadingFavorite(true);
         try {
             if (isFavorite) {
@@ -298,7 +298,7 @@ const ProductDetail = () => {
             // Thêm vào giỏ hàng trước và đợi hoàn thành
             await addToCart(productData._id, finalQuantity);
             console.log('✅ Debug - handleBuyNow: Added to cart successfully');
-            
+
             // Lưu thông tin sản phẩm để mua ngay vào localStorage
             const buyNowProduct = {
                 productId: productData._id,
@@ -309,12 +309,12 @@ const ProductDetail = () => {
                 package: selectedPackage,
                 originalPrice: productData.price
             };
-            
+
             localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
-            
+
             // Dispatch event để cập nhật giỏ hàng (nếu cần)
             window.dispatchEvent(new Event('cart-updated'));
-            
+
             // Chuyển đến trang thanh toán ngay lập tức
             console.log('🔍 Debug - handleBuyNow: Navigating to checkout');
             navigate('/checkout');
@@ -333,7 +333,7 @@ const ProductDetail = () => {
         
         const userId = getUserId();
         console.log('🔍 Debug - User ID:', userId);
-        
+
         if (!userId) {
             showWarning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'Yêu cầu đăng nhập');
             return;
@@ -367,7 +367,7 @@ const ProductDetail = () => {
                     console.log('🔍 Debug - Adding to cart:', productData._id, 'quantity:', pendingAddQtyRef.current);
                     await addToCart(productData._id, pendingAddQtyRef.current);
                     console.log('✅ Debug - Added to cart successfully');
-                    
+
                     window.dispatchEvent(new Event('cart-updated'));
                     showNotification(`Đã thêm ${pendingAddQtyRef.current} sản phẩm vào giỏ hàng!`, 'success');
                 } catch (error) {
@@ -385,23 +385,23 @@ const ProductDetail = () => {
 
     const handlePostComment = async () => {
         if (!newComment.trim()) return;
-        
+
         const userId = getUserId();
         if (!userId) {
             showWarning('Vui lòng đăng nhập để gửi bình luận', 'Yêu cầu đăng nhập');
             return;
         }
-        
+
         setPostingComment(true);
         try {
             const response = await postComment(productData._id, newComment);
-            
+
             // Fetch lại toàn bộ comments thay vì cập nhật state local
             const commentsResponse = await getProductComments(productData._id);
             if (commentsResponse.data && Array.isArray(commentsResponse.data)) {
                 setComments(commentsResponse.data);
             }
-            
+
             setNewComment('');
             showSuccess('Bình luận đã được gửi thành công!');
         } catch (err) {
@@ -429,32 +429,32 @@ const ProductDetail = () => {
 
     const handlePostReply = async () => {
         if (!replyText.trim()) return;
-        
+
         const userId = getUserId();
         if (!userId) {
             showWarning('Vui lòng đăng nhập để trả lời bình luận', 'Yêu cầu đăng nhập');
             return;
         }
-        
+
         setPostingReply(true);
         try {
             console.log('🔍 Sending reply for comment:', replyingTo.id);
             console.log('🔍 Reply content:', replyText);
-            
+
             const response = await postReply(replyingTo.id, replyText);
             console.log('✅ Reply sent successfully:', response);
-            
+
             // Thêm delay nhỏ để đảm bảo database đã được cập nhật
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             console.log('🔄 Fetching updated comments...');
             const commentsResponse = await getProductComments(productData._id);
             console.log('📦 Comments response:', commentsResponse);
-            
+
             if (commentsResponse.data && Array.isArray(commentsResponse.data)) {
                 console.log('📝 Setting comments state:', commentsResponse.data);
                 setComments(commentsResponse.data);
-                
+
                 // Debug: Kiểm tra replies trong mỗi comment
                 commentsResponse.data.forEach((comment, index) => {
                     console.log(`Comment ${index + 1}:`, {
@@ -462,12 +462,12 @@ const ProductDetail = () => {
                         content: comment.comment,
                         replies: comment.replies,
                         repliesCount: comment.replies?.length || 0
+                    });
                 });
-            });
             } else {
                 console.error('❌ Invalid comments response:', commentsResponse);
             }
-            
+
             setReplyText('');
             setReplyingTo(null);
             showSuccess('Trả lời đã được gửi thành công!');
@@ -493,116 +493,116 @@ const ProductDetail = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            {/* Breadcrumb */}
-            <nav className="flex mb-8" aria-label="Breadcrumb">
-                <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                    <li className="inline-flex items-center">
-                        <Link to="/" className="text-gray-700 hover:text-blue-600">
-                            Trang chủ
-                        </Link>
-                    </li>
-                    <li>
-                        <div className="flex items-center">
-                            <svg key="breadcrumb-chevron-1" className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
-                            </svg>
-                            <Link to="/product" className="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">
-                                Sản phẩm
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* Breadcrumb */}
+                <nav className="flex mb-8" aria-label="Breadcrumb">
+                    <ol className="inline-flex items-center space-x-1 md:space-x-3">
+                        <li className="inline-flex items-center">
+                            <Link to="/" className="text-gray-700 hover:text-blue-600">
+                                Trang chủ
                             </Link>
-                        </div>
-                    </li>
-                    <li aria-current="page">
-                        <div className="flex items-center">
-                            <svg key="breadcrumb-chevron-2" className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
-                            </svg>
-                            <span className="ml-1 text-gray-500 md:ml-2">{productData.name}</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
+                        </li>
+                        <li>
+                            <div className="flex items-center">
+                                <svg key="breadcrumb-chevron-1" className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+                                </svg>
+                                <Link to="/product" className="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">
+                                    Sản phẩm
+                                </Link>
+                            </div>
+                        </li>
+                        <li aria-current="page">
+                            <div className="flex items-center">
+                                <svg key="breadcrumb-chevron-2" className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+                                </svg>
+                                <span className="ml-1 text-gray-500 md:ml-2">{productData.name}</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-                {/* Product Images */}
-                <div className="space-y-4">
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                            src={mainImage || productData.images?.[0] || '/images/image_product.png'}
-                            alt={productData.name}
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    {productData.images && productData.images.length > 1 && (
-                        <div className="grid grid-cols-5 gap-2">
-                            {productData.images.map((image, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setMainImage(image)}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    {/* Product Images */}
+                    <div className="space-y-4">
+                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                            <img
+                                src={mainImage || productData.images?.[0] || '/images/image_product.png'}
+                                alt={productData.name}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        {productData.images && productData.images.length > 1 && (
+                            <div className="grid grid-cols-5 gap-2">
+                                {productData.images.map((image, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setMainImage(image)}
                                     className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 ${
                                         mainImage === image ? 'border-blue-500' : 'border-transparent'
-                                    }`}
-                                >
-                                    <img
-                                        src={image}
-                                        alt={`${productData.name} ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Product Info */}
-                <div className="space-y-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center">
-                                <span className="text-2xl font-bold text-red-500">
-                                    {formatCurrency(productData.price)}
-                                </span>
-                                {productData.original_price && productData.original_price > productData.price && (
-                                    <span className="ml-2 text-lg text-gray-500 line-through">
-                                        {formatCurrency(productData.original_price)}
-                                    </span>
-                                )}
-                            </div>
-                            {productData.original_price && productData.original_price > productData.price && (
-                                <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
-                                    -{Math.round(((productData.original_price - productData.price) / productData.original_price) * 100)}%
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
-                            <p className="text-gray-600 leading-relaxed">{productData.description}</p>
-                        </div>
-
-                        {productData.category && (
-                            <div>
-                                <h3 className="text-lg font-semibold mb-2">Danh mục</h3>
-                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                    {productData.category.name}
-                                </span>
+                                            }`}
+                                    >
+                                        <img
+                                            src={image}
+                                            alt={`${productData.name} ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </button>
+                                ))}
                             </div>
                         )}
                     </div>
 
-                    {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
-                    <ProductPackageSelector
-                        product={productData}
-                        onPackageSelect={handlePackageSelect}
-                        selectedPackage={selectedPackage}
-                    />
+                    {/* Product Info */}
+                    <div className="space-y-6">
+                        <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center">
+                                    <span className="text-2xl font-bold text-red-500">
+                                        {formatCurrency(productData.price)}
+                                    </span>
+                                    {productData.original_price && productData.original_price > productData.price && (
+                                        <span className="ml-2 text-lg text-gray-500 line-through">
+                                            {formatCurrency(productData.original_price)}
+                                        </span>
+                                    )}
+                                </div>
+                                {productData.original_price && productData.original_price > productData.price && (
+                                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
+                                        -{Math.round(((productData.original_price - productData.price) / productData.original_price) * 100)}%
+                                    </span>
+                                )}
+                            </div>
+                        </div>
 
-                    {/* Quantity and Actions */}
-                    <div className="space-y-3">
-                        {/* Hàng 1: Nút Mua hàng (nổi bật nhất) */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
+                                    <p className="text-gray-600 leading-relaxed">{productData.description}</p>
+                                </div>
+
+                            {productData.category && (
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Danh mục</h3>
+                                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                        {productData.category.name}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
+                        <ProductPackageSelector
+                            product={productData}
+                            onPackageSelect={handlePackageSelect}
+                            selectedPackage={selectedPackage}
+                        />
+
+                        {/* Quantity and Actions */}
+                        <div className="space-y-3">
+                            {/* Hàng 1: Nút Mua hàng (nổi bật nhất) */}
                                 <button
                             onClick={handleBuyNow}
                             className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
@@ -611,19 +611,19 @@ const ProductDetail = () => {
                                 </button>
                         
                         {/* Hàng 2: Thêm vào giỏ hàng và Yêu thích */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={loadingAddToCart}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={loadingAddToCart}
                                 className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed text-sm border border-gray-300"
-                            >
-                                {loadingAddToCart ? (
+                                >
+                                    {loadingAddToCart ? (
                                     <div className="animate-spin h-4 w-4 border-b-2 border-gray-600"></div>
-                                ) : (
+                                    ) : (
                                     'Thêm vào giỏ hàng'
-                                )}
-                            </button>
-                            <button
+                                    )}
+                                </button>
+                                <button
                                 onClick={handleToggleFavorite}
                                 disabled={loadingFavorite}
                                 className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
@@ -646,26 +646,26 @@ const ProductDetail = () => {
                                     />
                                 </svg>
                                 {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
-                            </button>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
             {/* Description and Comments Section */}
             <div className="flex gap-8 my-8">
                 {/* Description */}
                 <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-[600px] overflow-y-auto">
                     <h2 className="text-2xl font-bold mb-4 sticky top-0 bg-white z-10">Mô tả sản phẩm</h2>
-                    {productData.images && productData.images.length > 0 && (
-                        <img
-                            src={productData.images[0]}
-                            alt={productData.name}
+                            {productData.images && productData.images.length > 0 && (
+                                <img
+                                    src={productData.images[0]}
+                                    alt={productData.name}
                             className="w-full max-h-60 object-contain rounded mb-4"
-                        />
-                    )}
+                                />
+                            )}
                     <p>{productData.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
-                </div>
+                        </div>
 
                 {/* Comments */}
                 <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-[600px] flex flex-col">
@@ -675,9 +675,9 @@ const ProductDetail = () => {
                             onClick={() => setActiveTab('comments')}
                             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                                 activeTab === 'comments'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
                         >
                             Bình luận
                         </button>
@@ -685,9 +685,9 @@ const ProductDetail = () => {
                             onClick={() => setActiveTab('reviews')}
                             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                                 activeTab === 'reviews'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
                         >
                             Đánh giá ({reviews.length})
                         </button>
@@ -706,7 +706,7 @@ const ProductDetail = () => {
                                         rows="3"
                                     />
                                     <div className="flex justify-end mt-2">
-                                        <button 
+                                        <button
                                             onClick={handlePostComment}
                                             disabled={!newComment.trim() || postingComment}
                                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -727,8 +727,8 @@ const ProductDetail = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Đăng nhập để bình luận</h3>
                                     <p className="text-gray-600 mb-4">Bạn cần đăng nhập để có thể gửi bình luận về sản phẩm này.</p>
-                                    <Link 
-                                        to="/login" 
+                                    <Link
+                                        to="/login"
                                         className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] hover:from-[#70d9ff] hover:to-[#06AEF4] text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
                                     >
                                         <svg key="login-icon" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -774,16 +774,16 @@ const ProductDetail = () => {
                                                     </div>
                                                 </div>
                                                 <div className="ml-auto text-xs text-gray-500">
-                                                    {comment.create_at ? 
-                                                        new Date(comment.create_at).toLocaleString('vi-VN', {
-                                                            year: 'numeric',
-                                                            month: '2-digit',
-                                                            day: '2-digit',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        }) : 
-                                                        'Vừa xong'
-                                                    }
+                                                        {comment.create_at ?
+                                                            new Date(comment.create_at).toLocaleString('vi-VN', {
+                                                                year: 'numeric',
+                                                                month: '2-digit',
+                                                                day: '2-digit',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            }) :
+                                                            'Vừa xong'
+                                                        }
                                                 </div>
                                             </div>
                                             {/* Comment content */}
@@ -792,14 +792,14 @@ const ProductDetail = () => {
                                             </div>
                                             {/* Actions */}
                                             <div className="flex items-center gap-6 ml-12">
-                                                                                            <button 
-                                                onClick={() => handleReply(comment._id, comment.user_id?.full_name || comment.user_id?.username || 'Người dùng')}
+                                                <button
+                                                    onClick={() => handleReply(comment._id, comment.user_id?.full_name || comment.user_id?.username || 'Người dùng')}
                                                 className="flex items-center gap-1 text-blue-500 hover:underline text-[15px]"
-                                            >
-                                                <svg key="reply-icon" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
-                                                </svg>
-                                                Trả lời
+                                                >
+                                                    <svg key="reply-icon" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+                                                    </svg>
+                                                    Trả lời
                                                 </button>
                                             </div>
 
@@ -877,14 +877,14 @@ const ProductDetail = () => {
                                                                                     {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
                                                                                 </span>
                                                                                 <span className="text-xs text-gray-500">
-                                                                                    {reply.create_at ? 
+                                                                                    {reply.create_at ?
                                                                                         new Date(reply.create_at).toLocaleString('vi-VN', {
                                                                                             year: 'numeric',
                                                                                             month: '2-digit',
                                                                                             day: '2-digit',
                                                                                             hour: '2-digit',
                                                                                             minute: '2-digit'
-                                                                                        }) : 
+                                                                                        }) :
                                                                                         'Vừa xong'
                                                                                     }
                                                                                 </span>
@@ -896,7 +896,7 @@ const ProductDetail = () => {
                                                                     </div>
                                                                 ))}
                                                             </div>
-                                                            
+
                                                             {/* Nút "Xem thêm replies" */}
                                                             <div className="mt-2">
                                                                 <button
@@ -914,47 +914,47 @@ const ProductDetail = () => {
                                                         <>
                                                             {/* Hiển thị tất cả replies khi đã mở rộng hoặc chỉ có 1 reply */}
                                                             <div className="space-y-3">
-                                                    {comment.replies.map((reply, replyIndex) => (
-                                                        <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
-                                                            <div className="bg-gray-50 rounded-lg p-3">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                                                        {reply.user_id?.avatar ? (
-                                                                            <img
-                                                                                src={reply.user_id.avatar}
-                                                                                alt="Avatar"
-                                                                                className="w-full h-full object-cover"
-                                                                            />
-                                                                        ) : (
-                                                                            <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                                                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                                            </svg>
-                                                                        )}
+                                                                {comment.replies.map((reply, replyIndex) => (
+                                                                    <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
+                                                                        <div className="bg-gray-50 rounded-lg p-3">
+                                                                            <div className="flex items-center gap-2 mb-1">
+                                                                                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                                                                    {reply.user_id?.avatar ? (
+                                                                                        <img
+                                                                                            src={reply.user_id.avatar}
+                                                                                            alt="Avatar"
+                                                                                            className="w-full h-full object-cover"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                                                        </svg>
+                                                                                    )}
+                                                                                </div>
+                                                                                <span className="font-medium text-sm">
+                                                                                    {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
+                                                                                </span>
+                                                                                <span className="text-xs text-gray-500">
+                                                                                    {reply.create_at ?
+                                                                                        new Date(reply.create_at).toLocaleString('vi-VN', {
+                                                                                            year: 'numeric',
+                                                                                            month: '2-digit',
+                                                                                            day: '2-digit',
+                                                                                            hour: '2-digit',
+                                                                                            minute: '2-digit'
+                                                                                        }) :
+                                                                                        'Vừa xong'
+                                                                                    }
+                                                                                </span>
+                                                                            </div>
+                                                                            <div className="text-sm text-gray-800 ml-8">
+                                                                                {reply.reply || 'Nội dung trả lời'}
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                    <span className="font-medium text-sm">
-                                                                        {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
-                                                                    </span>
-                                                                    <span className="text-xs text-gray-500">
-                                                                        {reply.create_at ? 
-                                                                            new Date(reply.create_at).toLocaleString('vi-VN', {
-                                                                                year: 'numeric',
-                                                                                month: '2-digit',
-                                                                                day: '2-digit',
-                                                                                hour: '2-digit',
-                                                                                minute: '2-digit'
-                                                                            }) : 
-                                                                            'Vừa xong'
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                                <div className="text-sm text-gray-800 ml-8">
-                                                                    {reply.reply || 'Nội dung trả lời'}
-                                                                </div>
+                                                                ))}
                                                             </div>
-                                                        </div>
-                                                    ))}
-                                                            </div>
-                                                            
+
                                                             {/* Nút "Thu gọn" nếu đã mở rộng và có nhiều hơn 1 reply */}
                                                             {isRepliesExpanded(comment._id) && comment.replies.length > 1 && (
                                                                 <div className="mt-2">
@@ -980,7 +980,7 @@ const ProductDetail = () => {
                                         </div>
                                     ))
                                 )}
-                                
+
                                 {comments.length > COMMENTS_TO_SHOW && (
                                     <div className="text-center pt-4">
                                         <button
@@ -997,115 +997,115 @@ const ProductDetail = () => {
                         <>
                             {/* Reviews List - scrollable */}
                             <div className="flex-grow overflow-y-auto pr-4 space-y-6">
-                                {reviewsLoading ? (
+                                    {reviewsLoading ? (
                                     <div className="text-center py-8 text-gray-500">Đang tải đánh giá...</div>
-                                ) : reviews.length === 0 ? (
+                                    ) : reviews.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500">Chưa có đánh giá nào cho sản phẩm này.</div>
-                                ) : (
-                                    reviews.map((review) => (
+                                            ) : (
+                                reviews.map((review) => (
                                         <div key={review._id} className="border border-gray-200 rounded-lg p-4">
-                                            {/* User info */}
+                                                {/* User info */}
                                             <div className="flex items-center gap-3 mb-3">
                                                 <img 
                                                     src="https://i.imgur.com/0y0y0y0.png" 
                                                     alt="avatar" 
                                                     className="w-10 h-10 rounded-full border" 
                                                 />
-                                                <div className="flex-1">
+                                                    <div className="flex-1">
                                                     <div className="font-semibold">{review.user_id?.email || 'Người dùng'}</div>
                                                     <div className="flex items-center gap-2">
-                                                        {/* Rating stars */}
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <svg 
-                                                                key={`star-${review._id}-${i}`} 
-                                                                className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                                fill="currentColor" 
-                                                                viewBox="0 0 20 20"
-                                                            >
-                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
-                                                            </svg>
-                                                        ))}
+                                                            {/* Rating stars */}
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <svg
+                                                                    key={`star-${review._id}-${i}`}
+                                                                    className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                                    fill="currentColor"
+                                                                    viewBox="0 0 20 20"
+                                                                >
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.787.565-1.842-.197-1.542-1.118l1.07-3.292c.3.921-.755 1.683-1.542 1.118l-2.8-2.034a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
+                                                                </svg>
+                                                            ))}
                                                         <span className="text-sm text-gray-600">{review.rating}/5</span>
+                                                        </div>
+                                                    </div>
+                                                <div className="text-xs text-gray-500">
+                                                        {new Date(review.create_at).toLocaleDateString('vi-VN')}
                                                     </div>
                                                 </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {new Date(review.create_at).toLocaleDateString('vi-VN')}
-                                                </div>
-                                            </div>
-                                            {/* Review content */}
+                                                {/* Review content */}
                                             <div className="bg-gray-50 rounded-lg p-3">
                                                 <p className="text-gray-800">{review.user_review || 'Không có nội dung đánh giá.'}</p>
+                                                </div>
                                             </div>
+                                            ))
+                            )}
                                         </div>
-                                    ))
-                                )}
-                            </div>
                         </>
                     )}
-                </div>
-            </div>
+                                        </div>
+                                                    </div>
 
             {/* Related Products */}
-            {relatedProducts && relatedProducts.length > 0 && (
-                <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <h2 className="text-2xl font-bold mb-4">Sản phẩm liên quan</h2>
-                    <Swiper
-                        spaceBetween={20}
-                        slidesPerView={5}
-                        loop={true}
-                        autoplay={{ delay: 2500, disableOnInteraction: false }}
-                        modules={[Autoplay]}
-                        className="w-full"
-                    >
-                        {relatedProducts.map((item) => (
-                            <SwiperSlide key={item._id}>
-                                <Product data={item} />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </div>
-            )}
+                                {relatedProducts && relatedProducts.length > 0 && (
+                                    <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                                        <h2 className="text-2xl font-bold mb-4">Sản phẩm liên quan</h2>
+                                        <Swiper
+                                            spaceBetween={20}
+                                            slidesPerView={5}
+                                            loop={true}
+                                            autoplay={{ delay: 2500, disableOnInteraction: false }}
+                                            modules={[Autoplay]}
+                                            className="w-full"
+                                        >
+                                            {relatedProducts.map((item) => (
+                                                <SwiperSlide key={item._id}>
+                                                    <Product data={item} />
+                                                </SwiperSlide>
+                                            ))}
+                                        </Swiper>
+                                    </div>
+                                )}
 
-            {/* Custom Notification */}
-                            {notification.show && (
+                                {/* Custom Notification */}
+                                {notification.show && (
                     <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
                         notification.type === 'success' ? 'border-green-500' : 'border-red-500'
-                    } transform transition-all duration-300 ease-in-out`}>
-                        <div className="p-4">
-                            <div className="flex items-start">
-                                <div className="flex-shrink-0">
-                                    {notification.type === 'success' ? (
-                                        <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    ) : (
-                                        <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    )}
-                                </div>
-                                <div className="ml-3 w-0 flex-1">
+                                        } transform transition-all duration-300 ease-in-out`}>
+                                        <div className="p-4">
+                                            <div className="flex items-start">
+                                                <div className="flex-shrink-0">
+                                                    {notification.type === 'success' ? (
+                                                        <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <div className="ml-3 w-0 flex-1">
                                     <p className={`text-sm font-medium ${
                                         notification.type === 'success' ? 'text-green-800' : 'text-red-800'
-                                    }`}>
-                                        {notification.message}
-                                    </p>
-                                </div>
-                                <div className="ml-4 flex-shrink-0 flex">
-                                    <button
-                                        className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
-                                        onClick={() => setNotification({ show: false, message: '', type: 'success' })}
-                                    >
-                                        <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                                        }`}>
+                                                        {notification.message}
+                                                    </p>
+                                                </div>
+                                                <div className="ml-4 flex-shrink-0 flex">
+                                                    <button
+                                                        className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                                                        onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                                                    >
+                                                        <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    </div>
-                )}
-        </div>
     );
 };
 

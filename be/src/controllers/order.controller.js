@@ -389,9 +389,9 @@ export const cancelOrder = async (req, res, next) => {
       throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only cancel your own orders');
     }
 
-    // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang pending)
-    if (order.order_status !== 'pending') {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Order cannot be cancelled. Only pending orders can be cancelled.');
+    // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang pending hoặc failed)
+    if (order.order_status !== 'pending' && order.order_status !== 'failed') {
+      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Order cannot be cancelled. Only pending or failed orders can be cancelled.');
     }
 
     // Cập nhật trạng thái thành cancelled

@@ -1,0 +1,163 @@
+### Vietmap Shipping API Tests
+### Base URL: http://localhost:3000/api/vietmap-shipping
+
+### 1. Kiểm tra trạng thái API
+GET http://localhost:3000/api/vietmap-shipping/api-status
+
+### 2. Tính phí ship từ địa chỉ (Hàm chính theo yêu cầu)
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### 3. Tính phí ship từ địa chỉ (Endpoint cũ)
+POST http://localhost:3000/api/vietmap-shipping/calculate-from-address
+Content-Type: application/json
+
+{
+  "deliveryAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### 4. Tính phí ship từ tọa độ
+POST http://localhost:3000/api/vietmap-shipping/calculate-from-coordinates
+Content-Type: application/json
+
+{
+  "lat": 10.7769,
+  "lon": 106.7009
+}
+
+### 5. Tìm kiếm địa chỉ (Autocomplete)
+GET http://localhost:3000/api/vietmap-shipping/search-addresses?query=nguyen hue
+
+### 6. Lấy địa chỉ từ tọa độ (Reverse Geocoding)
+GET http://localhost:3000/api/vietmap-shipping/get-address-from-coordinates?lat=10.7769&lon=106.7009
+
+### 7. Tính phí ship với thông tin chi tiết tuyến đường
+POST http://localhost:3000/api/vietmap-shipping/calculate-with-route-details
+Content-Type: application/json
+
+{
+  "deliveryAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### 8. Test với các địa chỉ khác nhau
+
+#### Test địa chỉ gần cửa hàng (≤ 3km)
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "123 Lý Chính Thắng, Phường 9, Quận 3, Thành phố Hồ Chí Minh"
+}
+
+#### Test địa chỉ trung bình (3-7km)
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+#### Test địa chỉ xa (> 7km)
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "123 Nguyễn Huệ, Quận 1, Thành phố Hồ Chí Minh"
+}
+
+### 9. Test với địa chỉ khác tỉnh
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "123 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"
+}
+
+### 10. Test với địa chỉ không hợp lệ
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "Địa chỉ không tồn tại"
+}
+
+### 11. Test với body rỗng
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{}
+
+### 12. Test tọa độ không hợp lệ
+POST http://localhost:3000/api/vietmap-shipping/calculate-from-coordinates
+Content-Type: application/json
+
+{
+  "lat": 999,
+  "lon": 999
+}
+
+### 13. Test search với query ngắn
+GET http://localhost:3000/api/vietmap-shipping/search-addresses?query=a
+
+### 14. Test reverse geocoding với tọa độ không hợp lệ
+GET http://localhost:3000/api/vietmap-shipping/get-address-from-coordinates?lat=999&lon=999
+
+### 15. Test với địa chỉ đầy đủ
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh, Việt Nam"
+}
+
+### 16. Test với địa chỉ ngắn gọn
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự, Quận 10, HCM"
+}
+
+### 17. Test với địa chỉ có số nhà
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "123/45 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### 18. Test với địa chỉ có tên đường
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "Đường Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### 19. Test với địa chỉ có dấu tiếng Việt
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự, Phường 13, Quận 10, TP.HCM"
+}
+
+### 20. Test với địa chỉ có ký tự đặc biệt
+POST http://localhost:3000/api/vietmap-shipping/calculate-shipping-fee
+Content-Type: application/json
+
+{
+  "customerAddress": "10 Ngô Gia Tự (gần chợ), Phường 13, Quận 10, Thành phố Hồ Chí Minh"
+}
+
+### ============================================
+### Lưu ý khi test:
+### 1. Đảm bảo server đang chạy trên port 3000
+### 2. Đảm bảo VIETMAP_API_KEY đã được cấu hình trong .env
+### 3. Đảm bảo có kết nối internet để gọi Vietmap API
+### 4. Các test case 10-20 là để kiểm tra error handling
+### ============================================ 
