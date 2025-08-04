@@ -10,10 +10,22 @@ const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
   useEffect(() => {
     const checkAuth = () => {
       const token = Cookies.get('auth_token');
-      const userData = localStorage.getItem('user');
+      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
       
-      if (!token || !userData) {
-        console.log('🚫 ProtectedRoute: No authentication found');
+      console.log('🔍 ProtectedRoute Debug:');
+      console.log('🔍 Token:', token ? 'exists' : 'missing');
+      console.log('🔍 UserData:', userData ? 'exists' : 'missing');
+      
+      if (!token) {
+        console.log('🚫 ProtectedRoute: No token found');
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        navigate(redirectTo);
+        return false;
+      }
+      
+      if (!userData) {
+        console.log('🚫 ProtectedRoute: No userData found');
         setIsAuthenticated(false);
         setIsLoading(false);
         navigate(redirectTo);
@@ -22,20 +34,39 @@ const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
       
       try {
         const user = JSON.parse(userData);
-        if (!user.username) {
-          console.log('🚫 ProtectedRoute: Invalid user data');
+        console.log('🔍 Parsed user object:', user);
+        
+        // Kiểm tra các trường có thể có của user
+        const hasValidUser = user && (
+          user.username || 
+          user.email || 
+          user.id || 
+          user._id ||
+          user.full_name ||
+          user.name
+        );
+        
+        if (!hasValidUser) {
+          console.log('🚫 ProtectedRoute: Invalid user data - no valid user fields');
+          console.log('🔍 User object keys:', Object.keys(user || {}));
           setIsAuthenticated(false);
           setIsLoading(false);
           navigate(redirectTo);
           return false;
         }
         
-        console.log('✅ ProtectedRoute: User authenticated:', user.username);
+        console.log('✅ ProtectedRoute: User authenticated successfully');
+        console.log('🔍 User info:', {
+          id: user.id || user._id,
+          username: user.username,
+          email: user.email,
+          name: user.full_name || user.name
+        });
         setIsAuthenticated(true);
         setIsLoading(false);
         return true;
       } catch (error) {
-        console.log('🚫 ProtectedRoute: Error parsing user data');
+        console.log('🚫 ProtectedRoute: Error parsing user data:', error);
         setIsAuthenticated(false);
         setIsLoading(false);
         navigate(redirectTo);
@@ -44,7 +75,7 @@ const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
     };
     
     // Check immediately
-    if (!checkAuth()) return;
+    checkAuth();
     
     // Set up interval to check periodically
     const authCheckInterval = setInterval(checkAuth, 5000);

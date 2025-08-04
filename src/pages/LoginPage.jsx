@@ -52,21 +52,19 @@ const handleSubmit = async (e) => {
         console.log('👤 User found:', user);
         
         if (user && user.username) {
+            // Store user information in local storage NGAY LẬP TỨC
+            localStorage.setItem('userData', JSON.stringify(user));
+            console.log('✅ User data saved to localStorage:', user);
+            
             setMessage('Đăng nhập thành công! Chào mừng ' + user.username);
             setMessageType('success');
+            
             setTimeout(() => {
                 setMessage("");
-                // Store user information in local storage
-                localStorage.setItem('userData', JSON.stringify(user));
                 if (user.role === 'admin') {
                     navigate('/admin');
                 } else {
-                    // Force reload để reset tất cả state
-                    if (user.role === 'admin') {
-                        window.location.href = '/admin';
-                    } else {
-                        window.location.href = '/';
-                    }
+                    navigate('/');
                 }
             }, 2000);
         } else {

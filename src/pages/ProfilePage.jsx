@@ -72,7 +72,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const checkAuthAndRedirect = () => {
       const token = Cookies.get("auth_token");
-      const userData = localStorage.getItem('user');
+      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
       
       if (!token || !userData) {
         console.log('🚫 No authentication found, redirecting to login...');
@@ -84,15 +84,26 @@ const ProfilePage = () => {
       
       try {
         const user = JSON.parse(userData);
-        if (!user.username) {
+        // Kiểm tra các trường có thể có của user (tương tự ProtectedRoute)
+        const hasValidUser = user && (
+          user.username || 
+          user.email || 
+          user.id || 
+          user._id ||
+          user.full_name ||
+          user.name
+        );
+        
+        if (!hasValidUser) {
           console.log('🚫 Invalid user data, redirecting to login...');
+          console.log('🔍 User object keys:', Object.keys(user || {}));
           setIsAuthenticated(false);
           setIsLoading(false);
           navigate('/login');
           return false;
         }
         
-        console.log('✅ User authenticated:', user.username);
+        console.log('✅ User authenticated:', user.username || user.email || user.full_name || user.name);
         setIsAuthenticated(true);
         setIsLoading(false);
         return true;
