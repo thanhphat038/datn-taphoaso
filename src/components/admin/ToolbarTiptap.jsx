@@ -18,7 +18,16 @@ import {
     FaUndo,
     FaRedo,
     FaPlus,
-    FaExpandArrowsAlt
+    FaExpandArrowsAlt,
+    FaStrikethrough,
+    FaSubscript,
+    FaSuperscript,
+    FaIndent,
+    FaOutdent,
+    FaEraser,
+    FaCopy,
+    FaPaste,
+    FaCut
 } from 'react-icons/fa';
 import './ToolbarTiptap.css';
 import ImageUploadToolbar from './ImageUploadToolbar';
@@ -27,6 +36,9 @@ import ImageSizeSelector from './ImageSizeSelector';
 const Toolbar = ({ editor, onImageUpload }) => {
     const [showImageUpload, setShowImageUpload] = useState(false);
     const [showImageSizeSelector, setShowImageSizeSelector] = useState(false);
+    const [showLinkModal, setShowLinkModal] = useState(false);
+    const [linkUrl, setLinkUrl] = useState('');
+    const [linkText, setLinkText] = useState('');
     const [selectedImageSize, setSelectedImageSize] = useState('medium');
     
     if (!editor) {
@@ -46,11 +58,34 @@ const Toolbar = ({ editor, onImageUpload }) => {
         setShowImageUpload(false);
     };
 
-    const setLink = () => {
-        const url = window.prompt('Nhập URL:');
-        if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
+    const handleLinkSubmit = (e) => {
+        e.preventDefault();
+        if (linkUrl.trim()) {
+            if (linkText.trim()) {
+                // Insert link with custom text
+                editor.chain().focus().insertContent(`<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`).run();
+            } else {
+                // Insert link with URL as text
+                editor.chain().focus().insertContent(`<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkUrl}</a>`).run();
+            }
+            setLinkUrl('');
+            setLinkText('');
+            setShowLinkModal(false);
         }
+    };
+
+    const setLink = () => {
+        const { from, to } = editor.state.selection;
+        const selectedText = editor.state.doc.textBetween(from, to);
+        
+        if (selectedText) {
+            setLinkText(selectedText);
+        }
+        setShowLinkModal(true);
+    };
+
+    const removeLink = () => {
+        editor.chain().focus().unsetLink().run();
     };
 
     // Function để lấy kích thước hiện tại của ảnh được chọn
@@ -105,6 +140,40 @@ const Toolbar = ({ editor, onImageUpload }) => {
         setShowImageSizeSelector(false);
     };
 
+    const clearFormatting = () => {
+        editor.chain().focus().clearNodes().unsetAllMarks().run();
+    };
+
+    const copyContent = () => {
+        const html = editor.getHTML();
+        navigator.clipboard.writeText(html).then(() => {
+            console.log('Nội dung đã được sao chép vào clipboard');
+        }).catch(err => {
+            console.error('Lỗi khi sao chép:', err);
+        });
+    };
+
+    const pasteContent = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            editor.chain().focus().insertContent(text).run();
+        } catch (err) {
+            console.error('Lỗi khi dán nội dung:', err);
+        }
+    };
+
+    const cutContent = () => {
+        const { from, to } = editor.state.selection;
+        const selectedText = editor.state.doc.textBetween(from, to);
+        if (selectedText) {
+            navigator.clipboard.writeText(selectedText).then(() => {
+                editor.chain().focus().deleteSelection().run();
+            }).catch(err => {
+                console.error('Lỗi khi cắt nội dung:', err);
+            });
+        }
+    };
+
     return (
         <>
             <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2">
@@ -113,23 +182,30 @@ const Toolbar = ({ editor, onImageUpload }) => {
                     <button
                         onClick={() => editor.chain().focus().toggleBold().run()}
                         className={`p-2 rounded hover:bg-gray-200 toolbar-button ${editor.isActive('bold') ? 'bg-gray-300' : ''}`}
-                        title="In đậm"
+                        title="In đậm (Ctrl+B)"
                     >
                         <FaBold className="w-4 h-4" />
                     </button>
                     <button
                         onClick={() => editor.chain().focus().toggleItalic().run()}
                         className={`p-2 rounded hover:bg-gray-200 toolbar-button ${editor.isActive('italic') ? 'bg-gray-300' : ''}`}
-                        title="In nghiêng"
+                        title="In nghiêng (Ctrl+I)"
                     >
                         <FaItalic className="w-4 h-4" />
                     </button>
                     <button
                         onClick={() => editor.chain().focus().toggleUnderline().run()}
                         className={`p-2 rounded hover:bg-gray-200 toolbar-button ${editor.isActive('underline') ? 'bg-gray-300' : ''}`}
-                        title="Gạch chân"
+                        title="Gạch chân (Ctrl+U)"
                     >
                         <FaUnderline className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleStrike().run()}
+                        className={`p-2 rounded hover:bg-gray-200 toolbar-button ${editor.isActive('strike') ? 'bg-gray-300' : ''}`}
+                        title="Gạch ngang"
+                    >
+                        <FaStrikethrough className="w-4 h-4" />
                     </button>
 
                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
@@ -218,26 +294,26 @@ const Toolbar = ({ editor, onImageUpload }) => {
                         <FaLink className="w-4 h-4" />
                     </button>
                     <button
-                        onClick={() => editor.chain().focus().unsetLink().run()}
+                        onClick={removeLink}
                         className="p-2 rounded hover:bg-gray-200 toolbar-button"
                         title="Xóa liên kết"
                     >
                         <FaUnlink className="w-4 h-4" />
                     </button>
-                                    <button
-                    onClick={addImage}
-                    className="p-2 rounded hover:bg-gray-200 toolbar-button"
-                    title="Thêm hình ảnh"
-                >
-                    <FaImageIcon className="w-4 h-4" />
-                </button>
-                <button
-                    onClick={() => setShowImageSizeSelector(true)}
-                    className="p-2 rounded hover:bg-gray-200 toolbar-button"
-                    title="Chỉnh kích thước ảnh"
-                >
-                    <FaExpandArrowsAlt className="w-4 h-4" />
-                </button>
+                    <button
+                        onClick={addImage}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Thêm hình ảnh"
+                    >
+                        <FaImageIcon className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => setShowImageSizeSelector(true)}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Chỉnh kích thước ảnh"
+                    >
+                        <FaExpandArrowsAlt className="w-4 h-4" />
+                    </button>
 
                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
 
@@ -259,12 +335,37 @@ const Toolbar = ({ editor, onImageUpload }) => {
 
                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
 
+                    {/* Copy/Paste/Cut */}
+                    <button
+                        onClick={copyContent}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Sao chép (Ctrl+C)"
+                    >
+                        <FaCopy className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={pasteContent}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Dán (Ctrl+V)"
+                    >
+                        <FaPaste className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={cutContent}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Cắt (Ctrl+X)"
+                    >
+                        <FaCut className="w-4 h-4" />
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
                     {/* Undo/Redo */}
                     <button
                         onClick={() => editor.chain().focus().undo().run()}
                         disabled={!editor.can().undo()}
                         className="p-2 rounded hover:bg-gray-200 disabled:opacity-50 toolbar-button"
-                        title="Hoàn tác"
+                        title="Hoàn tác (Ctrl+Z)"
                     >
                         <FaUndo className="w-4 h-4" />
                     </button>
@@ -272,9 +373,16 @@ const Toolbar = ({ editor, onImageUpload }) => {
                         onClick={() => editor.chain().focus().redo().run()}
                         disabled={!editor.can().redo()}
                         className="p-2 rounded hover:bg-gray-200 disabled:opacity-50 toolbar-button"
-                        title="Làm lại"
+                        title="Làm lại (Ctrl+Y)"
                     >
                         <FaRedo className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={clearFormatting}
+                        className="p-2 rounded hover:bg-gray-200 toolbar-button"
+                        title="Xóa định dạng"
+                    >
+                        <FaEraser className="w-4 h-4" />
                     </button>
                 </div>
             </div>
@@ -284,14 +392,87 @@ const Toolbar = ({ editor, onImageUpload }) => {
                 isOpen={showImageUpload}
                 onClose={() => setShowImageUpload(false)}
                 onImageSelect={handleImageSelect}
-                maxImages={1}
+                maxImages={10}
                 maxSize={2 * 1024 * 1024}
             />
 
+            {/* Link Modal */}
+            {showLinkModal && (
+                <div className="fixed inset-0 backdrop-sepia-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900">Thêm liên kết</h3>
+                            <button
+                                onClick={() => {
+                                    setShowLinkModal(false);
+                                    setLinkUrl('');
+                                    setLinkText('');
+                                }}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={handleLinkSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    URL <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="url"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    placeholder="https://example.com"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Văn bản hiển thị (tùy chọn)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={linkText}
+                                    onChange={(e) => setLinkText(e.target.value)}
+                                    placeholder="Văn bản sẽ hiển thị cho liên kết"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Thêm liên kết
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowLinkModal(false);
+                                        setLinkUrl('');
+                                        setLinkText('');
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                                >
+                                    Hủy bỏ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* Image Size Selector Modal */}
             {showImageSizeSelector && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div className="fixed inset-0 backdrop-sepia-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-gray-900">Chỉnh kích thước ảnh</h3>
                             <button
@@ -316,7 +497,13 @@ const Toolbar = ({ editor, onImageUpload }) => {
                                         if (node.type.name === 'image') {
                                             const alt = node.attrs.alt || 'Ảnh';
                                             const currentSize = getCurrentImageSize();
-                                            imageInfo = `${alt} (Kích thước hiện tại: ${currentSize})`;
+                                            const sizeLabels = {
+                                                'small': 'Nhỏ',
+                                                'medium': 'Vừa',
+                                                'large': 'Lớn',
+                                                'full': 'Đầy đủ'
+                                            };
+                                            imageInfo = `${alt} (Kích thước hiện tại: ${sizeLabels[currentSize]})`;
                                         }
                                     });
                                     

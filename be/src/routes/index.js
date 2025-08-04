@@ -18,6 +18,7 @@ import favoriteRouter from './favorite.route.js';
 import cartRouter from './cart.route.js';
 
 import voucherRouter from './voucher.route.js';
+import variantRouter from './variant.route.js';
 import authRouter from './auth.route.js';
 
 import uploadRouter from './upload.route.js';
@@ -55,6 +56,7 @@ router.use('/carts', authMiddleware, cartRouter);
 
 router.use('/vouchers', authMiddleware, voucherRouter);
 
+router.use('/variants', variantRouter);
 
 router.use('/upload', uploadRouter);
 

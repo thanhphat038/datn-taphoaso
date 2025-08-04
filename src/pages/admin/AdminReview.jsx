@@ -78,6 +78,7 @@ const AdminReview = () => {
             ...r,
             user_id: user,
             product_id: product,
+            status: r.is_hidden ? 'inactive' : 'active',
           });
         }
       }
@@ -122,7 +123,6 @@ const AdminReview = () => {
 
   // Handle toggle review status
   const handleToggleStatus = async (reviewId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const actionText = currentStatus === 'active' ? 'ẩn' : 'hiện';
     
     const confirmMessage = `Bạn có chắc chắn muốn ${actionText} đánh giá này?`;
@@ -133,8 +133,9 @@ const AdminReview = () => {
 
     try {
       setLoading(true);
-      await updateReviewStatus(reviewId, newStatus);
-
+      await updateReviewStatus(reviewId);
+      // Toggle the status locally
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       setReviews(reviews.map(r => 
         r._id === reviewId ? { ...r, status: newStatus } : r
       ));
@@ -153,8 +154,9 @@ const AdminReview = () => {
   // Filter reviews
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = 
-      (review.comment && review.comment.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (review.user_id?.username && review.user_id.username.toLowerCase().includes(searchQuery.toLowerCase()));
+      (review.user_review && review.user_review.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (review.user_id?.username && review.user_id.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (review.user_id?.full_name && review.user_id.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
     // Status filtering disabled
     // const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
     const matchesRating = ratingFilter === 'All' || review.rating === parseInt(ratingFilter);
@@ -219,7 +221,7 @@ const AdminReview = () => {
             {review.user_id?.username ? review.user_id.username.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{review.user_id?.username || 'Người dùng ẩn danh'}</div>
+            <div className="font-semibold text-gray-900">{review.user_id?.username || review.user_id?.full_name || 'Người dùng ẩn danh'}</div>
             <div className="text-sm text-gray-500">{review.user_id?.email || 'Không có email'}</div>
           </div>
         </div>
@@ -380,7 +382,7 @@ const AdminReview = () => {
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
   const todayReviews = reviews.filter(r => 
-    r.createdAt && new Date(r.createdAt).toDateString() === new Date().toDateString()
+    r.create_at && new Date(r.create_at).toDateString() === new Date().toDateString()
   ).length;
 
   return (
@@ -488,7 +490,7 @@ const AdminReview = () => {
                   {currentReview.user_id?.username ? currentReview.user_id.username.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900">{currentReview.user_id?.username || 'Người dùng ẩn danh'}</div>
+                  <div className="font-semibold text-gray-900">{currentReview.user_id?.username || currentReview.user_id?.full_name || 'Người dùng ẩn danh'}</div>
                   <div className="text-sm text-gray-500">{currentReview.user_id?.email || 'Không có email'}</div>
                 </div>
               </div>
@@ -511,7 +513,7 @@ const AdminReview = () => {
                 <div>
                   <div className="font-semibold text-gray-900">{currentReview.product_id?.name || 'Sản phẩm không tồn tại'}</div>
                   <div className="text-sm text-gray-500">
-                    {currentReview.createdAt ? new Date(currentReview.createdAt).toLocaleDateString('vi-VN', {
+                    {currentReview.create_at ? new Date(currentReview.create_at).toLocaleDateString('vi-VN', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -529,10 +531,10 @@ const AdminReview = () => {
               </div>
 
               {/* Review Content */}
-              {currentReview.comment && (
+              {currentReview.user_review && (
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-sm text-gray-600 mb-2">Nội dung đánh giá</div>
-                  <div className="text-sm text-gray-900 whitespace-pre-wrap">{currentReview.comment}</div>
+                  <div className="text-sm text-gray-900 whitespace-pre-wrap">{currentReview.user_review}</div>
                 </div>
               )}
 

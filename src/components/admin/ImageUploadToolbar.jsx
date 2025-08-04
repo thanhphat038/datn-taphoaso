@@ -8,7 +8,7 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Handle image selection with temporary base64
+  // Handle image selection with base64 conversion
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     
@@ -41,10 +41,10 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
 
       // Process each image to base64
       const imagePromises = files.map(async (file) => {
-        // Compress image and convert to base64
-        const compressedBase64 = await compressImageToBase64(file);
+        // Convert image to base64
+        const base64Image = await compressImageToBase64(file);
         return {
-          base64: compressedBase64,
+          base64: base64Image,
           originalFile: file,
           name: file.name
         };
@@ -81,7 +81,7 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -123,7 +123,7 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -174,7 +174,7 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
     <div className="image-upload-modal-overlay">
       <div className="image-upload-modal">
         <div className="image-upload-modal-header">
-          <h3 className="image-upload-modal-title">Tải lên hình ảnh</h3>
+          <h3 className="image-upload-modal-title">Chọn hình ảnh</h3>
           <button
             onClick={onClose}
             className="image-upload-modal-close"
@@ -194,12 +194,12 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
 
           {/* Upload Progress */}
           {uploading && (
-                      <div className="loading-message">
-            <div className="flex items-center justify-center gap-2">
-              <div className="spinner rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              Đang xử lý hình ảnh...
+            <div className="loading-message">
+              <div className="flex items-center justify-center gap-2">
+                <div className="spinner rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                Đang xử lý hình ảnh...
+              </div>
             </div>
-          </div>
           )}
 
           {/* Upload Button */}
@@ -217,12 +217,12 @@ const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSi
               className={`cursor-pointer flex flex-col items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <FaUpload className="w-6 h-6 text-gray-400" />
-                        <div className="text-sm text-gray-600">
-            {uploading ? 'Đang xử lý...' : 'Kéo thả hoặc click để chọn hình ảnh'}
-          </div>
-          <div className="text-xs text-gray-500">
-            PNG, JPG, GIF, WebP (tối đa {Math.round(maxSize / 1024 / 1024)}MB mỗi file, tối đa {maxImages} ảnh)
-          </div>
+              <div className="text-sm text-gray-600">
+                {uploading ? 'Đang xử lý...' : 'Kéo thả hoặc click để chọn hình ảnh'}
+              </div>
+              <div className="text-xs text-gray-500">
+                PNG, JPG, GIF, WebP (tối đa {Math.round(maxSize / 1024 / 1024)}MB mỗi file, tối đa {maxImages} ảnh)
+              </div>
               <div className="upload-button">
                 <FaImage className="w-4 h-4" />
                 Chọn file

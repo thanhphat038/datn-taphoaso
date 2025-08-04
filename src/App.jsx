@@ -25,11 +25,12 @@ import ProfilePage from './pages/ProfilePage';
 
 import OrderDetailPage from './pages/OrderDetailPage';
 
-import ProductsPage from './pages/products';
+import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
+import AdminBlogCategory from './pages/admin/AdminBlogCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
@@ -46,6 +47,8 @@ import AddBlog from './pages/admin/AddBlog';
 import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
 import AdminReview from './pages/admin/AdminReview';
+import AdminVariant from './pages/admin/AdminVariant';
+import AddVariantPage from './pages/admin/AddVariantPage';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -114,6 +117,7 @@ function Layout() {
             <Route path="/admin/addproduct" element={<AddProductPage />} />
             <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
             <Route path="/admin/category" element={<AdminCategory />} />
+            <Route path="/admin/blogcategory" element={<AdminBlogCategory />} />
             <Route path="/admin/voucher" element={<VoucherPage />} />
             <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
             <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />
@@ -124,6 +128,9 @@ function Layout() {
             <Route path="/admin/blog/detail/:id" element={<AdminBlogDetail />} />
             <Route path="/admin/comment" element={<AdminComment />} />
             <Route path="/admin/review" element={<AdminReview />} />
+            <Route path="/admin/variant" element={<AdminVariant />} />
+            <Route path="/admin/addvariant" element={<AddVariantPage />} />
+            <Route path="/admin/addvariant/:id" element={<AddVariantPage />} />
             <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
           </Routes>
         </AdminProtected>
