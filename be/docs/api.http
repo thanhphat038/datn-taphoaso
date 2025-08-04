@@ -1,0 +1,612 @@
+@baseUrl = http://localhost:3000/api
+
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2E2Y2ZkYWI2MDZhOGM1NWI4OTUxMyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUzNDU5NTUyLCJleHAiOjE3NTQwNjQzNTJ9.N8Mwo-81Q48q8ykTimYChznEjXpxI7HwIp-3HYqHdp0
+
+### Variables
+@userId = 685a9ea76875fcf8f499fa9a
+@addressId = 6862dbf5b04329ea26a04112
+@productId = 6862d1c32df5d5159cc51ef2
+@categoryId = 684312904b15be945ea7a436
+@orderId = 686366fbbd9300db3933df53
+@commentId = 687f9fadc0647b5a2ec6e3d7
+@reviewId = 687fb9d1add96fdef96b888e
+
+# chưa làm 
+@voucherId = 1
+@blogId = 1 
+
+### Authentication ###
+
+# Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "password123",
+  "email": "user@gmail.com"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "newpassword123"
+}
+
+### Get Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Change Password
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123"
+}
+
+### Forgot Password
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@gmail.com",
+  "username": "user1"
+}
+
+### Users ###
+
+### Get all users (Admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{authToken}}
+
+### Get user by ID
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+### Update user
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "full_name": "1241241",
+  "phone": "0987654321",
+  "email": "test@example.com"
+}
+
+### Delete user
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+### Deactivate user
+PATCH {{baseUrl}}/users/{{userId}}/deactivate
+Authorization: Bearer {{authToken}}
+
+### Categories ###
+
+### Get all categories
+GET {{baseUrl}}/categories
+
+### Get category by ID
+GET {{baseUrl}}/categories/{{categoryId}}
+
+### Create category (Admin only)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "New Category",
+  "description": "Description for new category",
+  "status": "active"
+}
+
+### Update category (Admin only)
+PUT {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Category",
+  "description": "Updated description"
+}
+
+### Delete category (Admin only)
+DELETE {{baseUrl}}/categories/{{categoryId}}
+Authorization: Bearer {{authToken}}
+
+### Products ###
+
+### Get all products
+GET {{baseUrl}}/products
+
+?page=1
+&limit=10
+&sort=price
+&order=asc
+
+### Get product by ID
+GET {{baseUrl}}/products/{{productId}}
+
+### Create product (Admin only)
+POST {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Product",
+  "description": "Test Description",
+  "original_price": 120000,
+  "price": 100000,
+  "in_stock": 100,
+  "category_id": "{{categoryId}}",
+  "images": ["image1.jpg", "image2.jpg"]
+}
+
+### Update product (Admin only)
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Product",
+  "price": 150000,
+  "in_stock": 80
+}
+
+### Delete product (Admin only)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Deactivate product (Admin only)
+PATCH {{baseUrl}}/products/6862d1c32df5d5159cc51f08/activate
+Authorization: Bearer {{authToken}}
+
+### Deactivate product (Admin only)
+PATCH {{baseUrl}}/products/6862d1c32df5d5159cc51f08/deactivate
+Authorization: Bearer {{authToken}}
+
+### Search products
+GET {{baseUrl}}/products/search?q=mì&page=1&limit=10
+
+### Get products by category
+GET {{baseUrl}}/products/category/{{categoryId}}?page=1&limit=10
+
+### Get top rated products
+GET {{baseUrl}}/products/top-rated?limit=10
+
+### Get new arrivals
+GET {{baseUrl}}/products/new-arrivals?limit=10
+
+### Get related products
+GET {{baseUrl}}/products/{{productId}}/related?limit=4
+### Orders ###
+### Orders ###
+
+### Get all orders (Admin)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+
+### Get order by ID (Admin)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{authToken}}
+
+### Create order (User)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "address": "Số 123, Quận ABC, TP XYZ",
+  "receiver": "Nguyễn Văn AAAAAA",
+  "sdt": "0123456789",
+  "items": [
+    {
+      "product_id": "6862d1c32df5d5159cc51ef9",
+      "qty": 2
+    }
+  ],
+  "payment_method": "cod",
+  "note": "Vui lòng giao buổi sáng"
+}
+
+### Get my orders (User)
+GET {{baseUrl}}/orders/my?page=1&limit=3
+Authorization: Bearer {{authToken}}
+
+### Update order status (Admin)
+PUT {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "processing"
+}
+
+### Get order stats (Admin)
+GET {{baseUrl}}/orders/stats
+Authorization: Bearer {{authToken}}
+
+### Update VNPAY info for order (admin/debug)
+PUT {{baseUrl}}/orders/{{orderId}}/vnpay-info
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "order_status": "cancelled",
+  "vnpay_txn_ref": "31152240",
+  "vnpay_response_code": "24",
+  "vnpay_transaction_status": "02",
+  "vnpay_error_message": "Giao dịch không thành công do: Khách hàng hủy giao dịch"
+}
+
+### Get recent orders (Admin)
+GET {{baseUrl}}/orders/recent?limit=10
+Authorization: Bearer {{authToken}}
+
+### Delete order (Admin)
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{authToken}}
+
+### Addresses ###
+
+### Get all addresses
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{authToken}}
+
+### Get address by ID
+GET {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{authToken}}
+
+### Create address
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "phone": "0123456789",
+  "city": "City",
+  "district": "District",
+  "ward": "Ward",
+  "address_detail": "Building A, Room 101",
+  "receiver": "Nguyen Van A",
+  "is_default": true
+}
+
+### Update address
+PUT {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "address": "456 New Street"
+}
+
+### Delete address
+DELETE {{baseUrl}}/addresses/684694371aaf49d7a7259201
+Authorization: Bearer {{authToken}}
+
+### Reviews ###
+
+### Get all reviews
+GET {{baseUrl}}/reviews
+Authorization: Bearer {{authToken}}
+
+### Get review by ID
+GET {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{authToken}}
+
+### Create review
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}",
+  "rating": 5,
+  "content": "Great product!"
+}
+
+### Get product reviews
+GET {{baseUrl}}/products/{{productId}}/reviews
+?page=1
+&limit=10
+Authorization: Bearer {{authToken}}
+
+
+# ### Update review
+# PUT {{baseUrl}}/reviews/1
+# Authorization: Bearer {{authToken}}
+# Content-Type: application/json
+
+# {
+#   "rating": 4,
+#   "content": "Updated review"
+# }
+
+### Delete review
+DELETE {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{authToken}}
+
+### Toggle is_hidden for review
+PATCH {{baseUrl}}/reviews/{{reviewId}}/toggle-hidden
+Authorization: Bearer {{authToken}}
+
+### Comments ###
+
+### Get all comments
+GET {{baseUrl}}/comments
+Authorization: Bearer {{authToken}}
+
+### Get all comments of a product (no pagination)
+GET {{baseUrl}}/comments/product/{{productId}}/all-comments
+Authorization: Bearer {{authToken}}
+
+### Get comment by ID
+GET {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
+
+### Create comment
+POST {{baseUrl}}/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+
+  "product_id": "{{productId}}",
+  "comment": "This is a sencond comment"
+
+}
+
+### Get product comments
+GET {{baseUrl}}/products/{{productId}}/comments
+?page=1
+&limit=10
+
+# ### Update comment
+# PUT {{baseUrl}}/comments/{{commentId}}
+# Authorization: Bearer {{authToken}}
+# Content-Type: application/json
+
+# {
+#   "content": "Updated comment"
+# }
+
+### Delete comment
+DELETE {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
+
+### Toggle is_hidden for comment
+PATCH {{baseUrl}}/comments/{{commentId}}/toggle-hidden
+Authorization: Bearer {{authToken}}
+
+### Favorites ###
+
+### Get all favorites
+GET {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+
+### Add to favorites
+POST {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "6862d1c32df5d5159cc51f08"
+}
+
+### Remove from favorites
+DELETE {{baseUrl}}/favorites
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "{{productId}}"
+}
+
+### Cart ###
+### Get cart
+GET {{baseUrl}}/carts
+Authorization: Bearer {{authToken}}
+
+### Add item to cart
+POST {{baseUrl}}/carts/items
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "product_id": "6862d1c32df5d5159cc51ef9",
+
+  "qty": 2
+}
+
+### Update cart item
+PUT {{baseUrl}}/carts/items/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "qty": 3
+}
+
+### Remove item from cart
+DELETE {{baseUrl}}/carts/items/{{productId}}
+Authorization: Bearer {{authToken}}
+
+### Clear cart
+DELETE {{baseUrl}}/carts/items
+Authorization: Bearer {{authToken}}
+
+### Calculate cart total
+GET {{baseUrl}}/carts/total
+Authorization: Bearer {{authToken}}
+
+### Vouchers ###
+
+### Get all vouchers
+GET {{baseUrl}}/vouchers
+Authorization: Bearer {{authToken}}
+
+
+### Get voucher by ID
+GET {{baseUrl}}/vouchers/{{voucherId}}
+
+### Create voucher (Admin only)
+POST {{baseUrl}}/vouchers
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "NEWVOUCHER",
+  "discount_type": "percentage",
+  "discount_value": 15,
+  "max_discount": 100000,
+  "min_order_value": 300000,
+  "start_date": "2024-03-20",
+  "end_date": "2024-04-20",
+  "status": "active"
+}
+
+### Update voucher (Admin only)
+PUT {{baseUrl}}/vouchers/{{voucherId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "discount_value": 20,
+  "max_discount": 150000
+}
+
+### Delete voucher (Admin only)
+DELETE {{baseUrl}}/vouchers/{{voucherId}}
+Authorization: Bearer {{authToken}}
+
+### Get active vouchers
+GET {{baseUrl}}/vouchers/active
+Authorization: Bearer {{authToken}}
+
+### Apply voucher
+POST {{baseUrl}}/vouchers/apply
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "SUMMER2024",
+  "total_amount": 1000000
+}
+
+### Get voucher stats (Admin only)
+GET {{baseUrl}}/vouchers/stats
+Authorization: Bearer {{authToken}} 
+
+
+### Payment - Create VNPAY payment URL
+POST {{baseUrl}}/payment/create
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "amount": 100000,
+  "bankCode": "",
+  "language": "vn"
+}
+
+### Payment - Handle return from VNPAY
+GET {{baseUrl}}/payment/return?method=vnpay&vnp_TxnRef=...&vnp_Amount=...&vnp_ResponseCode=...&vnp_SecureHash=...
+
+### Payment - Handle IPN from VNPAY
+GET {{baseUrl}}/payment/ipn?method=vnpay&vnp_TxnRef=...&vnp_Amount=...&vnp_ResponseCode=...&vnp_SecureHash=...
+
+### Payment - Query transaction
+POST {{baseUrl}}/payment/query
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "orderId": "...",
+  "transDate": "...",
+  "ipAddr": "..."
+}
+
+### Payment - Refund transaction
+POST {{baseUrl}}/payment/refund
+Content-Type: application/json
+
+{
+  "method": "vnpay",
+  "orderId": "...",
+  "transDate": "...",
+  "amount": 100000,
+  "transType": "...",
+  "user": "...",
+  "ipAddr": "..."
+} 
+
+### Test Create Order with VNPAY
+POST {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "address": "Số 123, Quận ABC, TP XYZ",
+    "receiver": "Nguyễn Văn AAAAAA",
+    "sdt": "0123456789",
+    "items": [
+        {
+            "product_id": "6862d1c32df5d5159cc51ef2",
+            "qty": 1
+        }
+    ],
+    "payment_method": "vnpay",
+    "note": "Vui lòng giao buổi sáng",
+    "total_amount": 11000
+}
+
+### Test Create VNPAY Payment with Order ID
+POST {{baseUrl}}/payment/create
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "method": "vnpay",
+    "amount": 11000,
+    "bankCode": "",
+    "language": "vn",
+    "orderId": "6886207fbbcbae9e3fd8fa44"
+}
+
+### Test Update Order Status
+POST {{baseUrl}}/payment/test-update-status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "orderId": "6886207fbbcbae9e3fd8fa44",
+  "status": "paid"
+}
+
+### Test Find Order by VNPAY TxnRef
+GET {{baseUrl}}/payment/find-order/27193316
+
+### Get All Orders with VNPAY Ref
+GET {{baseUrl}}/payment/all-orders-with-vnpay-ref
+
+### Payment Return Test (VNPAY Callback)
+GET {{baseUrl}}/payment/return?vnp_ResponseCode=00&vnp_TxnRef=27193316&vnp_Amount=1100000&vnp_BankCode=VNPAY&vnp_CardType=QRCODE&vnp_PayDate=20250727175916&vnp_TransactionStatus=00&vnp_TransactionNo=123456&vnp_SecureHash=test_hash
+
+### Payment Return Test (VNPAY Failed)
+GET {{baseUrl}}/payment/return?vnp_ResponseCode=24&vnp_TxnRef=27193316&vnp_Amount=1100000&vnp_BankCode=VNPAY&vnp_CardType=QRCODE&vnp_PayDate=20250727175916&vnp_TransactionStatus=02&vnp_TransactionNo=0&vnp_SecureHash=test_hash 
+
+### Get products in an order
+GET {{baseUrl}}/orders/{{orderId}}/products
+Authorization: Bearer {{authToken}}
+
+### Get order with deadline info
+GET {{baseUrl}}/orders/{{orderId}}/deadline
+Authorization: Bearer {{authToken}} 
