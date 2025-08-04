@@ -13,7 +13,8 @@ import {
   FaChartBar,
   FaSignOutAlt,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaCubes
 } from 'react-icons/fa';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
@@ -25,7 +26,9 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { path: '/admin', icon: FaHome, label: 'Tổng quan' },
     { path: '/admin/product', icon: FaBox, label: 'Sản phẩm' },
+    { path: '/admin/variant', icon: FaCubes, label: 'Biến thể' },
     { path: '/admin/category', icon: FaListAlt, label: 'Danh mục' },
+    { path: '/admin/blogcategory', icon: FaListAlt, label: 'Danh mục Blog' },
     { path: '/admin/user', icon: FaUsers, label: 'Khách hàng' },
     { path: '/admin/order', icon: FaShoppingCart, label: 'Đơn hàng' },
     { path: '/admin/voucher', icon: FaTicketAlt, label: 'Voucher' },

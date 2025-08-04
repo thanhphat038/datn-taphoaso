@@ -226,11 +226,11 @@ const OrderPage = () => {
       key: 'id',
       render: (order) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#06AEF4] bg-opacity-10 rounded-lg flex items-center justify-center">
+          {/* <div className="w-10 h-10 bg-[#06AEF4] bg-opacity-10 rounded-lg flex items-center justify-center">
             <FaShoppingCart className="w-4 h-4 text-[#06AEF4]" />
-          </div>
+          </div> */}
           <div>
-            <div className="font-semibold text-gray-900">#{order._id?.slice(-8)}</div>
+            <div className="font-semibold text-gray-900">{order._id}</div>
             <div className="text-sm text-gray-500">
               {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN') : 'N/A'}
             </div>

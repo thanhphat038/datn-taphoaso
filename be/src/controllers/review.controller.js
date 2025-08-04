@@ -26,11 +26,14 @@ export const getReviews = async (req, res) => {
 
     const reviews = await reviewService.findAll(filters, {
       populate: [
-        { path: 'user_id', select: 'name email' },
-        { path: 'product_id', select: 'name price' }
+        { path: 'user_id', select: 'username email full_name' },
+        { path: 'product_id', select: 'name price images' }
       ]
     });
-    res.json(reviews);
+    res.json({
+      success: true,
+      data: reviews
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -41,8 +44,8 @@ export const getReviewById = async (req, res) => {
   try {
     const review = await reviewService.findById(req.params.id, {
       populate: [
-        { path: 'user_id', select: 'name email' },
-        { path: 'product_id', select: 'name price' }
+        { path: 'user_id', select: 'username email full_name' },
+        { path: 'product_id', select: 'name price images' }
       ]
     });
     res.json(review);

@@ -134,7 +134,7 @@ const BlogPage = () => {
 
     if (loading && blogPosts.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+            <div className="min-h-screen bg-[#F5FBFB] flex items-center justify-center">
                 <div className="text-center">
                     <div className="relative">
                         <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
@@ -148,7 +148,7 @@ const BlogPage = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+            <div className="min-h-screen bg-[#F5FBFB] flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
                     <div className="bg-white rounded-2xl shadow-lg p-8">
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -171,7 +171,7 @@ const BlogPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        <div className="min-h-screen bg-[#F5FBFB]">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-cyan-600/10"></div>
@@ -288,6 +288,8 @@ const BlogPage = () => {
                     </div>
                 </div>
             </div>
+
+
         </div>
     );
 };

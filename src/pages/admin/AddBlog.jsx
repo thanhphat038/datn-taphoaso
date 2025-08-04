@@ -10,7 +10,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+import ImageExtension from '@tiptap/extension-image';
 import Toolbar from '../../components/admin/ToolbarTiptap';
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -29,7 +29,7 @@ const AddBlog = () => {
           class: 'text-blue-600 underline cursor-pointer',
         },
       }),
-      Image.configure({
+      ImageExtension.configure({
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
         },
@@ -61,11 +61,13 @@ const AddBlog = () => {
     description: '',
     content: '',
     image: '',
+    images: [],
     blog_category_id: '',
     status: 'draft'
   });
 
   const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [categories, setCategories] = useState([]);
   const [imageUploading, setImageUploading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -112,14 +114,31 @@ const AddBlog = () => {
             description: blog.description || '',
             content: blog.content || '',
             image: blog.image || '',
+            images: blog.images || [], // Ensure images array is populated
             blog_category_id: blog.blog_category_id || '',
             status: blog.status || 'draft'
           });
 
           if (blog.image) {
-            // Xử lý đường dẫn tương đối cho preview
-            const imagePath = blog.image.startsWith('http') ? blog.image : `http://localhost:3000${blog.image}`;
-            setImagePreview(imagePath);
+            // Xử lý hình ảnh base64 hoặc URL
+            if (blog.image.startsWith('data:image')) {
+              // Đây là base64 image
+              setImagePreview(blog.image);
+            } else {
+              // Đây là URL image (từ dữ liệu cũ)
+              const imagePath = blog.image.startsWith('http') ? blog.image : `http://localhost:3000${blog.image}`;
+              setImagePreview(imagePath);
+            }
+          }
+
+          // Handle multiple images if they exist
+          if (blog.images && blog.images.length > 0) {
+            const imageDataArray = blog.images.map((img, index) => ({
+              base64: img,
+              name: `Image ${index + 1}`,
+              size: img.length
+            }));
+            setImagePreviews(imageDataArray);
           }
           if (editor && blog.content) {
             editor.commands.setContent(blog.content);
@@ -143,80 +162,138 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
   };
 
   const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-    // Validate file type
+    console.log('handleImageChange called with files:', files.map(f => f.name));
+
+    // Validate file types
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
+    const invalidFiles = files.filter(file => !validTypes.includes(file.type));
+    
+    if (invalidFiles.length > 0) {
       setError('Chỉ chấp nhận file hình ảnh (JPEG, PNG, GIF, WebP)');
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file sizes (max 5MB each)
+    const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
       setError('Kích thước file không được vượt quá 5MB');
       return;
     }
 
+    // Limit number of images (max 10)
+    if (files.length > 10) {
+      setError('Tối đa 10 hình ảnh');
+      return;
+    }
+
     try {
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-
-      // Upload image
-      const formData = new FormData();
-      formData.append('image', file);
-
       setImageUploading(true);
       setError(null);
+
+      console.log('Starting base64 conversion for multiple images...');
       
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        body: formData
+      // Convert all images to base64
+      const imagePromises = files.map(async (file) => {
+        const base64Image = await convertImageToBase64(file);
+        return {
+          base64: base64Image,
+          name: file.name,
+          size: file.size
+        };
       });
 
-      if (!response.ok) {
-        let errorMessage = 'Lỗi khi upload hình ảnh';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (parseError) {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
+      const convertedImages = await Promise.all(imagePromises);
       
-      // Kiểm tra response có đúng format không
-      if (!result.url) {
-        throw new Error('Response không hợp lệ từ server');
-      }
-
-      // Lưu đường dẫn tương đối thay vì URL tuyệt đối
-      const imageUrl = result.url.startsWith('http') 
-        ? result.url.replace(/^https?:\/\/[^\/]+/, '') // Loại bỏ protocol và host
-        : result.url;
+      console.log('Base64 conversion successful for all images');
       
+      // Update image previews
+      setImagePreviews(prev => [...prev, ...convertedImages]);
+
+      // Save base64 images to form data (for backward compatibility, keep the first image as main image)
       setFormData(prev => ({
         ...prev,
-        image: imageUrl
+        image: convertedImages[0]?.base64 || '',
+        images: [...(prev.images || []), ...convertedImages.map(img => img.base64)]
       }));
+      
+      console.log('Image previews and form data updated successfully');
       
       // Hiển thị thông báo thành công
       setUploadSuccess(true);
       setTimeout(() => setUploadSuccess(false), 3000);
     } catch (error) {
-      console.error('Upload error:', error);
-      setError('Lỗi khi tải lên hình ảnh: ' + error.message);
-      setImagePreview(null);
+      console.error('Image conversion error:', error);
+      setError('Lỗi khi xử lý hình ảnh: ' + error.message);
     } finally {
       setImageUploading(false);
     }
+  };
+
+  // Function to convert image to base64
+  const convertImageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      console.log('Starting image conversion for file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        console.log('FileReader completed, data length:', reader.result.length);
+        console.log('Data URL starts with:', reader.result.substring(0, 50));
+        
+        // Compress image before converting to base64
+        const img = new window.Image();
+        img.onload = () => {
+          console.log('Image loaded successfully, dimensions:', img.width, 'x', img.height);
+          
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set max dimensions for compression
+          const maxWidth = 1200;
+          const maxHeight = 800;
+          let { width, height } = img;
+          
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+          
+          console.log('Canvas dimensions after compression:', width, 'x', height);
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+          
+          console.log('Base64 conversion completed, length:', compressedBase64.length);
+          console.log('Base64 starts with:', compressedBase64.substring(0, 50));
+          
+          resolve(compressedBase64);
+        };
+        img.onerror = (error) => {
+          console.error('Image loading error:', error);
+          reject(new Error('Không thể tải hình ảnh'));
+        };
+        img.src = reader.result;
+      };
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        reject(new Error('Không thể đọc file'));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   // Function để extract base64 images từ content (for debugging)
@@ -348,11 +425,18 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
 
       // Lưu trực tiếp vào database với base64 images
       const blogData = {
-        ...formData
+        ...formData,
+        // Đảm bảo image là base64 string
+        image: formData.image || '',
+        images: formData.images // Ensure images array is sent
       };
 
-      console.log(blogData);
-const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
+      console.log('Submitting blog with base64 image:', {
+        ...blogData,
+        imageLength: blogData.image ? blogData.image.length : 0
+      });
+
+      const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
       const method = id ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -527,115 +611,118 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                   </div>
                 )}
                 
-                                 {imagePreview ? (
-                  <div className="relative group">
-                    <img
-                      src={imagePreview.startsWith('http') ? imagePreview : `http://localhost:3000${imagePreview}`}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                      onError={(e) => {
-                        setError('Không thể tải hình ảnh. Vui lòng thử lại.');
-                        e.target.style.display = 'none';
-                        const placeholder = e.target.nextElementSibling;
-                        if (placeholder) {
-                          placeholder.style.display = 'flex';
-                        }
-                      }}
-                    />
-                    <div 
-                      className="hidden w-full h-48 bg-gray-200 rounded-lg items-center justify-center"
-                      style={{ display: 'none' }}
-                    >
-                      <div className="text-center text-gray-500">
-                        <FaImage className="w-16 h-16 mx-auto mb-2" />
-                        <p>Không thể tải hình ảnh</p>
-                      </div>
+                {/* Multiple Images Preview */}
+                {imagePreviews.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {imagePreviews.map((imageData, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={imageData.base64}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                            onLoad={(e) => {
+                              console.log(`Image ${index + 1} loaded successfully:`, e.target.src.substring(0, 50));
+                            }}
+                            onError={(e) => {
+                              console.error(`Image ${index + 1} preview error:`, e.target.src.substring(0, 50));
+                              setError('Không thể tải hình ảnh. Vui lòng thử lại.');
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                            <button
+                              onClick={() => {
+                                setImagePreviews(prev => prev.filter((_, i) => i !== index));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  images: prev.images.filter((_, i) => i !== index),
+                                  image: index === 0 ? (prev.images[1] || '') : prev.image
+                                }));
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200"
+                              title="Xóa hình ảnh"
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="absolute top-1 left-1 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            {index + 1}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
-                      <button
-                        onClick={() => {
-                          setImagePreview(null);
-                          setFormData(prev => ({ ...prev, image: '' }));
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200"
-                        title="Xóa hình ảnh"
-                      >
-                        <FaTrash className="w-4 h-4" />
-                      </button>
+                    <div className="text-xs text-gray-500">
+                      <p>Đã tải lên {imagePreviews.length} hình ảnh</p>
+                      <p>Tổng kích thước: {Math.round(imagePreviews.reduce((total, img) => total + img.base64.length, 0) / 1024)}KB</p>
                     </div>
-                  </div>
-                ) : (
-                  <div 
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#06AEF4] transition-colors duration-200"
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.add('border-[#06AEF4]', 'bg-blue-50');
-                    }}
-                    onDragLeave={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('border-[#06AEF4]', 'bg-blue-50');
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('border-[#06AEF4]', 'bg-blue-50');
-                      const files = e.dataTransfer.files;
-                      if (files.length > 0) {
-                        const file = files[0];
-                        const event = { target: { files: [file] } };
-                        handleImageChange(event);
-                      }
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="image-upload"
-                      disabled={imageUploading}
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className={`cursor-pointer flex flex-col items-center gap-2 ${imageUploading ? 'pointer-events-none opacity-50' : ''}`}
-                    >
-                      <FaImage className="w-8 h-8 text-gray-400" />
-                      <div className="text-sm text-gray-600">
-                        Kéo thả hoặc click để tải lên hình ảnh
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        PNG, JPG hoặc GIF (tối đa 5MB)
-                      </div>
-                      <button 
-                        className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                        disabled={imageUploading}
-                      >
-                        <FaUpload className="w-4 h-4" />
-                        {imageUploading ? 'Đang tải...' : 'Chọn file'}
-                      </button>
-                    </label>
                   </div>
                 )}
+
+                {/* Upload Area */}
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#06AEF4] transition-colors duration-200"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.add('border-[#06AEF4]', 'bg-blue-50');
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove('border-[#06AEF4]', 'bg-blue-50');
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove('border-[#06AEF4]', 'bg-blue-50');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                      const event = { target: { files } };
+                      handleImageChange(event);
+                    }
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="image-upload"
+                    disabled={imageUploading}
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className={`cursor-pointer flex flex-col items-center gap-2 ${imageUploading ? 'pointer-events-none opacity-50' : ''}`}
+                  >
+                    <FaImage className="w-8 h-8 text-gray-400" />
+                    <div className="text-sm text-gray-600">
+                      Kéo thả hoặc click để tải lên hình ảnh
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      PNG, JPG, GIF hoặc WebP (tối đa 5MB mỗi file, tối đa 10 ảnh)
+                    </div>
+                    <button 
+                      className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                      disabled={imageUploading}
+                    >
+                      <FaUpload className="w-4 h-4" />
+                      {imageUploading ? 'Đang xử lý...' : 'Chọn file'}
+                    </button>
+                  </label>
+                </div>
                 
                 {uploadSuccess && (
                   <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-xs text-green-800 font-medium">
-                      ✅ Hình ảnh đã được tải lên thành công!
+                      ✅ Hình ảnh đã được xử lý thành công!
                     </p>
                   </div>
                 )}
                 
                 {formData.image && !uploadSuccess && (
                   <div className="text-xs text-gray-500">
-                    <p>Hình ảnh đã được tải lên thành công</p>
-                    <p className="text-xs text-blue-600 mt-1 break-all">
-                      Đường dẫn: {formData.image}
+                    <p>Hình ảnh đã được chuyển đổi sang base64</p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Kích thước: {Math.round(formData.image.length / 1024)}KB
                     </p>
-                    <button 
-                      onClick={() => window.open(`http://localhost:3000${formData.image}`, '_blank')}
-                      className="text-xs text-blue-600 underline mt-1"
-                    >
-                      Mở hình ảnh trong tab mới
-                    </button>
                   </div>
                 )}
               </div>
@@ -657,8 +744,8 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                     <span>Danh mục: {formData.blog_category_id ? 'Đã chọn' : 'Chưa chọn'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${formData.image ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                    <span>Hình ảnh: {formData.image ? 'Đã tải lên' : 'Chưa tải lên'}</span>
+                    <div className={`w-2 h-2 rounded-full ${imagePreviews.length > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                    <span>Hình ảnh: {imagePreviews.length > 0 ? `Đã tải lên ${imagePreviews.length} ảnh` : 'Chưa tải lên'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${formData.content.trim() ? 'bg-green-500' : 'bg-red-500'}`}></div>

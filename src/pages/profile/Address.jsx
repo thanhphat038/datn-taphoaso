@@ -399,8 +399,8 @@ const Address = () => {
         <div className={`mb-4 p-3 rounded-lg shadow-md font-medium flex items-center justify-between ${
           messageType === 'error' 
             ? 'bg-red-50 border-l-4 border-red-500 text-red-700' 
-            : 'bg-green-50 border-l-4 border-green-500 text-green-700'
-        }`}>
+        
+          }`}>
           <div className="flex items-center gap-2">
             {messageType === 'error' ? (
               <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,8 +413,8 @@ const Address = () => {
             )}
             <span className="text-sm">{message}</span>
           </div>
-          <button 
-            className="text-gray-400 hover:text-gray-600 transition-colors" 
+          <button
+            className="text-gray-400 hover:text-gray-600 transition-colors"
             onClick={() => setMessage('')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,6 +441,7 @@ const Address = () => {
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-8 h-8 bg-[#06AEF4] rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -470,6 +471,7 @@ const Address = () => {
                     <button 
                       onClick={handleCancelEdit} 
                       className="px-3 py-1.5 rounded-md border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition-all text-sm"
+
                     >
                       Hủy
                     </button>
@@ -479,6 +481,7 @@ const Address = () => {
                     <button
                       onClick={() => handleStartEdit(address)}
                       className="px-3 py-1.5 rounded-md bg-[#06AEF4] text-white font-medium hover:bg-[#70d9ff] transition-all shadow-sm hover:shadow-md text-sm"
+
                     >
                       Sửa
                     </button>
@@ -516,6 +519,7 @@ const Address = () => {
                       onChange={e => setEditAddress({ ...editAddress, receiver: e.target.value })} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
                       placeholder="Nhập tên người nhận" 
+
                     />
                   </div>
                   <div className="group">
@@ -531,6 +535,12 @@ const Address = () => {
                       onChange={e => setEditAddress({ ...editAddress, phone: e.target.value })} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
                       placeholder="Nhập số điện thoại" 
+//                     <input
+//                       type="tel"
+//                       value={editAddress.phone}
+//                       onChange={e => setEditAddress({ ...editAddress, phone: e.target.value })}
+//                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+//                       placeholder="Nhập số điện thoại"
                     />
                   </div>
                   <div className="group">
@@ -544,6 +554,7 @@ const Address = () => {
                       value={editAddress.city} 
                       onChange={handleEditCityChange} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm"
+
                     >
                       <option value="">Chọn tỉnh/thành phố</option>
                       {cities.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
@@ -560,6 +571,7 @@ const Address = () => {
                       value={editAddress.district} 
                       onChange={handleEditDistrictChange} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
+
                       disabled={!editDistricts.length}
                     >
                       <option value="">Chọn quận/huyện</option>
@@ -577,6 +589,7 @@ const Address = () => {
                       value={editAddress.ward} 
                       onChange={handleEditWardChange} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
+
                       disabled={!editWards.length}
                     >
                       <option value="">Chọn phường/xã</option>
@@ -596,6 +609,7 @@ const Address = () => {
                       onChange={e => setEditAddress({ ...editAddress, address_detail: e.target.value })} 
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
                       placeholder="Nhập địa chỉ chi tiết" 
+
                     />
                   </div>
                 </div>
@@ -611,6 +625,7 @@ const Address = () => {
         className="w-full py-3 px-4 bg-[#06AEF4] text-white rounded-lg font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
         Thêm địa chỉ mới
@@ -622,12 +637,14 @@ const Address = () => {
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <div className="w-6 h-6 bg-[#06AEF4] rounded-full flex items-center justify-center">
               <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
             Thêm địa chỉ mới
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
             <div className="group">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
                 <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -641,6 +658,7 @@ const Address = () => {
                 onChange={e => setNewAddress({ ...newAddress, receiver: e.target.value })} 
                 className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
                 placeholder="Nhập tên người nhận" 
+
               />
             </div>
             <div className="group">
@@ -656,6 +674,7 @@ const Address = () => {
                 onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} 
                 className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
                 placeholder="Nhập số điện thoại" 
+
               />
               {phoneError && <div className="text-red-500 text-xs mt-1 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -675,6 +694,7 @@ const Address = () => {
                 value={newAddress.city} 
                 onChange={handleCityChange} 
                 className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm"
+
               >
                 <option value="">Chọn tỉnh/thành phố</option>
                 {cities.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
@@ -691,6 +711,7 @@ const Address = () => {
                 value={newAddress.district} 
                 onChange={handleDistrictChange} 
                 className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
+
                 disabled={!districts.length}
               >
                 <option value="">Chọn quận/huyện</option>
@@ -708,6 +729,7 @@ const Address = () => {
                 value={newAddress.ward} 
                 onChange={handleWardChange} 
                 className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 bg-white text-sm" 
+
                 disabled={!wards.length}
               >
                 <option value="">Chọn phường/xã</option>
@@ -740,6 +762,25 @@ const Address = () => {
             <button 
               onClick={() => setShowAddForm(false)} 
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-600 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm"
+//               <input
+//                 type="text"
+//                 value={newAddress.address_detail}
+//                 onChange={e => setNewAddress({ ...newAddress, address_detail: e.target.value })}
+//                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+//                 placeholder="Nhập địa chỉ chi tiết"
+//               />
+//             </div>
+//           </div>
+//           <div className="flex gap-4 mt-6">
+//             <button
+//               onClick={handleAddAddress}
+//               className="flex-1 px-6 py-3 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+//             >
+//               Lưu địa chỉ
+//             </button>
+//             <button
+//               onClick={() => setShowAddForm(false)}
+//               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:bg-gray-50 transition-all"
             >
               Hủy
             </button>

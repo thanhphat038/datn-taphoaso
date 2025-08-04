@@ -77,6 +77,7 @@ const ProfilePage = () => {
       console.log('🔍 ProfilePage Debug:');
       console.log('🔍 Token:', token ? 'exists' : 'missing');
       console.log('🔍 UserData:', userData ? 'exists' : 'missing');
+
       
       if (!token || !userData) {
         console.log('🚫 No authentication found, redirecting to login...');

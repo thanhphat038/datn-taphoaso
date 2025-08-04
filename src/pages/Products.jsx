@@ -179,6 +179,7 @@ const ProductsPage = () => {
     if (loading) {
         return (
             <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
+
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center'>
@@ -196,6 +197,7 @@ const ProductsPage = () => {
     if (error) {
         return (
             <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
+
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100'>
@@ -217,6 +219,7 @@ const ProductsPage = () => {
 
     return (
         <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
+
             <div className='max-w-7xl mx-auto px-4 py-8'>
                 {/* Header */}
                 {/* <div className='mb-8'>

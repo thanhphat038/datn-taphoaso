@@ -12,6 +12,7 @@ const AboutPage = () => {
   }, []);
 
   return (
+
     <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
       <div className='max-w-7xl mx-auto px-4 py-8 font-sans'>
         {/* Top Welcome Section with pink background */}
@@ -24,6 +25,138 @@ const AboutPage = () => {
                 alt="Woman cooking"
                 className="w-full h-[500px] object-cover rounded-lg"
               />
+
+//     <div className="min-h-screen bg-[#F5FBFB]">
+//       <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
+//       {/* Top Welcome Section with pink background */}
+//       <section className="bg-sky-50 rounded-2xl p-8 mb-16">
+//         <div className="flex flex-col md:flex-row gap-8">
+//           {/* Left Large Image */}
+//           <div className="md:w-1/2">
+//             <img
+//               src="/images/about-1.png"
+//               alt="Woman cooking"
+//               className="w-full h-[500px] object-cover rounded-lg"
+//             />
+//           </div>
+
+//           {/* Right Content */}
+//           <div className="md:w-1/2">
+//             <h2 className="text-2xl font-medium mb-2">
+//               Chào mừng bạn đến với{' '}
+//               <span className="text-blue-500">Tạp Hóa Số</span>
+//             </h2>
+//             <h3 className="text-xl mb-4">Cửa hàng tiện lợi cho mọi nhà!</h3>
+//             <p className="text-gray-600 mb-8 leading-relaxed">
+//               <span className="text-blue-500">Tạp Hóa Số</span> là mô hình cửa hàng tạp hóa hiện đại, 
+//               nơi bạn có thể thoải mái để dàng mua sắm thực phẩm tươi sống, nhu yếu phẩm hàng ngày 
+//               và các sản phẩm tiêu dùng chất lượng cao với giá cả phải chăng. Chúng tôi kết hợp sự 
+//               tiện lợi của công nghệ số với sự thân thiện của cửa hàng truyền thống, giúp bạn tiết 
+//               kiệm thời gian, chi phí và luôn an tâm về chất lượng sản phẩm. Đủ bạn ở đâu, Tạp Hóa Số 
+//               luôn sẵn sàng phục vụ – nhanh chóng, tiện lợi và đáng tin cậy.
+//             </p>
+
+//             {/* Bottom Images Carousel */}
+//             <div className="relative overflow-hidden group">
+//               <div 
+//                 className="flex transition-transform duration-500 ease-in-out"
+//                 style={{
+//                   transform: `translateX(-${currentSlide * 100}%)`,
+//                 }}
+//               >
+//                 {/* First group of 3 images */}
+//                 <div className="flex-none w-full flex gap-4">
+//                   <img
+//                     src="/images/about-2.jpg"
+//                     alt="Food plate"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-3.jpg"
+//                     alt="Vegetables"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-4.jpg"
+//                     alt="Cooking"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                 </div>
+                
+//                 {/* Second group of 3 images */}
+//                 <div className="flex-none w-full flex gap-4">
+//                   <img
+//                     src="/images/about-0.jpg"
+//                     alt="Food variety"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-7.jpg"
+//                     alt="Fresh produce"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-5.jpg"
+//                     alt="Healthy options"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                 </div>
+                
+//                 {/* Third group of 3 images */}
+//                 <div className="flex-none w-full flex gap-4">
+//                   <img
+//                     src="/images/about-11.jpg"
+//                     alt="Store front"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-12.jpg"
+//                     alt="Special offers"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                   <img
+//                     src="/images/about-13.jpg"
+//                     alt="Promotions"
+//                     className="w-1/3 h-57 object-cover rounded-lg"
+//                   />
+//                 </div>
+//               </div>
+              
+//               {/* Previous Button */}
+//               <button
+//                 onClick={() => setCurrentSlide((prev) => (prev - 1 + 3) % 3)}
+//                 className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+//                 aria-label="Previous slide"
+//               >
+//                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+//                 </svg>
+//               </button>
+              
+//               {/* Next Button */}
+//               <button
+//                 onClick={() => setCurrentSlide((prev) => (prev + 1) % 3)}
+//                 className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+//                 aria-label="Next slide"
+//               >
+//                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+//                 </svg>
+//               </button>
+              
+//               {/* Navigation Dots */}
+//               <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+//                 {[0, 1, 2].map((dot) => (
+//                   <button
+//                     key={dot}
+//                     onClick={() => setCurrentSlide(dot)}
+//                     className={`w-2 h-2 rounded-full transition-colors ${
+//                       currentSlide === dot ? 'bg-blue-600' : 'bg-gray-300'
+//                     }`}
+//                     aria-label={`Go to slide ${dot + 1}`}
+//                   />
+//                 ))}
+//               </div>
             </div>
 
             {/* Right Content */}
@@ -324,6 +457,10 @@ const AboutPage = () => {
         </section>
       </div>
     </main>
+//         </div>
+//       </section>
+//       </div>
+//     </div>
   );
 };
 
