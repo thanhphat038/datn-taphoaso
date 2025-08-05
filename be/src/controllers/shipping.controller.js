@@ -1,107 +1,106 @@
 import ShippingService from '../services/shipping/shipping.service.js';
+import VietmapShippingService from '../services/shipping/vietmapShipping.service.js';
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
+import { ok } from '../utils/response.js';
+
+const STORE_COORDS = {
+  lat: 10.782238,
+  lon: 106.683384
+};
 
 const shippingService = new ShippingService();
+const vietmapShippingService = new VietmapShippingService();
 
 // Tính phí ship từ địa chỉ
 export const calculateShippingFromAddress = async (req, res, next) => {
   try {
-    const { address } = req.body;
-
-    if (!address) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Địa chỉ giao hàng là bắt buộc');
-    }
-
-    const shippingInfo = await shippingService.calculateShippingFromAddress(address);
+    console.log('🚀 [SHIPPING] Bắt đầu tính phí ship từ địa chỉ');
     
-    res.json({
-      success: true,
-      data: shippingInfo
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    const { deliveryAddress, service = 'default' } = req.body;
+    console.log('📍 [SHIPPING] Địa chỉ giao hàng:', deliveryAddress);
+    console.log('🔧 [SHIPPING] Service được chọn:', service);
 
-// Tính phí ship từ tọa độ
-export const calculateShippingFromCoordinates = async (req, res, next) => {
-  try {
-    const { lat, lon } = req.body;
-
-    if (!lat || !lon) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Tọa độ là bắt buộc');
+    if (!deliveryAddress) {
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'Địa chỉ giao hàng là bắt buộc');
     }
 
-    // Validate tọa độ
-    const latNum = parseFloat(lat);
-    const lonNum = parseFloat(lon);
-    
-    if (isNaN(latNum) || isNaN(lonNum)) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Tọa độ không hợp lệ');
+    let shippingInfo;
+
+    switch (service) {
+      case 'vietmap':
+        console.log('🗺️ [SHIPPING] Sử dụng Vietmap service');
+        
+        // Lấy tọa độ từ địa chỉ
+        console.log('📍 [SHIPPING] Đang lấy tọa độ từ địa chỉ...');
+        const coordinates = await vietmapShippingService.getCoordinatesFromAddress(deliveryAddress);
+        console.log('✅ [SHIPPING] Đã lấy được tọa độ:', coordinates);
+        
+        // Tính khoảng cách tự tính
+        console.log('📏 [SHIPPING] Đang tính khoảng cách tự tính...');
+        const calculatedDistance = vietmapShippingService.calculateDistance(STORE_COORDS, coordinates);
+        console.log('📊 [SHIPPING] Khoảng cách tự tính:', calculatedDistance, 'km');
+        
+        // Lấy thông tin tuyến đường thực tế từ API
+        console.log('🛣️ [SHIPPING] Đang lấy thông tin tuyến đường từ Vietmap API...');
+        const routeInfo = await vietmapShippingService.getRouteInfo(STORE_COORDS, coordinates);
+        const actualDistance = routeInfo.distance;
+        console.log('📊 [SHIPPING] Khoảng cách thực tế:', actualDistance, 'km');
+        console.log('⏱️ [SHIPPING] Thời gian di chuyển:', Math.round(routeInfo.time / 60), 'phút');
+        
+        // Tính phí ship dựa trên khoảng cách thực tế
+        console.log('💰 [SHIPPING] Đang tính phí ship...');
+        const shippingFee = vietmapShippingService.calculateShippingFee(actualDistance);
+        console.log('💵 [SHIPPING] Phí ship:', shippingFee, 'VND');
+        
+        shippingInfo = {
+          shippingFee,
+          distance: {
+            calculated: Math.round(calculatedDistance * 100) / 100,
+            actual: Math.round(actualDistance * 100) / 100,
+            difference: Math.round(Math.abs(calculatedDistance - actualDistance) * 100) / 100
+          },
+          coordinates,
+          address: deliveryAddress,
+          routeInfo: {
+            time: Math.round(routeInfo.time / 60), // Chuyển sang phút
+            instructions: routeInfo.instructions
+          }
+        };
+        
+        console.log('✅ [SHIPPING] Hoàn thành tính phí ship với Vietmap service');
+        break;
+        
+      case 'default':
+      default:
+        console.log('🔧 [SHIPPING] Sử dụng Default service');
+        console.log('📍 [SHIPPING] Đang tính phí ship với Default service...');
+        shippingInfo = await shippingService.calculateShippingFromAddress(deliveryAddress);
+        console.log('✅ [SHIPPING] Hoàn thành tính phí ship với Default service');
+        break;
     }
 
-    if (latNum < -90 || latNum > 90) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Vĩ độ phải từ -90 đến 90');
-    }
-
-    if (lonNum < -180 || lonNum > 180) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Kinh độ phải từ -180 đến 180');
-    }
-
-    const shippingInfo = shippingService.calculateShippingFromCoordinates(latNum, lonNum);
-    
-    res.json({
-      success: true,
-      data: shippingInfo
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Lấy địa chỉ từ tọa độ
-export const getAddressFromCoordinates = async (req, res, next) => {
-  try {
-    const { lat, lon } = req.query;
-
-    if (!lat || !lon) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Tọa độ là bắt buộc');
-    }
-
-    // Validate tọa độ
-    const latNum = parseFloat(lat);
-    const lonNum = parseFloat(lon);
-    
-    if (isNaN(latNum) || isNaN(lonNum)) {
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Tọa độ không hợp lệ');
-    }
-
-    const addressInfo = await shippingService.getAddressFromCoordinates(latNum, lonNum);
-    
-    res.json({
-      success: true,
-      data: addressInfo
-    });
-  } catch (err) {
-    next(err);
+    console.log('🎉 [SHIPPING] Trả về kết quả thành công');
+    return ok(res, shippingInfo, 'Tính phí vận chuyển thành công');
+  } catch (error) {
+    console.error('❌ [SHIPPING] Lỗi:', error.message);
+    next(error);
   }
 };
 
 // Lấy thông tin cửa hàng
 export const getStoreInfo = async (req, res, next) => {
   try {
-    res.json({
-      success: true,
-      data: {
-        address: "159 Nam Kỳ Khởi Nghĩa, Phường Võ Thị Sáu, Quận 3, Hồ Chí Minh, Vietnam",
-        coordinates: {
-          lat: 10.7829,
-          lon: 106.7009
-        }
+    const storeInfo = {
+      address: "159 Nam Kỳ Khởi Nghĩa, Phường Võ Thị Sáu, Quận 3, Hồ Chí Minh, Vietnam",
+      coordinates: {
+        lat: 10.7829,
+        lon: 106.7009
       }
-    });
-  } catch (err) {
-    next(err);
+    };
+
+    return ok(res, storeInfo, 'Lấy thông tin cửa hàng thành công');
+  } catch (error) {
+    next(error);
   }
 }; 

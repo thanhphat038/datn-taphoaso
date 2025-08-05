@@ -84,16 +84,20 @@ class ShippingService {
   // Tính phí ship dựa trên khoảng cách
   calculateShippingFee(distance) {
     // Bảng giá ship theo khoảng cách (đơn vị: km, phí: VND)
-    if (distance <= 5) {
-      return 15000; // 15k VND cho khoảng cách <= 5km
+    if (distance <= 1) {
+      return 8000; // 8k VND cho khoảng cách <= 1km
+    } else if (distance <= 3) {
+      return 12000; // 12k VND cho khoảng cách 1-3km
+    } else if (distance <= 5) {
+      return 18000; // 18k VND cho khoảng cách 3-5km
     } else if (distance <= 10) {
       return 25000; // 25k VND cho khoảng cách 5-10km
+    } else if (distance <= 15) {
+      return 35000; // 35k VND cho khoảng cách 10-15km
     } else if (distance <= 20) {
-      return 35000; // 35k VND cho khoảng cách 10-20km
-    } else if (distance <= 30) {
-      return 45000; // 45k VND cho khoảng cách 20-30km
+      return 45000; // 45k VND cho khoảng cách 15-20km
     } else {
-      return 55000; // 55k VND cho khoảng cách > 30km
+      return 55000; // 55k VND cho khoảng cách > 20km
     }
   }
 

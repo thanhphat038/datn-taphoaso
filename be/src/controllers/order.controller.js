@@ -30,9 +30,9 @@ export const createOrder = async (req, res, next) => {
     const cart = await cartService.getCart(userId);
     console.log('🔍 Debug - Cart:', cart);
 
-    if (!cart || !cart.items?.length) {
-      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
-    }
+    // if (!cart || !cart.items?.length) {
+    //   throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
+    // }
 
     for (const item of items) {
       console.log('🔍 Debug - Processing item:', item);   
