@@ -3,6 +3,9 @@ import express from 'express';
 import userRouter from './user.route.js';
 
 import productRouter from './product.route.js';
+import blogRouter from './blog.route.js';
+import blogCategoryRouter from './blogCategory.route.js';
+
 import categoryRouter from './category.route.js';
 import orderRouter from './order.route.js';
 import addressRouter from './address.route.js';
@@ -15,11 +18,16 @@ import favoriteRouter from './favorite.route.js';
 import cartRouter from './cart.route.js';
 
 import voucherRouter from './voucher.route.js';
+import variantRouter from './variant.route.js';
 import authRouter from './auth.route.js';
+
+import uploadRouter from './upload.route.js';
+
 import paymentRouter from './payment.route.js';
 import shippingRouter from './shipping.route.js';
 import productVariantRouter from './productVariant.route.js';
 import recentViewsRouter from './recentViews.route.js';
+
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -40,14 +48,20 @@ router.use('/favorites', authMiddleware, favoriteRouter);
 
 // Protected routes
 router.use('/products', productRouter);
+
+router.use('/blogs', blogRouter);
+
+router.use('/blogs_categories', blogCategoryRouter);
+
 router.use('/categories', authMiddleware,categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);
 
 router.use('/vouchers', authMiddleware, voucherRouter);
 
-// Payment routes
-router.use('/payment', paymentRouter);
+router.use('/variants', variantRouter);
+
+router.use('/upload', uploadRouter);
 
 // Shipping routes
 router.use('/shipping', shippingRouter);
@@ -59,3 +73,4 @@ router.use('/product-variants', productVariantRouter);
 router.use('/recent-views', recentViewsRouter);
 
 export default router;
+

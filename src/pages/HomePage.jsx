@@ -85,69 +85,66 @@ const HomePage = () => {
   }, [products]);
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50'>
+    <main className='min-h-screen bg-[#F5FBFB]'>
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-12'>
 
         {/* Hero Banner Section - Giữ đơn giản như ban đầu */}
-        <div className='flex gap-5 mb-5'>
+        <div className='flex gap-0 mb-5'>
           <div className='grow-2'>
             <Swiper
               spaceBetween={20}
               slidesPerView={1}
               loop={true}
-              className='rounded-[30px] w-full max-w-[800px] mx-auto'
+              className='rounded-lg w-full max-w-[860px] mx-auto'
               autoplay={{ delay: 3000, disableOnInteraction: false }}
               modules={[Autoplay]}
             >
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="./images/banner_taphoaso.png" alt="Banner 1" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="Banner 2" />
               </SwiperSlide>
               <SwiperSlide>
-                <img className='rounded-[30px] w-full h-[560px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
+                <img className='rounded-lg w-full h-[400px] object-cover' src="https://amis.misa.vn/wp-content/uploads/2022/07/tim-hieu-tong-quan-chien-luoc-marketing-cua-chocopie.jpg" alt="Banner 3" />
               </SwiperSlide>
             </Swiper>
           </div>
-          <div className='grow-1 grid gap-5'>
-            <img className='rounded-[30px]' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
-            <img className='rounded-[30px]' src="./images/banner_3.png" alt="" />
+          <div className='grow-1 grid gap-3'>
+            <img className='rounded-lg h-[195px] w-full object-cover' src="https://www.mihaohao.vn/wp-content/uploads/2024/04/2803HH-Sum24-KV-Horizontal-copy.jpg" alt="" />
+            <img className='rounded-lg h-[195px] w-full object-cover' src="./images/banner_3.png" alt="" />
           </div>
         </div>
 
-        {/* Category Section 1 - THỊT, CÁ, TRỨNG, HẢI SẢN */}
         <div className="relative">
-          {/* Modern Category Header */}
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl blur-lg opacity-30"></div>
-              <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl blur-lg opacity-30"></div>
+              <div className="relative bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-2xl shadow-lg">
                 <div className="flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
                   </svg>
-                  <span className="text-xl font-bold">THỊT, CÁ, TRỨNG, HẢI SẢN</span>
+                  <span className="text-xl font-bold">MÌ ĂN LIỀN</span>
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Products Container */}
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
             <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'>
               {getProductsByCategory("684697023d545550b38460cd", 5)}
             </div>
 
             <div className='mt-8 flex justify-center'>
-              <Link 
-                to="/product?category=684697023d545550b38460cd" 
-                className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
+              <Link
+                to="/product?category=684697023d545550b38460cd"
+                className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
               >
                 <span>Xem thêm</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -158,7 +155,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Category Section 2 - NƯỚC UỐNG */}
         <div className="relative">
           <div className="flex justify-center mb-8">
             <div className="relative">
@@ -198,7 +194,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Middle Banner - Giữ đơn giản như ban đầu */}
         <div className='mb-5'>
           <Swiper
             spaceBetween={20}
@@ -220,7 +215,6 @@ const HomePage = () => {
           </Swiper>
         </div>
 
-        {/* Category Section 3 - MÌ ĂN LIỀN */}
         <div className="relative">
           <div className="flex justify-center mb-8">
             <div className="relative">
@@ -326,6 +320,50 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Features Section */}
+        <section className="mt-16 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Tại Sao Chọn Chúng Tôi?</h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Chúng tôi cam kết mang đến những sản phẩm chất lượng cao với dịch vụ tốt nhất
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🚚</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giao Hàng Nhanh</h3>
+              <p className="text-gray-600">Giao hàng trong vòng 2-4 giờ</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Chất Lượng Cao</h3>
+              <p className="text-gray-600">Sản phẩm tươi ngon, đảm bảo vệ sinh</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Giá Cả Hợp Lý</h3>
+              <p className="text-gray-600">Giá cả cạnh tranh, nhiều ưu đãi</p>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🛡️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Bảo Mật Thông Tin</h3>
+              <p className="text-gray-600">Thông tin cá nhân được bảo vệ an toàn</p>
+            </div>
+          </div>
+        </section>
 
       </div>
       

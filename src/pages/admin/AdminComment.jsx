@@ -71,8 +71,8 @@ const AdminComment = () => {
         return {
           _id: c._id,
           content: c.comment || c.content || '',
-          createdAt: c.create_at || c.createdAt || '',
-          status: c.status || 'active',
+          create_at: c.create_at || c.create_at || '',
+          status: c.is_hidden ? 'inactive' : 'active',
           user_id: user,
           product_id: product,
         };
@@ -117,7 +117,6 @@ const AdminComment = () => {
 
   // Handle toggle comment status
   const handleToggleStatus = async (commentId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const actionText = currentStatus === 'active' ? 'ẩn' : 'hiện';
     
     const confirmMessage = `Bạn có chắc chắn muốn ${actionText} bình luận này?`;
@@ -128,7 +127,9 @@ const AdminComment = () => {
 
     try {
       setLoading(true);
-      await updateCommentStatus(commentId, newStatus);
+      await updateCommentStatus(commentId);
+      // Toggle the status locally
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       setComments(comments.map(c => 
         c._id === commentId ? { ...c, status: newStatus } : c
       ));
@@ -148,9 +149,12 @@ const AdminComment = () => {
   const filteredComments = comments.filter(comment => {
     const matchesSearch = 
       (comment.content && comment.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (comment.user_id?.name && comment.user_id.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'All' || comment.status === statusFilter;
-    return matchesSearch && matchesStatus;
+      (comment.user_id?.username && comment.user_id.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (comment.user_id?.full_name && comment.user_id.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
+    // Status filtering disabled
+    // const matchesStatus = statusFilter === 'All' || comment.status === statusFilter;
+    // return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const totalComments = filteredComments.length;
@@ -186,7 +190,7 @@ const AdminComment = () => {
             {comment.user_id?.username ? comment.user_id.username.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{comment.user_id?.username || 'Người dùng ẩn danh'}</div>
+            <div className="font-semibold text-gray-900">{comment.user_id?.username || comment.user_id?.full_name || 'Người dùng ẩn danh'}</div>
             <div className="text-sm text-gray-500">{comment.user_id?.email || 'Không có email'}</div>
           </div>
         </div>
@@ -236,10 +240,10 @@ const AdminComment = () => {
     },
     {
       title: 'Ngày tạo',
-      key: 'createdAt',
+      key: 'create_at',
       render: (comment) => (
         <div className="text-sm text-gray-600">
-          {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString('vi-VN', {
+          {comment.create_at ? new Date(comment.create_at).toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -249,19 +253,19 @@ const AdminComment = () => {
         </div>
       )
     },
-    {
-      title: 'Trạng thái',
-      key: 'status',
-      render: (comment) => {
-        const statusInfo = getCommentStatusInfo(comment.status);
-        return (
-          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
-            <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
-            {statusInfo.label}
-          </span>
-        );
-      }
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   key: 'status',
+    //   render: (comment) => {
+    //     const statusInfo = getCommentStatusInfo(comment.status);
+    //     return (
+    //       <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${statusInfo.color}`}>
+    //         <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
+    //         {statusInfo.label}
+    //       </span>
+    //     );
+    //   }
+    // },
     {
       title: '',
       key: 'actions',
@@ -276,12 +280,13 @@ const AdminComment = () => {
                 setShowViewModal(true);
               }
             },
-            {
-              label: comment.status === 'active' ? 'Ẩn bình luận' : 'Hiện bình luận',
-              icon: comment.status === 'active' ? FaEyeSlash : FaEye,
-              variant: comment.status === 'active' ? 'warning' : 'success',
-              onClick: () => handleToggleStatus(comment._id, comment.status)
-            },
+            // Status toggle disabled
+            // {
+            //   label: comment.status === 'active' ? 'Ẩn bình luận' : 'Hiện bình luận',
+            //   icon: comment.status === 'active' ? FaEyeSlash : FaEye,
+            //   variant: comment.status === 'active' ? 'warning' : 'success',
+            //   onClick: () => handleToggleStatus(comment._id, comment.status)
+            // },
             {
               label: 'Xóa bình luận',
               icon: FaTrash,
@@ -297,17 +302,18 @@ const AdminComment = () => {
 
   // Filter options
   const filterOptions = [
-    {
-      key: 'status',
-      label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
-             statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
-      value: statusFilter,
-      options: [
-        { value: 'All', label: 'Tất cả trạng thái' },
-        { value: 'active', label: 'Đang hiển thị' },
-        { value: 'inactive', label: 'Đã ẩn' }
-      ]
-    }
+    // Status filter disabled
+    // {
+    //   key: 'status',
+    //   label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
+    //          statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
+    //   value: statusFilter,
+    //   options: [
+    //     { value: 'All', label: 'Tất cả trạng thái' },
+    //     { value: 'active', label: 'Đang hiển thị' },
+    //     { value: 'inactive', label: 'Đã ẩn' }
+    //   ]
+    // }
   ];
 
   const handleFilterChange = (key, value) => {
@@ -318,10 +324,10 @@ const AdminComment = () => {
   };
 
   // Calculate statistics
-  const activeComments = comments.filter(c => c.status === 'active').length;
-  const inactiveComments = comments.filter(c => c.status === 'inactive').length;
+  // const activeComments = comments.filter(c => c.status === 'active').length;
+  // const inactiveComments = comments.filter(c => c.status === 'inactive').length;
   const todayComments = comments.filter(c => 
-    c.createdAt && new Date(c.createdAt).toDateString() === new Date().toDateString()
+    c.create_at && new Date(c.create_at).toDateString() === new Date().toDateString()
   ).length;
 
   return (
@@ -349,18 +355,10 @@ const AdminComment = () => {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AdminCard className="text-center">
             <div className="text-2xl font-bold text-[#06AEF4]">{totalComments}</div>
             <div className="text-sm text-gray-600">Tổng bình luận</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-green-600">{activeComments}</div>
-            <div className="text-sm text-gray-600">Đang hiển thị</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-red-600">{inactiveComments}</div>
-            <div className="text-sm text-gray-600">Đã ẩn</div>
           </AdminCard>
           <AdminCard className="text-center">
             <div className="text-2xl font-bold text-purple-600">{todayComments}</div>
@@ -430,7 +428,7 @@ const AdminComment = () => {
                   {currentComment.user_id?.username ? currentComment.user_id.username.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900">{currentComment.user_id?.username || 'Người dùng ẩn danh'}</div>
+                  <div className="font-semibold text-gray-900">{currentComment.user_id?.username || currentComment.user_id?.full_name || 'Người dùng ẩn danh'}</div>
                   <div className="text-sm text-gray-500">{currentComment.user_id?.email || 'Không có email'}</div>
                 </div>
               </div>
@@ -453,7 +451,7 @@ const AdminComment = () => {
                 <div>
                   <div className="font-semibold text-gray-900">{currentComment.product_id?.name || 'Sản phẩm không tồn tại'}</div>
                   <div className="text-sm text-gray-500">
-                    {currentComment.createdAt ? new Date(currentComment.createdAt).toLocaleDateString('vi-VN', {
+                    {currentComment.create_at ? new Date(currentComment.create_at).toLocaleDateString('vi-VN', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaSearch, FaFilter, FaChevronDown } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaChevronDown, FaTimes } from 'react-icons/fa';
 
 const AdminSearchFilter = ({
   searchValue,
@@ -34,8 +34,17 @@ const AdminSearchFilter = ({
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+          className="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent transition-all duration-200 bg-white shadow-sm"
         />
+        {searchValue && (
+          <button
+            onClick={() => onSearchChange('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Xóa tìm kiếm"
+          >
+            <FaTimes className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Filter Dropdowns */}

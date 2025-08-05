@@ -186,28 +186,13 @@ export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    const userId = req.user.id;
 
-    // Kiểm tra xem order có tồn tại và thuộc về user hiện tại không
-    const order = await orderService.getOrderById(orderId);
-    
-    if (!order) {
-      throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
+    if (!status) {
+      throw new AppError(ERROR_CODES.BAD_REQUEST, 'Status is required');
     }
 
-    let orderUserId;
-    if (typeof order.user_id === 'object' && order.user_id._id) {
-      orderUserId = order.user_id._id;
-    } else {
-      orderUserId = order.user_id;
-    }
-    
-    if (orderUserId.toString() !== userId.toString()) {
-      throw new AppError(ERROR_CODES.FORBIDDEN, 'You can only update your own orders');
-    }
-
-    const updatedOrder = await orderService.updateStatus(orderId, status);
-    res.json({ success: true, data: updatedOrder });
+    const order = await orderService.updateStatus(orderId, status);
+    res.json({ success: true, data: order });
   } catch (err) { next(err); }
 };
 

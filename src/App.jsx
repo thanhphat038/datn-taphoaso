@@ -25,16 +25,18 @@ import ProfilePage from './pages/ProfilePage';
 
 import OrderDetailPage from './pages/OrderDetailPage';
 
-import ProductsPage from './pages/products';
+import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
+import AdminBlogCategory from './pages/admin/AdminBlogCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import CheckoutGuard from './components/CheckoutGuard';
+import ProtectedRoute from './components/ProtectedRoute';
 import AddProductPage from './pages/admin/AddProductPage';
 import AdminPage from './pages/admin/AdminPage';
 import VoucherPage from './pages/admin/VoucherPage';
@@ -45,6 +47,8 @@ import AddBlog from './pages/admin/AddBlog';
 import AdminBlogDetail from './pages/admin/AdminBlogDetail';
 import AdminComment from './pages/admin/AdminComment';
 import AdminReview from './pages/admin/AdminReview';
+import AdminVariant from './pages/admin/AdminVariant';
+import AddVariantPage from './pages/admin/AddVariantPage';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -71,7 +75,11 @@ function Layout() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile/*" element={<ProfilePage />} />
+              <Route path="/profile/*" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
               <Route path="/order/:id" element={<OrderDetailPage />} />
               <Route path="/checkout" element={
                 <CheckoutGuard>
@@ -102,24 +110,31 @@ function Layout() {
       )}
       
       {isAdminRoute && (
-        <Routes>
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/user" element={<AdminUser />} />
-          <Route path="/admin/product" element={<AdminProduct />} />
-          <Route path="/admin/addproduct" element={<AddProductPage />} />
-          <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
-          <Route path="/admin/category" element={<AdminCategory />} />
-          <Route path="/admin/voucher" element={<VoucherPage />} />
-          <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
-          <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />
-          <Route path="/admin/order" element={<OrderPage />} />
-          <Route path="/admin/blog" element={<AdminBlogPage />} />
-          <Route path="/admin/addblog" element={<AddBlog />} />
-          <Route path="/admin/blog/detail/:id" element={<AdminBlogDetail />} />
-          <Route path="/admin/comment" element={<AdminComment />} />
-          <Route path="/admin/review" element={<AdminReview />} />
-          <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
-        </Routes>
+        <AdminProtected>
+          <Routes>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/user" element={<AdminUser />} />
+            <Route path="/admin/product" element={<AdminProduct />} />
+            <Route path="/admin/addproduct" element={<AddProductPage />} />
+            <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
+            <Route path="/admin/category" element={<AdminCategory />} />
+            <Route path="/admin/blogcategory" element={<AdminBlogCategory />} />
+            <Route path="/admin/voucher" element={<VoucherPage />} />
+            <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
+            <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />
+            <Route path="/admin/order" element={<OrderPage />} />
+            <Route path="/admin/blog" element={<AdminBlogPage />} />
+            <Route path="/admin/addblog" element={<AddBlog />} />
+            <Route path="/admin/addblog/:id" element={<AddBlog />} />
+            <Route path="/admin/blog/detail/:id" element={<AdminBlogDetail />} />
+            <Route path="/admin/comment" element={<AdminComment />} />
+            <Route path="/admin/review" element={<AdminReview />} />
+            <Route path="/admin/variant" element={<AdminVariant />} />
+            <Route path="/admin/addvariant" element={<AddVariantPage />} />
+            <Route path="/admin/addvariant/:id" element={<AddVariantPage />} />
+            <Route path="/admin/detailproduct/:id" element={<DetailProduct />} />
+          </Routes>
+        </AdminProtected>
       )}
     </div>
   );

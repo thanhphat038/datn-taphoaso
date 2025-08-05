@@ -14,6 +14,9 @@ const ProductsPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const productsPerPage = 16;
+    
+    // Thêm state cho notification
+    const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -99,10 +102,18 @@ const ProductsPage = () => {
     const totalProducts = filteredProducts.length;
     const totalPages = Math.ceil(totalProducts / productsPerPage);
 
+    // Hàm hiển thị notification
+    const showNotification = (message, type = 'success') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => {
+            setNotification({ show: false, message: '', type: 'success' });
+        }, 3000);
+    };
+
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     const currentProducts = filteredProducts.slice(startIndex, endIndex).map((element, index) => (
-        <Product key={index} data={element} />
+        <Product key={index} data={element} onAddToCartSuccess={showNotification} />
     ));
 
     const handlePageChange = (pageNumber) => {
@@ -161,13 +172,13 @@ const ProductsPage = () => {
         }
 
         return filteredProducts.slice(0, limit).map((product, index) => (
-            <Product key={product._id || index} data={product} />
+            <Product key={product._id || index} data={product} onAddToCartSuccess={showNotification} />
         ));
     };
     // Hiển thị loading state
     if (loading) {
         return (
-            <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+            <main className='min-h-screen bg-[#F5FBFB]'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center'>
@@ -184,7 +195,7 @@ const ProductsPage = () => {
     // Hiển thị error state
     if (error) {
         return (
-            <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+            <main className='min-h-screen bg-[#F5FBFB]'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100'>
@@ -205,7 +216,7 @@ const ProductsPage = () => {
     }
 
     return (
-        <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+        <main className='min-h-screen bg-[#F5FBFB]'>
             <div className='max-w-7xl mx-auto px-4 py-8'>
                 {/* Header */}
                 {/* <div className='mb-8'>
@@ -399,9 +410,39 @@ const ProductsPage = () => {
                         </div> */}
 
                         {/* Products Grid */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
-                            {currentProducts}
-                        </div>
+                        {filteredProducts.length === 0 ? (
+                            <div className='bg-white rounded-2xl shadow-lg p-8 border border-gray-100 text-center'>
+                                <div className='text-gray-400 text-6xl mb-4'>🔍</div>
+                                <h3 className='text-xl font-bold text-gray-800 mb-2'>Không tìm thấy sản phẩm</h3>
+                                <p className='text-gray-600 mb-6'>
+                                    Không có sản phẩm nào phù hợp với bộ lọc hiện tại. 
+                                    {selectedCategoryId && (
+                                        <span> Hãy thử chọn danh mục khác hoặc </span>
+                                    )}
+                                    {selectedPriceRange && (
+                                        <span> Hãy thử chọn khoảng giá khác hoặc </span>
+                                    )}
+                                    <span> xóa bộ lọc để xem tất cả sản phẩm.</span>
+                                </p>
+                                <div className='flex justify-center gap-3'>
+                                    {(selectedCategoryId || selectedPriceRange) && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCategoryId(null);
+                                                setSelectedPriceRange(null);
+                                            }}
+                                            className='px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors duration-200 font-medium'
+                                        >
+                                            Xóa tất cả bộ lọc
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
+                                {currentProducts}
+                            </div>
+                        )}
 
                         {/* Pagination */}
                         {totalPages > 1 && (
@@ -451,6 +492,46 @@ const ProductsPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Custom Notification */}
+            {notification.show && (
+                <div className={`fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+                    notification.type === 'success' ? 'border-green-500' : 'border-red-500'
+                } transform transition-all duration-300 ease-in-out`}>
+                    <div className="p-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                {notification.type === 'success' ? (
+                                    <svg key="success-icon" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                ) : (
+                                    <svg key="error-icon" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                            </div>
+                            <div className="ml-3 w-0 flex-1">
+                                <p className={`text-sm font-medium ${
+                                    notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}>
+                                    {notification.message}
+                                </p>
+                            </div>
+                            <div className="ml-4 flex-shrink-0 flex">
+                                <button
+                                    className={`inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150`}
+                                    onClick={() => setNotification({ show: false, message: '', type: 'success' })}
+                                >
+                                    <svg key="close-icon" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 };

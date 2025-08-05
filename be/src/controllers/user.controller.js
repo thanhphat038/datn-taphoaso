@@ -100,7 +100,7 @@ export const updateUser = async (req, res) => {
       return badRequest(res, validationError.message);
     }
 
-    const { username, full_name, phone, email } = req.body;
+    const { username, full_name, phone, email, role, status } = req.body;
 
     if (username !== undefined && !isValidUsername(username)) {
       return badRequest(res, 'Invalid username');
@@ -116,6 +116,16 @@ export const updateUser = async (req, res) => {
 
     if (email !== undefined && !isValidEmail(email)) {
       return badRequest(res, 'Invalid email address');
+    }
+
+    // Validate role if provided
+    if (role !== undefined && !['user', 'admin'].includes(role)) {
+      return badRequest(res, 'Invalid role. Role must be either "user" or "admin"');
+    }
+
+    // Validate status if provided
+    if (status !== undefined && !['active', 'inactive'].includes(status)) {
+      return badRequest(res, 'Invalid status. Status must be either "active" or "inactive"');
     }
 
     const user = await userService.update(id, req.body);

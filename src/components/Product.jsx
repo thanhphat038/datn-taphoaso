@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
+import { addToCart } from '../service/Cart.service';
 import Cookies from 'js-cookie';
 import { useAlertContext } from './AlertProvider';
-import { useToast } from './ToastContainer';
 
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -12,13 +12,78 @@ export const formatCurrency = (value) => {
   }).format(value);
 };
 
-const Product = ({ data: product, isFavorited = false }) => {
-  console.log('🔍 Debug - Product data:', product);
-  console.log('🔍 Debug - Product name:', product?.name);
-  console.log('🔍 Debug - Product price:', product?.price);
-  console.log('🔍 Debug - Product images:', product?.images);
-  console.log('🔍 Debug - Is favorited:', isFavorited);
+const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => {
   
+  const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(isFavorited);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+  const [loadingAddToCart, setLoadingAddToCart] = useState(false);
+  const { showAlert } = useAlertContext();
+  
+  // Lấy user_id từ token
+  const getUserId = () => {
+    const token = Cookies.get('auth_token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id;
+      } catch (error) {
+        console.error('Error parsing token:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Kiểm tra trạng thái yêu thích khi component mount
+  useEffect(() => {
+    // Nếu đã được truyền prop isFavorited, không cần kiểm tra
+    if (isFavorited) {
+      setIsFavorite(true);
+      return;
+    }
+    
+    // Kiểm tra xem user đã đăng nhập chưa
+    const userId = getUserId();
+    if (!userId) {
+      console.log('🔒 User not logged in, skipping favorite check');
+      setIsFavorite(false);
+      return;
+    }
+    
+    let isMounted = true;
+    
+    const checkFavoriteStatus = async () => {
+      try {
+        console.log('🔍 Checking favorite status for product:', product._id);
+        const response = await getFavorites();
+        if (!isMounted) return;
+        
+        if (response.data?.data) {
+          const isProductFavorite = response.data.data.some(
+            (fav) => fav.product_id?._id === product._id
+          );
+          setIsFavorite(isProductFavorite);
+          console.log('✅ Favorite status updated:', isProductFavorite);
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('❌ Error checking favorite status:', error);
+        // Chỉ log lỗi nếu không phải lỗi 401 (unauthorized)
+        if (error.response?.status !== 401) {
+          console.error('❌ Unexpected error checking favorite status:', error);
+        }
+        setIsFavorite(false);
+      }
+    };
+
+    checkFavoriteStatus();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [product._id, isFavorited]);
+
   // Kiểm tra dữ liệu sản phẩm
   if (!product || !product._id) {
     console.error('❌ Error - Invalid product data:', product);
@@ -65,74 +130,133 @@ const Product = ({ data: product, isFavorited = false }) => {
   // Kiểm tra dữ liệu sản phẩm
   validateProductData();
 
-  const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(isFavorited);
-  const [loadingFavorite, setLoadingFavorite] = useState(false);
-  const { showAlert } = useAlertContext();
-  const { showWarning } = useToast();
-
-  // Lấy user_id từ token
-  const getUserId = () => {
-    const token = Cookies.get('auth_token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.id;
-      } catch (error) {
-        console.error('Error parsing token:', error);
-        return null;
+  const handleBuyNow = async () => {
+    const userId = getUserId();
+    if (!userId) {
+      console.log('🔒 User not logged in, showing login prompt for buy now');
+      
+      // Lưu thông tin sản phẩm để mua ngay sau khi đăng nhập
+      const buyNowProduct = {
+        productId: product._id,
+        name: productName,
+        price: productPrice,
+        quantity: 1,
+        image: imageUrl,
+        originalPrice: product.original_price || productPrice
       }
-    }
-    return null;
-  };
-
-  // Kiểm tra trạng thái yêu thích khi component mount
-  useEffect(() => {
-    // Nếu đã được truyền prop isFavorited, không cần kiểm tra
-    if (isFavorited) {
-      setIsFavorite(true);
+      localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
+      
+      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để mua sản phẩm',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              navigate('/login');
+            }
+          }
+        ]
+      });
+      
       return;
     }
-    
-    let isMounted = true;
-    
-    const checkFavoriteStatus = async () => {
-      try {
-        const response = await getFavorites();
-        if (!isMounted) return;
-        
-        if (response.data?.data) {
-          const isProductFavorite = response.data.data.some(
-            (fav) => fav.product_id?._id === product._id
-          );
-          setIsFavorite(isProductFavorite);
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('Error checking favorite status:', error);
-        setIsFavorite(false);
-      }
-    };
 
-    checkFavoriteStatus();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [product._id, isFavorited]);
-
-  const handleBuyNow = () => {
-    navigate('/checkout', {
-      state: {
-        product: {
-          id: product._id,
-          name: productName,
-          image: imageUrl,
-          price: productPrice,
-          quantity: 1,
-        }
+    try {
+      // Thêm sản phẩm vào giỏ hàng trước
+      await addToCart(product._id, 1);
+      
+      // Lưu thông tin sản phẩm để mua ngay vào localStorage
+      const buyNowProduct = {
+        productId: product._id,
+        name: productName,
+        price: productPrice,
+        quantity: 1,
+        image: imageUrl,
+        originalPrice: product.original_price || productPrice
       }
-    });
+
+      localStorage.setItem('buyNowProduct', JSON.stringify(buyNowProduct));
+      
+      // Dispatch event để cập nhật cart context
+      window.dispatchEvent(new Event('cart-updated'));
+      
+      // Đợi một chút để cart context cập nhật
+      setTimeout(() => {
+        // Chuyển đến trang thanh toán
+        navigate('/checkout');
+      }, 500);
+    } catch (error) {
+      console.error('Error in handleBuyNow:', error);
+      showAlert({
+        title: 'Lỗi',
+        message: 'Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.',
+        type: 'error'
+      });
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (loadingAddToCart) return;
+    
+    const userId = getUserId();
+    if (!userId) {
+      console.log('🔒 User not logged in, showing login prompt for add to cart');
+      
+      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              navigate('/login');
+            }
+          }
+        ]
+      });
+      return;
+    }
+
+    setLoadingAddToCart(true);
+    try {
+      await addToCart(product._id, 1);
+      
+      // Gọi callback nếu có
+      if (onAddToCartSuccess) {
+        onAddToCartSuccess('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+      } else {
+        // Fallback cho showAlert nếu không có callback
+        showAlert({
+          title: 'Thành công',
+          message: 'Đã thêm sản phẩm vào giỏ hàng!',
+          type: 'success'
+        });
+      }
+      
+      // Dispatch event để cập nhật cart context
+      window.dispatchEvent(new Event('cart-updated'));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      
+      // Gọi callback nếu có
+      if (onAddToCartSuccess) {
+        onAddToCartSuccess('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!', 'error');
+      } else {
+        // Fallback cho showAlert nếu không có callback
+        showAlert({
+          title: 'Lỗi',
+          message: 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!',
+          type: 'error'
+        });
+      }
+    } finally {
+      setLoadingAddToCart(false);
+    }
   };
 
   const handleToggleFavorite = async (e) => {
@@ -143,10 +267,22 @@ const Product = ({ data: product, isFavorited = false }) => {
     
     const userId = getUserId();
     if (!userId) {
-      showWarning(
-        'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
-        'Yêu cầu đăng nhập'
-      );
+      console.log('🔒 User not logged in, showing login prompt for favorite');
+      
+      // Hiện thông báo với tùy chọn chuyển về trang đăng nhập
+      showAlert({
+        title: 'Yêu cầu đăng nhập',
+        message: 'Vui lòng đăng nhập để sử dụng tính năng yêu thích',
+        type: 'warning',
+        actions: [
+          {
+            label: 'Đăng nhập ngay',
+            onClick: () => {
+              navigate('/login');
+            }
+          }
+        ]
+      });
       return;
     }
     
@@ -195,13 +331,11 @@ const Product = ({ data: product, isFavorited = false }) => {
               console.error('❌ Error - Image failed to load:', imageUrl);
               e.target.src = '/placeholder.png';
             }}
-            onLoad={() => {
-              console.log('✅ Debug - Image loaded successfully:', imageUrl);
-            }}
+
           />
         </Link>
         
-        {/* Favorite Button - Floating */}
+        {/* Favorite Button - Floating on top right */}
         <button 
           className='absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-200 z-20' 
           onClick={handleToggleFavorite} 
@@ -268,13 +402,35 @@ const Product = ({ data: product, isFavorited = false }) => {
           </div>
         </div>
 
-        {/* Buy Now Button */}
-        <button
-          onClick={e => { e.stopPropagation(); handleBuyNow(); }}
-          className='w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg'
-        >
-          Mua ngay
-        </button>
+        {/* Action Buttons */}
+        <div className='flex gap-2'>
+          {/* Buy Now Button */}
+          <button
+            onClick={e => { e.stopPropagation(); handleBuyNow(); }}
+            className='flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg'
+          >
+            Mua ngay
+          </button>
+
+          {/* Add to Cart Button - Icon Only */}
+          <button
+            onClick={e => { e.stopPropagation(); handleAddToCart(); }}
+            disabled={loadingAddToCart}
+            className='w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center'
+            title="Thêm vào giỏ hàng"
+          >
+            {loadingAddToCart ? (
+              <svg className="animate-spin size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

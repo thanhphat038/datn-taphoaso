@@ -31,12 +31,35 @@ const LoginPage = () => {
 
 const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginError(''); // Clear previous errors
+    
     try {
+        console.log('🚀 Attempting login...');
         const response = await loginUser({username: formData.username, password: formData.password});
-        if (response && response.data && response.data.user && response.data.user.username) {
-            const user = response.data.user;
+        console.log('📥 Login response in component:', response);
+        
+        // Kiểm tra response một cách an toàn
+        let user = null;
+        
+        // Thử các cấu trúc response khác nhau
+        if (response && response.data && response.data.user) {
+            user = response.data.user;
+        } else if (response && response.data && response.data.data && response.data.data.user) {
+            user = response.data.data.user;
+        } else if (response && response.user) {
+            user = response.user;
+        }
+        
+        console.log('👤 User found:', user);
+        
+        if (user && user.username) {
+            // Store user information in local storage NGAY LẬP TỨC
+            localStorage.setItem('userData', JSON.stringify(user));
+            console.log('✅ User data saved to localStorage:', user);
+            
             setMessage('Đăng nhập thành công! Chào mừng ' + user.username);
             setMessageType('success');
+            
             setTimeout(() => {
                 setMessage("");
                 // Store user information in local storage and update auth context
@@ -49,9 +72,11 @@ const handleSubmit = async (e) => {
                 }
             }, 2000);
         } else {
+            console.warn('⚠️ No user found in response');
             setLoginError('Tên đăng nhập hoặc mật khẩu không đúng');
         }
     } catch (error) {
+        console.error('❌ Login error in component:', error);
         setLoginError('Đăng nhập thất bại: ' + error.message);
     }
 };

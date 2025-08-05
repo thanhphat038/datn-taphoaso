@@ -8,7 +8,9 @@ const AdminActionDropdown = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState('bottom');
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -22,6 +24,27 @@ const AdminActionDropdown = ({
     };
   }, []);
 
+  // Kiểm tra vị trí để quyết định dropdown hiển thị ở trên hay dưới
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const dropdownHeight = 200; // Ước tính chiều cao dropdown
+      
+      // Kiểm tra không gian ở dưới
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      // Kiểm tra không gian ở trên
+      const spaceAbove = buttonRect.top;
+      
+      // Quyết định vị trí dropdown
+      if (spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+  }, [isOpen]);
+
   const handleActionClick = (action, event) => {
     event.stopPropagation();
     setIsOpen(false);
@@ -33,6 +56,7 @@ const AdminActionDropdown = ({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
+        ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
@@ -44,7 +68,13 @@ const AdminActionDropdown = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+        <div 
+          className={`absolute w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-50 ${
+            dropdownPosition === 'top' 
+              ? 'bottom-full mb-2' 
+              : 'top-full mt-2'
+          } right-0`}
+        >
           {actions.map((action, index) => (
             <button
               key={index}
