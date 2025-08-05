@@ -3,10 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEdit, FaMapMarkerAlt, FaCreditCard, FaTruck, FaGift, FaStickyNote } from 'react-icons/fa';
 import './Checkout.css';
 import PaymentMethodModal from '../../components/checkout/PaymentMethodModal';
+import PaymentRedirectModal from '../../components/checkout/PaymentRedirectModal';
 import { CartContext } from '../../context/CartContext';
 import { getAllAddress } from '../../service/Address.service';
 import { getVoucherByCode } from '../../service/Voucher.service';
-import { createOrder, createVNPayPayment } from '../../service/Checkout.service';
+import { createOrder, createVNPayPayment } from '../../service/Checkout.service.js';
 
 // Xử lý mã voucher
 
@@ -22,6 +23,12 @@ const Checkout = () => {
   const [voucher, setVoucher] = useState(null);
   const [note, setNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // State cho payment redirect modal
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [redirectData, setRedirectData] = useState({ paymentUrl: '', orderId: '' });
+  
+
 
   const productFromState = location.state?.product;
   const productsToDisplay = productFromState ? [productFromState] : cartItems;
@@ -162,13 +169,22 @@ const Checkout = () => {
           console.log('Payment URL:', paymentResponse.url);
 
           if (paymentResponse.success && paymentResponse.url) {
-            // Chuyển hướng đến trang processing payment
-            navigate('/checkout/payment/processing', {
-              state: {
-                paymentUrl: paymentResponse.url,
-                orderData: paymentData // Truyền paymentData có _id thay vì orderData
-              }
+//<<<<<<< fe-payment-vnpay
+            // Hiển thị modal chuyển hướng
+            setRedirectData({
+              paymentUrl: paymentResponse.url,
+              orderId: orderResponse.data._id
             });
+            setShowRedirectModal(true);
+//=======
+//             // Chuyển hướng đến trang processing payment
+//             navigate('/checkout/payment/processing', {
+//               state: {
+//                 paymentUrl: paymentResponse.url,
+//                 orderData: paymentData // Truyền paymentData có _id thay vì orderData
+//               }
+//             });
+//>>>>>>> dev
           } else {
             setVoucherMessage('Không thể tạo thanh toán VNPAY, vui lòng thử lại!');
           }
@@ -535,6 +551,14 @@ const Checkout = () => {
             setPaymentMethod(key);
             setOpenPaymentModal(false);
           }}
+        />
+        
+        {/* Payment Redirect Modal */}
+        <PaymentRedirectModal
+          isOpen={showRedirectModal}
+          onClose={() => setShowRedirectModal(false)}
+          paymentUrl={redirectData.paymentUrl}
+          orderId={redirectData.orderId}
         />
       </div>
     </div>

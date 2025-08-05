@@ -1,0 +1,36 @@
+### Shipping API Tests
+
+@baseUrl = http://localhost:3000/api/shipping
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MzMyNjk3LCJleHAiOjE3NTQ5Mzc0OTd9.OO7YVYpPU1WnfLcVXIS04bQFc54ZIBiIrhC-kPcPHt8
+
+
+### Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "khactri",
+  "password": "Q1234567"
+}
+
+### 1. Tính phí ship từ địa chỉ - Default Service
+POST {{baseUrl}}/calculate-from-address
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "deliveryAddress": "159 Nguyễn Đình Chiểu, Phường 6, Quận 3, Hồ Chí Minh",
+  "service": "default"
+}
+
+### 2. Tính phí ship từ địa chỉ - Vietmap Service (với thông tin tuyến đường)
+POST {{baseUrl}}/calculate-from-address
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "deliveryAddress": "159 Nguyễn Đình Chiểu, Phường 6, Quận 3, Hồ Chí Minh",
+  "service": "vietmap"
+}
+### 7. Lấy thông tin cửa hàng
+GET {{baseUrl}}/store-info

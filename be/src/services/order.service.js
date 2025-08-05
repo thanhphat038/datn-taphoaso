@@ -246,7 +246,7 @@ class OrderService extends DBService {
   }
 
   async updateStatus(orderId, status) {
-    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
 
     if (!validStatuses.includes(status)) {
       throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid order status');
@@ -275,12 +275,14 @@ class OrderService extends DBService {
   const pendingOrders = await this.model.countDocuments({ order_status: 'pending' });
   const completedOrders = await this.model.countDocuments({ order_status: 'completed' });
   const cancelledOrders = await this.model.countDocuments({ order_status: 'cancelled' });
+  const failedOrders = await this.model.countDocuments({ order_status: 'failed' });
 
   return {
     totalOrders,
     pendingOrders,
     completedOrders,
     cancelledOrders,
+    failedOrders,
     totalRevenue: totalRevenue[0]?.total || 0
   };
 }

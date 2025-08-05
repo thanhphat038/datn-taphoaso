@@ -35,6 +35,8 @@ import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
 
+import { AuthProvider } from './context/AuthContext';
+
 import CheckoutGuard from './components/CheckoutGuard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddProductPage from './pages/admin/AddProductPage';
@@ -52,7 +54,11 @@ import AddVariantPage from './pages/admin/AddVariantPage';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+
+import { PaymentRedirectModalTest } from './components/checkout/PaymentRedirectModal';
+
 import AdminProtected from './components/admin/AdminProtected';
+
 
 function Layout() {
   const location = useLocation();
@@ -102,6 +108,7 @@ function Layout() {
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/test/modal" element={<PaymentRedirectModalTest />} />
             </Routes>
           </div>
           {showFooter && <Footer />}
@@ -145,9 +152,11 @@ function App() {
       <Router>
         <AlertProvider>
           <ToastProvider>
-            <CartProvider>
-              <Layout />
-            </CartProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Layout />
+              </CartProvider>
+            </AuthProvider>
           </ToastProvider>
         </AlertProvider>
       </Router>

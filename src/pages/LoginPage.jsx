@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../service/UserService';
 import { forgotPassword } from '../service/UserService';
+import { useAuth } from '../context/AuthContext';
 
 
 const LoginPage = () => {
@@ -19,6 +20,7 @@ const LoginPage = () => {
     const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -61,6 +63,10 @@ const handleSubmit = async (e) => {
             
             setTimeout(() => {
                 setMessage("");
+
+                // Store user information in local storage and update auth context
+                localStorage.setItem('user', JSON.stringify(user));
+                login(user);
                 if (user.role === 'admin') {
                     navigate('/admin');
                 } else {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Cookies from "js-cookie";
+import { useAuth } from '../context/AuthContext';
 import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
@@ -10,6 +11,7 @@ import axios from 'axios';
 import { logoutUser } from '../service/UserService';
 
 const ProfilePage = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
@@ -17,7 +19,12 @@ const ProfilePage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const handleLogout = () => {
-    logoutUser();
+//<<<<<<< fe-payment-vnpay
+    logout();
+    navigate('/login');
+//=======
+//    logoutUser();
+//>>>>>>> dev
   };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
@@ -31,29 +38,60 @@ const ProfilePage = () => {
   }, [currentTab]);
 
   useEffect(() => {
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     async function fetchProfile() {
       try {
-        const token = Cookies.get("auth_token");
+//<<<<<<< fe-payment-vnpay
+        // Sử dụng user từ AuthContext nếu có
+        if (user) {
+          setProfile(user);
+          return;
+        }
+
+        // Fallback: gọi API để lấy profile
+        const token = localStorage.getItem('token') || Cookies.get("auth_token") || localStorage.getItem('authToken') || localStorage.getItem('accessToken');
         
         if (!token) {
-          setProfile(null);
+          console.error('🔍 Debug - No token found');
+          navigate('/login');
+//=======
+//         const token = Cookies.get("auth_token");
+        
+//         if (!token) {
+//           setProfile(null);
+//>>>>>>> dev
           return;
         }
         
-        const res = await axios.get('/api/auth/profile', {
+        const res = await axios.get('http://localhost:3000/api/auth/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        // Nếu response là { data: { ...user } }
+//<<<<<<< fe-payment-vnpay
+        console.log('🔍 Debug - Profile response:', res.data);
         setProfile(res.data.data || res.data);
       } catch (err) {
         console.error('Lỗi lấy profile:', err);
-        setProfile(null);
+        // Nếu API fail, logout user
+        logout();
+        navigate('/login');
+//=======
+        // Nếu response là { data: { ...user } }
+//         setProfile(res.data.data || res.data);
+//       } catch (err) {
+//         console.error('Lỗi lấy profile:', err);
+//         setProfile(null);
+//>>>>>>> dev
       }
     }
     fetchProfile();
-  }, []);
+  }, [isAuthenticated, user, navigate, logout]);
 
   // Listen for logout event
   useEffect(() => {
