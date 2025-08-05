@@ -50,3 +50,9 @@ export const getAuthHeaders = () => {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }; 
+
+export const clearAuthData = () => {
+  Cookies.remove('auth_token');
+  localStorage.clear();
+  sessionStorage.clear();
+};

@@ -53,7 +53,7 @@ router.use('/blogs', blogRouter);
 
 router.use('/blogs_categories', blogCategoryRouter);
 
-router.use('/categories', authMiddleware,categoryRouter);
+router.use('/categories', categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);
 

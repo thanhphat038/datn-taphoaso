@@ -27,6 +27,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 
 import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import AdminProtected from './pages/admin/AdminProtected';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
