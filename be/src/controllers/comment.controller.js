@@ -30,7 +30,8 @@ export const getComments = async (req, res, next) => {
     if (product_id) filters.product_id = product_id;
 
     const comments = await commentService.model.find(filters)
-      .populate('user_id', 'full_name avatar username');
+      .populate('user_id', 'username email full_name avatar')
+      .populate('product_id', 'name images');
     res.json({
       success: true,
       data: comments

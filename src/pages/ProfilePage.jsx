@@ -8,6 +8,7 @@ import Order from './profile/Order';
 import ProductFavorite from './profile/ProductFavorite';
 import ChangePassword from './profile/ChangePassword';
 import axios from 'axios';
+import { logoutUser } from '../service/UserService';
 
 const ProfilePage = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -15,11 +16,15 @@ const ProfilePage = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
-  console.log('profile:', profile); // Đặt ở đây
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const handleLogout = () => {
+//<<<<<<< fe-payment-vnpay
     logout();
     navigate('/login');
+//=======
+//    logoutUser();
+//>>>>>>> dev
   };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
@@ -41,6 +46,7 @@ const ProfilePage = () => {
 
     async function fetchProfile() {
       try {
+//<<<<<<< fe-payment-vnpay
         // Sử dụng user từ AuthContext nếu có
         if (user) {
           setProfile(user);
@@ -53,6 +59,12 @@ const ProfilePage = () => {
         if (!token) {
           console.error('🔍 Debug - No token found');
           navigate('/login');
+//=======
+//         const token = Cookies.get("auth_token");
+        
+//         if (!token) {
+//           setProfile(null);
+//>>>>>>> dev
           return;
         }
         
@@ -61,6 +73,7 @@ const ProfilePage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+//<<<<<<< fe-payment-vnpay
         console.log('🔍 Debug - Profile response:', res.data);
         setProfile(res.data.data || res.data);
       } catch (err) {
@@ -68,12 +81,130 @@ const ProfilePage = () => {
         // Nếu API fail, logout user
         logout();
         navigate('/login');
+//=======
+        // Nếu response là { data: { ...user } }
+//         setProfile(res.data.data || res.data);
+//       } catch (err) {
+//         console.error('Lỗi lấy profile:', err);
+//         setProfile(null);
+//>>>>>>> dev
       }
     }
     fetchProfile();
   }, [isAuthenticated, user, navigate, logout]);
 
+  // Listen for logout event
+  useEffect(() => {
+    const handleUserLogout = () => {
+      setProfile(null);
+    };
 
+    window.addEventListener('user-logout', handleUserLogout);
+    
+    return () => {
+      window.removeEventListener('user-logout', handleUserLogout);
+    };
+  }, []);
+
+  // Enhanced authentication check and redirect
+  useEffect(() => {
+    const checkAuthAndRedirect = () => {
+      const token = Cookies.get("auth_token");
+      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
+      
+      if (!token || !userData) {
+        console.log('🚫 No authentication found, redirecting to login...');
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        navigate('/login');
+        return false;
+      }
+      
+      try {
+        const user = JSON.parse(userData);
+        // Kiểm tra các trường có thể có của user (tương tự ProtectedRoute)
+        const hasValidUser = user && (
+          user.username || 
+          user.email || 
+          user.id || 
+          user._id ||
+          user.full_name ||
+          user.name
+        );
+        
+        if (!hasValidUser) {
+          console.log('🚫 Invalid user data, redirecting to login...');
+          console.log('🔍 User object keys:', Object.keys(user || {}));
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          navigate('/login');
+          return false;
+        }
+        
+        console.log('✅ User authenticated:', user.username || user.email || user.full_name || user.name);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return true;
+      } catch (error) {
+        console.log('🚫 Error parsing user data, redirecting to login...');
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        navigate('/login');
+        return false;
+      }
+    };
+    
+    // Check immediately
+    if (!checkAuthAndRedirect()) return;
+    
+    // Set up interval to check periodically
+    const authCheckInterval = setInterval(checkAuthAndRedirect, 5000);
+    
+    return () => {
+      clearInterval(authCheckInterval);
+    };
+  }, [navigate]);
+
+
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Đang kiểm tra xác thực...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="text-red-500 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Truy cập bị từ chối</h2>
+            <p className="text-gray-600 mb-4">Bạn cần đăng nhập để truy cập trang này</p>
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Đăng nhập
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

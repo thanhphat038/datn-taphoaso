@@ -96,7 +96,7 @@ export const deleteReview = (reviewId) => {
     return axios.delete(`${api}/reviews/${reviewId}`, { headers: getAuthHeaders() });
 };
 export const updateReviewStatus = (reviewId, status) => {
-    return axios.patch(`${api}/reviews/${reviewId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+    return axios.patch(`${api}/reviews/${reviewId}/toggle-hidden`, {}, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 // COMMENT MANAGEMENT
@@ -107,11 +107,15 @@ export const deleteComment = (commentId) => {
     return axios.delete(`${api}/comments/${commentId}`, { headers: getAuthHeaders() });
 };
 export const updateCommentStatus = (commentId, status) => {
-    return axios.patch(`${api}/comments/${commentId}/status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+    return axios.patch(`${api}/comments/${commentId}/toggle-hidden`, {}, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
 };
 
 export const getUserById = (id) => {
     return axios.get(`${api}/users/${id}`, { headers: getAuthHeaders() });
+};
+
+export const getProductById = (id) => {
+    return axios.get(`${api}/products/${id}`, { headers: getAuthHeaders() });
 };
 
 export const getOrderDetailsByOrderId = (orderId) => {
@@ -125,4 +129,9 @@ export const getMyOrders = () => {
 // Lấy đơn hàng theo userId (Admin)
 export const getOrdersByUserId = (userId) => {
     return axios.get(`${api}/orders?user_id=${userId}`, { headers: getAuthHeaders() });
+};
+
+// Get all products (Admin)
+export const getAllProducts = () => {
+    return axios.get(`${api}/products`, { headers: getAuthHeaders() });
 };

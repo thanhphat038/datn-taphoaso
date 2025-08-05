@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 
+//<<<<<<< fe-payment-vnpay
 // Lấy token từ tất cả các nguồn có thể
 export const getAuthToken = () => {
   return localStorage.getItem('token') || 
@@ -49,4 +50,31 @@ export const clearAuthToken = () => {
 export const getAuthHeaders = () => {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+//=======
+// // Kiểm tra user có đăng nhập hay không
+// export const isAuthenticated = () => {
+//   const token = Cookies.get('auth_token');
+//   return !!token;
+// };
+
+// // Lấy token hiện tại
+// export const getAuthToken = () => {
+//   return Cookies.get('auth_token');
+// };
+
+// // Kiểm tra và redirect nếu chưa đăng nhập
+// export const requireAuth = () => {
+//   if (!isAuthenticated()) {
+//     window.location.href = '/login';
+//     return false;
+//   }
+//   return true;
+// };
+
+// // Clear tất cả dữ liệu authentication
+// export const clearAuthData = () => {
+//   Cookies.remove('auth_token');
+//   localStorage.clear();
+//   sessionStorage.clear();
+//>>>>>>> dev
 }; 

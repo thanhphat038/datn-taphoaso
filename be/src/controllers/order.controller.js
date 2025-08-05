@@ -208,6 +208,7 @@ export const updateOrderStatus = async (req, res, next) => {
 
     const updatedOrder = await orderService.updateStatus(orderId, status);
     res.json({ success: true, data: updatedOrder });
+
   } catch (err) { next(err); }
 };
 

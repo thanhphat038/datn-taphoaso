@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaEye, FaShoppingCart, FaUser, FaMapMarkerAlt, FaCalendar, FaDollarSign } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminTable from '../../components/admin/AdminTable';
@@ -12,6 +13,7 @@ import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrde
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const OrderPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -29,6 +31,16 @@ const OrderPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editStatus, setEditStatus] = useState('');
   const [currentEditOrder, setCurrentEditOrder] = useState(null);
+
+  // Check for order ID in URL parameters on component mount
+  useEffect(() => {
+    const orderId = searchParams.get('orderId');
+    if (orderId) {
+      setSearchQuery(orderId);
+      // Clear the URL parameter after setting the search query
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   // Status options with beautiful styling
   const statusOptions = [
@@ -57,10 +69,16 @@ const OrderPage = () => {
       dotColor: 'bg-green-500'
     },
     { 
-      value: 'cancelled', 
-      label: 'Đã hủy', 
+      value: 'payment_failed', 
+      label: 'Thanh toán thất bại', 
       color: 'bg-red-100 text-red-800 border-red-200',
       dotColor: 'bg-red-500'
+    },
+    { 
+      value: 'cancelled', 
+      label: 'Đã hủy', 
+      color: 'bg-gray-100 text-gray-800 border-gray-200',
+      dotColor: 'bg-gray-500'
     }
   ];
 
@@ -74,23 +92,36 @@ const OrderPage = () => {
       try {
         setLoading(true);
         const response = await getAllOrders();
-const ordersData = response.data.data.ordersWithItems || [];
+        const ordersData = response.data.data.ordersWithItems || [];
 
-        console.log('Orders from API:', ordersData); // Log dữ liệu trả về từ API
-        // Lấy chi tiết user và sản phẩm cho từng order
-        const ordersWithDetails = await Promise.all((ordersData).map(async order => {
-          let user = null;
-          try {
-            if (order.user_id && typeof order.user_id === 'string') {
-              const userRes = await getUserById(order.user_id);
-              user = userRes?.data?.data || userRes?.data;
-            } else if (typeof order.user_id === 'object' && order.user_id !== null) {
-              user = order.user_id;
-            }
-          } catch (e) {}
+        // Lấy chi tiết user cho từng order (KHÔNG lấy orderdetail nữa)
+        const ordersWithDetails = await Promise.all(
+          ordersData.map(async (order) => {
+            let user = null;
+            try {
+              if (order.user_id && typeof order.user_id === 'string') {
+                const userRes = await getUserById(order.user_id);
+                user = userRes?.data?.data || userRes?.data;
+              } else if (typeof order.user_id === 'object' && order.user_id !== null) {
+                user = order.user_id;
+              }
+            } catch (e) {}
+            return {
+              ...order,
+              user_id: user,
+            };
+          })
+        );
         
-        }));
-        setOrders(ordersWithDetails);
+        // Sắp xếp theo thời gian tạo mới nhất đầu tiên
+        const sortedOrders = ordersWithDetails.sort((a, b) => {
+          const dateA = new Date(a.created_at || a.create_at || 0);
+          const dateB = new Date(b.created_at || b.create_at || 0);
+          return dateB - dateA; // Giảm dần (mới nhất trước)
+        });
+        
+        setOrders(sortedOrders);
+        console.log('All orders with details:', sortedOrders);
       } catch (error) {
         setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);
@@ -108,7 +139,7 @@ const ordersData = response.data.data.ordersWithItems || [];
       setLoading(true);
       await updateOrderStatusService(currentEditOrder._id, editStatus);
       setOrders(orders.map(order => 
-        order._id === currentEditOrder._id ? { ...order, status: editStatus } : order
+        order._id === currentEditOrder._id ? { ...order, order_status: editStatus } : order
       ));
       setShowEditModal(false);
       setCurrentEditOrder(null);
@@ -147,6 +178,15 @@ const ordersData = response.data.data.ordersWithItems || [];
     }
   };
 
+    // Calculate statistics for filter tabs
+  const allOrders = orders.length;
+  const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
+  const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
+  const shippedOrders = orders.filter(order => (order.order_status || order.status) === 'shipped').length;
+  const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
+  const paymentFailedOrders = orders.filter(order => (order.order_status || order.status) === 'payment_failed').length;
+  const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
+
   // Filter and pagination logic
   const filteredOrders = orders.filter(order => {
     // Kiểm tra order có tồn tại không
@@ -154,7 +194,7 @@ const ordersData = response.data.data.ordersWithItems || [];
     
     const matchesSearch = 
       (order._id && order._id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-(order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (order.receiver && order.receiver.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (order.address && order.address.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = selectedStatus === 'All' || (order.order_status || order.status) === selectedStatus;
     return matchesSearch && matchesStatus;
@@ -186,11 +226,11 @@ const ordersData = response.data.data.ordersWithItems || [];
       key: 'id',
       render: (order) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#06AEF4] bg-opacity-10 rounded-lg flex items-center justify-center">
+          {/* <div className="w-10 h-10 bg-[#06AEF4] bg-opacity-10 rounded-lg flex items-center justify-center">
             <FaShoppingCart className="w-4 h-4 text-[#06AEF4]" />
-          </div>
+          </div> */}
           <div>
-            <div className="font-semibold text-gray-900">#{order._id?.slice(-8)}</div>
+            <div className="font-semibold text-gray-900">{order._id}</div>
             <div className="text-sm text-gray-500">
               {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN') : 'N/A'}
             </div>
@@ -251,36 +291,47 @@ const ordersData = response.data.data.ordersWithItems || [];
     {
       title: '',
       key: 'actions',
-      render: (order) => (
-        <AdminActionDropdown
-          actions={[
-            {
-              label: 'Xem chi tiết',
-              icon: FaEye,
-              onClick: () => {
-                console.log('Xem chi tiết:', order._id);
-                setExpandedOrderId(expandedOrderId === order._id ? null : order._id);
+      render: (order) => {
+        const isCompleted = (order.order_status || order.status) === 'delivered';
+        return (
+          <AdminActionDropdown
+            actions={[
+              {
+                label: 'Xem chi tiết',
+                icon: FaEye,
+                onClick: () => {
+                  console.log('Xem chi tiết:', order._id);
+                  setExpandedOrderId(expandedOrderId === order._id ? null : order._id);
+                }
+              },
+              {
+                label: 'Sửa trạng thái',
+                icon: FaEdit,
+                disabled: isCompleted,
+                onClick: () => {
+                  if (!isCompleted) {
+                    setCurrentEditOrder(order);
+                    setEditStatus(order.order_status || order.status);
+                    setShowEditModal(true);
+                  }
+                }
+              },
+              {
+                label: 'Xóa đơn hàng',
+                icon: FaTrash,
+                variant: 'danger',
+                disabled: isCompleted,
+                onClick: () => {
+                  if (!isCompleted) {
+                    handleDeleteOrder(order._id);
+                  }
+                }
               }
-            },
-            {
-              label: 'Sửa trạng thái',
-              icon: FaEdit,
-              onClick: () => {
-                setCurrentEditOrder(order);
-                setEditStatus(order.order_status || order.status);
-                setShowEditModal(true);
-              }
-            },
-            {
-              label: 'Xóa đơn hàng',
-              icon: FaTrash,
-              variant: 'danger',
-              onClick: () => handleDeleteOrder(order._id)
-            }
-          ]}
-          onActionClick={(action) => action.onClick()}
-        />
-      )
+            ]}
+            onActionClick={(action) => action.onClick()}
+          />
+        );
+      }
     }
   ];
 
@@ -325,7 +376,7 @@ const ordersData = response.data.data.ordersWithItems || [];
               {order.items && order.items.length > 0 ? (
                 order.items.map((item, idx) => (
                   <tr key={idx} className="border-b last:border-b-0">
-<td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
+                    <td className="px-4 py-2">{item.product_id?.name || 'Sản phẩm không xác định'}</td>
                     <td className="px-4 py-2 text-right">{formatCurrency(item.cur_price)}</td>
                     <td className="px-4 py-2 text-right">x{item.qty}</td>
                   </tr>
@@ -365,12 +416,42 @@ const ordersData = response.data.data.ordersWithItems || [];
           <div className="flex justify-between items-center">
             <span>Trạng thái</span>
             <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border bg-green-100 text-green-800 border-green-200">
-              {getStatusInfo(order.status).label}
+              {getStatusInfo(order.order_status || order.status).label}
             </span>
           </div>
           <div className="flex gap-3 mt-4">
-            <button className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">Chỉnh đơn hàng</button>
-            <button className="flex-1 px-4 py-2 rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200 transition">Hủy bỏ</button>
+            <button 
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+                (order.order_status || order.status) === 'delivered'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+              disabled={(order.order_status || order.status) === 'delivered'}
+              onClick={() => {
+                if ((order.order_status || order.status) !== 'delivered') {
+                  setCurrentEditOrder(order);
+                  setEditStatus(order.order_status || order.status);
+                  setShowEditModal(true);
+                }
+              }}
+            >
+              Chỉnh trạng thái
+            </button>
+            <button 
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+                (order.order_status || order.status) === 'delivered'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-red-100 text-red-600 hover:bg-red-200'
+              }`}
+              disabled={(order.order_status || order.status) === 'delivered'}
+              onClick={() => {
+                if ((order.order_status || order.status) !== 'delivered') {
+                  handleDeleteOrder(order._id);
+                }
+              }}
+            >
+              Hủy bỏ
+            </button>
           </div>
         </div>
       </div>
@@ -401,16 +482,90 @@ const ordersData = response.data.data.ordersWithItems || [];
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <AdminCard>
-          <AdminSearchFilter
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder="Tìm kiếm theo ID đơn hàng, tên khách hàng hoặc địa chỉ..."
-            filters={filterOptions}
-            onFilterChange={handleFilterChange}
-          />
-        </AdminCard>
+                 {/* Search and Filters */}
+         <AdminCard>
+           <AdminSearchFilter
+             searchValue={searchQuery}
+             onSearchChange={setSearchQuery}
+             searchPlaceholder="Tìm kiếm theo ID đơn hàng, tên khách hàng hoặc địa chỉ..."
+             filters={filterOptions}
+             onFilterChange={handleFilterChange}
+           />
+         </AdminCard>
+
+         {/* Filter Tabs */}
+         <div className="flex flex-wrap gap-2">
+           <button
+             onClick={() => setSelectedStatus('All')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'All'
+                 ? 'bg-blue-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Tất cả ({allOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('pending')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'pending'
+                 ? 'bg-yellow-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Chờ xử lý ({pendingOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('processing')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'processing'
+                 ? 'bg-blue-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đang xử lý ({processingOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('shipped')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'shipped'
+                 ? 'bg-purple-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đã giao hàng ({shippedOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('delivered')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'delivered'
+                 ? 'bg-green-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Hoàn thành ({deliveredOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('payment_failed')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'payment_failed'
+                 ? 'bg-red-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Thanh toán thất bại ({paymentFailedOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('cancelled')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'cancelled'
+                 ? 'bg-gray-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             Đã hủy ({cancelledOrders})
+           </button>
+         </div>
 
         {/* Orders Table */}
         <AdminCard noPadding>
@@ -482,6 +637,12 @@ setEditStatus('');
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="text-sm text-gray-600">Đơn hàng</div>
               <div className="font-semibold text-gray-900">#{currentEditOrder?._id?.slice(-8)}</div>
+              <div className="text-sm text-gray-600 mt-1">
+                Trạng thái hiện tại: 
+                <span className="font-medium text-gray-900 ml-1">
+                  {currentEditOrder ? getStatusInfo(currentEditOrder.order_status || currentEditOrder.status).label : ''}
+                </span>
+              </div>
             </div>
             
             <div>

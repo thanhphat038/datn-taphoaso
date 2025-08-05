@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaUser, FaEnvelope, FaPhone, FaUserCheck, FaUserTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaUser, FaEnvelope, FaPhone, FaUserCheck, FaUserTimes, FaUserShield, FaCrown } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminTable from '../../components/admin/AdminTable';
@@ -7,6 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
+import EditRoleModal from '../../components/admin/EditRoleModal';
 import { fetchUsers, updateUser, deleteUser, toggleUserStatus } from '../../service/UserService';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +34,10 @@ const AdminUser = () => {
     phone: '',
     username: ''
   });
+
+  // Role modal states
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [currentRoleUser, setCurrentRoleUser] = useState(null);
 
   // Toast/Message states
   const [message, setMessage] = useState("");
@@ -118,6 +123,35 @@ setShowEditModal(true);
       setTimeout(() => setMessage(''), 2000);
     } catch (error) {
       setMessage('Lỗi khi cập nhật người dùng: ' + error.message);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 2000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle edit role
+  const handleEditRole = (user) => {
+    setCurrentRoleUser(user);
+    setShowRoleModal(true);
+  };
+
+  // Handle save role
+  const handleSaveRole = async (newRole) => {
+    if (!currentRoleUser) return;
+    try {
+      setLoading(true);
+      await updateUser(currentRoleUser._id, { role: newRole });
+      setUsers(users.map(user => 
+        user._id === currentRoleUser._id ? { ...user, role: newRole } : user
+      ));
+      setShowRoleModal(false);
+      setCurrentRoleUser(null);
+      setMessage('Cập nhật vai trò thành công!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
+    } catch (error) {
+      setMessage('Lỗi khi cập nhật vai trò: ' + error.message);
       setMessageType('error');
       setTimeout(() => setMessage(''), 2000);
     } finally {
@@ -258,6 +292,30 @@ setShowEditModal(true);
       )
     },
     {
+      title: 'Vai trò',
+      key: 'role',
+      render: (user) => {
+        const roleInfo = user.role === 'admin' 
+          ? {
+              label: 'Quản trị viên',
+              color: 'bg-purple-100 text-purple-800 border-purple-200',
+              icon: FaCrown
+            }
+          : {
+              label: 'Người dùng',
+              color: 'bg-blue-100 text-blue-800 border-blue-200',
+              icon: FaUser
+            };
+        
+        return (
+          <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${roleInfo.color}`}>
+            <roleInfo.icon className="w-3 h-3" />
+            {roleInfo.label}
+          </span>
+        );
+      }
+    },
+    {
       title: 'Trạng thái',
       key: 'status',
       render: (user) => {
@@ -276,10 +334,15 @@ setShowEditModal(true);
       render: (user) => (
         <AdminActionDropdown
           actions={[
+            // {
+            //   label: 'Chỉnh sửa',
+            //   icon: FaEdit,
+            //   onClick: () => handleEditUser(user)
+            // },
             {
-              label: 'Chỉnh sửa',
-              icon: FaEdit,
-              onClick: () => handleEditUser(user)
+              label: 'Chỉnh sửa vai trò',
+              icon: FaUserShield,
+              onClick: () => handleEditRole(user)
             },
             {
               label: user.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt',
@@ -500,6 +563,18 @@ className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none
             </div>
           </div>
         </AdminModal>
+
+        {/* Edit Role Modal */}
+        <EditRoleModal
+          isOpen={showRoleModal}
+          onClose={() => {
+            setShowRoleModal(false);
+            setCurrentRoleUser(null);
+          }}
+          user={currentRoleUser}
+          onSave={handleSaveRole}
+          loading={loading}
+        />
       </div>
     </AdminLayout>
   );
