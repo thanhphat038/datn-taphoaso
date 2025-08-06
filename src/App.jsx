@@ -13,12 +13,12 @@ import PaymentProcessing from './pages/checkout/PaymentProcessing';
 import PaymentWaiting from './pages/checkout/PaymentWaiting';
 import VNPayReturn from './pages/checkout/VNPayReturn';
 
-import Header from './components/Header';
+import Header from './components/layout/Header';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailPage from './pages/BlogDetailPage';
-import Footer from './components/Footer';
+import Footer from './components/layout/Footer';
 
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';

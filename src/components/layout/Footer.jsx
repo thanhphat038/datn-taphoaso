@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Shield, 
-  Truck, 
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Shield,
+  Truck,
   ArrowUp,
   Facebook,
   Instagram,
   Twitter,
   Youtube
 } from 'lucide-react';
+import ChatBot from '../ChatBot';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  // Theo dõi vị trí cuộn để hiển thị/ẩn nút scroll to top
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setShowScrollToTop(scrollTop > 300); // Hiển thị khi cuộn xuống hơn 300px
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -32,43 +45,43 @@ const Footer = () => {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
+
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img 
-                className="h-12 w-auto" 
-                src="/images/logo_vuong.png" 
-                alt="Tạp Hóa Số Logo" 
+              <img
+                className="h-12 w-auto"
+                src="/images/logo_vuong.png"
+                alt="Tạp Hóa Số Logo"
               />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               Tạp Hóa Số - Nơi cung cấp các sản phẩm tươi ngon, chất lượng cao với dịch vụ giao hàng nhanh chóng và tiện lợi.
             </p>
             <div className="flex space-x-4">
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
                 aria-label="Facebook"
               >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
                 aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
                 aria-label="Twitter"
               >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
                 aria-label="YouTube"
               >
@@ -82,40 +95,40 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white">Liên kết nhanh</h3>
             <ul className="space-y-2">
               <li>
-                <Link 
-                  to="/product" 
+                <Link
+                  to="/product"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Sản phẩm
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/about" 
+                <Link
+                  to="/about"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Về chúng tôi
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/blog" 
+                <Link
+                  to="/blog"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Blog & Tin tức
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Liên hệ
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/cart" 
+                <Link
+                  to="/cart"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Giỏ hàng
@@ -137,8 +150,8 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <a 
-                  href="tel:0859499579" 
+                <a
+                  href="tel:0859499579"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   0859499579
@@ -146,8 +159,8 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <a 
-                  href="mailto:taphoaso@gmail.com" 
+                <a
+                  href="mailto:taphoaso@gmail.com"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   taphoaso@gmail.com
@@ -197,33 +210,46 @@ const Footer = () => {
             <div className="flex items-center space-x-4">
               <span className="text-gray-400 text-sm">Phương thức thanh toán:</span>
               <div className="flex space-x-2">
-                <img 
-                  src="/images/image 16.png" 
-                  alt="Payment Method 1" 
+                <img
+                  src="/images/image 16.png"
+                  alt="Payment Method 1"
                   className="h-8 w-auto"
                 />
-                <img 
-                  src="/images/image 20.png" 
-                  alt="Payment Method 2" 
+                <img
+                  src="/images/image 20.png"
+                  alt="Payment Method 2"
                   className="h-8 w-auto"
                 />
               </div>
             </div>
             <div className="text-gray-400 text-sm">
-              © 2024 Tạp Hóa Số. Tất cả quyền được bảo lưu.
+              © 2025 Tạp Hóa Số. Tất cả quyền được bảo lưu.
             </div>
           </div>
         </div>
       </div>
 
-      {/* Back to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-50"
-        aria-label="Back to top"
-      >
-        <ArrowUp className="h-5 w-5" />
-      </button>
+      {/* Floating Action Buttons Grid */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+        {/* Back to Top Button */}
+        <button
+          onClick={scrollToTop}
+          className={`bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-500 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 ${showScrollToTop
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+            }`}
+          aria-label="Back to top"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
+
+        {/* ChatBot Button */}
+        <div className="relative">
+          <ChatBot />
+        </div>
+      </div>
+
+
     </footer>
   );
 };
