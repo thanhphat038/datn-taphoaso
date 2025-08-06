@@ -15,8 +15,8 @@ import AdminModal, { ModalButton } from "../../components/admin/AdminModal";
 import {
   getAllCategories,
   createCategory,
-} from "../../service/Admin.Service.jsx";
-import { getVariantsByProduct } from "../../service/Variant.service.jsx";
+} from "../../service/Admin.Service.js";
+import { getVariantsByProduct } from "../../service/Variant.service.js";
 import Cookies from "js-cookie";
 
 import { getApiUrl } from '../../config/api.js';

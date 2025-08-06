@@ -4,8 +4,8 @@ import { FaUpload, FaTrash, FaImage, FaPlus, FaCubes, FaBarcode, FaDollarSign, F
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllProducts, getProductById } from '../../service/Admin.Service.jsx';
-import { createVariant, updateVariant, getVariantById } from '../../service/Variant.service.jsx';
+import { getAllProducts, getProductById } from '../../service/Admin.Service.js';
+import { createVariant, updateVariant, getVariantById } from '../../service/Variant.service.js';
 import Cookies from "js-cookie";
 
 import { getApiUrl } from '../../config/api.js';

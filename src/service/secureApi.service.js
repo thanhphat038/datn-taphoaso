@@ -1,4 +1,4 @@
-import { getSecureAuthHeaders, getSecureAuthHeadersAsync, refreshAccessToken } from '../utils/secureAuth';
+import { getSecureAuthHeaders, getSecureAuthHeadersAsync, refreshAccessToken } from '../utils/secureAuth.js';
 import { getApiUrl } from '../config/api.js';
 
 class SecureApiService {

@@ -7,7 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus } from '../../service/Admin.Service.jsx';
+import { getAllCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus } from '../../service/Admin.Service.js';
 
 import { getApiUrl } from '../../config/api.js';
 

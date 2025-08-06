@@ -22,8 +22,8 @@ import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
 import AdminModal from "../../components/admin/AdminModal";
-import { getAllVariants, deleteVariant, toggleVariantStatus, getVariantStats } from '../../service/Variant.service.jsx';
-import { getAllProducts } from '../../service/Admin.Service.jsx';
+import { getAllVariants, deleteVariant, toggleVariantStatus, getVariantStats } from '../../service/Variant.service.js';
+import { getAllProducts } from '../../service/Admin.Service.js';
 
 import { getApiUrl } from '../../config/api.js';
 

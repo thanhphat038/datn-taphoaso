@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthToken, setAuthToken, clearAuthData, syncUserData } from "../utils/auth";
+import { getAuthToken, setAuthToken, clearAuthData, syncUserData } from "../utils/auth.js";
 import { getApiUrl, getAuthHeaders } from '../config/api.js';
 
 const API_URL = getApiUrl('/auth');

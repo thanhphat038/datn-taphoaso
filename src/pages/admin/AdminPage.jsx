@@ -4,7 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import Cookies from 'js-cookie';
 import { useNavigate, Link } from 'react-router-dom';
-import { getAllComments, getAllReviews, getAllOrders } from '../../service/Admin.Service.jsx';
+import { getAllComments, getAllReviews, getAllOrders } from '../../service/Admin.Service.js';
 
 import { getApiUrl } from '../../config/api.js';
 

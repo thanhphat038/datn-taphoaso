@@ -4,7 +4,7 @@ import { FaTicketAlt, FaPercentage, FaDollarSign, FaCalendarAlt, FaInfoCircle } 
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
-import { getVoucherById, createVoucher, updateVoucher } from '../../service/Admin.Service.jsx';
+import { getVoucherById, createVoucher, updateVoucher } from '../../service/Admin.Service.js';
 
 import { getApiUrl } from '../../config/api.js';
 
