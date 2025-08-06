@@ -12,7 +12,9 @@ import { fetchUsers, updateUserById, deleteUser, toggleUserStatus } from '../../
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AdminUser = () => {
   const navigate = useNavigate();

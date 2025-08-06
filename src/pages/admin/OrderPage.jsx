@@ -10,7 +10,9 @@ import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.jsx';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const OrderPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

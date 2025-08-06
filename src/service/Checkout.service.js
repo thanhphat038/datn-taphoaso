@@ -2,7 +2,9 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 // API Configuration
-const API_BASE_URL = "http://localhost:3000/api";
+import { getApiUrl } from '../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 const API_ENDPOINTS = {
   CREATE_ORDER: "/orders",
   CREATE_VNPAY_PAYMENT: "/payment/create",

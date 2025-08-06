@@ -6,7 +6,9 @@ import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
 import { getVoucherById, createVoucher, updateVoucher } from '../../service/Admin.Service.jsx';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AddVoucherPage = () => {
   const { id } = useParams();

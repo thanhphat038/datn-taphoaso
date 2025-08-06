@@ -6,7 +6,9 @@ import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
 import { deleteProduct, toggleProductStatus } from '../../service/Admin.Service.jsx';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const DetailProduct = () => {
   const { id } = useParams();

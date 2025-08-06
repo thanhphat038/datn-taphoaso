@@ -4,6 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { addToCart } from '../service/Cart.service';
 import { useAlertContext } from '../components/AlertProvider';
+import { getApiUrl } from '../config/api.js';
 
 import { ArrowLeft, Calendar, MapPin, User, Phone, Package } from 'lucide-react';
 
@@ -104,7 +105,7 @@ const OrderDetailPage = () => {
           return;
         }
 
-        const response = await axios.get(`http://localhost:3000/api/orders/${id}`, {
+        const response = await axios.get(`${getApiUrl(`/orders/${id}`)}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

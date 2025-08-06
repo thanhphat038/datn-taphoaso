@@ -1,6 +1,20 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getAuthToken, getCurrentUser, setAuthToken, clearAuthToken } from '../utils/auth';
+import { 
+  setSecureTokens, 
+  getAccessToken, 
+  getSecureUserData, 
+  clearSecureTokens, 
+  isAuthenticated as isSecureAuthenticated,
+  isAuthenticatedAsync as isSecureAuthenticatedAsync,
+  isTokenValid,
+  setupTokenRefresh,
+  checkAuthRateLimit,
+  clearAuthRateLimit,
+  refreshAccessToken
+} from '../utils/secureAuth';
 import Cookies from 'js-cookie';
+import { getApiUrl } from '../config/api.js';
 
 const AuthContext = createContext();
 
@@ -24,61 +38,72 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = () => {
     try {
+      // Use secure authentication first
+      const isSecureAuth = isSecureAuthenticated();
+      const secureUserData = getSecureUserData();
+      
+      if (isSecureAuth && secureUserData) {
+        setUser(secureUserData);
+        setIsAuthenticated(true);
+        return;
+      }
+      
+      // Fallback to legacy authentication
       const token = getAuthToken();
-      // Kiểm tra cả user và userData để đồng bộ
       const userData = getCurrentUser() || JSON.parse(localStorage.getItem('userData') || 'null');
       
       if (token && userData) {
+        // Migrate to secure storage
+        setSecureTokens(token, null, userData);
         setUser(userData);
         setIsAuthenticated(true);
-        // Đồng bộ dữ liệu
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('userData', JSON.stringify(userData));
       } else {
         setUser(null);
         setIsAuthenticated(false);
-        // Clear tất cả dữ liệu
-        localStorage.removeItem('user');
-        localStorage.removeItem('userData');
+        clearSecureTokens();
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
       setUser(null);
       setIsAuthenticated(false);
-      // Clear dữ liệu lỗi
-      localStorage.removeItem('user');
-      localStorage.removeItem('userData');
+      clearSecureTokens();
     } finally {
       setLoading(false);
     }
   };
 
   const login = (userData) => {
+    // Rate limiting check
+    const identifier = userData.username || userData.email || 'unknown';
+    if (!checkAuthRateLimit(identifier)) {
+      throw new Error('Too many login attempts. Please try again later.');
+    }
+    
+    // Use secure token storage
+    if (userData.token) {
+      setSecureTokens(userData.token, userData.refreshToken, userData);
+    }
+    
     setUser(userData);
     setIsAuthenticated(true);
-    // Đồng bộ lưu vào cả 2 nơi
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('userData', JSON.stringify(userData));
-    // Lưu token nếu có
-    if (userData.token) {
-      setAuthToken(userData.token);
-    }
+    
+    // Clear rate limit on successful login
+    clearAuthRateLimit(identifier);
+    
+    // Setup token refresh
+    setupTokenRefresh();
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    clearAuthToken();
-    // Clear tất cả dữ liệu user
-    localStorage.removeItem('user');
-    localStorage.removeItem('userData');
+    clearSecureTokens();
   };
 
   const updateUser = (userData) => {
     setUser(userData);
-    // Đồng bộ lưu vào cả 2 nơi
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('userData', JSON.stringify(userData));
+    // Update secure storage
+    setSecureTokens(null, null, userData);
   };
 
   // Kiểm tra quyền admin
@@ -88,16 +113,25 @@ export const AuthProvider = ({ children }) => {
 
   // Lấy token hiện tại
   const getToken = () => {
-    return getAuthToken();
+    try {
+      const secureToken = sessionStorage.getItem('access_token');
+      if (secureToken && isTokenValid(secureToken)) {
+        return secureToken;
+      }
+      return getAuthToken();
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return getAuthToken();
+    }
   };
 
   // Refresh user data từ API
   const refreshUserData = async () => {
     try {
-      const token = getAuthToken();
+      const token = getToken();
       if (!token) return;
 
-      const response = await fetch('http://localhost:3000/api/auth/profile', {
+      const response = await fetch(getApiUrl('/auth/profile'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -109,6 +143,12 @@ export const AuthProvider = ({ children }) => {
         const userData = result.data;
         updateUser(userData);
         return userData;
+      } else if (response.status === 401) {
+        // Token expired, try to refresh
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          return refreshUserData(); // Retry with new token
+        }
       }
     } catch (error) {
       console.error('Error refreshing user data:', error);

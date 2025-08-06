@@ -1,7 +1,9 @@
 import axios from "axios";
 import { getAuthToken, setAuthToken, clearAuthData, syncUserData } from "../utils/auth";
-const API_URL = "http://localhost:3000/api/auth";
-const BASE_URL = "http://localhost:3000/api";
+import { getApiUrl, getAuthHeaders } from '../config/api.js';
+
+const API_URL = getApiUrl('/auth');
+const BASE_URL = getApiUrl('');
 
 export async function registerUser({ username, email, password }) {
   try {

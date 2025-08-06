@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { FaImage, FaUpload, FaTrash, FaTimes } from 'react-icons/fa';
 import './ImageUploadToolbar.css';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const ImageUploadToolbar = ({ onImageUpload, onImageSelect, maxImages = 5, maxSize = 2 * 1024 * 1024, isOpen = false, onClose }) => {
   const [uploading, setUploading] = useState(false);

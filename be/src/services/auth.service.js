@@ -34,16 +34,23 @@ class AuthService {
         };
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
+      // Generate JWT tokens
+      const accessToken = jwt.sign(
         { id: user._id, role: user.role },
         JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
+        { expiresIn: '15m' } // Short-lived access token
+      );
+      
+      const refreshToken = jwt.sign(
+        { id: user._id, type: 'refresh' },
+        JWT_SECRET,
+        { expiresIn: '7d' } // Long-lived refresh token
       );
 
       return {
         success: true,
-        token,
+        accessToken,
+        refreshToken,
         user: {
           id: user._id,
           username: user.username,

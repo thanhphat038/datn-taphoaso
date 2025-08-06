@@ -8,7 +8,9 @@ import { getAllProducts, getProductById } from '../../service/Admin.Service.jsx'
 import { createVariant, updateVariant, getVariantById } from '../../service/Variant.service.jsx';
 import Cookies from "js-cookie";
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 // Utility function to convert ISO or any date string to yyyy-MM-dd
 const toDateInputValue = (dateString) => {

@@ -61,3 +61,17 @@ export const validateObjectId = (id, fieldName = 'ID') => {
   
   return null;
 };
+
+/**
+ * Sanitize user input to prevent XSS and other injection attacks
+ * @param {string} input - Input string to sanitize
+ * @returns {string} Sanitized input
+ */
+export const sanitizeUserInput = (input) => {
+  if (typeof input !== 'string') return '';
+  
+  return input
+    .trim()
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .substring(0, 100); // Limit length
+};

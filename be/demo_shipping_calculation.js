@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000/api/vietmap-shipping';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const API_ENDPOINT = `${BASE_URL}/api/vietmap-shipping`;
 
 // Địa chỉ theo yêu cầu
 const CUSTOMER_ADDRESS = "10 Ngô Gia Tự, Phường 13, Quận 10, Thành phố Hồ Chí Minh";
@@ -10,7 +11,7 @@ async function calculateShippingFee(customerAddress) {
   try {
     console.log('🔍 Calculating shipping fee for:', customerAddress);
     
-    const response = await axios.post(`${BASE_URL}/calculate-shipping-fee`, {
+    const response = await axios.post(`${API_ENDPOINT}/calculate-shipping-fee`, {
       customerAddress: customerAddress
     });
     

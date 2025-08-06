@@ -4,9 +4,10 @@ import { searchProducts, getProductsByCategory } from '../service/Product.servic
 import Product from '../components/Product';
 import { useToast } from '../components/ToastContainer';
 import axios from 'axios';
+import { getApiUrl } from '../config/api.js';
 
 const ProductsSearch = () => {
-    const api = "http://localhost:3000/api";
+    const api = getApiUrl('');
     const { showSuccess, showError } = useToast();
 
     const [products, setProducts] = useState([]);

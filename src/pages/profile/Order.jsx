@@ -7,7 +7,9 @@ import { useParams } from 'react-router-dom';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
 import { useAuth } from '../../context/AuthContext';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 // Constants
 const ORDER_STATUS_CONFIG = {

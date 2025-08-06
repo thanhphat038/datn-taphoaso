@@ -14,6 +14,13 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     
+    // Check if token is not a refresh token
+    if (decoded.type === 'refresh') {
+      return res.status(401).json({
+        message: 'Invalid token type.'
+      });
+    }
+    
     // Check if user exists and is active
     const user = await userService.findById(decoded.id);
     if (!user || user.status !== 'active') {
@@ -28,6 +35,12 @@ export const authMiddleware = async (req, res, next) => {
     };
     next();
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        message: 'Token expired.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
     return res.status(401).json({
       message: 'Invalid token.'
     });

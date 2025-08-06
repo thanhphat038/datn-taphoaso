@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Product from '../components/Product';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const ProductsPage = () => {
 

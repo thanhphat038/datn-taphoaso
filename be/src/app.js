@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import helmet from 'helmet';
 import compression from 'compression';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,6 +9,15 @@ import { connectDB } from './config/database.js';
 import './models/reply.model.js'; // Import Reply model để đảm bảo nó được register
 
 import { globalErrorHandler } from './middlewares/error.middleware.js';
+import { 
+  securityHeaders, 
+  corsOptions, 
+  requestLogger, 
+  errorHandler, 
+  sanitizeInput,
+  apiRateLimiter,
+  authRateLimiter
+} from './middlewares/security.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,22 +27,23 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "blob:", "http://localhost:3000"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-    },
-  },
-})); // Security headers
-app.use(cors()); // Enable CORS
-app.use(compression()); // Compress responses
-app.use(morgan('dev')); // Logging
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+// Security middleware
+app.use(securityHeaders);
+app.use(cors(corsOptions));
+app.use(compression());
+app.use(requestLogger);
+app.use(morgan('dev'));
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization
+app.use(sanitizeInput);
+
+// Rate limiting
+app.use('/api/auth', authRateLimiter);
+app.use('/api', apiRateLimiter);
 
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
@@ -43,13 +52,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use('/api', routes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err : {}
-  });
-});
+app.use(errorHandler);
 
 // 404 handler
 // app.use((req, res) => {
