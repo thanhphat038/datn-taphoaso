@@ -19,7 +19,7 @@ export const ToastProvider = ({ children }) => {
     message,
     type = 'info',
     duration = 3000,
-    position = 'top-right'
+    position = 'center'
   }) => {
     setToasts(prev => [...prev, { id, message, type, duration, position }]);
   }, []);
@@ -105,6 +105,24 @@ export const ToastProvider = ({ children }) => {
                 duration={toast.duration}
                 position={toast.position}
               />
+            ))}
+        </div>
+
+        {/* Center */}
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          {toasts
+            .filter(toast => toast.position === 'center')
+            .map(toast => (
+              <div key={toast.id} className="pointer-events-auto">
+                <Toast
+                  isOpen={true}
+                  onClose={() => removeToast(toast.id)}
+                  message={toast.message}
+                  type={toast.type}
+                  duration={toast.duration}
+                  position={toast.position}
+                />
+              </div>
             ))}
         </div>
 

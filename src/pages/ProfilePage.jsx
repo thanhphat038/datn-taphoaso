@@ -82,6 +82,10 @@ const ProfilePage = () => {
       const token = Cookies.get("auth_token");
       const userData = localStorage.getItem('userData') || localStorage.getItem('user');
       
+      console.log('🔍 ProfilePage Debug:');
+      console.log('🔍 Token:', token ? 'exists' : 'missing');
+      console.log('🔍 UserData:', userData ? 'exists' : 'missing');
+      
       if (!token || !userData) {
         console.log('🚫 No authentication found, redirecting to login...');
         setIsAuthenticated(false);
@@ -92,7 +96,7 @@ const ProfilePage = () => {
       
       try {
         const user = JSON.parse(userData);
-        // Kiểm tra các trường có thể có của user (tương tự ProtectedRoute)
+        // Kiểm tra các trường có thể có của user
         const hasValidUser = user && (
           user.username || 
           user.email || 
@@ -111,7 +115,13 @@ const ProfilePage = () => {
           return false;
         }
         
-        console.log('✅ User authenticated:', user.username || user.email || user.full_name || user.name);
+        console.log('✅ ProfilePage: User authenticated successfully');
+        console.log('🔍 User info:', {
+          id: user.id || user._id,
+          username: user.username,
+          email: user.email,
+          name: user.full_name || user.name
+        });
         setIsAuthenticated(true);
         setIsLoading(false);
         return true;

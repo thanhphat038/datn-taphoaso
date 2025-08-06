@@ -75,13 +75,21 @@ function Layout() {
               <Route path="/search/:value" element={<ProductsSearch />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/cart" element={<CartPage />} />
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              } />
               <Route path="/profile/*" element={
                 <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
               } />
-              <Route path="/order/:id" element={<OrderDetailPage />} />
+              <Route path="/order/:id" element={
+                <ProtectedRoute>
+                  <OrderDetailPage />
+                </ProtectedRoute>
+              } />
               <Route path="/checkout" element={
                 <CheckoutGuard>
                   <Checkout />
@@ -99,7 +107,11 @@ function Layout() {
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route path="/change-password" element={
+                <ProtectedRoute>
+                  <ChangePasswordPage />
+                </ProtectedRoute>
+              } />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />

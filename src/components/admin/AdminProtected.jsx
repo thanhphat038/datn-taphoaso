@@ -60,7 +60,7 @@ const AdminProtected = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
           <div className="flex items-center justify-center mb-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#06AEF4]"></div>

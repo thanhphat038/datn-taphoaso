@@ -124,7 +124,7 @@ const SelectAddress = () => {
   };
 
   return (
-    <div className="select-address-wrapper">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 flex items-center justify-center">
       {/* Toast Message */}
       {message && (
         <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>

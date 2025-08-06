@@ -10,6 +10,8 @@ const ProductFavorite = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8);
   const navigate = useNavigate();
 
   // Lấy user_id từ token
@@ -135,6 +137,55 @@ const ProductFavorite = () => {
     };
   }, []);
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = favorites.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(favorites.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top khi chuyển trang
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Tạo mảng số trang để hiển thị
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
+
   // Show login prompt if not authenticated
   if (!isAuthenticated && !loading) {
     return (
@@ -178,39 +229,95 @@ const ProductFavorite = () => {
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 w-full">
-<h2 className="text-xl font-semibold mb-4">Sản phẩm yêu thích</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 max-w-7xl mx-auto px-4 py-6">
-        {favorites.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500 py-8">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <p className="mt-2">Chưa có sản phẩm yêu thích nào</p>
-            <p className="text-sm text-gray-400 mb-4">Hãy thêm sản phẩm vào danh sách yêu thích để xem chúng ở đây</p>
-            
-            {!isAuthenticated && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 mb-2">Bạn cần đăng nhập để sử dụng tính năng yêu thích</p>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Đăng nhập ngay
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          favorites.map((product) => {
-            console.log('🔍 Debug - Rendering product:', product);
-            return (
-              <div key={product._id} className="p-2 min-w-[220px] max-w-[260px] mx-auto">
-                <Product data={product} isFavorited={true} />
-              </div>
-            );
-          })
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Sản phẩm yêu thích</h2>
+        {favorites.length > 0 && (
+          <span className="text-sm text-gray-500">
+            {favorites.length} sản phẩm • Trang {currentPage} / {totalPages}
+          </span>
         )}
       </div>
+      
+      {favorites.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">
+          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <p className="mt-2">Chưa có sản phẩm yêu thích nào</p>
+          <p className="text-sm text-gray-400 mb-4">Hãy thêm sản phẩm vào danh sách yêu thích để xem chúng ở đây</p>
+          
+          {!isAuthenticated && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-500 mb-2">Bạn cần đăng nhập để sử dụng tính năng yêu thích</p>
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
+              >
+                Đăng nhập ngay
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Grid sản phẩm */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+            {currentItems.map((product) => {
+              console.log('🔍 Debug - Rendering product:', product);
+              return (
+                <div key={product._id} className="w-full">
+                  <Product data={product} isFavorited={true} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Phân trang */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 mt-8">
+              {/* Nút Previous */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Số trang */}
+              {getPageNumbers().map((pageNumber, index) => (
+                <button
+                  key={index}
+                  onClick={() => typeof pageNumber === 'number' && handlePageChange(pageNumber)}
+                  disabled={pageNumber === '...'}
+                  className={`px-3 py-2 text-sm font-medium rounded-md ${
+                    pageNumber === currentPage
+                      ? 'bg-blue-600 text-white'
+                      : pageNumber === '...'
+                      ? 'text-gray-400 cursor-default'
+                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              ))}
+
+              {/* Nút Next */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

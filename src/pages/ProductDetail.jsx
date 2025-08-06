@@ -40,7 +40,7 @@ const ProductDetail = () => {
     const [loadingRelatedProducts, setLoadingRelatedProducts] = useState(false);
     const [quantity] = useState(1);
     const [, setPendingAddQty] = useState(0);
-    const { showAlert, showError } = useAlertContext();
+    const { showAlert, showError, hideAlert } = useAlertContext();
     const { showSuccess } = useToast();
 
     // Thêm state cho package selection
@@ -259,10 +259,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -320,10 +322,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -383,10 +387,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -448,10 +454,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -487,10 +495,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -516,10 +526,12 @@ const ProductDetail = () => {
                     {
                         label: 'Đăng nhập ngay',
                         onClick: () => {
+                            hideAlert(); // Tắt alert
                             navigate('/login');
                         }
                     }
-                ]
+                ],
+                autoClose: false
             });
             return;
         }
@@ -693,9 +705,17 @@ const ProductDetail = () => {
                             </div>
                         </div>
 
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600 font-medium">Trạng thái:</span>
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${productData.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                }`}>
+                                {productData.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                            </span>
+                        </div>
                         <div className="space-y-4">
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
+
                                 <p className="text-gray-600 leading-relaxed">{productData.description}</p>
                             </div>
 
@@ -774,13 +794,6 @@ const ProductDetail = () => {
                                 </div>
                             )}
 
-                            <div className="flex items-center gap-2">
-                                <span className="text-gray-600 font-medium">Trạng thái:</span>
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${productData.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
-                                    {productData.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1297,8 +1310,8 @@ const ProductDetail = () => {
                     </div>
                 )}
             </div>
-        </div >
+        </div>
     );
-}
+};
 
 export default ProductDetail;

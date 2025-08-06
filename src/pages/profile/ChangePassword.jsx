@@ -166,25 +166,25 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-[#06AEF4] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="text-center mb-6">
+        <div className="w-12 h-12 bg-[#06AEF4] rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-[#06AEF4]">
+        <h2 className="text-xl font-bold text-[#06AEF4]">
           Đổi mật khẩu
         </h2>
-        <p className="text-gray-600 mt-2">Bảo mật tài khoản của bạn</p>
+        <p className="text-gray-600 mt-1 text-sm">Bảo mật tài khoản của bạn</p>
       </div>
 
-      <form key="change-password-form" onSubmit={handleSubmit} className="space-y-6">
+      <form key="change-password-form" onSubmit={handleSubmit} className="space-y-4">
         {/* Current Password */}
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Mật khẩu hiện tại
@@ -193,7 +193,7 @@ const ChangePassword = () => {
             <input
               key="current-password"
               type={showPasswords.currentPassword ? "text" : "password"}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
               placeholder="Nhập mật khẩu hiện tại"
               value={passwords.currentPassword}
               onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
@@ -202,16 +202,16 @@ const ChangePassword = () => {
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
               onClick={() => togglePasswordVisibility('currentPassword')}
             >
-              {showPasswords.currentPassword ? <FaEyeSlash className="h-5 w-5 text-gray-500" /> : <FaEye className="h-5 w-5 text-gray-500" />}
+              {showPasswords.currentPassword ? <FaEyeSlash className="h-4 w-4 text-gray-500" /> : <FaEye className="h-4 w-4 text-gray-500" />}
             </span>
-             <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-lg bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
 
         {/* New Password */}
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Mật khẩu mới
@@ -220,7 +220,7 @@ const ChangePassword = () => {
             <input
               key="new-password"
               type={showPasswords.newPassword ? "text" : "password"}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
               placeholder="Nhập mật khẩu mới"
               value={passwords.newPassword}
               onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
@@ -229,24 +229,24 @@ const ChangePassword = () => {
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
               onClick={() => togglePasswordVisibility('newPassword')}
             >
-              {showPasswords.newPassword ? <FaEyeSlash className="h-5 w-5 text-gray-500" /> : <FaEye className="h-5 w-5 text-gray-500" />}
+              {showPasswords.newPassword ? <FaEyeSlash className="h-4 w-4 text-gray-500" /> : <FaEye className="h-4 w-4 text-gray-500" />}
             </span>
-             <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-lg bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
           {/* Password Strength Indicator */}
           {passwords.newPassword && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+            <div className="mt-2 p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Độ mạnh mật khẩu:</span>
-                <span className={`text-sm font-semibold ${getStrengthColor(passwordStrength.score)}`}>
+                <span className="text-xs font-medium text-gray-700">Độ mạnh mật khẩu:</span>
+                <span className={`text-xs font-semibold ${getStrengthColor(passwordStrength.score)}`}>
                   {getStrengthText(passwordStrength.score)}
                 </span>
               </div>
               
               {/* Strength Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+              <div className="w-full bg-gray-200 rounded-full h-1.5 mb-2">
                 <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
                     passwordStrength.score <= 2 ? 'bg-red-500' :
                     passwordStrength.score <= 3 ? 'bg-yellow-500' :
                     passwordStrength.score <= 4 ? 'bg-blue-500' : 'bg-green-500'
@@ -260,11 +260,11 @@ const ChangePassword = () => {
                 {passwordStrength.feedback.map((item, index) => {
                   const isMet = item.startsWith('Có') || item.startsWith('Đủ');
                   return (
-                    <div key={index} className="flex items-center gap-2 text-xs">
+                    <div key={index} className="flex items-center gap-1.5 text-xs">
                       {isMet ? (
-                        <FaCheck className="text-green-500 w-3 h-3" />
+                        <FaCheck className="text-green-500 w-2.5 h-2.5" />
                       ) : (
-                        <FaTimes className="text-red-500 w-3 h-3" />
+                        <FaTimes className="text-red-500 w-2.5 h-2.5" />
                       )}
                       <span className={isMet ? 'text-green-600' : 'text-red-600'}>
                         {item}
@@ -279,8 +279,8 @@ const ChangePassword = () => {
 
         {/* Confirm Password */}
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
             </svg>
             Xác nhận mật khẩu mới
@@ -289,7 +289,7 @@ const ChangePassword = () => {
             <input
               key="confirm-password"
               type={showPasswords.confirmPassword ? "text" : "password"}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#06AEF4] focus:ring-4 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white"
+              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
               placeholder="Nhập lại mật khẩu mới"
               value={passwords.confirmPassword}
               onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
@@ -298,17 +298,17 @@ const ChangePassword = () => {
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
               onClick={() => togglePasswordVisibility('confirmPassword')}
             >
-              {showPasswords.confirmPassword ? <FaEyeSlash className="h-5 w-5 text-gray-500" /> : <FaEye className="h-5 w-5 text-gray-500" />}
+              {showPasswords.confirmPassword ? <FaEyeSlash className="h-4 w-4 text-gray-500" /> : <FaEye className="h-4 w-4 text-gray-500" />}
             </span>
-             <div className="absolute inset-0 rounded-xl bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-lg bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
 
         {/* Error/Success Messages */}
         {error && (
-          <div key="error-message" className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+          <div key="error-message" className="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-red-700 text-sm font-medium">{error}</p>
@@ -317,9 +317,9 @@ const ChangePassword = () => {
         )}
         
         {success && (
-          <div key="success-message" className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+          <div key="success-message" className="bg-green-50 border-l-4 border-green-500 p-3 rounded-lg">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
@@ -333,14 +333,14 @@ const ChangePassword = () => {
         )}
 
         {/* Security Tips */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">Lưu ý bảo mật:</p>
-              <ul className="text-xs space-y-1 list-disc list-inside">
+              <p className="font-medium mb-1 text-xs">Lưu ý bảo mật:</p>
+              <ul className="text-xs space-y-0.5 list-disc list-inside">
                 <li>Không chia sẻ mật khẩu với người khác</li>
                 <li>Sử dụng mật khẩu mạnh với ít nhất 8 ký tự</li>
                 <li>Kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt</li>
@@ -353,32 +353,32 @@ const ChangePassword = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-3 px-6 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full py-2.5 px-4 bg-[#06AEF4] text-white rounded-lg font-semibold hover:bg-[#70d9ff] transform hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
           disabled={loading || passwordStrength.score < 3}
         >
           {loading ? (
             <div className="flex items-center justify-center gap-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               Đang xử lý...
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              {passwordStrength.score < 3 ? 'Cải thiện độ mạnh mật khẩu' : 'Đổi mật khẩu'}
+              {passwordStrength.score < 3 ? 'Đổi mật khẩu' : 'Đổi mật khẩu'}
             </div>
           )}
         </button>
 
         {/* Password Strength Warning */}
         {passwords.newPassword && passwordStrength.score < 3 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
-              <span className="text-yellow-700 text-sm">
+              <span className="text-yellow-700 text-xs">
                 Mật khẩu cần đạt độ mạnh tối thiểu để tiếp tục
               </span>
             </div>
@@ -387,19 +387,19 @@ const ChangePassword = () => {
       </form>
 
       {/* Footer */}
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mt-6 text-center text-xs text-gray-500">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Quên mật khẩu?</span>
         </div>
-                 <a 
-           href="/login" 
-           className="text-[#06AEF4] hover:text-[#70d9ff] font-medium hover:underline transition-colors"
-         >
-           Lấy lại mật khẩu tại trang đăng nhập
-         </a>
+        <a 
+          href="/login" 
+          className="text-[#06AEF4] hover:text-[#70d9ff] font-medium hover:underline transition-colors"
+        >
+          Lấy lại mật khẩu tại trang đăng nhập
+        </a>
       </div>
     </div>
   );

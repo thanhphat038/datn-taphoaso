@@ -62,9 +62,6 @@ const handleSubmit = async (e) => {
             
             setTimeout(() => {
                 setMessage("");
-                // Store user information in local storage and update auth context
-                localStorage.setItem('user', JSON.stringify(user));
-                login(user);
                 if (user.role === 'admin') {
                     navigate('/admin');
                 } else {

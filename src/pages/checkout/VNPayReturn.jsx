@@ -96,7 +96,7 @@ const VNPayReturn = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Đang xử lý thanh toán...</p>
@@ -107,7 +107,7 @@ const VNPayReturn = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full mx-4">
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">❌</div>
@@ -137,7 +137,7 @@ const VNPayReturn = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full mx-4">
         <div className="text-center">
           {paymentResult?.success ? (

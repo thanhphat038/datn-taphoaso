@@ -3,16 +3,13 @@
 import Cookies from "js-cookie";
 
 export async function getProductComments(productId) {
-  console.log('🔍 Fetching comments for product:', productId);
   const res = await fetch(`/api/comments/product/${productId}/all-comments`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token') || Cookies.get("auth_token")}`,
     },
   });
   
-  console.log(' Response status:', res.status);
   const data = await res.json();
-  console.log('📦 Response data:', data);
   
   return data;
 }
