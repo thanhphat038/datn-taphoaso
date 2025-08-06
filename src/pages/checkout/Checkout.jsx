@@ -28,8 +28,6 @@ const Checkout = () => {
   const [showRedirectModal, setShowRedirectModal] = useState(false);
   const [redirectData, setRedirectData] = useState({ paymentUrl: '', orderId: '' });
   
-
-
   const productFromState = location.state?.product;
   const productsToDisplay = productFromState ? [productFromState] : cartItems;
 

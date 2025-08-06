@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, updateProfile } from '../../service/UserService';
+import { getProfile, updateProfile } from '../../service/user.service';
+import { useAuth } from '../../context/AuthContext';
 
 const Information = () => {
-  const [user, setUser] = useState({ username: '', full_name: '', email: '', phone: '', gender: 'male', avatar: '' });
+  const { user, updateUser, refreshUserData } = useAuth();
+  const [userData, setUserData] = useState({ username: '', full_name: '', email: '', phone: '', gender: 'male', avatar: '' });
   const [originalUser, setOriginalUser] = useState({ username: '', full_name: '', email: '', phone: '', gender: 'male', avatar: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +26,7 @@ const Information = () => {
           gender: data.gender || 'male',
           avatar: data.avatar || '',
         };
-        setUser(userData);
+        setUserData(userData);
         setOriginalUser(userData); // Lưu dữ liệu gốc
       } catch (err) {
         setError(err.message || 'Không thể tải thông tin người dùng');
@@ -37,7 +39,7 @@ const Information = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUser(prev => ({ ...prev, [name]: value }));
+    setUserData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarChange = (e) => {
@@ -51,14 +53,14 @@ const Information = () => {
       reader.readAsDataURL(file);
       
       // Update user state
-      setUser(prev => ({ ...prev, avatar: file }));
+      setUserData(prev => ({ ...prev, avatar: file }));
     }
   };
 
   const handleEdit = () => {
     if (isEditing) {
       // Hủy chỉnh sửa - khôi phục dữ liệu gốc
-      setUser(originalUser);
+      setUserData(originalUser);
       setAvatarPreview(null);
       setIsEditing(false);
       setError(null);
@@ -75,25 +77,25 @@ const Information = () => {
     e.preventDefault();
     
     // Validation
-    if (!user.username.trim()) {
+    if (!userData.username.trim()) {
       setError('Tên tài khoản không được để trống!');
       setTimeout(() => setError(null), 3000);
       return;
     }
     
-    if (user.full_name && user.full_name.trim().length < 2) {
+    if (userData.full_name && userData.full_name.trim().length < 2) {
       setError('Họ và tên phải có ít nhất 2 ký tự!');
       setTimeout(() => setError(null), 3000);
       return;
     }
     
-    if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+    if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
       setError('Email không hợp lệ!');
       setTimeout(() => setError(null), 3000);
       return;
     }
     
-    if (user.phone && !/^[0-9]{10,11}$/.test(user.phone.replace(/\s/g, ''))) {
+    if (userData.phone && !/^[0-9]{10,11}$/.test(userData.phone.replace(/\s/g, ''))) {
       setError('Số điện thoại không hợp lệ!');
       setTimeout(() => setError(null), 3000);
       return;
@@ -105,24 +107,27 @@ const Information = () => {
     try {
       
       // If avatar is a File object, handle file upload
-      if (user.avatar instanceof File) {
+      if (userData.avatar instanceof File) {
         const formData = new FormData();
-        formData.append('avatar', user.avatar);
-        formData.append('username', user.username);
-        formData.append('full_name', user.full_name);
-        formData.append('email', user.email);
-        formData.append('phone', user.phone);
-        formData.append('gender', user.gender);
+        formData.append('avatar', userData.avatar);
+        formData.append('username', userData.username);
+        formData.append('full_name', userData.full_name);
+        formData.append('email', userData.email);
+        formData.append('phone', userData.phone);
+        formData.append('gender', userData.gender);
         
         await updateProfile(formData);
       } else {
         // Regular update without file
-        await updateProfile(user);
+        await updateProfile(userData);
       }
+      
+      // Refresh user data in AuthContext
+      await refreshUserData();
       
       setSuccess('Cập nhật thông tin thành công!');
       setAvatarPreview(null); // Clear preview after successful save
-      setOriginalUser(user); // Cập nhật dữ liệu gốc
+      setOriginalUser(userData); // Cập nhật dữ liệu gốc
       setIsEditing(false); // Thoát chế độ chỉnh sửa
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
@@ -150,10 +155,14 @@ const Information = () => {
         gender: data.gender || 'male',
         avatar: data.avatar || '',
       };
-      setUser(userData);
+      setUserData(userData);
       setOriginalUser(userData);
       setAvatarPreview(null);
       setIsEditing(false);
+      
+      // Refresh user data in AuthContext
+      await refreshUserData();
+      
       setSuccess('Đã tải lại thông tin mới nhất!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -184,7 +193,7 @@ const Information = () => {
         <div className="relative mb-4">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 overflow-hidden border-3 border-white shadow-lg relative">
             <img
-              src={avatarPreview || user.avatar || "/images/avata.jpg"}
+              src={avatarPreview || userData.avatar || "/images/avata.jpg"}
               alt="Profile"
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -251,7 +260,7 @@ const Information = () => {
             <input
               type="text"
               name="username"
-              value={user.username}
+              value={userData.username}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 text-sm ${
@@ -277,7 +286,7 @@ const Information = () => {
             <input
               type="text"
               name="full_name"
-              value={user.full_name}
+              value={userData.full_name}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 text-sm ${
@@ -303,7 +312,7 @@ const Information = () => {
             <input
               type="tel"
               name="phone"
-              value={user.phone}
+              value={userData.phone}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 text-sm ${
@@ -329,7 +338,7 @@ const Information = () => {
             <input
               type="email"
               name="email"
-              value={user.email}
+              value={userData.email}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 text-sm ${
@@ -397,7 +406,7 @@ const Information = () => {
         </div>
 
         {/* Refresh Button - Only show when not editing */}
-        {!isEditing && (
+        {/* {!isEditing && (
           <div className="flex justify-center pt-3">
             <button
               type="button"
@@ -417,7 +426,7 @@ const Information = () => {
               </span>
             </button>
           </div>
-        )}
+        )} */}
       </form>
     </div>
   );

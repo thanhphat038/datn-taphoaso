@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 import { addToCart } from '../service/Cart.service';
 import { useAlertContext } from '../components/AlertProvider';
 
+import { ArrowLeft, Calendar, MapPin, User, Phone, Package } from 'lucide-react';
+
 const OrderDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();

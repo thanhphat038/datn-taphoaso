@@ -7,7 +7,7 @@ import { getAllCategories } from '../../service/Admin.Service';
 import Cookies from "js-cookie";
 import { Search, ShoppingCart, User, Menu, LogOut, MapPin } from 'lucide-react';
 import { CartContext } from '../../context/CartContext';
-import { logoutUser } from '../../service/UserService';
+import { logoutUser } from '../../service/user.service';
 
 const Header = () => {
     const token = Cookies.get("auth_token");

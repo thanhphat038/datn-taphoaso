@@ -54,7 +54,7 @@ export const createVNPayPayment = async (orderData) => {
       amount: orderData.total_amount,
       bankCode: "",
       language: "vn",
-      orderId: orderData._id // Truyền orderId để sử dụng làm vnp_TxnRef
+      orderId: orderData._id 
     };
     
     console.log('Creating VNPAY payment with orderId:', orderData._id);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser } from '../service/UserService';
-import { forgotPassword } from '../service/UserService';
+import { loginUser } from '../service/user.service';
+import { requestPasswordReset } from '../service/user.service';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
@@ -53,9 +53,9 @@ const handleSubmit = async (e) => {
         console.log('👤 User found:', user);
         
         if (user && user.username) {
-            // Store user information in local storage NGAY LẬP TỨC
-            localStorage.setItem('userData', JSON.stringify(user));
-            console.log('✅ User data saved to localStorage:', user);
+            // Sử dụng AuthContext để login
+            login(user);
+            console.log('✅ User logged in via AuthContext:', user);
             
             setMessage('Đăng nhập thành công! Chào mừng ' + user.username);
             setMessageType('success');
@@ -83,7 +83,7 @@ const handleSubmit = async (e) => {
         setForgotMessage('');
         setForgotLoading(true);
         try {
-            await forgotPassword(forgotEmail);
+            await requestPasswordReset({ email: forgotEmail });
             setForgotMessage('Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.');
         } catch (error) {
             setForgotMessage('Lỗi: ' + (error.response?.data?.message || error.message));

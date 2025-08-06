@@ -8,7 +8,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import EditRoleModal from '../../components/admin/EditRoleModal';
-import { fetchUsers, updateUser, deleteUser, toggleUserStatus } from '../../service/UserService';
+import { fetchUsers, updateUserById, deleteUser, toggleUserStatus } from '../../service/user.service';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -100,7 +100,7 @@ setShowEditModal(true);
     if (!currentEditUser) return;
     try {
       setLoading(true);
-      await updateUser(currentEditUser._id, {
+              await updateUserById(currentEditUser._id, {
         full_name: editFormData.name,
         email: editFormData.email,
         phone: editFormData.phone,
@@ -141,7 +141,7 @@ setShowEditModal(true);
     if (!currentRoleUser) return;
     try {
       setLoading(true);
-      await updateUser(currentRoleUser._id, { role: newRole });
+              await updateUserById(currentRoleUser._id, { role: newRole });
       setUsers(users.map(user => 
         user._id === currentRoleUser._id ? { ...user, role: newRole } : user
       ));

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { registerUser } from "../service/UserService";
+import { registerUser } from "../service/user.service";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({

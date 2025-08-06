@@ -1,92 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = Cookies.get('auth_token');
-      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
-      
-      console.log('🔍 ProtectedRoute Debug:');
-      console.log('🔍 Token:', token ? 'exists' : 'missing');
-      console.log('🔍 UserData:', userData ? 'exists' : 'missing');
-      
-      if (!token) {
-        console.log('🚫 ProtectedRoute: No token found');
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        navigate(redirectTo);
-        return false;
-      }
-      
-      if (!userData) {
-        console.log('🚫 ProtectedRoute: No userData found');
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        navigate(redirectTo);
-        return false;
-      }
-      
-      try {
-        const user = JSON.parse(userData);
-        console.log('🔍 Parsed user object:', user);
-        
-        // Kiểm tra các trường có thể có của user
-        const hasValidUser = user && (
-          user.username || 
-          user.email || 
-          user.id || 
-          user._id ||
-          user.full_name ||
-          user.name
-        );
-        
-        if (!hasValidUser) {
-          console.log('🚫 ProtectedRoute: Invalid user data - no valid user fields');
-          console.log('🔍 User object keys:', Object.keys(user || {}));
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          navigate(redirectTo);
-          return false;
-        }
-        
-        console.log('✅ ProtectedRoute: User authenticated successfully');
-        console.log('🔍 User info:', {
-          id: user.id || user._id,
-          username: user.username,
-          email: user.email,
-          name: user.full_name || user.name
-        });
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        return true;
-      } catch (error) {
-        console.log('🚫 ProtectedRoute: Error parsing user data:', error);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        navigate(redirectTo);
-        return false;
-      }
-    };
-    
-    // Check immediately
-    checkAuth();
-    
-    // Set up interval to check periodically
-    const authCheckInterval = setInterval(checkAuth, 5000);
-    
-    return () => {
-      clearInterval(authCheckInterval);
-    };
-  }, [navigate, redirectTo]);
+  React.useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate(redirectTo);
+    }
+  }, [isAuthenticated, loading, navigate, redirectTo]);
 
   // Show loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">

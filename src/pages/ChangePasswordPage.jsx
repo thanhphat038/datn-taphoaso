@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { changePassword } from '../service/UserService';
+import { changePassword } from '../service/user.service';
 
 const ChangePasswordPage = () => {
   const [formData, setFormData] = useState({

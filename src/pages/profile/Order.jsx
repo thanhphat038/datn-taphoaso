@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createReview, getMyOrders } from '../../service/UserService';
+import { createReview, getMyOrders } from '../../service/user.service';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';

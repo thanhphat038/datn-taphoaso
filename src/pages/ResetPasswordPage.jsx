@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { resetPassword } from '../service/UserService';
+import { resetPassword } from '../service/user.service';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -51,7 +51,7 @@ const ResetPasswordPage = () => {
     }
     setLoading(true);
     try {
-      await resetPassword(token, formData.newPassword);
+      await resetPassword({ token, newPassword: formData.newPassword });
       setSuccess('Đặt lại mật khẩu thành công! Đang chuyển về trang đăng nhập...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {

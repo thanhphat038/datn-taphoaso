@@ -15,10 +15,11 @@ export const isAuthenticated = () => {
   return !!token;
 };
 
-// Lấy user từ localStorage
+// Lấy user từ localStorage - kiểm tra cả user và userData
 export const getCurrentUser = () => {
   try {
-    const userStr = localStorage.getItem('user');
+    // Thử lấy từ user trước, nếu không có thì lấy từ userData
+    const userStr = localStorage.getItem('user') || localStorage.getItem('userData');
     return userStr ? JSON.parse(userStr) : null;
   } catch (error) {
     console.error('Error parsing user from localStorage:', error);
@@ -36,12 +37,13 @@ export const setAuthToken = (token) => {
   }
 };
 
-// Xóa tất cả token
+// Xóa tất cả token và user data
 export const clearAuthToken = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('authToken');
   localStorage.removeItem('accessToken');
   localStorage.removeItem('user');
+  localStorage.removeItem('userData');
   Cookies.remove('auth_token');
 };
 
@@ -49,10 +51,19 @@ export const clearAuthToken = () => {
 export const getAuthHeaders = () => {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
-}; 
+};
 
+// Clear tất cả dữ liệu auth
 export const clearAuthData = () => {
   Cookies.remove('auth_token');
   localStorage.clear();
   sessionStorage.clear();
+};
+
+// Đồng bộ user data giữa các nguồn
+export const syncUserData = (userData) => {
+  if (userData) {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('userData', JSON.stringify(userData));
+  }
 };

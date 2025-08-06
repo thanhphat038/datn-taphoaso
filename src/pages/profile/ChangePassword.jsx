@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { changePassword } from '../../service/UserService';
+import { changePassword } from '../../service/user.service';
 import { FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 
 const ChangePassword = () => {

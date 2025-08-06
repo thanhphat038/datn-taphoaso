@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import Cookies from "js-cookie";
 import { useAuth } from '../context/AuthContext';
 import Information from './profile/Information';
 import Address from './profile/Address';
 import Order from './profile/Order';
 import ProductFavorite from './profile/ProductFavorite';
 import ChangePassword from './profile/ChangePassword';
-import axios from 'axios';
-import { logoutUser } from '../service/UserService';
+import { logoutUser } from '../service/user.service';
 
 const ProfilePage = () => {
-  // const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, loading, user, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const handleLogout = () => {
-    logoutUser();
-  };
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -33,35 +26,16 @@ const ProfilePage = () => {
   }, [currentTab]);
 
   useEffect(() => {
-    // Kiểm tra đăng nhập
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       navigate('/login');
       return;
     }
 
-    async function fetchProfile() {
-      try {
-        const token = Cookies.get("auth_token");
-        
-        if (!token) {
-          setProfile(null);
-          return;
-        }
-        
-        const res = await axios.get('http://localhost:3000/api/auth/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        // Nếu response là { data: { ...user } }
-        setProfile(res.data.data || res.data);
-      } catch (err) {
-        console.error('Lỗi lấy profile:', err);
-        setProfile(null);
-      }
+    // Set profile from AuthContext user data
+    if (user) {
+      setProfile(user);
     }
-    fetchProfile();
-  }, []);
+  }, [isAuthenticated, loading, user, navigate]);
 
   // Listen for logout event
   useEffect(() => {
@@ -76,79 +50,12 @@ const ProfilePage = () => {
     };
   }, []);
 
-  // Enhanced authentication check and redirect
-  useEffect(() => {
-    const checkAuthAndRedirect = () => {
-      const token = Cookies.get("auth_token");
-      const userData = localStorage.getItem('userData') || localStorage.getItem('user');
-      
-      console.log('🔍 ProfilePage Debug:');
-      console.log('🔍 Token:', token ? 'exists' : 'missing');
-      console.log('🔍 UserData:', userData ? 'exists' : 'missing');
-      
-      if (!token || !userData) {
-        console.log('🚫 No authentication found, redirecting to login...');
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        navigate('/login');
-        return false;
-      }
-      
-      try {
-        const user = JSON.parse(userData);
-        // Kiểm tra các trường có thể có của user
-        const hasValidUser = user && (
-          user.username || 
-          user.email || 
-          user.id || 
-          user._id ||
-          user.full_name ||
-          user.name
-        );
-        
-        if (!hasValidUser) {
-          console.log('🚫 Invalid user data, redirecting to login...');
-          console.log('🔍 User object keys:', Object.keys(user || {}));
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          navigate('/login');
-          return false;
-        }
-        
-        console.log('✅ ProfilePage: User authenticated successfully');
-        console.log('🔍 User info:', {
-          id: user.id || user._id,
-          username: user.username,
-          email: user.email,
-          name: user.full_name || user.name
-        });
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        return true;
-      } catch (error) {
-        console.log('🚫 Error parsing user data, redirecting to login...');
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        navigate('/login');
-        return false;
-      }
-    };
-    
-    // Check immediately
-    if (!checkAuthAndRedirect()) return;
-    
-    // Set up interval to check periodically
-    const authCheckInterval = setInterval(checkAuthAndRedirect, 5000);
-    
-    return () => {
-      clearInterval(authCheckInterval);
-    };
-  }, [navigate]);
-
-
+  const handleLogout = () => {
+    logoutUser();
+  };
 
   // Show loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -306,7 +213,7 @@ const ProfilePage = () => {
             <Route path="favorites" element={<ProductFavorite />} />
             <Route path="change-password" element={<ChangePassword />} />
           </Routes>
-                </div>
+        </div>
       </div>
     </div>
   );
