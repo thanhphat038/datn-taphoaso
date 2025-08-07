@@ -84,11 +84,36 @@ const seedData = async () => {
         description: 'Các loại nước ngọt giải khát',
         status: 'active'
       },
-      {
-        name: 'Thịt heo',
-        description: 'Các loại thịt heo tươi ngon',
-        status: 'active'
-      }
+              {
+          name: 'Thịt heo',
+          description: 'Các loại thịt heo tươi ngon',
+          status: 'active'
+        },
+        {
+          name: 'Bia',
+          description: 'Các loại bia giải khát',
+          status: 'active'
+        },
+        {
+          name: 'Sữa',
+          description: 'Các loại sữa tươi và sữa đóng hộp',
+          status: 'active'
+        },
+        {
+          name: 'Gạo',
+          description: 'Các loại gạo chất lượng cao',
+          status: 'active'
+        },
+        {
+          name: 'Nước tương',
+          description: 'Các loại nước tương đậu nành',
+          status: 'active'
+        },
+        {
+          name: 'Hạt nêm, bột ngọt, bột canh',
+          description: 'Các loại hạt nêm, bột ngọt, bột canh',
+          status: 'active'
+        }
     ]);
 
     // Create products
@@ -96,146 +121,77 @@ const seedData = async () => {
       {
         category_id: categories[0]._id,
         name: 'Rau muống tươi',
-        price: 15000,
-        original_price: 12000,
+        price: 5000,
+        original_price: 4000,
         in_stock: 100,
         status: 'active',
         description: 'Rau muống tươi ngon, sạch, không thuốc trừ sâu. Rau muống giàu chất xơ, vitamin và khoáng chất tốt cho sức khỏe.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/rau-muong-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/rau-muong-tuoi-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505081440524383.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505071517577794.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505091532251089.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202503271012135926.jpg'
         ]
       },
       {
         category_id: categories[0]._id,
         name: 'Rau cải xanh',
-        price: 20000,
-        original_price: 18000,
+        price: 5000,
+        original_price: 4000,
         in_stock: 80,
         status: 'active',
         description: 'Rau cải xanh tươi ngon, giàu vitamin C và chất chống oxy hóa. Rau cải giúp tăng cường miễn dịch và tốt cho tim mạch.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/rau-cai-xanh-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/rau-cai-xanh-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/309156/bhx/cai-be-xanh_202505081455284799.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-500g-202401121613149216.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-500g-202401121613156170.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-400gr-202408141351036981.jpg'
         ]
       },
       {
-        category_id: categories[1]._id,
-        name: 'Táo đỏ Mỹ',
-        price: 45000,
-        original_price: 40000,
-        in_stock: 50,
-        status: 'active',
-        description: 'Táo đỏ Mỹ giòn ngọt, giàu chất xơ và vitamin. Táo giúp giảm cholesterol, tốt cho tim mạch và hệ tiêu hóa.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/tao-do-my-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/tao-do-my-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[1]._id,
-        name: 'Cam sành',
-        price: 35000,
-        original_price: 30000,
-        in_stock: 60,
-        status: 'active',
-        description: 'Cam sành ngọt mát, giàu vitamin C. Cam giúp tăng cường miễn dịch, làm đẹp da và tốt cho mắt.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/cam-sanh-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/cam-sanh-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Thịt heo ba chỉ',
-        price: 150000,
-        original_price: 130000,
-        in_stock: 30,
-        status: 'active',
-        description: 'Thịt heo ba chỉ tươi ngon, mềm mại. Thịt heo giàu protein và các vitamin nhóm B cần thiết cho cơ thể.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/thit-heo-ba-chi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/thit-heo-ba-chi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Cá basa tươi',
-        price: 120000,
-        original_price: 100000,
-        in_stock: 25,
-        status: 'active',
-        description: 'Cá basa tươi ngon, thịt trắng mềm. Cá basa giàu omega-3, protein và các khoáng chất tốt cho sức khỏe.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123461/bhx/ca-basa-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123461/bhx/ca-basa-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Muối tinh khiết',
+        category_id: categories[0]._id,
+        name: 'Rau mồng tơi 400gr',
         price: 5000,
         original_price: 4000,
-        in_stock: 200,
-        status: 'active',
-        description: 'Muối tinh khiết 100%, không chứa tạp chất. Muối cung cấp natri cần thiết cho cơ thể và tăng hương vị món ăn.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123462/bhx/muoi-tinh-khiet-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123462/bhx/muoi-tinh-khiet-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Tiêu đen',
-        price: 25000,
-        original_price: 20000,
-        in_stock: 150,
-        status: 'active',
-        description: 'Tiêu đen nguyên hạt, thơm nồng. Tiêu giúp tăng hương vị món ăn và có tác dụng kháng khuẩn tự nhiên.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123463/bhx/tieu-den-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123463/bhx/tieu-den-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[7]._id,
-        name: 'Pepsi Cola',
-        price: 12000,
-        original_price: 10000,
-        in_stock: 100,
-        status: 'active',
-        description: 'Pepsi Cola tươi mát, hương vị đậm đà. Nước ngọt giải khát hoàn hảo cho mọi dịp.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123464/bhx/pepsi-cola-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123464/bhx/pepsi-cola-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[7]._id,
-        name: 'Pepsi Max',
-        price: 15000,
-        original_price: 12000,
-        in_stock: 80,
-        status: 'active',
-        description: 'Pepsi Max không đường, không calo. Lựa chọn hoàn hảo cho người quan tâm đến sức khỏe.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123465/bhx/pepsi-max-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123465/bhx/pepsi-max-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[7]._id,
-        name: 'Pepsi Twist',
-        price: 13000,
-        original_price: 11000,
         in_stock: 90,
         status: 'active',
-        description: 'Pepsi Twist vị chanh tươi mát. Hương vị độc đáo kết hợp giữa cola và chanh tự nhiên.',
+        description: 'Rau mồng tơi tươi ngon, giàu chất xơ và vitamin. Rau mồng tơi giúp thanh nhiệt, giải độc và tốt cho hệ tiêu hóa.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123466/bhx/pepsi-twist-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123466/bhx/pepsi-twist-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/310775/bhx/rau-mong-toi-500-g_202505081431588846.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-500-g-202310201702541388.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-500g-202307170925491678.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-400gr-202408141544286699.jpg'
         ]
       },
+      {
+        category_id: categories[0]._id,
+        name: 'Hành lá 300g',
+        price: 15000,
+        original_price: 12000,
+        in_stock: 70,
+        status: 'active',
+        description: 'Hành lá tươi ngon, thơm nồng. Hành lá giúp tăng hương vị món ăn và có tác dụng kháng khuẩn tự nhiên.',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/232791/bhx/hanh-la-goi-50g_202505100847399340.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/232791/bhx/hanh-la-goi-50g-202012282236343442.jpg',
+          'https://cdn.tgdd.vn/Products/Images/8820/232791/bhx/hanh-la-goi-50g-202012282236355259.jpg'
+        ]
+      },
+      {
+        category_id: categories[0]._id,
+        name: 'Xà lách ta 300g',
+        price: 12000,
+        original_price: 10000,
+        in_stock: 60,
+        status: 'active',
+        description: 'Xà lách ta tươi giòn, giàu vitamin và khoáng chất. Xà lách giúp làm mát cơ thể và tốt cho hệ tiêu hóa.',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240908090022.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240921170604.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240921167970.jpg'
+        ]
+      },
+      
       // Dầu ăn
       {
         category_id: categories[4]._id,
@@ -414,10 +370,11 @@ const seedData = async () => {
         status: 'active',
         description: 'Đường vàng Quảng Ngãi gói 1kg chiết xuất từ mật mía tự nhiên, an toàn cho sức khỏe, hoàn toàn không sử dụng chất tạo màu. Đường Quảng Ngãi làm từ nguồn nguyên liệu mía chất lượng, đường được đóng gói trên dây chuyền tự động, đảm bảo vệ sinh.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202401251130536710.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202401251130539737.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202403121131038324.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202403121131050993.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202403121131041775.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202403121131046591.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2804/321751/bhx/duong-vang-quang-ngai-goi-1kg-202403121131046591.jpg'
         ]
       },
       {
@@ -429,10 +386,10 @@ const seedData = async () => {
         status: 'active',
         description: 'Đường thốt nốt không chỉ thay thế cho các chất tạo ngọt khác trong các bữa ăn mà còn mang đến nhiều lợi ích về sức khỏe đến từ đường Moun7ains. Đường thốt nốt dạng viên Moun7ains gói 500g mang đến hương vị đặc trưng, thơm ngon, khó cưỡng cho mọi món ăn của bạn.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/sellingpoint.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/duong-thot-not-dang-vien-7-moutains-goi-500g-201907241728193833.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/duong-thot-not-dang-vien-7-moutains-goi-500g-201907241728195103.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/duong-thot-not-dang-vien-7-moutains-goi-500g-201907241728196933.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/duong-thot-not-dang-vien-7-moutains-goi-500g-201907241728196933.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2804/207731/bhx/duong-thot-not-dang-vien-7-moutains-goi-500g-201907241728262073.jpg'
         ]
       },
       {
@@ -444,9 +401,10 @@ const seedData = async () => {
         status: 'active',
         description: 'Đường mía thiên nhiên Biên Hoà 1kg được làm từ 100% mật mía đường tinh khiết, tự nhiên, mang lại vị ngọt dễ chịu, giúp món ăn có màu sắc và hương vị hấp dẫn hơn. Đường Biên Hòa sản xuất bằng phương pháp kết tinh hiện đại, không chất tạo màu, an toàn sử dụng.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/193562/bhx/duong-mia-thien-nhien-bien-hoa-goi-1kg-202202141526330176.jpg',
           'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2804/193562/bhx/duong-vang-thien-nhien-bien-hoa-goi-1kg_202506041047178929.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/193562/bhx/duong-vang-thien-nhien-bien-hoa-gold-goi-1kg-202104230135254630.jpeg'
+          'https://cdn.tgdd.vn/Products/Images/2804/193562/bhx/duong-vang-thien-nhien-bien-hoa-gold-goi-1kg-202104230135249977.jpeg',
+          'https://cdn.tgdd.vn/Products/Images/2804/193562/bhx/duong-vang-thien-nhien-bien-hoa-gold-goi-1kg-202104230135254630.jpeg',
+          'https://cdn.tgdd.vn/Products/Images/2804/193562/bhx/duong-vang-thien-nhien-bien-hoa-gold-goi-1kg-202104230135260971.jpeg'
         ]
       },
       {
@@ -458,554 +416,448 @@ const seedData = async () => {
         status: 'active',
         description: 'Đường phèn được sản xuất từ mía đường tự nhiên tinh khiết bằng công nghệ hiện đại đến từ thương hiệu đường Hoàng Long. Đường phèn hạt to Hoàng Long gói 500g có màu trắng tự nhiên nên có thể dùng để nấu chè, pha chế các loại thức uống giải nhiệt,...',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hoang-long-goi-500g-202202160900434649.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hat-to-hoang-long-goi-500g-201912121527430211.jpg',
           'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hat-to-hoang-long-goi-500g-201912121527433674.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hat-to-hoang-long-goi-500g-201912121527439507.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hat-to-hoang-long-goi-500g-201912121527436425.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-hat-to-hoang-long-goi-500g-201912121527439507.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2804/77187/bhx/duong-phen-tui-05kg-hl-4-700x467.jpg'
         ]
       },
       // Thêm 50 sản phẩm mới
       // Rau củ thêm
-      {
-        category_id: categories[0]._id,
-        name: 'Rau cải thảo',
-        price: 25000,
-        original_price: 22000,
-        in_stock: 70,
-        status: 'active',
-        description: 'Rau cải thảo tươi ngon, giòn ngọt. Rau cải thảo giàu vitamin và khoáng chất, tốt cho hệ tiêu hóa.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123467/bhx/rau-cai-thao-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123467/bhx/rau-cai-thao-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[0]._id,
-        name: 'Rau ngót',
-        price: 18000,
-        original_price: 15000,
-        in_stock: 85,
-        status: 'active',
-        description: 'Rau ngót tươi ngon, mát lành. Rau ngót giàu canxi, sắt và vitamin C, tốt cho xương và máu.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123468/bhx/rau-ngot-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123468/bhx/rau-ngot-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[0]._id,
-        name: 'Rau dền',
-        price: 16000,
-        original_price: 14000,
-        in_stock: 60,
-        status: 'active',
-        description: 'Rau dền tươi ngon, giàu sắt và canxi. Rau dền giúp bổ máu và tốt cho xương.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123469/bhx/rau-den-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123469/bhx/rau-den-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[0]._id,
-        name: 'Rau mồng tơi',
-        price: 17000,
-        original_price: 15000,
-        in_stock: 75,
-        status: 'active',
-        description: 'Rau mồng tơi tươi ngon, mát lành. Rau mồng tơi giàu vitamin và khoáng chất, tốt cho sức khỏe.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123470/bhx/rau-mong-toi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123470/bhx/rau-mong-toi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[0]._id,
-        name: 'Rau lang',
-        price: 14000,
-        original_price: 12000,
-        in_stock: 90,
-        status: 'active',
-        description: 'Rau lang tươi ngon, giàu chất xơ. Rau lang giúp nhuận tràng và tốt cho hệ tiêu hóa.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123471/bhx/rau-lang-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123471/bhx/rau-lang-202401251130539737.jpg'
-        ]
-      },
-      // Trái cây thêm
-      {
-        category_id: categories[1]._id,
-        name: 'Chuối sứ',
-        price: 25000,
-        original_price: 22000,
-        in_stock: 120,
-        status: 'active',
-        description: 'Chuối sứ ngọt thơm, giàu kali. Chuối giúp ổn định huyết áp và tốt cho tim mạch.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123472/bhx/chuoi-su-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123472/bhx/chuoi-su-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[1]._id,
-        name: 'Xoài cát Hòa Lộc',
-        price: 55000,
-        original_price: 48000,
-        in_stock: 40,
-        status: 'active',
-        description: 'Xoài cát Hòa Lộc ngọt thơm, thịt vàng mịn. Xoài giàu vitamin A và C, tốt cho mắt và da.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123473/bhx/xoai-cat-hoa-loc-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123473/bhx/xoai-cat-hoa-loc-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[1]._id,
-        name: 'Dứa mật',
-        price: 35000,
-        original_price: 30000,
-        in_stock: 55,
-        status: 'active',
-        description: 'Dứa mật ngọt thơm, giàu enzyme bromelain. Dứa giúp tiêu hóa tốt và tăng cường miễn dịch.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123474/bhx/dua-mat-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123474/bhx/dua-mat-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[1]._id,
-        name: 'Dưa hấu',
-        price: 30000,
-        original_price: 25000,
-        in_stock: 80,
-        status: 'active',
-        description: 'Dưa hấu ngọt mát, giàu nước. Dưa hấu giúp giải nhiệt và tốt cho thận.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123475/bhx/dua-hau-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123475/bhx/dua-hau-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[1]._id,
-        name: 'Thanh long ruột đỏ',
-        price: 40000,
-        original_price: 35000,
-        in_stock: 45,
-        status: 'active',
-        description: 'Thanh long ruột đỏ ngọt mát, giàu chất chống oxy hóa. Thanh long tốt cho tim mạch và làm đẹp da.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123476/bhx/thanh-long-ruot-do-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123476/bhx/thanh-long-ruot-do-202401251130539737.jpg'
-        ]
-      },
-      // Thịt cá thêm
-      {
-        category_id: categories[2]._id,
-        name: 'Thịt bò phi lê',
-        price: 280000,
-        original_price: 250000,
-        in_stock: 20,
-        status: 'active',
-        description: 'Thịt bò phi lê tươi ngon, mềm mại. Thịt bò giàu protein và sắt, tốt cho cơ bắp và máu.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123477/bhx/thit-bo-phi-le-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123477/bhx/thit-bo-phi-le-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Thịt gà ta',
-        price: 180000,
-        original_price: 160000,
-        in_stock: 35,
-        status: 'active',
-        description: 'Thịt gà ta tươi ngon, thịt chắc. Thịt gà giàu protein và ít mỡ, tốt cho sức khỏe.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123478/bhx/thit-ga-ta-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123478/bhx/thit-ga-ta-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Cá lóc tươi',
-        price: 140000,
-        original_price: 120000,
-        in_stock: 30,
-        status: 'active',
-        description: 'Cá lóc tươi ngon, thịt trắng mềm. Cá lóc giàu protein và omega-3, tốt cho não bộ.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123479/bhx/ca-loc-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123479/bhx/ca-loc-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Tôm sú tươi',
-        price: 220000,
-        original_price: 200000,
-        in_stock: 25,
-        status: 'active',
-        description: 'Tôm sú tươi ngon, thịt chắc ngọt. Tôm sú giàu protein và canxi, tốt cho xương.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123480/bhx/tom-su-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123480/bhx/tom-su-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[2]._id,
-        name: 'Cua biển tươi',
-        price: 350000,
-        original_price: 320000,
-        in_stock: 15,
-        status: 'active',
-        description: 'Cua biển tươi ngon, thịt ngọt béo. Cua biển giàu protein và omega-3, tốt cho sức khỏe.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123481/bhx/cua-bien-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123481/bhx/cua-bien-tuoi-202401251130539737.jpg'
-        ]
-      },
-      // Gia vị thêm
+      
+      
       {
         category_id: categories[3]._id,
-        name: 'Hành tím',
-        price: 8000,
-        original_price: 6000,
-        in_stock: 150,
-        status: 'active',
-        description: 'Hành tím tươi ngon, thơm nồng. Hành tím giúp tăng hương vị món ăn và có tác dụng kháng khuẩn.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123482/bhx/hanh-tim-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123482/bhx/hanh-tim-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Tỏi tươi',
-        price: 12000,
-        original_price: 10000,
-        in_stock: 120,
-        status: 'active',
-        description: 'Tỏi tươi thơm nồng, có tác dụng kháng khuẩn. Tỏi giúp tăng hương vị món ăn và tốt cho tim mạch.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123483/bhx/toi-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123483/bhx/toi-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Gừng tươi',
-        price: 15000,
-        original_price: 12000,
-        in_stock: 100,
-        status: 'active',
-        description: 'Gừng tươi thơm nồng, có tác dụng làm ấm cơ thể. Gừng giúp tiêu hóa tốt và chống buồn nôn.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123484/bhx/gung-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123484/bhx/gung-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Nghệ tươi',
-        price: 18000,
-        original_price: 15000,
-        in_stock: 80,
-        status: 'active',
-        description: 'Nghệ tươi có màu vàng đẹp, có tác dụng kháng viêm. Nghệ giúp làm đẹp da và tốt cho dạ dày.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123485/bhx/nghe-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123485/bhx/nghe-tuoi-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[3]._id,
-        name: 'Sả tươi',
+        name: 'Sả tươi 200gr',
         price: 10000,
         original_price: 8000,
         in_stock: 90,
         status: 'active',
         description: 'Sả tươi thơm nồng, có tác dụng kháng khuẩn. Sả giúp tăng hương vị món ăn và tốt cho tiêu hóa.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123486/bhx/sa-tuoi-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123486/bhx/sa-tuoi-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8785/292740/bhx/cdntgddvnproductsimages8785292740bhxsa-cay-goi-200g-202210031601138393_202409041611032864.jpg'
         ]
       },
       // Dầu ăn thêm
       {
         category_id: categories[4]._id,
-        name: 'Dầu oliu nguyên chất',
+        name: 'Dầu olive Extra Virgin Olivoilà chai 250ml',
         price: 120000,
         original_price: 100000,
         in_stock: 40,
         status: 'active',
         description: 'Dầu oliu nguyên chất cao cấp, giàu chất chống oxy hóa. Dầu oliu tốt cho tim mạch và làm đẹp da.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123487/bhx/dau-oliu-nguyen-chat-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123487/bhx/dau-oliu-nguyen-chat-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2286/79397/bhx/79397-sldie_202409121337056916.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/79397/bhx/dau-olive-extra-virgin-olivoila-chai-250ml-202407130903572803.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/79397/bhx/dau-olive-extra-virgin-olivoila-chai-250ml-202407130903574162.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/79397/bhx/dau-olive-extra-virgin-olivoila-chai-250ml-202407130903575666.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/79397/bhx/dau-olive-extra-virgin-olivoila-chai-250ml-202407130903577053.jpg'
         ]
       },
       {
         category_id: categories[4]._id,
-        name: 'Dầu mè đen',
-        price: 85000,
-        original_price: 70000,
+        name: 'Dầu mè thơm Tường An chai 100ml',
+        price: 38000,
+        original_price: 35000,
         in_stock: 35,
         status: 'active',
-        description: 'Dầu mè đen thơm nồng, giàu vitamin E. Dầu mè đen tốt cho tim mạch và làm đẹp da.',
+        description: 'Dầu mè thơm Tường An chai 100ml',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123488/bhx/dau-me-den-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123488/bhx/dau-me-den-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2286/228302/bhx/dau-me-thom-tuong-an-chai-100ml-202407121521338294.png',
+          'https://cdn.tgdd.vn/Products/Images/2286/228302/bhx/dau-me-thom-tuong-an-chai-100ml-202407121521340192.png',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2286/228302/bhx/228302-tem_202409121542387249.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/228302/bhx/dau-me-thom-tuong-an-chai-100ml-202407121521344497.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/228302/bhx/dau-me-thom-tuong-an-chai-100ml-202407121521347116.jpg'
         ]
       },
+      
+      // Nước mắm thêm
+      
+      
+      // Sản phẩm đa dạng thêm
+      
+      // Bia sản phẩm
       {
-        category_id: categories[4]._id,
-        name: 'Dầu hạt cải',
-        price: 75000,
-        original_price: 65000,
-        in_stock: 45,
-        status: 'active',
-        description: 'Dầu hạt cải tinh khiết, giàu omega-3. Dầu hạt cải tốt cho tim mạch và não bộ.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123489/bhx/dau-hat-cai-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123489/bhx/dau-hat-cai-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[4]._id,
-        name: 'Dầu đậu nành',
-        price: 65000,
-        original_price: 55000,
+        category_id: categories[9]._id, // Bia
+        name: 'Thùng 24 lon bia Sài Gòn Lager 330ml',
+        price: 180000,
+        original_price: 160000,
         in_stock: 50,
         status: 'active',
-        description: 'Dầu đậu nành tinh khiết, giàu protein thực vật. Dầu đậu nành tốt cho tim mạch và xương.',
+        description: 'Bia Sài Gòn Lager thùng 24 lon 330ml, hương vị đậm đà, tươi mát. Bia truyền thống Việt Nam với hương vị độc đáo.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123490/bhx/dau-dau-nanh-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123490/bhx/dau-dau-nanh-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2282/158349/bhx/thung-24-lon-bia-sai-gon-lager-330ml-202110111038141085.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/158349/bhx/thung-24-lon-bia-sai-gon-lager-330ml-202110111038144356.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/158349/bhx/thung-24-lon-bia-sai-gon-lager-330ml-202110111038148147.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/158349/bhx/thung-24-lon-bia-sai-gon-lager-330ml-202110111038154351.jpg'
         ]
       },
       {
-        category_id: categories[4]._id,
-        name: 'Dầu hướng dương',
-        price: 70000,
-        original_price: 60000,
-        in_stock: 55,
-        status: 'active',
-        description: 'Dầu hướng dương tinh khiết, giàu vitamin E. Dầu hướng dương tốt cho tim mạch và làm đẹp da.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123491/bhx/dau-huong-duong-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123491/bhx/dau-huong-duong-202401251130539737.jpg'
-        ]
-      },
-      // Nước mắm thêm
-      {
-        category_id: categories[5]._id,
-        name: 'Nước mắm Phú Quốc 40 độ đạm',
-        price: 85000,
-        original_price: 70000,
-        in_stock: 30,
-        status: 'active',
-        description: 'Nước mắm Phú Quốc truyền thống, 40 độ đạm cao cấp. Nước mắm Phú Quốc có hương vị đậm đà đặc trưng.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2289/123492/bhx/nuoc-mam-phu-quoc-40-do-dam-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2289/123492/bhx/nuoc-mam-phu-quoc-40-do-dam-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[5]._id,
-        name: 'Nước mắm Nha Trang 25 độ đạm',
-        price: 65000,
-        original_price: 55000,
-        in_stock: 40,
-        status: 'active',
-        description: 'Nước mắm Nha Trang truyền thống, 25 độ đạm. Nước mắm Nha Trang có hương vị thơm ngon đặc trưng.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2289/123493/bhx/nuoc-mam-nha-trang-25-do-dam-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2289/123493/bhx/nuoc-mam-nha-trang-25-do-dam-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[5]._id,
-        name: 'Nước mắm Cát Hải 30 độ đạm',
-        price: 75000,
-        original_price: 65000,
-        in_stock: 35,
-        status: 'active',
-        description: 'Nước mắm Cát Hải truyền thống, 30 độ đạm. Nước mắm Cát Hải có hương vị đậm đà và thơm ngon.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2289/123494/bhx/nuoc-mam-cat-hai-30-do-dam-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2289/123494/bhx/nuoc-mam-cat-hai-30-do-dam-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[5]._id,
-        name: 'Nước mắm Cửa Kạn 35 độ đạm',
-        price: 80000,
-        original_price: 70000,
-        in_stock: 25,
-        status: 'active',
-        description: 'Nước mắm Cửa Kạn truyền thống, 35 độ đạm. Nước mắm Cửa Kạn có hương vị đặc trưng của vùng biển.',
-        images: [
-          'https://cdn.tgdd.vn/Products/Images/2289/123495/bhx/nuoc-mam-cua-kan-35-do-dam-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2289/123495/bhx/nuoc-mam-cua-kan-35-do-dam-202401251130539737.jpg'
-        ]
-      },
-      {
-        category_id: categories[5]._id,
-        name: 'Nước mắm Hòn Đất 20 độ đạm',
-        price: 55000,
-        original_price: 45000,
+        category_id: categories[9]._id, // Bia
+        name: 'Thùng 24 lon bia Sài Gòn Chill 330ml',
+        price: 190000,
+        original_price: 170000,
         in_stock: 45,
         status: 'active',
-        description: 'Nước mắm Hòn Đất truyền thống, 20 độ đạm. Nước mắm Hòn Đất có hương vị thơm ngon tự nhiên.',
+        description: 'Bia Sài Gòn Chill thùng 24 lon 330ml, hương vị mới lạ, tươi mát. Bia với hương vị độc đáo, phù hợp cho mọi dịp.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2289/123496/bhx/nuoc-mam-hon-dat-20-do-dam-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2289/123496/bhx/nuoc-mam-hon-dat-20-do-dam-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2282/245542/bhx/thung-24-lon-bia-sai-gon-chill-330ml-202110211035111771.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245542/bhx/thung-24-lon-bia-sai-gon-chill-330ml-202202191519360768.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245542/bhx/thung-24-lon-bia-sai-gon-chill-330ml-202201211123355563.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245542/bhx/thung-24-lon-bia-sai-gon-chill-330ml-202201211123359568.jpg'
         ]
       },
-      // Đường thêm
       {
-        category_id: categories[6]._id,
-        name: 'Đường phèn tinh khiết',
-        price: 35000,
-        original_price: 30000,
-        in_stock: 100,
+        category_id: categories[9]._id, // Bia
+        name: 'Bia 333 lon cao 250ml',
+        price: 8500,
+        original_price: 7500,
+        in_stock: 200,
         status: 'active',
-        description: 'Đường phèn tinh khiết 100%, không chứa tạp chất. Đường phèn có vị ngọt thanh, tốt cho sức khỏe.',
+        description: 'Bia 333 lon cao 250ml, hương vị truyền thống, tươi mát. Bia Việt Nam với hương vị đặc trưng.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/123497/bhx/duong-phen-tinh-khiet-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/123497/bhx/duong-phen-tinh-khiet-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/328902/bhx/412208-4-1_202501040903412829.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/328902/bhx/httpscdnv2tgddvnbhx-staticbhxproductsimages2282328902bhxlon-250ml202412031319189029_202412041001229346.jpg'
         ]
       },
       {
-        category_id: categories[6]._id,
-        name: 'Đường nâu tự nhiên',
-        price: 45000,
-        original_price: 38000,
-        in_stock: 80,
+        category_id: categories[9]._id, // Bia
+        name: 'Thùng 24 lon bia Tiger lon cao 330ml',
+        price: 220000,
+        original_price: 200000,
+        in_stock: 40,
         status: 'active',
-        description: 'Đường nâu tự nhiên, giàu khoáng chất. Đường nâu có vị ngọt đậm đà và tốt cho sức khỏe.',
+        description: 'Bia Tiger thùng 24 lon cao 330ml, hương vị quốc tế, tươi mát. Bia cao cấp với hương vị đặc trưng.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/123498/bhx/duong-nau-tu-nhien-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/123498/bhx/duong-nau-tu-nhien-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/316846/bhx/412208-2_202501031430339626.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/316846/bhx/httpscdnv2tgddvnbhx-staticbhxproductsimages2282316846bhxlon-330ml-1202412031318226970_202412040935166288.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/316846/bhx/412208-1_202501031430336921.jpg'
         ]
       },
       {
-        category_id: categories[6]._id,
-        name: 'Đường mía thô',
-        price: 30000,
-        original_price: 25000,
-        in_stock: 90,
+        category_id: categories[9]._id, // Bia
+        name: 'Thùng 24 lon bia Heineken Silver 330ml',
+        price: 280000,
+        original_price: 250000,
+        in_stock: 35,
         status: 'active',
-        description: 'Đường mía thô tự nhiên, chưa qua tinh chế. Đường mía thô giữ nguyên các khoáng chất tự nhiên.',
+        description: 'Bia Heineken Silver thùng 24 lon 330ml, hương vị quốc tế, tươi mát. Bia cao cấp với hương vị đặc trưng.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/123499/bhx/duong-mia-tho-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/123499/bhx/duong-mia-tho-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2282/200639/bhx/thung-24-lon-bia-heineken-silver-330ml-202205111635132939.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200639/bhx/thung-24-lon-bia-heineken-silver-330ml-201903281046300671.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200639/bhx/thung-24-lon-bia-heineken-silver-330ml-201903281046301735.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200639/bhx/thung-24-lon-bia-heineken-silver-330ml-201910091038476393.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200639/bhx/thung-24-lon-bia-heineken-silver-330ml-201903281046302976.JPG'
         ]
       },
+      // Sữa sản phẩm
       {
-        category_id: categories[6]._id,
-        name: 'Đường dừa tự nhiên',
-        price: 55000,
-        original_price: 48000,
+        category_id: categories[10]._id, // Sữa
+        name: 'Thùng 48 hộp sữa tươi tiệt trùng ít đường TH True Milk 180ml',
+        price: 180000,
+        original_price: 160000,
         in_stock: 60,
         status: 'active',
-        description: 'Đường dừa tự nhiên, giàu khoáng chất. Đường dừa có vị ngọt thanh và chỉ số đường huyết thấp.',
+        description: 'Sữa tươi tiệt trùng TH True Milk thùng 48 hộp 180ml, ít đường, giàu dinh dưỡng. Sữa tươi tự nhiên, an toàn cho sức khỏe.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/123500/bhx/duong-dua-tu-nhien-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2804/123500/bhx/duong-dua-tu-nhien-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-th-true-milk-180ml-202104081706329168.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-th-true-milk-180ml-202207151050154094.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-th-true-milk-180ml-202207151050159958.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-sua-tuoi-tiet-trung-th-true-milk-it-duong-180ml-48-hop-201811262347284349.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-sua-tuoi-tiet-trung-th-true-milk-it-duong-180ml-48-hop-201811262347301480.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-sua-tuoi-tiet-trung-th-true-milk-it-duong-180ml-48-hop-201811262347319031.jpg'
         ]
       },
       {
-        category_id: categories[6]._id,
-        name: 'Đường mật ong tự nhiên',
+        category_id: categories[10]._id, // Sữa
+        name: 'Thùng 48 hộp sữa tươi tiệt trùng ít đường Vinamilk 100% sữa tươi 180ml',
+        price: 170000,
+        original_price: 150000,
+        in_stock: 65,
+        status: 'active',
+        description: 'Sữa tươi tiệt trùng Vinamilk 100% thùng 48 hộp 180ml, ít đường, giàu dinh dưỡng. Sữa tươi tự nhiên, an toàn cho sức khỏe.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419459272.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419462141.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419465238.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419467951.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419472266.jpg'
+        ]
+      },
+      {
+        category_id: categories[10]._id, // Sữa
+        name: 'Thùng 12 hộp sữa tươi tiệt trùng không đường Vinamilk 100% sữa tươi 1 lít',
         price: 120000,
         original_price: 100000,
         in_stock: 40,
         status: 'active',
-        description: 'Đường mật ong tự nhiên, giàu enzyme và khoáng chất. Mật ong có tác dụng kháng khuẩn và tốt cho sức khỏe.',
+        description: 'Sữa tươi tiệt trùng Vinamilk 100% thùng 12 hộp 1 lít, không đường, giàu dinh dưỡng. Sữa tươi tự nhiên, an toàn cho sức khỏe.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2804/123501/bhx/duong-mat-ong-tu-nhien-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123501/bhx/duong-mat-ong-tu-nhien-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058296104.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058276647.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058279023.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058281593.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058283574.jpg'
         ]
       },
-      // Sản phẩm đa dạng thêm
       {
-        category_id: categories[7]._id,
-        name: 'Coca Cola',
-        price: 12000,
-        original_price: 10000,
-        in_stock: 150,
+        category_id: categories[10]._id, // Sữa
+        name: 'Thùng 48 hộp sữa lúa mạch ít đường Milo A2 180ml',
+        price: 200000,
+        original_price: 180000,
+        in_stock: 50,
         status: 'active',
-        description: 'Coca Cola tươi mát, hương vị đậm đà. Nước ngọt giải khát hoàn hảo cho mọi dịp.',
+        description: 'Sữa lúa mạch Milo A2 thùng 48 hộp 180ml, ít đường, giàu dinh dưỡng. Sữa với hương vị lúa mạch độc đáo.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123502/bhx/coca-cola-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123502/bhx/coca-cola-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504101039251295.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504101108334742.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504110913175937.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504101108372522.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504110913179972.jpg'
         ]
       },
       {
-        category_id: categories[7]._id,
-        name: 'Sprite',
-        price: 11000,
-        original_price: 9000,
-        in_stock: 120,
+        category_id: categories[10]._id, // Sữa
+        name: 'Thùng 48 hộp sữa socola lúa mạch Lof Kun có thạch 170ml',
+        price: 220000,
+        original_price: 200000,
+        in_stock: 45,
         status: 'active',
-        description: 'Sprite tươi mát, vị chanh tự nhiên. Nước ngọt giải khát hoàn hảo.',
+        description: 'Sữa socola lúa mạch Lof Kun có thạch thùng 48 hộp 170ml, hương vị độc đáo. Sữa với hương vị socola và thạch ngon.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123503/bhx/sprite-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123503/bhx/sprite-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/327987/bhx/327987-slide-1_202501211456144244.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2945/327987/bhx/thung-48-hop-sua-socola-lua-mach-lif-kun-co-thach-170ml-202407161605449380.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2945/327987/bhx/thung-48-hop-sua-socola-lua-mach-lif-kun-co-thach-170ml-202407161605455121.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/327987/bhx/327987-slide-2_202501211456292887.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/327987/bhx/bs9a8874_202412231017247836.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/327987/bhx/bs9a8872_202412231017252705.jpg'
         ]
       },
+      // Gạo sản phẩm
       {
-        category_id: categories[7]._id,
-        name: 'Fanta',
-        price: 11000,
-        original_price: 9000,
+        category_id: categories[11]._id, // Gạo
+        name: 'Gạo thơm A An ST25+ túi 5kg',
+        price: 95000,
+        original_price: 85000,
         in_stock: 100,
         status: 'active',
-        description: 'Fanta hương vị cam tươi mát. Nước ngọt giải khát với hương vị trái cây tự nhiên.',
+        description: 'Gạo thơm A An ST25+ túi 5kg, gạo thơm ngon nhất thế giới. Gạo ST25 có hương thơm đặc trưng, hạt gạo dài, trắng bóng và vị ngọt tự nhiên. Được đóng gói trong túi 5kg tiện lợi.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123504/bhx/fanta-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123504/bhx/fanta-202401251130539737.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332920/bhx/thiet-ke-chua-co-ten-2024-12-17t142205261_202412171422573674.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332920/bhx/thiet-ke-chua-co-ten-2024-12-17t142238369_202412171422575934.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332920/bhx/bs9a9650_202412241548531678.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332920/bhx/bs9a9653_202412241548528679.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332920/bhx/preview_202412241548525787.jpg'
         ]
       },
       {
-        category_id: categories[7]._id,
-        name: '7Up',
-        price: 11000,
-        original_price: 9000,
-        in_stock: 110,
+        category_id: categories[11]._id, // Gạo
+        name: 'Gạo thơm Neptune ST25+ Extra túi 5kg',
+        price: 98000,
+        original_price: 88000,
+        in_stock: 80,
         status: 'active',
-        description: '7Up tươi mát, vị chanh tự nhiên. Nước ngọt giải khát với hương vị thanh mát.',
+        description: 'Gạo thơm Neptune ST25+ Extra túi 5kg, gạo thơm ngon nhất thế giới. Gạo ST25 có hương thơm đặc trưng, hạt gạo dài, trắng bóng và vị ngọt tự nhiên. Được đóng gói trong túi 5kg tiện lợi.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123505/bhx/7up-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123505/bhx/7up-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2513/324448/bhx/gao-thom-neptune-st25-extra-tui-5kg-202403300918336881.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/324448/bhx/gao-thom-neptune-st25-extra-tui-5kg-202403300918339138.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/324448/bhx/gao-thom-neptune-st25-extra-tui-5kg-202403300918341944.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/324448/bhx/gao-thom-neptune-st25-extra-tui-5kg-202403300918344226.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/324448/bhx/gao-thom-neptune-st25-extra-tui-5kg-202403300918346554.jpg'
         ]
       },
       {
-        category_id: categories[7]._id,
-        name: 'Mirinda',
-        price: 11000,
-        original_price: 9000,
-        in_stock: 95,
+        category_id: categories[11]._id, // Gạo
+        name: 'Gạo lứt tím Vĩnh Hiển túi 1kg',
+        price: 28000,
+        original_price: 25000,
+        in_stock: 120,
         status: 'active',
-        description: 'Mirinda hương vị cam tươi mát. Nước ngọt giải khát với hương vị trái cây tự nhiên.',
+        description: 'Gạo lứt tím Vĩnh Hiển túi 1kg, gạo nguyên cám giàu dinh dưỡng. Gạo lứt tím chứa nhiều chất xơ, vitamin và khoáng chất tốt cho sức khỏe.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/2286/123506/bhx/mirinda-202401251130536710.jpg',
-          'https://cdn.tgdd.vn/Products/Images/2286/123506/bhx/mirinda-202401251130539737.jpg'
+          'https://cdn.tgdd.vn/Products/Images/2513/262354/bhx/gao-lut-tim-vinh-hien-tui-1kg-202112151155237174.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/262354/bhx/gao-lut-tim-vinh-hien-tui-1kg-202112151155242817.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/262354/bhx/gao-lut-tim-vinh-hien-tui-1kg-202112151155248108.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2513/262354/bhx/gao-lut-tim-vinh-hien-tui-1kg-202112151155252908.jpg'
         ]
       },
-      // Thịt heo
       {
-        category_id: categories[8]._id,
-        name: 'Ba rọi heo nhập khẩu',
-        price: 180000,
-        original_price: 160000,
-        in_stock: 25,
+        category_id: categories[11]._id, // Gạo
+        name: 'Gạo lứt huyết rồng Bảo Minh thương hiệu túi 1kg',
+        price: 32000,
+        original_price: 28000,
+        in_stock: 90,
         status: 'active',
-        description: 'Ba rọi heo nhập khẩu tươi ngon, thịt mềm mại với lớp mỡ vừa phải. Ba rọi heo là phần thịt được ưa chuộng để làm các món ăn truyền thống Việt Nam.',
+        description: 'Gạo lứt huyết rồng Bảo Minh thương hiệu túi 1kg, gạo nguyên cám giàu dinh dưỡng. Gạo lứt huyết rồng chứa nhiều chất xơ, vitamin và khoáng chất tốt cho sức khỏe.',
         images: [
-          'https://cdn.tgdd.vn/Products/Images/8781/275804/bhx/ba-roi-heo-nhap-khau-202402011709510589.jpg',
-          'https://cdnv2.tgdd.vn/bhx-static//ba-roi-heo-nhap-khau_202502131312187869.jpg',
-          'https://cdn.tgdd.vn/Products/Images/8781/275804/bhx/ba-roi-heo-nhap-khau-202408141142519258.jpg'
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/338447/bhx/gao-lut-huyet-rong-bao-minh-thuong-hang-tui-1kg-clone_202505231104568186.jpg'
+        ]
+      },
+      {
+        category_id: categories[11]._id, // Gạo
+        name: 'Gạo thơm Vua Gạo ST25 + túi 5kg',
+        price: 95000,
+        original_price: 85000,
+        in_stock: 100,
+        status: 'active',
+        description: 'Gạo thơm Vua Gạo ST25 + túi 5kg, gạo thơm ngon nhất thế giới. Gạo ST25 có hương thơm đặc trưng, hạt gạo dài, trắng bóng và vị ngọt tự nhiên. Được đóng gói trong túi 5kg tiện lợi.',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332640/bhx/thiet-ke-chua-co-ten-2024-12-02t101141121_202412021017531362.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332640/bhx/thiet-ke-chua-co-ten-2024-12-12t093138530_202412120932036499.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332640/bhx/thiet-ke-chua-co-ten-2024-12-12t092511764_202412120925334751.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332640/bhx/thiet-ke-chua-co-ten-2024-12-12t093042713_202412120930516264.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2513/332640/bhx/thiet-ke-chua-co-ten-2024-12-12t093024810_202412120930598920.jpg'
+        ]
+      },
+      // Nước tương sản phẩm
+      {
+        category_id: categories[12]._id, // Nước tương
+        name: 'Nước tương Nhất Ca Tam Thái Tử chai 500ml',
+        price: 20500,
+        original_price: 18000,
+        in_stock: 80,
+        status: 'active',
+        description: 'Nước tương Nhất Ca Tam Thái Tử chai 500ml, nước tương đậu nành truyền thống, hương vị đậm đà tự nhiên.',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2683/82802/bhx/82802-slide-mau-moi_202501211043008763.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/82802/bhx/nuoc-tuong-nhat-ca-tam-thai-tu-chai-500ml-202308111729325157.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/82802/bhx/nuoc-tuong-nhat-ca-tam-thai-tu-chai-500ml-202308111729327061.jpg'
+        ]
+      },
+      {
+        category_id: categories[12]._id, // Nước tương
+        name: 'Nước tương đậu nành đậm đặc Cholimex chai 300ml',
+        price: 15000,
+        original_price: 13000,
+        in_stock: 90,
+        status: 'active',
+        description: 'Nước tương đậu nành đậm đặc Cholimex chai 300ml, nước tương truyền thống, hương vị đậm đà.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2683/194598/bhx/nuoc-tuong-dau-nanh-dam-dac-cholimex-chai-300ml-202203152312042979.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/194598/bhx/nuoc-tuong-cholimex-dam-dac-chai-300ml-201902171540189232.JPG',
+          'https://cdn.tgdd.vn/Products/Images/2683/194598/bhx/nuoc-tuong-dau-nanh-dam-dac-cholimex-chai-300ml-4-700x467.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/194598/bhx/nuoc-tuong-dau-nanh-dam-dac-cholimex-chai-300ml-3-700x467.jpg'
+        ]
+      },
+      {
+        category_id: categories[12]._id, // Nước tương
+        name: 'Nước tương đậu nành Maggi thanh dịu chai 450ml',
+        price: 19000,
+        original_price: 17000,
+        in_stock: 75,
+        status: 'active',
+        description: 'Nước tương đậu nành Maggi thanh dịu chai 450ml, nước tương thanh dịu, hương vị tự nhiên.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2683/278943/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-450ml-202308121813519516.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278943/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-450ml-202308121813517143.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278943/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-450ml-202308121813522060.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278943/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-450ml-202308121813529551.jpg'
+        ]
+      },
+      {
+        category_id: categories[12]._id, // Nước tương
+        name: 'Nước tương Chinsu tỏi ớt chai 330ml',
+        price: 21000,
+        original_price: 19000,
+        in_stock: 70,
+        status: 'active',
+        description: 'Nước tương Chinsu tỏi ớt chai 330ml, nước tương với hương vị tỏi ớt độc đáo.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2683/278939/bhx/sellingpoint.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278939/bhx/nuoc-tuong-chinsu-toi-ot-chai-330ml-202205060918487846.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278939/bhx/nuoc-tuong-chinsu-toi-ot-chai-330ml-202205060918503635.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/278939/bhx/nuoc-tuong-chinsu-toi-ot-chai-330ml-202205060918506095.jpg'
+        ]
+      },
+      {
+        category_id: categories[12]._id, // Nước tương
+        name: 'Nước tương Phú Sĩ Ajinomoto chai 500ml',
+        price: 17600,
+        original_price: 16000,
+        in_stock: 85,
+        status: 'active',
+        description: 'Nước tương Phú Sĩ Ajinomoto chai 500ml, nước tương đậu nành truyền thống, hương vị đậm đà.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2683/76555/bhx/nuoc-tuong-phu-si-ajinomoto-chai-500ml-202308092053176050.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/76555/bhx/nuoc-tuong-phu-si-ajinomoto-chai-500ml-202308092053301017.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/76555/bhx/nuoc-tuong-phu-si-ajinomoto-chai-500ml-202308092053311632.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/76555/bhx/nuoc-tuong-phu-si-ajinomoto-chai-500ml-202308092053313609.jpg'
+        ]
+      },
+      // Hạt nêm, bột ngọt, bột canh sản phẩm
+      {
+        category_id: categories[13]._id, // Hạt nêm, bột ngọt, bột canh
+        name: 'Hạt nêm Chinsu ngọt tôm thơm thịt gói 900g',
+        price: 69000,
+        original_price: 60000,
+        in_stock: 60,
+        status: 'active',
+        description: 'Hạt nêm Chinsu ngọt tôm thơm thịt gói 900g, hạt nêm cao cấp với hương vị tôm thơm thịt đậm đà.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/312764/bhx/hat-nem-chinsu-ngot-tom-thom-thit-goi-900g-202308181104413992.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/312764/bhx/hat-nem-chinsu-ngot-tom-thom-thit-goi-900g-202308051850002856.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/312764/bhx/hat-nem-chinsu-ngot-tom-thom-thit-goi-900g-202308181104417074.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/312764/bhx/hat-nem-chinsu-ngot-tom-thom-thit-goi-900g-202308181104424097.jpg'
+        ]
+      },
+      {
+        category_id: categories[13]._id, // Hạt nêm, bột ngọt, bột canh
+        name: 'Hạt nêm cao cấp Maggi nấm hương gói 450g',
+        price: 53500,
+        original_price: 48000,
+        in_stock: 50,
+        status: 'active',
+        description: 'Hạt nêm cao cấp Maggi nấm hương gói 450g, hạt nêm với hương vị nấm hương tự nhiên.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/198877/bhx/sellingpoint.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/198877/bhx/hat-nem-cao-cap-vi-nam-huong-maggi-goi-450g-202207291105505226.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/198877/bhx/hat-nem-cao-cap-vi-nam-huong-maggi-goi-202207291104146361.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/198877/bhx/hat-nem-cao-cap-vi-nam-huong-maggi-goi-202207291104156962.jpg'
+        ]
+      },
+      {
+        category_id: categories[13]._id, // Hạt nêm, bột ngọt, bột canh
+        name: 'Hạt nêm Natafoods thịt heo gói 1kg',
+        price: 49000,
+        original_price: 45000,
+        in_stock: 70,
+        status: 'active',
+        description: 'Hạt nêm Natafoods thịt heo gói 1kg, hạt nêm với hương vị thịt heo tự nhiên.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/247343/bhx/hat-nem-thit-heo-natafoods-goi-1kg-202203161350437396.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/247343/bhx/hat-nem-thit-heo-natafoods-goi-1kg-202108141817540320.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/247343/bhx/hat-nem-thit-heo-natafoods-goi-1kg-202108141818121703.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/247343/bhx/hat-nem-thit-heo-natafoods-goi-1kg-202108141818573008.jpg'
+        ]
+      },
+      {
+        category_id: categories[13]._id, // Hạt nêm, bột ngọt, bột canh
+        name: 'Hạt nêm Knorr thịt thăn, xương ống, tủy gói 400g',
+        price: 39000,
+        original_price: 35000,
+        in_stock: 65,
+        status: 'active',
+        description: 'Hạt nêm Knorr thịt thăn, xương ống, tủy gói 400g, hạt nêm với hương vị thịt thăn, xương ống, tủy đậm đà.',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/82271/bhx/hat-nem-thit-than-xuong-ong-tuy-knorr-goi-400g-202202161925416725.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/82271/bhx/82271-slide_202409241054430157.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/82271/bhx/82271-slide-moi_202409301037454217.jpg'
+        ]
+      },
+      {
+        category_id: categories[13]._id, // Hạt nêm, bột ngọt, bột canh
+        name: 'Hạt nêm Aji-ngon vị heo gói 900g',
+        price: 75500,
+        original_price: 68000,
+        in_stock: 55,
+        status: 'active',
+        description: 'Hạt nêm Aji-ngon vị heo gói 900g, hạt nêm với hương vị heo tự nhiên, đậm đà.',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/77238/bhx/77238-slide_202409300925114415.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/77238/bhx/77238-slidee_202409300922440802.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/77238/bhx/77238-slide-moi_202409300922444575.jpg'
         ]
       }
     ]);
@@ -1160,6 +1012,535 @@ const seedData = async () => {
         images: [
           'https://cdn.tgdd.vn/Products/Images/2289/82719/bhx/sellingpoint.jpg',
           'https://cdn.tgdd.vn/Products/Images/2289/82719/bhx/nuoc-mam-cao-cap-vi-xua-barona-40-do-dam-chai-500ml-201910241415220050.jpg'
+        ]
+      },
+      // Biến thể cho bia Sài Gòn Lager
+      {
+        product_id: products[23]._id, // Thùng 24 lon bia Sài Gòn Lager 330ml
+        name: 'Bia Sài Gòn Lager lon 330ml',
+        sku: 'SAIGON-LAGER-330ML',
+        unit: 'lon',
+        quantity_per_unit: 1,
+        price: 8500,
+        original_price: 7500,
+        in_stock: 200,
+        status: 'active',
+        is_default: false,
+        description: 'Bia Sài Gòn Lager lon 330ml, hương vị đậm đà, tươi mát',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/158346/bhx/bia-sai-gon-lager-330ml-202202101244236776.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/195208/bhx/6-lon-bia-sai-gon-lager-330ml-202110111038506128.jpg'
+        ]
+      },
+      {
+        product_id: products[23]._id, // Thùng 24 lon bia Sài Gòn Lager 330ml
+        name: '6 lon bia Sài Gòn Lager 330ml',
+        sku: 'SAIGON-LAGER-6LON',
+        unit: 'lốc',
+        quantity_per_unit: 6,
+        price: 45000,
+        original_price: 40000,
+        in_stock: 80,
+        status: 'active',
+        is_default: false,
+        description: '6 lon bia Sài Gòn Lager 330ml, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/195208/bhx/6-lon-bia-sai-gon-lager-330ml-202110111038506128.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/158346/bhx/bia-sai-gon-lager-330ml-202202101244236776.jpg'
+        ]
+      },
+      // Biến thể cho bia Sài Gòn Chill
+      {
+        product_id: products[24]._id, // Thùng 24 lon bia Sài Gòn Chill 330ml
+        name: 'Bia Sài Gòn Chill lon 330ml',
+        sku: 'SAIGON-CHILL-330ML',
+        unit: 'lon',
+        quantity_per_unit: 1,
+        price: 9000,
+        original_price: 8000,
+        in_stock: 180,
+        status: 'active',
+        is_default: false,
+        description: 'Bia Sài Gòn Chill lon 330ml, hương vị mới lạ, tươi mát',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/245538/bhx/bia-sai-gon-chill-lon-330ml-202202191518191078.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245540/bhx/6-lon-bia-sai-gon-chill-330ml-202202191519059129.jpg'
+        ]
+      },
+      {
+        product_id: products[24]._id, // Thùng 24 lon bia Sài Gòn Chill 330ml
+        name: '6 lon bia Sài Gòn Chill 330ml',
+        sku: 'SAIGON-CHILL-6LON',
+        unit: 'lốc',
+        quantity_per_unit: 6,
+        price: 48000,
+        original_price: 43000,
+        in_stock: 70,
+        status: 'active',
+        is_default: false,
+        description: '6 lon bia Sài Gòn Chill 330ml, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/245540/bhx/6-lon-bia-sai-gon-chill-330ml-202202191519059129.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245538/bhx/bia-sai-gon-chill-lon-330ml-202202191518191078.jpg'
+        ]
+      },
+      {
+        product_id: products[24]._id, // Thùng 24 lon bia Sài Gòn Chill 330ml
+        name: 'Thùng 18 lon bia Sài Gòn Chill 330ml',
+        sku: 'SAIGON-CHILL-18LON',
+        unit: 'thùng',
+        quantity_per_unit: 18,
+        price: 140000,
+        original_price: 125000,
+        in_stock: 25,
+        status: 'active',
+        is_default: false,
+        description: 'Thùng 18 lon bia Sài Gòn Chill 330ml, tiết kiệm cho nhà hàng',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/297400/bhx/thung-18-lon-bia-sai-gon-chill-330ml-202211271345226732.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/245540/bhx/6-lon-bia-sai-gon-chill-330ml-202202191519059129.jpg'
+        ]
+      },
+      // Biến thể cho bia 333
+      {
+        product_id: products[25]._id, // Bia 333 lon cao 250ml
+        name: 'Bia 333 lon cao 250ml',
+        sku: 'BIA333-250ML',
+        unit: 'lon',
+        quantity_per_unit: 1,
+        price: 8500,
+        original_price: 7500,
+        in_stock: 300,
+        status: 'active',
+        is_default: true,
+        description: 'Bia 333 lon cao 250ml, hương vị truyền thống, tươi mát',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/328901/bhx/httpscdnv2tgddvnbhx-staticbhxproductsimages2282328901bhx1202411271524241358_202412041000310687.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/328902/bhx/412208-4-1_202501040903412829.jpg'
+        ]
+      },
+      // Biến thể cho bia Tiger
+      {
+        product_id: products[26]._id, // Thùng 24 lon bia Tiger lon cao 330ml
+        name: 'Bia Tiger lon cao 330ml',
+        sku: 'TIGER-330ML',
+        unit: 'lon',
+        quantity_per_unit: 1,
+        price: 12000,
+        original_price: 10000,
+        in_stock: 150,
+        status: 'active',
+        is_default: false,
+        description: 'Bia Tiger lon cao 330ml, hương vị quốc tế, tươi mát',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/316845/bhx/httpscdnv2tgddvnbhx-staticbhxproductsimages2282316845bhxlon-330ml-1202412031318045954_202412040956494059.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/319485/bhx/412208-5-1_202501031425346431.jpg'
+        ]
+      },
+      {
+        product_id: products[26]._id, // Thùng 24 lon bia Tiger lon cao 330ml
+        name: '6 lon bia Tiger lon cao 330ml',
+        sku: 'TIGER-6LON',
+        unit: 'lốc',
+        quantity_per_unit: 6,
+        price: 65000,
+        original_price: 55000,
+        in_stock: 60,
+        status: 'active',
+        is_default: false,
+        description: '6 lon bia Tiger lon cao 330ml, tiết kiệm cho gia đình',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/319485/bhx/412208-5-1_202501031425346431.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2282/316845/bhx/httpscdnv2tgddvnbhx-staticbhxproductsimages2282316845bhxlon-330ml-1202412031318045954_202412040956494059.jpg'
+        ]
+      },
+      // Biến thể cho bia Heineken
+      {
+        product_id: products[27]._id, // Thùng 24 lon bia Heineken Silver 330ml
+        name: 'Bia Heineken Silver 330ml',
+        sku: 'HEINEKEN-330ML',
+        unit: 'lon',
+        quantity_per_unit: 1,
+        price: 15000,
+        original_price: 12000,
+        in_stock: 120,
+        status: 'active',
+        is_default: false,
+        description: 'Bia Heineken Silver 330ml, hương vị quốc tế, tươi mát',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/200637/bhx/bia-heineken-silver-330ml-201903281046586878.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200638/bhx/6-lon-bia-heineken-silver-330ml-202301152339137476.jpg'
+        ]
+      },
+      {
+        product_id: products[27]._id, // Thùng 24 lon bia Heineken Silver 330ml
+        name: '6 lon bia Heineken Silver 330ml',
+        sku: 'HEINEKEN-6LON',
+        unit: 'lốc',
+        quantity_per_unit: 6,
+        price: 80000,
+        original_price: 70000,
+        in_stock: 50,
+        status: 'active',
+        is_default: false,
+        description: '6 lon bia Heineken Silver 330ml, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2282/200638/bhx/6-lon-bia-heineken-silver-330ml-202301152339137476.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2282/200637/bhx/bia-heineken-silver-330ml-201903281046586878.jpg'
+        ]
+      },
+      // Biến thể cho sữa TH True Milk
+      {
+        product_id: products[28]._id, // Thùng 48 hộp sữa tươi tiệt trùng ít đường TH True Milk 180ml
+        name: 'Lốc 4 hộp sữa tươi tiệt trùng ít đường TH True Milk 180ml',
+        sku: 'TH-TRUE-4HOP',
+        unit: 'lốc',
+        quantity_per_unit: 4,
+        price: 18000,
+        original_price: 16000,
+        in_stock: 200,
+        status: 'active',
+        is_default: false,
+        description: 'Lốc 4 hộp sữa tươi tiệt trùng ít đường TH True Milk 180ml, tiện lợi cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2386/80492/bhx/loc-4-hop-sua-tuoi-tiet-trung-it-duong-th-true-milk-180ml-202203042221008284.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85853/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-th-true-milk-180ml-202104081706329168.jpg'
+        ]
+      },
+      // Biến thể cho sữa Vinamilk 100%
+      {
+        product_id: products[29]._id, // Thùng 48 hộp sữa tươi tiệt trùng ít đường Vinamilk 100% sữa tươi 180ml
+        name: 'Lốc 4 hộp sữa tươi tiệt trùng ít đường Vinamilk 100% sữa tươi 180ml',
+        sku: 'VINAMILK-4HOP',
+        unit: 'lốc',
+        quantity_per_unit: 4,
+        price: 17000,
+        original_price: 15000,
+        in_stock: 220,
+        status: 'active',
+        is_default: false,
+        description: 'Lốc 4 hộp sữa tươi tiệt trùng ít đường Vinamilk 100% sữa tươi 180ml, tiện lợi cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2386/80604/bhx/loc-4-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071421530162.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/85530/bhx/thung-48-hop-sua-tuoi-tiet-trung-it-duong-vinamilk-100-sua-tuoi-180ml-202310071419459272.jpg'
+        ]
+      },
+      // Biến thể cho sữa Vinamilk 1 lít
+      {
+        product_id: products[30]._id, // Thùng 12 hộp sữa tươi tiệt trùng không đường Vinamilk 100% sữa tươi 1 lít
+        name: 'Sữa tươi tiệt trùng không đường Vinamilk 100% sữa tươi hộp 1 lít',
+        sku: 'VINAMILK-1L',
+        unit: 'hộp',
+        quantity_per_unit: 1,
+        price: 12000,
+        original_price: 10000,
+        in_stock: 150,
+        status: 'active',
+        is_default: false,
+        description: 'Sữa tươi tiệt trùng không đường Vinamilk 100% sữa tươi hộp 1 lít, tiện lợi cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2386/76888/bhx/sua-tuoi-tiet-trung-khong-duong-vinamilk-100-sua-tuoi-hop-1-lit-202403281355125054.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2386/88762/bhx/thung-12-hop-sua-tuoi-tiet-trung-khong-duong-vinamilk-sua-tuoi-100-1-lit-202404021058296104.jpg'
+        ]
+      },
+      // Biến thể cho sữa Milo A2
+      {
+        product_id: products[31]._id, // Thùng 48 hộp sữa lúa mạch ít đường Milo A2 180ml
+        name: 'Lốc 4 hộp sữa lúa mạch ít đường Milo A2 180ml',
+        sku: 'MILO-A2-4HOP',
+        unit: 'lốc',
+        quantity_per_unit: 4,
+        price: 20000,
+        original_price: 18000,
+        in_stock: 180,
+        status: 'active',
+        is_default: false,
+        description: 'Lốc 4 hộp sữa lúa mạch ít đường Milo A2 180ml, tiện lợi cho gia đình',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336177/bhx/loc-4-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504101051223453.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/336178/bhx/thung-48-hop-sua-lua-mach-it-duong-milo-a2-180ml_202504101039251295.jpg'
+        ]
+      },
+      // Biến thể cho sữa Lof Kun
+      {
+        product_id: products[32]._id, // Thùng 48 hộp sữa socola lúa mạch Lof Kun có thạch 170ml
+        name: 'Lốc 4 hộp sữa socola lúa mạch Lof Kun có thạch 170ml',
+        sku: 'LOFKUN-4HOP',
+        unit: 'lốc',
+        quantity_per_unit: 4,
+        price: 22000,
+        original_price: 20000,
+        in_stock: 160,
+        status: 'active',
+        is_default: false,
+        description: 'Lốc 4 hộp sữa socola lúa mạch Lof Kun có thạch 170ml, tiện lợi cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2945/327986/bhx/loc-4-hop-sua-socola-lua-mach-lif-kun-co-thach-170ml-202407161553487408.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2945/327987/bhx/327987-slide-1_202501211456144244.jpg'
+        ]
+      },
+      // Biến thể cho gạo tám thơm
+      {
+        product_id: products[33]._id, // Gạo tám thơm 5kg
+        name: 'Gạo tám thơm 1kg',
+        sku: 'GAO-TAM-1KG',
+        unit: 'kg',
+        quantity_per_unit: 1,
+        price: 18000,
+        original_price: 16000,
+        in_stock: 200,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo tám thơm 1kg, hạt gạo dài, thơm ngon',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/gao-tam-thom-1kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/gao-tam-thom-1kg-202401251130539737.jpg'
+        ]
+      },
+      {
+        product_id: products[33]._id, // Gạo tám thơm 5kg
+        name: 'Gạo tám thơm 10kg',
+        sku: 'GAO-TAM-10KG',
+        unit: 'kg',
+        quantity_per_unit: 10,
+        price: 160000,
+        original_price: 140000,
+        in_stock: 50,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo tám thơm 10kg, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/gao-tam-thom-10kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123456/bhx/gao-tam-thom-10kg-202401251130539737.jpg'
+        ]
+      },
+      // Biến thể cho gạo nếp cái hoa vàng
+      {
+        product_id: products[34]._id, // Gạo nếp cái hoa vàng 2kg
+        name: 'Gạo nếp cái hoa vàng 1kg',
+        sku: 'GAO-NEP-1KG',
+        unit: 'kg',
+        quantity_per_unit: 1,
+        price: 25000,
+        original_price: 22000,
+        in_stock: 150,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo nếp cái hoa vàng 1kg, hạt gạo tròn, dẻo thơm',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/gao-nep-cai-hoa-vang-1kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/gao-nep-cai-hoa-vang-1kg-202401251130539737.jpg'
+        ]
+      },
+      {
+        product_id: products[34]._id, // Gạo nếp cái hoa vàng 2kg
+        name: 'Gạo nếp cái hoa vàng 5kg',
+        sku: 'GAO-NEP-5KG',
+        unit: 'kg',
+        quantity_per_unit: 5,
+        price: 100000,
+        original_price: 90000,
+        in_stock: 60,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo nếp cái hoa vàng 5kg, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/gao-nep-cai-hoa-vang-5kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123457/bhx/gao-nep-cai-hoa-vang-5kg-202401251130539737.jpg'
+        ]
+      },
+      // Biến thể cho gạo ST25
+      {
+        product_id: products[35]._id, // Gạo ST25 10kg
+        name: 'Gạo ST25 5kg',
+        sku: 'GAO-ST25-5KG',
+        unit: 'kg',
+        quantity_per_unit: 5,
+        price: 95000,
+        original_price: 85000,
+        in_stock: 80,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo ST25 5kg, gạo thơm ngon nhất thế giới',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/gao-st25-5kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/gao-st25-5kg-202401251130539737.jpg'
+        ]
+      },
+      {
+        product_id: products[35]._id, // Gạo ST25 10kg
+        name: 'Gạo ST25 25kg',
+        sku: 'GAO-ST25-25KG',
+        unit: 'kg',
+        quantity_per_unit: 25,
+        price: 400000,
+        original_price: 350000,
+        in_stock: 30,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo ST25 25kg, tiết kiệm cho gia đình lớn',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/gao-st25-25kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123458/bhx/gao-st25-25kg-202401251130539737.jpg'
+        ]
+      },
+      // Biến thể cho gạo Jasmine
+      {
+        product_id: products[36]._id, // Gạo Jasmine 5kg
+        name: 'Gạo Jasmine 1kg',
+        sku: 'GAO-JASMINE-1KG',
+        unit: 'kg',
+        quantity_per_unit: 1,
+        price: 20000,
+        original_price: 18000,
+        in_stock: 120,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo Jasmine 1kg, gạo thơm Thái Lan',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/gao-jasmine-1kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/gao-jasmine-1kg-202401251130539737.jpg'
+        ]
+      },
+      {
+        product_id: products[36]._id, // Gạo Jasmine 5kg
+        name: 'Gạo Jasmine 10kg',
+        sku: 'GAO-JASMINE-10KG',
+        unit: 'kg',
+        quantity_per_unit: 10,
+        price: 180000,
+        original_price: 160000,
+        in_stock: 40,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo Jasmine 10kg, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/gao-jasmine-10kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123459/bhx/gao-jasmine-10kg-202401251130539737.jpg'
+        ]
+      },
+      // Biến thể cho gạo lứt đỏ
+      {
+        product_id: products[37]._id, // Gạo lứt đỏ 1kg
+        name: 'Gạo lứt đỏ 500g',
+        sku: 'GAO-LUT-DO-500G',
+        unit: 'gram',
+        quantity_per_unit: 500,
+        price: 15000,
+        original_price: 13000,
+        in_stock: 200,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo lứt đỏ 500g, gạo nguyên cám giàu dinh dưỡng',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/gao-lut-do-500g-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/gao-lut-do-500g-202401251130539737.jpg'
+        ]
+      },
+      {
+        product_id: products[37]._id, // Gạo lứt đỏ 1kg
+        name: 'Gạo lứt đỏ 2kg',
+        sku: 'GAO-LUT-DO-2KG',
+        unit: 'kg',
+        quantity_per_unit: 2,
+        price: 45000,
+        original_price: 40000,
+        in_stock: 80,
+        status: 'active',
+        is_default: false,
+        description: 'Gạo lứt đỏ 2kg, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/gao-lut-do-2kg-202401251130536710.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2286/123460/bhx/gao-lut-do-2kg-202401251130539737.jpg'
+        ]
+      },
+      // Biến thể cho nước tương Maggi
+      {
+        product_id: products[42]._id, // Nước tương đậu nành Maggi thanh dịu chai 450ml
+        name: 'Nước tương đậu nành Maggi thanh dịu chai 700ml',
+        sku: 'MAGGI-700ML',
+        unit: 'chai',
+        quantity_per_unit: 1,
+        price: 30000,
+        original_price: 27000,
+        in_stock: 50,
+        status: 'active',
+        is_default: false,
+        description: 'Nước tương đậu nành Maggi thanh dịu chai 700ml, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2683/79060/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-700ml-202304131533080005.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/79060/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-700ml-202304131530127244.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2683/79060/bhx/nuoc-tuong-dau-nanh-thanh-diu-maggi-chai-700ml-202304131530271233.jpg'
+        ]
+      },
+      // Biến thể cho hạt nêm Knorr
+      {
+        product_id: products[46]._id, // Hạt nêm Knorr thịt thăn, xương ống, tủy gói 400g
+        name: 'Hạt nêm Knorr thịt thăn, xương ống, tủy gói 1.2kg (Tặng 1kg gạo)',
+        sku: 'KNORR-1.2KG',
+        unit: 'gói',
+        quantity_per_unit: 1,
+        price: 99000,
+        original_price: 89000,
+        in_stock: 30,
+        status: 'active',
+        is_default: false,
+        description: 'Hạt nêm Knorr thịt thăn, xương ống, tủy gói 1.2kg (Tặng 1kg gạo), tiết kiệm cho gia đình',
+        images: [
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/335690/bhx/hat-nem-knorr-thit-than-xuong-ong-tuy-goi-12kg-tang-1kg-gao_202504160910373980.jpg'
+        ]
+      },
+      // Biến thể cho hạt nêm Aji-ngon
+      {
+        product_id: products[47]._id, // Hạt nêm Aji-ngon vị heo gói 900g
+        name: 'Hạt nêm Aji-ngon vị heo gói 55g',
+        sku: 'AJI-NGON-55G',
+        unit: 'gói',
+        quantity_per_unit: 1,
+        price: 5000,
+        original_price: 4500,
+        in_stock: 300,
+        status: 'active',
+        is_default: false,
+        description: 'Hạt nêm Aji-ngon vị heo gói 55g, tiện lợi cho nấu ăn',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/198893/bhx/hat-nem-vi-heo-aji-ngon-goi-55g-202211051018410088.jpg',
+          'https://cdn.tgdd.vn/Products/Images/2806/198893/bhx/hat-nem-vi-heo-aji-ngon-goi-55g-202211051018384374.jpg'
+        ]
+      },
+      {
+        product_id: products[47]._id, // Hạt nêm Aji-ngon vị heo gói 900g
+        name: 'Hạt nêm Aji-ngon vị heo gói 170g',
+        sku: 'AJI-NGON-170G',
+        unit: 'gói',
+        quantity_per_unit: 1,
+        price: 17000,
+        original_price: 15000,
+        in_stock: 150,
+        status: 'active',
+        is_default: false,
+        description: 'Hạt nêm Aji-ngon vị heo gói 170g, tiện lợi cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/177826/bhx/hat-nem-aji-ngon-vi-heo-goi-170g-202407021018299777.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/177826/bhx/177826-slide-moi_202409271647007891.jpg'
+        ]
+      },
+      {
+        product_id: products[47]._id, // Hạt nêm Aji-ngon vị heo gói 900g
+        name: 'Hạt nêm Aji-ngon vị heo gói 400g',
+        sku: 'AJI-NGON-400G',
+        unit: 'gói',
+        quantity_per_unit: 1,
+        price: 32500,
+        original_price: 29000,
+        in_stock: 100,
+        status: 'active',
+        is_default: false,
+        description: 'Hạt nêm Aji-ngon vị heo gói 400g, tiết kiệm cho gia đình',
+        images: [
+          'https://cdn.tgdd.vn/Products/Images/2806/82259/bhx/hat-nem-vi-heo-aji-ngon-goi-400g-202303281033540192.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/82259/bhx/82259-slide-moi_202409300935251423.jpg',
+          'https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/2806/82259/bhx/82259-mat-sau_202409300935243227.jpg'
         ]
       }
     ]);

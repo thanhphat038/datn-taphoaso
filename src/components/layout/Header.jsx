@@ -5,7 +5,7 @@ import { dataProduct } from '../../service/Product.service';
 import { getAllAddress } from '../../service/Address.service';
 import { getAllCategories } from '../../service/Admin.Service';
 import Cookies from "js-cookie";
-import { Search, ShoppingCart, User, Menu, LogOut, MapPin } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, LogOut, MapPin, ChevronRight } from 'lucide-react';
 import { CartContext } from '../../context/CartContext';
 import { logoutUser } from '../../service/user.service';
 
@@ -26,6 +26,7 @@ const Header = () => {
     const [selectedAddressId, setSelectedAddressId] = useState(null);
     const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     React.useEffect(() => {
         const fetchProduct = async () => {
@@ -498,16 +499,25 @@ const Header = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-2">
                         {/* Categories */}
-                        <div className="hidden md:flex space-x-6 text-sm">
-                            {categories.map((category) => (
+                        <div className="hidden md:flex items-center space-x-6 text-sm">
+                            {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
                                 <Link 
                                     key={category._id}
                                     to={`/product?category=${category._id}`} 
-                                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                                    className="text-gray-600 hover:text-blue-600 transition-colors whitespace-nowrap"
                                 >
                                     {category.name}
                                 </Link>
                             ))}
+                            {categories.length > 5 && (
+                                <button
+                                    onClick={() => setShowAllCategories(!showAllCategories)}
+                                    className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+                                >
+                                    <span className="text-xs">{showAllCategories ? 'Thu gọn' : 'Xem thêm'}</span>
+                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showAllCategories ? 'rotate-90' : ''}`} />
+                                </button>
+                            )}
                         </div>
 
                         {/* Delivery Address */}
