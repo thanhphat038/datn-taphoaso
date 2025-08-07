@@ -16,6 +16,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 // Connect to MongoDB
 connectDB();
 

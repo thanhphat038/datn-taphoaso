@@ -16,10 +16,22 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Tạo tên file unique với timestamp
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  const uploadDir = 'public/uploads';
+  let filename = file.originalname;
+  let filepath = path.join(uploadDir, filename);
+
+  // Nếu file trùng tên tồn tại thì thêm hậu tố để tránh trùng
+  let counter = 1;
+  while (fs.existsSync(filepath)) {
+    const ext = path.extname(file.originalname);
+    const base = path.basename(file.originalname, ext);
+    filename = `${base}-${counter}${ext}`;
+    filepath = path.join(uploadDir, filename);
+    counter++;
   }
+
+  cb(null, filename);
+}
 });
 
 // Filter để chỉ chấp nhận file hình ảnh
