@@ -25,6 +25,7 @@ import uploadRouter from './upload.route.js';
 
 import paymentRouter from './payment.route.js';
 
+import bannerRouter from './banner.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -59,6 +60,8 @@ router.use('/vouchers', authMiddleware, voucherRouter);
 router.use('/variants', variantRouter);
 
 router.use('/upload', uploadRouter);
+
+router.use('/banners', bannerRouter);
 
 export default router;
 

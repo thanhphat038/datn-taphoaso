@@ -19,7 +19,7 @@ const variantSchema = new mongoose.Schema({
   },
   unit: {
     type: String,
-    enum: ['thùng', 'lốc', 'gói', 'chai', 'lon', 'túi', 'hộp', 'kg', 'gram'],
+    enum: ['thùng', 'lốc', 'gói', 'chai', 'lon', 'túi', 'hộp', 'can', 'kg', 'gram'],
     required: [true, 'Đơn vị là bắt buộc']
   },
   quantity_per_unit: {

@@ -135,3 +135,28 @@ export const getOrdersByUserId = (userId) => {
 export const getAllProducts = () => {
     return axios.get(`${api}/products`, { headers: getAuthHeaders() });
 };
+
+// BANNER MANAGEMENT - Tất cả đều public không cần authentication
+export const getAllBanners = () => {
+    return axios.get(`${api}/banners`);
+};
+
+export const getBannerById = (id) => {
+    return axios.get(`${api}/banners/${id}`);
+};
+
+export const createBanner = (data) => {
+    return axios.post(`${api}/banners`, data, { headers: { 'Content-Type': 'application/json' } });
+};
+
+export const updateBanner = (id, data) => {
+    return axios.put(`${api}/banners/${id}`, data, { headers: { 'Content-Type': 'application/json' } });
+};
+
+export const deleteBanner = (id) => {
+    return axios.delete(`${api}/banners/${id}`);
+};
+
+export const updateBannerStatus = (id) => {
+    return axios.patch(`${api}/banners/${id}/toggle-status`, {});
+};

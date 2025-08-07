@@ -26,13 +26,17 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "blob:", "http://localhost:3000"],
+      imgSrc: ["'self'", "data:", "blob:", "http://localhost:3000", "https:"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "http://localhost:3000"],
     },
   },
 })); // Security headers
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+})); // Enable CORS
 app.use(compression()); // Compress responses
 app.use(morgan('dev')); // Logging
 app.use(express.json()); // Parse JSON bodies

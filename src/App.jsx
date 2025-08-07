@@ -53,6 +53,8 @@ import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminProtected from './components/admin/AdminProtected';
+import AdminBanner from './pages/admin/AdminBanner';
+import AddBannerPage from './pages/admin/AddBannerPage';
 
 function Layout() {
   const location = useLocation();
@@ -118,6 +120,9 @@ function Layout() {
             <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
             <Route path="/admin/category" element={<AdminCategory />} />
             <Route path="/admin/blogcategory" element={<AdminBlogCategory />} />
+            <Route path="/admin/banner" element={<AdminBanner />} />
+            <Route path="/admin/banner/add" element={<AddBannerPage />} />
+            <Route path="/admin/banner/edit/:id" element={<AddBannerPage />} />
             <Route path="/admin/voucher" element={<VoucherPage />} />
             <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
             <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />
