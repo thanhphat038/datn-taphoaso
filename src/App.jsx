@@ -13,12 +13,12 @@ import PaymentProcessing from './pages/checkout/PaymentProcessing';
 import PaymentWaiting from './pages/checkout/PaymentWaiting';
 import VNPayReturn from './pages/checkout/VNPayReturn';
 
-import Header from './components/Header';
+import Header from './components/layout/Header';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailPage from './pages/BlogDetailPage';
-import Footer from './components/Footer';
+import Footer from './components/layout/Footer';
 
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
@@ -27,6 +27,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 
 import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import AdminProtected from './pages/admin/AdminProtected';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
@@ -34,7 +35,7 @@ import AdminBlogCategory from './pages/admin/AdminBlogCategory';
 import ProductsSearch from './pages/ProductsSearch';
 
 import { CartProvider, CartContext } from './context/CartContext';
-
+import { AuthProvider } from './context/AuthContext';
 import CheckoutGuard from './components/CheckoutGuard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddProductPage from './pages/admin/AddProductPage';
@@ -55,6 +56,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminProtected from './components/admin/AdminProtected';
 import AdminBanner from './pages/admin/AdminBanner';
 import AddBannerPage from './pages/admin/AddBannerPage';
+import { PaymentRedirectModalTest } from './components/checkout/PaymentRedirectModal';
 
 function Layout() {
   const location = useLocation();
@@ -76,13 +78,21 @@ function Layout() {
               <Route path="/search/:value" element={<ProductsSearch />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/cart" element={<CartPage />} />
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              } />
               <Route path="/profile/*" element={
                 <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
               } />
-              <Route path="/order/:id" element={<OrderDetailPage />} />
+              <Route path="/order/:id" element={
+                <ProtectedRoute>
+                  <OrderDetailPage />
+                </ProtectedRoute>
+              } />
               <Route path="/checkout" element={
                 <CheckoutGuard>
                   <Checkout />
@@ -100,10 +110,15 @@ function Layout() {
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route path="/change-password" element={
+                <ProtectedRoute>
+                  <ChangePasswordPage />
+                </ProtectedRoute>
+              } />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/test/modal" element={<PaymentRedirectModalTest />} />
             </Routes>
           </div>
           {showFooter && <Footer />}
@@ -150,9 +165,11 @@ function App() {
       <Router>
         <AlertProvider>
           <ToastProvider>
-            <CartProvider>
-              <Layout />
-            </CartProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Layout />
+              </CartProvider>
+            </AuthProvider>
           </ToastProvider>
         </AlertProvider>
       </Router>

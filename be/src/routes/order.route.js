@@ -12,7 +12,8 @@ import {
   getOrderProducts,
   getOrderWithDeadline,
   getOrderByVnpayRef,
-  updateOrderVnpayInfo
+  updateOrderVnpayInfo,
+  cancelOrder
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
@@ -35,6 +36,9 @@ router.get('/recent', getRecentOrders);
 
 // Update order status (Admin)
 router.put('/:orderId/status', updateOrderStatus);
+
+// Cancel order (User)
+router.put('/:orderId/cancel', cancelOrder);
 
 // Update VNPAY info for order (admin/debug)
 router.put('/:orderId/vnpay-info', updateOrderVnpayInfo);

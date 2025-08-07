@@ -1,7 +1,9 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const api = "http://localhost:3000/api";
+import { getApiUrl } from '../config/api.js';
+
+const api = getApiUrl('');
 
 function getAuthHeaders() {
     const token = Cookies.get('auth_token');

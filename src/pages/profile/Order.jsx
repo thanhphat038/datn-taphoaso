@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createReview, getMyOrders } from '../../service/UserService';
+import { createReview, getMyOrders } from '../../service/user.service';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useParams } from 'react-router-dom';
 import { getOrderDetailsByOrderId } from '../../service/Admin.Service';
+import { useAuth } from '../../context/AuthContext';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 // Constants
 const ORDER_STATUS_CONFIG = {
@@ -247,6 +250,7 @@ const Pagination = ({ pagination, onPageChange }) => {
 
 const Order = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -265,6 +269,12 @@ const Order = () => {
 
   // Fetch orders
   useEffect(() => {
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     const fetchOrders = async (page = 1, limit = 3) => {
       try {
         setLoading(true);
@@ -288,7 +298,7 @@ const Order = () => {
       }
     };
     fetchOrders(pagination.page, pagination.limit);
-  }, [pagination.page]);
+  }, [pagination.page, isAuthenticated, navigate]);
 
   // Filter orders
   const getFilteredOrders = () => {
@@ -491,23 +501,21 @@ const Order = () => {
                     {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+                {order.order_status !== 'cancelled' && (
 
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Đã thanh toán</p>
                   <p className="font-semibold text-green-600">
-                    {(order?.originalTotal ?? 0).toLocaleString()}đ
+                    {(order?.total_amount ?? 0).toLocaleString()}đ
                   </p>
                 </div>
+                )}
+
                 <div className="text-center">
                   <p className="text-gray-600 mb-1">Tiền cần đổi trả</p>
                   <p className="font-semibold text-red-600">0đ</p>
                 </div>
-                {order.order_status !== 'cancelled' && (
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-1">Đã thanh toán</p>
-                    <p className="font-bold text-green-600 text-lg">{(order?.total_amount ?? 0).toLocaleString()}đ</p>
-                  </div>
-                )}
+              
               </div>
             </div>
           </div>

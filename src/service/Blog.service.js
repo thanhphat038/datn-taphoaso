@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const api = "http://localhost:3000/api";
+import { getApiUrl } from '../config/api.js';
+
+const api = getApiUrl('');
 
 // Lấy tất cả blog
 export const getAllBlogs = (page = 1, limit = 10) => {

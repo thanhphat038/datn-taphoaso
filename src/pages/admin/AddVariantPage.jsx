@@ -4,11 +4,13 @@ import { FaUpload, FaTrash, FaImage, FaPlus, FaCubes, FaBarcode, FaDollarSign, F
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllProducts, getProductById } from '../../service/Admin.Service.jsx';
-import { createVariant, updateVariant, getVariantById } from '../../service/Variant.service.jsx';
+import { getAllProducts, getProductById } from '../../service/Admin.Service.js';
+import { createVariant, updateVariant, getVariantById } from '../../service/Variant.service.js';
 import Cookies from "js-cookie";
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 // Utility function to convert ISO or any date string to yyyy-MM-dd
 const toDateInputValue = (dateString) => {

@@ -10,7 +10,9 @@ import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AdminBlogCategory = () => {
   const [categories, setCategories] = useState([]);

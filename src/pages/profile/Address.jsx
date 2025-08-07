@@ -356,34 +356,34 @@ const Address = () => {
   }, [newAddress.district]);
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-[#06AEF4] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="text-center mb-6">
+        <div className="w-12 h-12 bg-[#06AEF4] rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-[#06AEF4]">
+        <h2 className="text-xl font-bold text-[#06AEF4]">
           Địa chỉ nhận hàng
         </h2>
-        <p className="text-gray-600 mt-2">Quản lý địa chỉ giao hàng của bạn</p>
+        <p className="text-gray-600 mt-1 text-sm">Quản lý địa chỉ giao hàng của bạn</p>
       </div>
 
       {/* Check if user is logged in */}
       {!Cookies.get('auth_token') && (
-        <div className="text-center py-12">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Vui lòng đăng nhập</h3>
-          <p className="text-gray-600 mb-6">Bạn cần đăng nhập để quản lý địa chỉ giao hàng</p>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Vui lòng đăng nhập</h3>
+          <p className="text-gray-600 mb-4 text-sm">Bạn cần đăng nhập để quản lý địa chỉ giao hàng</p>
           <button 
             onClick={() => window.location.href = '/login'}
-            className="px-6 py-3 bg-[#06AEF4] text-white rounded-xl font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg"
+            className="px-4 py-2 bg-[#06AEF4] text-white rounded-lg font-semibold hover:bg-[#70d9ff] transition-all shadow-md hover:shadow-lg text-sm"
           >
             Đăng nhập ngay
           </button>
@@ -402,21 +402,21 @@ const Address = () => {
           }`}>
           <div className="flex items-center gap-2">
             {messageType === 'error' ? (
-              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             ) : (
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             )}
-            <span>{message}</span>
+            <span className="text-sm">{message}</span>
           </div>
           <button
             className="text-gray-400 hover:text-gray-600 transition-colors"
             onClick={() => setMessage('')}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -425,16 +425,16 @@ const Address = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="w-8 h-8 border-4 border-[#06AEF4] border-t-transparent rounded-full animate-spin"></div>
-          <span className="ml-3 text-gray-600">Đang tải...</span>
+        <div className="flex items-center justify-center py-6">
+          <div className="w-6 h-6 border-4 border-[#06AEF4] border-t-transparent rounded-full animate-spin"></div>
+          <span className="ml-2 text-gray-600 text-sm">Đang tải...</span>
         </div>
       )}
 
       {/* Address List */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-3 mb-4">
         {addresses.map((address, idx) => (
-          <div key={address._id || address.id || idx} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300">
+          <div key={address._id || address.id || idx} className="bg-gradient-to-r from-gray-50 to-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-4 mb-3">
@@ -444,20 +444,20 @@ const Address = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800 text-lg">{address.receiver}</h3>
-                    <p className="text-blue-600 font-medium">{address.phone}</p>
+                    <h3 className="font-semibold text-gray-800 text-base">{address.receiver}</h3>
+                    <p className="text-blue-600 font-medium text-sm">{address.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-gray-600">
-                  <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   </svg>
-                  <p className="text-sm leading-relaxed">
+                  <p className="text-xs leading-relaxed">
                     {address.address_detail}, {address.ward}, {address.district}, {address.city}
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2 ml-4">
+              <div className="flex gap-2 ml-3">
                 {editId == address._id ? (
                   <>
                     <button
@@ -483,7 +483,7 @@ const Address = () => {
                     </button>
                     <button
                       onClick={() => handleDeleteAddress(address._id)}
-                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg"
+                      className="px-3 py-1.5 rounded-md bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md text-sm"
                     >
                       Xóa
                     </button>
@@ -494,17 +494,17 @@ const Address = () => {
 
             {/* Edit Form */}
             {editId == address._id && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h4 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   Chỉnh sửa địa chỉ
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                       Tên người nhận
@@ -518,8 +518,8 @@ const Address = () => {
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       Số điện thoại
@@ -533,8 +533,8 @@ const Address = () => {
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       Tỉnh/Thành phố
@@ -549,8 +549,8 @@ const Address = () => {
                     </select>
                   </div>
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       Quận/Huyện
@@ -566,8 +566,8 @@ const Address = () => {
                     </select>
                   </div>
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       Phường/Xã
@@ -583,8 +583,8 @@ const Address = () => {
                     </select>
                   </div>
                   <div className="group md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       </svg>
                       Địa chỉ chi tiết
@@ -628,8 +628,8 @@ const Address = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Tên người nhận
@@ -643,8 +643,8 @@ const Address = () => {
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 Số điện thoại
@@ -656,16 +656,16 @@ const Address = () => {
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
                 placeholder="Nhập số điện thoại"
               />
-              {phoneError && <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {phoneError && <div className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {phoneError}
               </div>}
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 Tỉnh/Thành phố
@@ -680,8 +680,8 @@ const Address = () => {
               </select>
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 Quận/Huyện
@@ -697,8 +697,8 @@ const Address = () => {
               </select>
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 Phường/Xã
@@ -714,8 +714,8 @@ const Address = () => {
               </select>
             </div>
             <div className="group md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
                 Địa chỉ chi tiết

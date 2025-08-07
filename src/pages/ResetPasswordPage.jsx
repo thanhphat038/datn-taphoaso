@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { resetPassword } from '../service/UserService';
+import { resetPassword } from '../service/user.service';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -51,7 +51,7 @@ const ResetPasswordPage = () => {
     }
     setLoading(true);
     try {
-      await resetPassword(token, formData.newPassword);
+      await resetPassword({ token, newPassword: formData.newPassword });
       setSuccess('Đặt lại mật khẩu thành công! Đang chuyển về trang đăng nhập...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
@@ -62,7 +62,7 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Đặt lại mật khẩu</h2>
         <form onSubmit={handleSubmit} className="space-y-5">

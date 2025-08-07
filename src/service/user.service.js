@@ -1,8 +1,9 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-import { clearAuthData } from "../utils/auth";
-const API_URL = "http://localhost:3000/api/auth";
-const BASE_URL = "http://localhost:3000/api";
+import { getAuthToken, setAuthToken, clearAuthData, syncUserData } from "../utils/auth.js";
+import { getApiUrl, getAuthHeaders } from '../config/api.js';
+
+const API_URL = getApiUrl('/auth');
+const BASE_URL = getApiUrl('');
 
 export async function registerUser({ username, email, password }) {
   try {
@@ -10,7 +11,7 @@ export async function registerUser({ username, email, password }) {
     const { token } = response.data.data;
     
     if (token) {
-      Cookies.set("auth_token", token, { expires: 7 });
+      setAuthToken(token);
     }
     return response.data;
   } catch (error) {
@@ -46,17 +47,16 @@ export async function loginUser({ username, password }) {
     console.log('👤 User found:', !!user);
     
     if (token) {
-      Cookies.set("auth_token", token, { expires: 7 });
-      console.log('✅ Token saved to cookies');
-      console.log('🔍 Token value:', token.substring(0, 20) + '...');
-      console.log('🔍 Cookie check:', Cookies.get("auth_token") ? 'exists' : 'missing');
+      setAuthToken(token);
+      console.log('✅ Token saved to all sources');
     } else {
       console.warn('⚠️ No token found in response');
     }
     
-    // Kiểm tra lại token sau khi lưu
-    const savedToken = Cookies.get("auth_token");
-    console.log('🔍 Final token check:', savedToken ? 'saved successfully' : 'failed to save');
+    // Đồng bộ user data nếu có
+    if (user) {
+      syncUserData(user);
+    }
     
     return response.data;
   } catch (error) {
@@ -79,7 +79,7 @@ export function logoutUser() {
 // Profile management
 export async function getProfile() {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
     const response = await axios.get(`${API_URL}/profile`, {
@@ -93,7 +93,7 @@ export async function getProfile() {
 
 export async function updateProfile(userData) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
     // Check if userData is FormData (for file upload)
@@ -111,25 +111,132 @@ export async function updateProfile(userData) {
   }
 }
 
-export async function changePassword(currentPassword, newPassword) {
+// Change password
+export async function changePassword({ currentPassword, newPassword }) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
-    const response = await axios.put(`${API_URL}/change-password`, 
-      { currentPassword, newPassword }, 
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const response = await axios.patch(`${API_URL}/change-password`, {
+      currentPassword,
+      newPassword
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Đổi mật khẩu thất bại");
   }
 }
 
+// Reset password request
+export async function requestPasswordReset({ email }) {
+  try {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Gửi yêu cầu reset mật khẩu thất bại");
+  }
+}
+
+// Reset password with token
+export async function resetPassword({ token, newPassword }) {
+  try {
+    const response = await axios.post(`${API_URL}/reset-password`, {
+      token,
+      newPassword
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Reset mật khẩu thất bại");
+  }
+}
+
+// Verify email
+export async function verifyEmail({ token }) {
+  try {
+    const response = await axios.post(`${API_URL}/verify-email`, { token });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Xác thực email thất bại");
+  }
+}
+
+// Resend verification email
+export async function resendVerificationEmail({ email }) {
+  try {
+    const response = await axios.post(`${API_URL}/resend-verification`, { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Gửi lại email xác thực thất bại");
+  }
+}
+
+// Get user by ID (admin only)
+export async function getUserById(userId) {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await axios.get(`${BASE_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Lấy thông tin user thất bại");
+  }
+}
+
+// Update user by ID (admin only)
+export async function updateUserById(userId, userData) {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await axios.patch(`${BASE_URL}/users/${userId}`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Cập nhật user thất bại");
+  }
+}
+
+// Delete user by ID (admin only)
+export async function deleteUserById(userId) {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await axios.delete(`${BASE_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Xóa user thất bại");
+  }
+}
+
+// Get all users (admin only)
+export async function getAllUsers(params = {}) {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await axios.get(`${BASE_URL}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Lấy danh sách users thất bại");
+  }
+}
+
 // Address management
 export async function getAddresses() {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
     const response = await axios.get(`${BASE_URL}/addresses`, {
@@ -143,7 +250,7 @@ export async function getAddresses() {
 
 export async function createAddress(addressData) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
 if (!token) throw new Error("No auth token found");
     
     const response = await axios.post(`${BASE_URL}/addresses`, addressData, {
@@ -157,7 +264,7 @@ if (!token) throw new Error("No auth token found");
 
 export async function updateAddress(id, addressData) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
     const response = await axios.put(`${BASE_URL}/addresses/${id}`, addressData, {
@@ -171,7 +278,7 @@ export async function updateAddress(id, addressData) {
 
 export async function deleteAddress(id) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
     await axios.delete(`${BASE_URL}/addresses/${id}`, {
@@ -183,22 +290,11 @@ export async function deleteAddress(id) {
   }
 }
 
-export async function updateUser(id, userData) {
-  try {
-    const token = Cookies.get("auth_token");
-    if (!token) throw new Error("No auth token found");
-    const response = await axios.put(`${BASE_URL}/users/${id}`, userData, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Cập nhật người dùng thất bại");
-  }
-}
+
 
 export async function deleteUser(id) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     await axios.delete(`${BASE_URL}/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -211,7 +307,7 @@ export async function deleteUser(id) {
 
 export async function toggleUserStatus(id, status) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     const response = await axios.put(`${BASE_URL}/users/${id}`, { status }, {
       headers: { Authorization: `Bearer ${token}` }
@@ -238,27 +334,13 @@ export async function fetchUsers(token) {
   return result.data || [];
 }
 
-export async function forgotPassword(email) {
-  try {
-    const response = await axios.post(`${API_URL}/forgot-password`, { email });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Không thể gửi email đặt lại mật khẩu');
-  }
-}
 
-export async function resetPassword(token, newPassword) {
-  try {
-    const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Không thể đặt lại mật khẩu');
-  }
-}
+
+
 
 export async function getMyOrders(page = 1, limit = 10) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     const response = await axios.get(`${BASE_URL}/orders/my?page=${page}&limit=${limit}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -271,7 +353,7 @@ export async function getMyOrders(page = 1, limit = 10) {
 
 export async function createReview(data) {
   try {
-    const token = Cookies.get("auth_token");
+    const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     const response = await axios.post(`${BASE_URL}/reviews`, data, {
       headers: { Authorization: `Bearer ${token}` }

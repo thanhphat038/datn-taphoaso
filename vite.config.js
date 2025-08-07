@@ -11,7 +11,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': process.env.VITE_API_BASE_URL || 'http://localhost:3000'
     },
     allowedHosts: ['.ngrok-free.app'] // 👈 Thêm dòng này để cho phép domain ngrok
   }

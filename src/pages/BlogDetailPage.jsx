@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getBlogById, getAllBlogs } from '../service/Blog.service.jsx';
+import { getBlogById, getAllBlogs } from '../service/Blog.service.js';
 
 const RelatedPostCard = ({ post }) => (
     <Link to={`/blog/${post._id}`} className="group block">

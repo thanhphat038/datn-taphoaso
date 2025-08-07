@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Product from '../components/Product';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl } from '../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const ProductsPage = () => {
 
@@ -178,7 +180,7 @@ const ProductsPage = () => {
     // Hiển thị loading state
     if (loading) {
         return (
-            <main className='min-h-screen bg-[#F5FBFB]'>
+            <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center'>
@@ -195,7 +197,7 @@ const ProductsPage = () => {
     // Hiển thị error state
     if (error) {
         return (
-            <main className='min-h-screen bg-[#F5FBFB]'>
+            <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
                 <div className='max-w-7xl mx-auto px-4 py-8'>
                     <div className='flex justify-center items-center h-96'>
                         <div className='text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100'>
@@ -216,7 +218,7 @@ const ProductsPage = () => {
     }
 
     return (
-        <main className='min-h-screen bg-[#F5FBFB]'>
+        <main className='min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20'>
             <div className='max-w-7xl mx-auto px-4 py-8'>
                 {/* Header */}
                 {/* <div className='mb-8'>

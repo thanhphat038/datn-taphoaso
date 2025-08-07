@@ -207,7 +207,7 @@ window.dispatchEvent(new CustomEvent('user-login', { detail: user }));
 router.get('/user/me', getUserAddresses);
 ```
 
-**File**: `src/service/Address.service.jsx`
+**File**: `src/service/Address.service.js`
 ```javascript
 export const getAllAddress = () => {
     return axios.get(`${api}/addresses/user/me`, { headers: getAuthHeaders() });
@@ -306,7 +306,7 @@ useEffect(() => {
 }, [product._id, isFavorited]);
 ```
 
-**File**: `src/service/Favorite.service.jsx`
+**File**: `src/service/Favorite.service.js`
 ```javascript
 export const getFavorites = (userId) => {
   // Kiểm tra authentication trước

@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useRef, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './NavBar';
-import { dataProduct } from '../service/Product.service';
-import { getAllAddress } from '../service/Address.service';
-import { getAllCategories } from '../service/Admin.Service';
+import { dataProduct } from '../../service/Product.service';
+import { getAllAddress } from '../../service/Address.service';
+import { getAllCategories } from '../../service/Admin.Service';
 import Cookies from "js-cookie";
 import { Search, ShoppingCart, User, Menu, LogOut, MapPin } from 'lucide-react';
-import { CartContext } from '../context/CartContext';
-import { logoutUser } from '../service/UserService';
+import { CartContext } from '../../context/CartContext';
+import { logoutUser } from '../../service/user.service';
 
 const Header = () => {
     const token = Cookies.get("auth_token");

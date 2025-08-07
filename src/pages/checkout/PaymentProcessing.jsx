@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createOrder } from '../../service/Checkout.service';
+import { createOrder } from '../../service/Checkout.service.js';
 
 const PaymentProcessing = () => {
   const navigate = useNavigate();
@@ -116,7 +116,7 @@ const PaymentProcessing = () => {
     }, [navigate]);
     
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full mx-4 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@ const PaymentProcessing = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full mx-4 text-center">
         {/* Loading Animation */}
         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">

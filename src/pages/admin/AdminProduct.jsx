@@ -16,9 +16,11 @@ import AdminTable from "../../components/admin/AdminTable";
 import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
-import { getAllCategories } from '../../service/Admin.Service.jsx';
+import { getAllCategories } from '../../service/Admin.Service.js';
 
-const API_BASE_URL = "http://localhost:3000/api";
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AdminProduct = () => {
   const [products, setProducts] = useState([]);

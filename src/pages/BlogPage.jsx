@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllBlogs, getAllBlogCategories, getBlogsByCategory } from '../service/Blog.service.jsx';
+import { getAllBlogs, getAllBlogCategories, getBlogsByCategory } from '../service/Blog.service.js';
 
 const BlogCard = ({ _id, image, title, description, create_at }) => (
     <Link to={`/blog/${_id}`} className="group block h-full">

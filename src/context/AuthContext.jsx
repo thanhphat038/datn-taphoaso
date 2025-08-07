@@ -1,5 +1,20 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { getAuthToken, getCurrentUser, setAuthToken, clearAuthToken } from '../utils/auth';
+import { 
+  setSecureTokens, 
+  getAccessToken, 
+  getSecureUserData, 
+  clearSecureTokens, 
+  isAuthenticated as isSecureAuthenticated,
+  isAuthenticatedAsync as isSecureAuthenticatedAsync,
+  isTokenValid,
+  setupTokenRefresh,
+  checkAuthRateLimit,
+  clearAuthRateLimit,
+  refreshAccessToken
+} from '../utils/secureAuth';
 import Cookies from 'js-cookie';
+import { getApiUrl } from '../config/api.js';
 
 const AuthContext = createContext();
 
@@ -12,97 +27,145 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Kiểm tra authentication status
-  const checkAuthStatus = () => {
-    const token = Cookies.get('auth_token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setIsAuthenticated(true);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        logout();
-      }
-    } else {
-      setIsAuthenticated(false);
-      setUser(null);
-    }
-    setLoading(false);
-  };
-
-  // Login function
-  const login = (userData, token) => {
-    Cookies.set('auth_token', token, { expires: 7 });
-    localStorage.setItem('user', JSON.stringify(userData));
-    setIsAuthenticated(true);
-    setUser(userData);
-    
-    // Dispatch login event
-    window.dispatchEvent(new CustomEvent('user-login', { detail: userData }));
-  };
-
-  // Logout function
-  const logout = () => {
-    // Clear all data
-    Cookies.remove('auth_token');
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Reset state
-    setIsAuthenticated(false);
-    setUser(null);
-    
-    // Dispatch logout event
-    window.dispatchEvent(new CustomEvent('user-logout'));
-    
-    // Force reload to reset all components
-    window.location.href = '/login';
-  };
-
-  // Check auth status on mount and when token changes
   useEffect(() => {
+    // Kiểm tra user đã đăng nhập khi component mount
     checkAuthStatus();
-    
-    // Listen for storage changes (when user logs in/out in another tab)
-    const handleStorageChange = (e) => {
-      if (e.key === 'auth_token' || e.key === 'user') {
-        checkAuthStatus();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Listen for custom events
-    const handleUserLogin = () => checkAuthStatus();
-    const handleUserLogout = () => {
-      setIsAuthenticated(false);
-      setUser(null);
-    };
-
-    window.addEventListener('user-login', handleUserLogin);
-    window.addEventListener('user-logout', handleUserLogout);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('user-login', handleUserLogin);
-      window.removeEventListener('user-logout', handleUserLogout);
-    };
   }, []);
 
+  const checkAuthStatus = () => {
+    try {
+      // Use secure authentication first
+      const isSecureAuth = isSecureAuthenticated();
+      const secureUserData = getSecureUserData();
+      
+      if (isSecureAuth && secureUserData) {
+        setUser(secureUserData);
+        setIsAuthenticated(true);
+        return;
+      }
+      
+      // Fallback to legacy authentication
+      const token = getAuthToken();
+      const userData = getCurrentUser() || JSON.parse(localStorage.getItem('userData') || 'null');
+      
+      if (token && userData) {
+        // Migrate to secure storage
+        setSecureTokens(token, null, userData);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        clearSecureTokens();
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+      clearSecureTokens();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = (userData) => {
+    // Rate limiting check
+    const identifier = userData.username || userData.email || 'unknown';
+    if (!checkAuthRateLimit(identifier)) {
+      throw new Error('Too many login attempts. Please try again later.');
+    }
+    
+    // Use secure token storage
+    if (userData.token) {
+      setSecureTokens(userData.token, userData.refreshToken, userData);
+    }
+    
+    setUser(userData);
+    setIsAuthenticated(true);
+    
+    // Clear rate limit on successful login
+    clearAuthRateLimit(identifier);
+    
+    // Setup token refresh
+    setupTokenRefresh();
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    clearSecureTokens();
+  };
+
+  const updateUser = (userData) => {
+    setUser(userData);
+    // Update secure storage
+    setSecureTokens(null, null, userData);
+  };
+
+  // Kiểm tra quyền admin
+  const isAdmin = () => {
+    return user && user.role === 'admin';
+  };
+
+  // Lấy token hiện tại
+  const getToken = () => {
+    try {
+      const secureToken = sessionStorage.getItem('access_token');
+      if (secureToken && isTokenValid(secureToken)) {
+        return secureToken;
+      }
+      return getAuthToken();
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return getAuthToken();
+    }
+  };
+
+  // Refresh user data từ API
+  const refreshUserData = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(getApiUrl('/auth/profile'), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const userData = result.data;
+        updateUser(userData);
+        return userData;
+      } else if (response.status === 401) {
+        // Token expired, try to refresh
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          return refreshUserData(); // Retry with new token
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
   const value = {
-    isAuthenticated,
     user,
+    isAuthenticated,
     loading,
     login,
     logout,
-    checkAuthStatus
+    updateUser,
+    checkAuthStatus,
+    isAdmin,
+    getToken,
+    refreshUserData
   };
 
   return (

@@ -7,7 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllComments, deleteComment, updateCommentStatus, getUserById } from '../../service/Admin.Service.jsx';
+import { getAllComments, deleteComment, updateCommentStatus, getUserById } from '../../service/Admin.Service.js';
 
 
 const AdminComment = () => {

@@ -13,7 +13,9 @@ import Link from '@tiptap/extension-link';
 import ImageExtension from '@tiptap/extension-image';
 import Toolbar from '../../components/admin/ToolbarTiptap';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getApiUrl, getBaseUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AddBlog = () => {
   const editor = useEditor({
@@ -124,9 +126,9 @@ const AddBlog = () => {
             if (blog.image.startsWith('data:image')) {
               // Đây là base64 image
               setImagePreview(blog.image);
-            } else {
-              // Đây là URL image (từ dữ liệu cũ)
-              const imagePath = blog.image.startsWith('http') ? blog.image : `http://localhost:3000${blog.image}`;
+                          } else {
+                // Đây là URL image (từ dữ liệu cũ)
+                const imagePath = blog.image.startsWith('http') ? blog.image : `${getBaseUrl()}${blog.image}`;
               setImagePreview(imagePath);
             }
           }

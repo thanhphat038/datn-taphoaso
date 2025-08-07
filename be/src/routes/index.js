@@ -24,6 +24,9 @@ import authRouter from './auth.route.js';
 import uploadRouter from './upload.route.js';
 
 import paymentRouter from './payment.route.js';
+import shippingRouter from './shipping.route.js';
+import productVariantRouter from './productVariant.route.js';
+import recentViewsRouter from './recentViews.route.js';
 
 import bannerRouter from './banner.route.js';
 
@@ -51,7 +54,7 @@ router.use('/blogs', blogRouter);
 
 router.use('/blogs_categories', blogCategoryRouter);
 
-router.use('/categories', authMiddleware,categoryRouter);
+router.use('/categories', categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);
 
@@ -62,6 +65,14 @@ router.use('/variants', variantRouter);
 router.use('/upload', uploadRouter);
 
 router.use('/banners', bannerRouter);
+// Shipping routes
+router.use('/shipping', shippingRouter);
+
+// Product Variant routes
+router.use('/product-variants', productVariantRouter);
+
+// Recent Views routes
+router.use('/recent-views', recentViewsRouter);
 
 export default router;
 

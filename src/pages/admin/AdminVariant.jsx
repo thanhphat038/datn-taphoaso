@@ -22,10 +22,12 @@ import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
 import AdminModal from "../../components/admin/AdminModal";
-import { getAllVariants, deleteVariant, toggleVariantStatus, getVariantStats } from '../../service/Variant.service.jsx';
-import { getAllProducts } from '../../service/Admin.Service.jsx';
+import { getAllVariants, deleteVariant, toggleVariantStatus, getVariantStats } from '../../service/Variant.service.js';
+import { getAllProducts } from '../../service/Admin.Service.js';
 
-const API_BASE_URL = "http://localhost:3000/api";
+import { getApiUrl } from '../../config/api.js';
+
+const API_BASE_URL = getApiUrl('');
 
 const AdminVariant = () => {
   const [variants, setVariants] = useState([]);

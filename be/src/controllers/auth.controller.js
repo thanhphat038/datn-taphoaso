@@ -20,8 +20,8 @@ import {
   unprocessableEntity 
 } from '../utils/response.js';
 
-const BASE_URL = 'http://localhost:3000'; 
-const FE_BASE_URL = 'http://localhost:5173 '; 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'; 
+const FE_BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173'; 
 
 export const register = async (req, res) => {
   try {
@@ -78,11 +78,17 @@ export const register = async (req, res) => {
       status: 'active'
     });
 
-    // Generate JWT token
-    const token = jwt.sign(
+    // Generate JWT tokens
+    const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: '15m' } // Short-lived access token
+    );
+    
+    const refreshToken = jwt.sign(
+      { id: user._id, type: 'refresh' },
+      JWT_SECRET,
+      { expiresIn: '7d' } // Long-lived refresh token
     );
 
     return created(res, {
@@ -94,7 +100,8 @@ export const register = async (req, res) => {
         phone: user.phone,
         role: user.role
       },
-      token
+      token: accessToken,
+      refreshToken
     }, 'User registered successfully');
   } catch (error) {
     return serverError(res, 'Error registering user', error);
@@ -117,7 +124,8 @@ export const login = async (req, res) => {
     }
 
     return ok(res, {
-      token: result.token,
+      token: result.accessToken,
+      refreshToken: result.refreshToken,
       user: result.user
     }, 'Login successful');
   } catch (error) {
@@ -351,6 +359,54 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error('Error resetting password:', error);
     return serverError(res, 'Error resetting password', error);
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return badRequest(res, 'Refresh token is required');
+    }
+
+    try {
+      // Verify refresh token
+      const decoded = jwt.verify(refreshToken, JWT_SECRET);
+      
+      if (decoded.type !== 'refresh') {
+        return unauthorized(res, 'Invalid token type');
+      }
+
+      // Check if user exists and is active
+      const user = await userService.findById(decoded.id);
+      if (!user || user.status !== 'active') {
+        return unauthorized(res, 'User not found or inactive');
+      }
+
+      // Generate new access token
+      const newAccessToken = jwt.sign(
+        { id: user._id, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+
+      return ok(res, {
+        token: newAccessToken,
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          full_name: user.full_name,
+          phone: user.phone,
+          role: user.role
+        }
+      }, 'Token refreshed successfully');
+    } catch (error) {
+      return unauthorized(res, 'Invalid refresh token');
+    }
+  } catch (error) {
+    return serverError(res, 'Error refreshing token', error);
   }
 };
 

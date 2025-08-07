@@ -20,6 +20,13 @@ export const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log('Auth middleware - Decoded token:', decoded);
     
+    // Check if token is not a refresh token
+    if (decoded.type === 'refresh') {
+      return res.status(401).json({
+        message: 'Invalid token type.'
+      });
+    }
+    
     // Check if user exists and is active
     const user = await userService.findById(decoded.id);
     console.log('Auth middleware - User found:', user ? 'Yes' : 'No');
@@ -42,7 +49,12 @@ export const authMiddleware = async (req, res, next) => {
     console.log('Auth middleware - Authentication successful for user:', user._id);
     next();
   } catch (error) {
-    console.error('Auth middleware - Token verification failed:', error.message);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        message: 'Token expired.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
     return res.status(401).json({
       message: 'Invalid token.'
     });
