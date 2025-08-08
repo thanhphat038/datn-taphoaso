@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
 
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/index.js';
 import { userService, authService } from '../services/index.js';
@@ -111,21 +112,23 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    // Validate required fields
     if (!username || !password) {
       return badRequest(res, 'Username and password are required');
     }
-
     const result = await authService.login(username, password);
-    
     if (!result.success) {
       return unauthorized(res, result.message);
     }
-
+    // Set refresh token vào httpOnly cookie
+    res.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: false, // LUÔN là false khi chạy local (http)
+      sameSite: 'lax', // Đảm bảo browser lưu cookie khi chạy http
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
+    });
     return ok(res, {
       token: result.accessToken,
-      refreshToken: result.refreshToken,
       user: result.user
     }, 'Login successful');
   } catch (error) {
@@ -364,33 +367,32 @@ export const resetPassword = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-
+    console.log('[refreshToken] Cookies:', req.cookies);
+    const refreshToken = req.cookies.refresh_token;
+    console.log('[refreshToken] refreshToken from cookie:', refreshToken);
     if (!refreshToken) {
+      console.log('[refreshToken] No refresh token in cookies');
       return badRequest(res, 'Refresh token is required');
     }
-
     try {
-      // Verify refresh token
       const decoded = jwt.verify(refreshToken, JWT_SECRET);
-      
       if (decoded.type !== 'refresh') {
+        res.clearCookie('refresh_token', { path: '/' });
+        console.log('[refreshToken] Invalid token type');
         return unauthorized(res, 'Invalid token type');
       }
-
-      // Check if user exists and is active
       const user = await userService.findById(decoded.id);
       if (!user || user.status !== 'active') {
+        res.clearCookie('refresh_token', { path: '/' });
+        console.log('[refreshToken] User not found or inactive');
         return unauthorized(res, 'User not found or inactive');
       }
-
-      // Generate new access token
       const newAccessToken = jwt.sign(
         { id: user._id, role: user.role },
         JWT_SECRET,
         { expiresIn: '15m' }
       );
-
+      console.log('[refreshToken] Token refreshed successfully for user:', user.username);
       return ok(res, {
         token: newAccessToken,
         user: {
@@ -403,9 +405,12 @@ export const refreshToken = async (req, res) => {
         }
       }, 'Token refreshed successfully');
     } catch (error) {
+      console.error('[refreshToken] JWT verify or user lookup error:', error);
+      res.clearCookie('refresh_token', { path: '/' });
       return unauthorized(res, 'Invalid refresh token');
     }
   } catch (error) {
+    console.error('[refreshToken] Outer error:', error);
     return serverError(res, 'Error refreshing token', error);
   }
 };
@@ -451,4 +456,10 @@ export const forgotPassword = async (req, res) => {
     console.error('Forgot password error:', error);
     return serverError(res, 'Error processing forgot password', error);
   }
+};
+
+// Thêm endpoint logout
+export const logout = async (req, res) => {
+  res.clearCookie('refresh_token', { path: '/' });
+  return ok(res, null, 'Logged out successfully');
 };

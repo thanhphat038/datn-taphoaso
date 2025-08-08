@@ -51,19 +51,14 @@ export const getTokenExpiry = (token) => {
 };
 
 // Secure token storage
-export const setSecureTokens = (accessToken, refreshToken = null, userData = null) => {
+export const setSecureTokens = (accessToken, _refreshToken = null, userData = null) => {
+  console.log('[setSecureTokens] called with:', { accessToken, userData });
   if (!accessToken) return false;
   
   try {
-    // Store access token in memory (sessionStorage) for better security
     sessionStorage.setItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY, accessToken);
     
-    // Store refresh token in httpOnly cookie if available
-    if (refreshToken) {
-      Cookies.set(TOKEN_CONFIG.REFRESH_TOKEN_KEY, refreshToken, TOKEN_CONFIG.COOKIE_OPTIONS);
-    }
-    
-    // Store user data securely
+    // Không lưu refresh token ở cookie từ phía frontend
     if (userData) {
       const sanitizedUserData = {
         id: userData.id || userData._id,
@@ -78,6 +73,10 @@ export const setSecureTokens = (accessToken, refreshToken = null, userData = nul
       
       sessionStorage.setItem(TOKEN_CONFIG.USER_DATA_KEY, JSON.stringify(sanitizedUserData));
     }
+    console.log('[setSecureTokens] sessionStorage after set:', {
+      access_token: sessionStorage.getItem('access_token'),
+      user_data: sessionStorage.getItem('user_data')
+    });
     
     // Store token expiry
     const expiry = getTokenExpiry(accessToken);
@@ -120,28 +119,26 @@ export const getRefreshToken = () => {
 // Refresh access token
 export const refreshAccessToken = async () => {
   try {
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      clearSecureTokens();
-      return null;
-    }
-    
-    const response = await fetch('/api/auth/refresh', {
+    const response = await fetch('http://localhost:3000/api/auth/refresh', {
       method: 'POST',
+      credentials: 'include', // Đảm bảo gửi cookie
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refreshToken })
+      }
     });
-    
     if (response.ok) {
       const data = await response.json();
-      if (data.token) {
-        setSecureTokens(data.token, data.refreshToken, data.user);
-        return data.token;
+      console.log('[refreshAccessToken] data:', data);
+      // Sửa ở đây: lấy token và user từ data.data
+      const token = data.data?.token;
+      const user = data.data?.user;
+      if (token) {
+        console.log('[refreshAccessToken] about to call setSecureTokens');
+        setSecureTokens(token, null, user);
+        console.log('[refreshAccessToken] called setSecureTokens');
+        return token;
       }
     }
-    
     // Refresh failed, clear tokens
     clearSecureTokens();
     return null;
@@ -170,13 +167,6 @@ export const clearSecureTokens = () => {
     sessionStorage.removeItem(TOKEN_CONFIG.USER_DATA_KEY);
     sessionStorage.removeItem(TOKEN_CONFIG.TOKEN_EXPIRY_KEY);
     Cookies.remove(TOKEN_CONFIG.REFRESH_TOKEN_KEY);
-    
-    // Also clear legacy tokens for backward compatibility
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userData');
     Cookies.remove('auth_token');
   } catch (error) {
     console.error('Error clearing secure tokens:', error);
@@ -251,7 +241,7 @@ export const sanitizeUserInput = (input) => {
 
 // Rate limiting for auth attempts
 const authAttempts = new Map();
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 100;
 const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
 
 export const checkAuthRateLimit = (identifier) => {

@@ -16,7 +16,9 @@ const API_CONFIG = {
       PROFILE: '/auth/profile',
       FORGOT_PASSWORD: '/auth/forgot-password',
       RESET_PASSWORD: '/auth/resET-password',
-      CHANGE_PASSWORD: '/auth/change-password'
+      CHANGE_PASSWORD: '/auth/change-password',
+      REFRESH: '/auth/refresh',
+      LOGOUT: '/auth/logout'
     },
     
     // Users
@@ -152,5 +154,12 @@ export const getAuthHeaders = () => {
                 '';
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+// Axios default configuration
+import axios from 'axios';
+
+// Set default axios config
+axios.defaults.withCredentials = true; // Đảm bảo tất cả requests đều gửi cookies
+axios.defaults.baseURL = API_CONFIG.BASE_URL;
 
 export default API_CONFIG; 

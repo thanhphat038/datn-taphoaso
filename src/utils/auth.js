@@ -1,12 +1,8 @@
 import Cookies from 'js-cookie';
 
-// Lấy token từ tất cả các nguồn có thể
+// Lấy token từ cookie
 export const getAuthToken = () => {
-  return localStorage.getItem('token') || 
-         Cookies.get('auth_token') || 
-         localStorage.getItem('authToken') || 
-         localStorage.getItem('accessToken') || 
-         '';
+  return Cookies.get('auth_token') || '';
 };
 
 // Kiểm tra user đã đăng nhập chưa
@@ -15,36 +11,28 @@ export const isAuthenticated = () => {
   return !!token;
 };
 
-// Lấy user từ localStorage - kiểm tra cả user và userData
+// Lấy user từ sessionStorage
 export const getCurrentUser = () => {
   try {
-    // Thử lấy từ user trước, nếu không có thì lấy từ userData
-    const userStr = localStorage.getItem('user') || localStorage.getItem('userData');
+    const userStr = sessionStorage.getItem('user_data');
     return userStr ? JSON.parse(userStr) : null;
   } catch (error) {
-    console.error('Error parsing user from localStorage:', error);
+    console.error('Error parsing user from sessionStorage:', error);
     return null;
   }
 };
 
-// Lưu token vào tất cả các nguồn
+// Lưu token vào cookie
 export const setAuthToken = (token) => {
   if (token) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('accessToken', token);
     Cookies.set('auth_token', token, { expires: 7 });
   }
 };
 
-// Xóa tất cả token và user data
+// Xóa user data khỏi sessionStorage
 export const clearAuthToken = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('user');
-  localStorage.removeItem('userData');
   Cookies.remove('auth_token');
+  sessionStorage.removeItem('user_data');
 };
 
 // Tạo headers cho API calls
@@ -63,7 +51,6 @@ export const clearAuthData = () => {
 // Đồng bộ user data giữa các nguồn
 export const syncUserData = (userData) => {
   if (userData) {
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('userData', JSON.stringify(userData));
+    sessionStorage.setItem('user_data', JSON.stringify(userData));
   }
 };

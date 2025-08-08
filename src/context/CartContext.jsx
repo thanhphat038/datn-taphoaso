@@ -1,16 +1,17 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { getCart } from '../service/Cart.service';
+import { useAuth } from './AuthContext';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { loading: authLoading, isAuthenticated } = useAuth();
 
   // Fetch cart from backend with debounce
   const fetchCartFromBackend = async () => {
     if (loading) return; // Prevent multiple simultaneous requests
-    
     try {
       setLoading(true);
       const response = await getCart();
@@ -30,45 +31,40 @@ export const CartProvider = ({ children }) => {
   // Listen for cart-updated events
   useEffect(() => {
     let debounceTimer;
-    
     const handleCartUpdate = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         fetchCartFromBackend();
       }, 300); // Debounce 300ms
     };
-
     window.addEventListener('cart-updated', handleCartUpdate);
-    
-    // Initial fetch
-    fetchCartFromBackend();
-
     return () => {
       window.removeEventListener('cart-updated', handleCartUpdate);
       clearTimeout(debounceTimer);
     };
   }, []);
 
+  // Initial fetch: chỉ fetch khi đã xác thực xong và user đã đăng nhập
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      fetchCartFromBackend();
+    } else if (!authLoading && !isAuthenticated) {
+      setCartItems([]); // Clear cart nếu user chưa đăng nhập
+    }
+  }, [authLoading, isAuthenticated]);
+
   const incrementQuantity = (id) => {
-    // This will be handled by backend API calls
     fetchCartFromBackend();
   };
-
   const decrementQuantity = (id) => {
-    // This will be handled by backend API calls
     fetchCartFromBackend();
   };
-
   const removeItem = (id) => {
-    // This will be handled by backend API calls
     fetchCartFromBackend();
   };
-
   const addProduct = (product) => {
-    // This will be handled by backend API calls
     fetchCartFromBackend();
   };
-
   const setInitialCartItems = (items) => {
     setCartItems(items);
   };
