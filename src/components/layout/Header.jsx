@@ -27,6 +27,7 @@ const Header = () => {
     const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
     const [categories, setCategories] = useState([]);
     const [showAllCategories, setShowAllCategories] = useState(false);
+    const categoriesDropdownRef = useRef(null);
 
     React.useEffect(() => {
         const fetchProduct = async () => {
@@ -104,9 +105,12 @@ const Header = () => {
             if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
                 setIsUserMenuOpen(false);
             }
-            if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target)) {
-                setIsAddressDropdownOpen(false);
-            }
+                         if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target)) {
+                 setIsAddressDropdownOpen(false);
+             }
+             if (categoriesDropdownRef.current && !categoriesDropdownRef.current.contains(event.target)) {
+                 setShowAllCategories(false);
+             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -500,7 +504,7 @@ const Header = () => {
                     <div className="flex justify-between items-center py-2">
                         {/* Categories */}
                         <div className="hidden md:flex items-center space-x-6 text-sm">
-                            {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
+                            {categories.slice(0, 10).map((category) => (
                                 <Link 
                                     key={category._id}
                                     to={`/product?category=${category._id}`} 
@@ -509,14 +513,34 @@ const Header = () => {
                                     {category.name}
                                 </Link>
                             ))}
-                            {categories.length > 5 && (
-                                <button
-                                    onClick={() => setShowAllCategories(!showAllCategories)}
-                                    className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
-                                >
-                                    <span className="text-xs">{showAllCategories ? 'Thu gọn' : 'Xem thêm'}</span>
-                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showAllCategories ? 'rotate-90' : ''}`} />
-                                </button>
+                            {categories.length > 10 && (
+                                <div className="relative" ref={categoriesDropdownRef}>
+                                    <button
+                                        onClick={() => setShowAllCategories(!showAllCategories)}
+                                        className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+                                    >
+                                        <span className="text-xs">Xem thêm</span>
+                                        <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showAllCategories ? 'rotate-90' : ''}`} />
+                                    </button>
+                                    
+                                    {/* Categories Dropdown */}
+                                    {showAllCategories && (
+                                        <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-lg border border-gray-200 max-h-60 overflow-auto z-30 min-w-48">
+                                            <div className="p-2">
+                                                {categories.slice(5).map((category) => (
+                                                    <Link 
+                                                        key={category._id}
+                                                        to={`/product?category=${category._id}`} 
+                                                        className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                                                        onClick={() => setShowAllCategories(false)}
+                                                    >
+                                                        {category.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
 
