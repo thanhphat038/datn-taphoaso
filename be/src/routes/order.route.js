@@ -38,7 +38,7 @@ router.get('/recent', getRecentOrders);
 router.put('/:orderId/status', updateOrderStatus);
 
 // Cancel order (User)
-router.put('/:orderId/cancel', cancelOrder);
+router.patch('/:orderId/cancel', cancelOrder);
 
 // Update VNPAY info for order (admin/debug)
 router.put('/:orderId/vnpay-info', updateOrderVnpayInfo);

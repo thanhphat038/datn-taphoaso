@@ -33,12 +33,12 @@ export const deleteAddress = (id) => {
 
 // API lấy dữ liệu vị trí cho UI (không cần token)
 export const getProvinces = () => {
-    return axios.get('https://provinces.open-api.vn/api/?depth=1');
+    return axios.get('https://provinces.open-api.vn/api/?depth=1', { withCredentials: false });
 };
 export const getDistricts = (provinceCode) => {
-    return axios.get(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+    return axios.get(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, { withCredentials: false });
 };
 export const getWards = (districtCode) => {
-    return axios.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+    return axios.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, { withCredentials: false });
 };
 
