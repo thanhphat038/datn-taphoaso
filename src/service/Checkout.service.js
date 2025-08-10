@@ -107,7 +107,7 @@ export const cancelOrder = async (orderId) => {
     console.log('Cancelling order:', orderId);
     console.log('Token:', token);
 
-    const response = await axios.put(
+    const response = await axios.patch(
       `${API_BASE_URL}/orders/${orderId}/cancel`,
       {},
       {

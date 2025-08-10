@@ -1,0 +1,52 @@
+@baseUrl = http://localhost:3000/api
+@authToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MTI3NDQ0LCJleHAiOjE3NTQ3MzIyNDR9.ITuKGr1FNmggjG6xi523DK7L8GqngWrvYQQymRy9L0U
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "password123",
+  "email": "user@gmail.com"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "newpassword123"
+}
+
+### Refresh Token
+POST {{baseUrl}}/auth/refresh
+# Không cần body, rely vào cookie
+
+### Logout
+POST {{baseUrl}}/auth/logout
+# Không cần body, rely vào cookie
+
+### Get Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Change Password
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123"
+}
+
+### Forgot Password
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@gmail.com",
+  "username": "user1"
+}

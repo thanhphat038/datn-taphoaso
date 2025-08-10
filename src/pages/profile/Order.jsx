@@ -440,7 +440,7 @@ const Order = () => {
                   </button>
                 )}
                 
-                {order.order_status === 'pending' && (
+                {(order.order_status === 'pending' || order.order_status === 'failed') &&(
                   <button
                     onClick={() => handleCancelOrder(order._id)}
                     className="px-5 py-2 border border-gray-500 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-sm transition-colors"

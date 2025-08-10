@@ -32,8 +32,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Kiểm tra user đã đăng nhập khi component mount
-    checkAuthStatus();
+    let isMounted = true;
+    const tryAutoLogin = async () => {
+      setLoading(true);
+      const secureToken = sessionStorage.getItem('access_token');
+      if (!secureToken) {
+        // Không có access token, thử refresh
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          // Sau khi refresh thành công, lấy lại user data từ API thay vì sessionStorage
+          const userData = await refreshUserData();
+          if (isMounted && userData) {
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else if (isMounted) {
+            setUser(null);
+            setIsAuthenticated(false);
+            clearSecureTokens();
+          }
+        } else if (isMounted) {
+          setUser(null);
+          setIsAuthenticated(false);
+          clearSecureTokens();
+        }
+        if (isMounted) setLoading(false);
+        return;
+      }
+      // Nếu có access token, kiểm tra như cũ
+      checkAuthStatus();
+      if (isMounted) setLoading(false);
+    };
+    tryAutoLogin();
+    return () => { isMounted = false; };
   }, []);
 
   const checkAuthStatus = () => {
@@ -48,20 +78,10 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       
-      // Fallback to legacy authentication
-      const token = getAuthToken();
-      const userData = getCurrentUser() || JSON.parse(localStorage.getItem('userData') || 'null');
-      
-      if (token && userData) {
-        // Migrate to secure storage
-        setSecureTokens(token, null, userData);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-        clearSecureTokens();
-      }
+      // Nếu không có secure, coi như chưa đăng nhập
+      setUser(null);
+      setIsAuthenticated(false);
+      clearSecureTokens();
     } catch (error) {
       console.error('Error checking auth status:', error);
       setUser(null);
@@ -78,19 +98,13 @@ export const AuthProvider = ({ children }) => {
     if (!checkAuthRateLimit(identifier)) {
       throw new Error('Too many login attempts. Please try again later.');
     }
-    
-    // Use secure token storage
+    // Chỉ lưu access token và userData
     if (userData.token) {
-      setSecureTokens(userData.token, userData.refreshToken, userData);
+      setSecureTokens(userData.token, null, userData);
     }
-    
     setUser(userData);
     setIsAuthenticated(true);
-    
-    // Clear rate limit on successful login
     clearAuthRateLimit(identifier);
-    
-    // Setup token refresh
     setupTokenRefresh();
   };
 
@@ -98,6 +112,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     clearSecureTokens();
+    // Gọi API /logout để backend xóa refresh token ở cookie
+    fetch('http://localhost:3000/api/auth/logout', { method: 'POST', credentials: 'include' });
   };
 
   const updateUser = (userData) => {

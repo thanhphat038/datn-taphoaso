@@ -58,6 +58,8 @@ router.use('/categories', categoryRouter);
 
 router.use('/carts', authMiddleware, cartRouter);
 
+router.use('/payment', paymentRouter);
+
 router.use('/vouchers', authMiddleware, voucherRouter);
 
 router.use('/variants', variantRouter);

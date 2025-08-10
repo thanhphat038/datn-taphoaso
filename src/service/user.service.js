@@ -7,7 +7,9 @@ const BASE_URL = getApiUrl('');
 
 export async function registerUser({ username, email, password }) {
   try {
-    const response = await axios.post(`${API_URL}/register`, { username, email, password });
+    const response = await axios.post(`${API_URL}/register`, { username, email, password }, {
+      withCredentials: true // Đảm bảo gửi và nhận cookies
+    });
     const { token } = response.data.data;
     
     if (token) {
@@ -23,7 +25,9 @@ export async function loginUser({ username, password }) {
   try {
     console.log('🔍 Login attempt for:', username);
     
-    const response = await axios.post(`${API_URL}/login`, { username, password });
+    const response = await axios.post(`${API_URL}/login`, { username, password }, {
+      withCredentials: true // Đảm bảo gửi và nhận cookies
+    });
     console.log('📥 Login response:', response.data);
     
     // Kiểm tra cấu trúc response và lấy token an toàn
