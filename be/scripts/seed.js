@@ -6,6 +6,7 @@ import Product from "../src/models/product.model.js";
 import Voucher from "../src/models/voucher.model.js";
 import Variant from "../src/models/variant.model.js";
 
+
 const seedData = async () => {
   try {
     // Connect to MongoDB
@@ -44,7 +45,11 @@ const seedData = async () => {
 
     // Create categories
     const categories = await Category.create([
-      
+      {
+        name: "Rau củ",
+        description: "Các loại rau củ tươi ngon",
+        status: "inactive",
+      },
       {
         name: "Trái cây",
         description: "Các loại trái cây tươi ngon",
@@ -53,12 +58,12 @@ const seedData = async () => {
       {
         name: "Thịt cá",
         description: "Các loại thịt cá tươi ngon",
-        status: "active",
+        status: "inactive",
       },
       {
         name: "Gia vị",
         description: "Các loại gia vị",
-        status: "active",
+        status: "inactive",
       },
       {
         name: "Dầu ăn",
@@ -83,7 +88,7 @@ const seedData = async () => {
       {
         name: "Thịt heo",
         description: "Các loại thịt heo tươi ngon",
-        status: "active",
+        status: "inactive",
       },
       {
         name: "Bia",
@@ -160,36 +165,6 @@ const seedData = async () => {
     // Create products
     const products = await Product.create([
       
-      {
-        category_id: categories[0]._id,
-        name: "Hành lá 300g",
-        price: 15000,
-        original_price: 12000,
-        in_stock: 70,
-        status: "active",
-        description:
-          "Hành lá tươi ngon, thơm nồng. Hành lá giúp tăng hương vị món ăn và có tác dụng kháng khuẩn tự nhiên.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/232791/bhx/hanh-la-goi-50g_202505100847399340.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/232791/bhx/hanh-la-goi-50g-202012282236343442.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/232791/bhx/hanh-la-goi-50g-202012282236355259.jpg",
-        ],
-      },
-      {
-        category_id: categories[0]._id,
-        name: "Xà lách ta 300g",
-        price: 12000,
-        original_price: 10000,
-        in_stock: 60,
-        status: "active",
-        description:
-          "Xà lách ta tươi giòn, giàu vitamin và khoáng chất. Xà lách giúp làm mát cơ thể và tốt cho hệ tiêu hóa.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240908090022.jpg",
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240921170604.jpg",
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/325723/bhx/xa-lach-ta-300g_202505240921167970.jpg",
-        ],
-      },
 
       // Dầu ăn
       {
@@ -438,6 +413,8 @@ const seedData = async () => {
         ],
       },
       // Thêm 50 sản phẩm mới
+      // Rau củ thêm
+
       
       // Dầu ăn thêm
       {
