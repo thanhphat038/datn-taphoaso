@@ -45,120 +45,120 @@ const seedData = async () => {
 
     // Create categories
     const categories = await Category.create([
-      {
+      { //1
         name: "Rau củ",
         description: "Các loại rau củ tươi ngon",
         status: "inactive",
       },
-      {
+      { //2
         name: "Trái cây",
         description: "Các loại trái cây tươi ngon",
-        status: "active",
+        status: "inactive",
       },
-      {
+      { //3
         name: "Thịt cá",
         description: "Các loại thịt cá tươi ngon",
         status: "inactive",
       },
-      {
+      { //4
         name: "Gia vị",
         description: "Các loại gia vị",
         status: "inactive",
       },
-      {
+      { //5
         name: "Dầu ăn",
         description: "Các loại dầu ăn chất lượng",
         status: "active",
       },
-      {
+      { //6
         name: "Nước mắm",
         description: "Các loại nước mắm truyền thống",
         status: "active",
       },
-      {
+      { //7
         name: "Đường",
         description: "Các loại đường tự nhiên",
         status: "active",
       },
-      {
+      { //8
         name: "Nước ngọt",
         description: "Các loại nước ngọt giải khát",
         status: "active",
       },
-      {
+      { //9
         name: "Thịt heo",
         description: "Các loại thịt heo tươi ngon",
         status: "inactive",
       },
-      {
+      { //10
         name: "Bia",
         description: "Các loại bia giải khát",
         status: "active",
       },
-      {
+      { //11
         name: "Sữa",
         description: "Các loại sữa tươi và sữa đóng hộp",
         status: "active",
       },
-      {
+      { //12
         name: "Gạo",
         description: "Các loại gạo chất lượng cao",
         status: "active",
       },
-      {
+      { //13
         name: "Nước tương",
         description: "Các loại nước tương đậu nành",
         status: "active",
       },
-      {
+      { //14
         name: "Hạt nêm, bột ngọt, bột canh",
         description: "Các loại hạt nêm, bột ngọt, bột canh",
         status: "active",
       },
-      {
+      { //15
         name: "Mì",
         description: "Các loại mì, phở, bún khô",
         status: "active",
       },
-      {
+      { //16
         name: "Kem",
         description: "Các loại kem tươi, kem que",
         status: "active",
       },
-      {
+      { //17
         name: "Sữa chua",
         description: "Các loại sữa chua tự nhiên",
         status: "active",
       },
-      {
+      { //18
         name: "Muối",
         description: "Các loại muối ăn, muối chấm",
         status: "active",
       },
-      {
+      { //19
         name: "Các loại tương",
         description: "Tương ớt, tương cà, tương đen",
-        status: "active",
+        status: "inactive",
       },
-      {
+      { //20
         name: "Dầu hào, Giấm, Bơ",
         description: "Dầu hào, giấm ăn, bơ thực vật",
-        status: "active",
+        status: "inactive",
       },
-      {
+      { //21
         name: "Nước chấm",
         description: "Các loại nước chấm, xốt ăn kèm",
         status: "active",
       },
-      {
+      { //22
         name: "Tiêu, sa tế",
         description: "Tiêu xay, sa tế tôm, sa tế cay",
-        status: "active",
+        status: "inactive",
       },
-      {
+      { //23
         name: "Sữa tươi",
         description: "Sữa tươi tiệt trùng các loại",
-        status: "active",
+        status: "inactive",
       },
     ]);
 
@@ -2503,7 +2503,7 @@ const seedData = async () => {
       },
       // Danh mục Muối
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối hạt thiên nhiên Ông Chà Và gói 1kg",
         price: 25000,
         original_price: 22000,
@@ -2516,7 +2516,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối chấm Hảo Hảo tôm chua cay hũ 120g",
         price: 15000,
         original_price: 12000,
@@ -2531,7 +2531,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tôm Trần Lâm Food hũ 100g",
         price: 18000,
         original_price: 15000,
@@ -2545,7 +2545,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tiêu Guyumi hũ 60g",
         price: 12000,
         original_price: 10000,
@@ -2560,7 +2560,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối ớt Guyumi hũ 110g",
         price: 14000,
         original_price: 12000,
@@ -2575,7 +2575,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tôm siêu cay Fadely hũ 60g",
         price: 16000,
         original_price: 14000,
@@ -2590,7 +2590,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tiêu lá chanh Dh Foods Natural hũ 55g",
         price: 13000,
         original_price: 11000,
@@ -2605,7 +2605,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối ớt hột Dh Foods hũ 65g",
         price: 15000,
         original_price: 13000,
@@ -2620,7 +2620,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tiêu Natas hũ 100g",
         price: 17000,
         original_price: 15000,
@@ -2635,7 +2635,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[16]._id, // Muối
+        category_id: categories[17]._id, // Muối
         name: "Muối tôm Tinh Nguyên hũ 90g",
         price: 16000,
         original_price: 14000,
@@ -2651,7 +2651,7 @@ const seedData = async () => {
       },
       // Danh mục Các loại tương
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt Chinsu chai 1kg",
         price: 45000,
         original_price: 40000,
@@ -2666,7 +2666,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương cà Ông Chà Và chai 290g",
         price: 15000,
         original_price: 12000,
@@ -2678,7 +2678,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương đen chai dẹp Ông Chà Và 300g",
         price: 18000,
         original_price: 15000,
@@ -2693,7 +2693,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt xanh Ông Chà Và chai 210g",
         price: 14000,
         original_price: 12000,
@@ -2708,7 +2708,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt Nam Dương đặc biệt cay chai 400g",
         price: 25000,
         original_price: 22000,
@@ -2720,7 +2720,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt Chinsu Sriracha chai 250g",
         price: 20000,
         original_price: 18000,
@@ -2734,7 +2734,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt Nam Dương chai 255g",
         price: 16000,
         original_price: 14000,
@@ -2749,7 +2749,7 @@ const seedData = async () => {
         ],
       },
       {
-        category_id: categories[17]._id, // Các loại tương
+        category_id: categories[20]._id, // Các loại tương
         name: "Tương ớt cay nồng Cholimex chai 270g",
         price: 22000,
         original_price: 19000,
