@@ -44,11 +44,7 @@ const seedData = async () => {
 
     // Create categories
     const categories = await Category.create([
-      {
-        name: "Rau củ",
-        description: "Các loại rau củ tươi ngon",
-        status: "active",
-      },
+      
       {
         name: "Trái cây",
         description: "Các loại trái cây tươi ngon",
@@ -163,54 +159,7 @@ const seedData = async () => {
 
     // Create products
     const products = await Product.create([
-      {
-        category_id: categories[0]._id,
-        name: "Rau muống tươi",
-        price: 5000,
-        original_price: 4000,
-        in_stock: 100,
-        status: "active",
-        description:
-          "Rau muống tươi ngon, sạch, không thuốc trừ sâu. Rau muống giàu chất xơ, vitamin và khoáng chất tốt cho sức khỏe.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505081440524383.jpg",
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505071517577794.jpg",
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202505091532251089.jpg",
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/335480/bhx/rau-muong-nuoc-400gr_202503271012135926.jpg",
-        ],
-      },
-      {
-        category_id: categories[0]._id,
-        name: "Rau cải xanh",
-        price: 5000,
-        original_price: 4000,
-        in_stock: 80,
-        status: "active",
-        description:
-          "Rau cải xanh tươi ngon, giàu vitamin C và chất chống oxy hóa. Rau cải giúp tăng cường miễn dịch và tốt cho tim mạch.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/309156/bhx/cai-be-xanh_202505081455284799.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-500g-202401121613149216.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-500g-202401121613156170.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/309156/bhx/cai-be-xanh-400gr-202408141351036981.jpg",
-        ],
-      },
-      {
-        category_id: categories[0]._id,
-        name: "Rau mồng tơi 400gr",
-        price: 5000,
-        original_price: 4000,
-        in_stock: 90,
-        status: "active",
-        description:
-          "Rau mồng tơi tươi ngon, giàu chất xơ và vitamin. Rau mồng tơi giúp thanh nhiệt, giải độc và tốt cho hệ tiêu hóa.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8820/310775/bhx/rau-mong-toi-500-g_202505081431588846.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-500-g-202310201702541388.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-500g-202307170925491678.jpg",
-          "https://cdn.tgdd.vn/Products/Images/8820/310775/bhx/rau-mong-toi-400gr-202408141544286699.jpg",
-        ],
-      },
+      
       {
         category_id: categories[0]._id,
         name: "Hành lá 300g",
@@ -489,21 +438,7 @@ const seedData = async () => {
         ],
       },
       // Thêm 50 sản phẩm mới
-      // Rau củ thêm
-
-      {
-        category_id: categories[3]._id,
-        name: "Sả tươi 200gr",
-        price: 10000,
-        original_price: 8000,
-        in_stock: 90,
-        status: "active",
-        description:
-          "Sả tươi thơm nồng, có tác dụng kháng khuẩn. Sả giúp tăng hương vị món ăn và tốt cho tiêu hóa.",
-        images: [
-          "https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/8785/292740/bhx/cdntgddvnproductsimages8785292740bhxsa-cay-goi-200g-202210031601138393_202409041611032864.jpg",
-        ],
-      },
+      
       // Dầu ăn thêm
       {
         category_id: categories[4]._id,

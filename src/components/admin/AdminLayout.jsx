@@ -27,6 +27,7 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { path: '/admin', icon: FaHome, label: 'Tổng quan' },
     { path: '/admin/product', icon: FaBox, label: 'Sản phẩm' },
+    // { path: '/admin/brand', icon: FaListAlt, label: 'Thương hiệu' },
     { path: '/admin/variant', icon: FaCubes, label: 'Biến thể' },
     { path: '/admin/category', icon: FaListAlt, label: 'Danh mục' },
     { path: '/admin/blogcategory', icon: FaListAlt, label: 'Danh mục Blog' },

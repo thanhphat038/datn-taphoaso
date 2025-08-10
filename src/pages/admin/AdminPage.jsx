@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaBox, FaShoppingCart, FaTicketAlt, FaChartLine, FaCalendarAlt, FaComments, FaStar, FaEye } from 'react-icons/fa';
+import { FaUsers, FaBox, FaShoppingCart, FaTicketAlt, FaChartLine, FaCalendarAlt, FaComments, FaStar, FaEye, FaListAlt } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import Cookies from 'js-cookie';
@@ -481,6 +481,19 @@ const AdminPage = () => {
                 <div>
                   <div className="font-medium text-gray-900">Quản lý khách hàng</div>
                   <div className="text-sm text-gray-500">Xem thông tin khách hàng</div>
+                </div>
+              </div>
+            </AdminCard>
+          </Link>
+          <Link to="/admin/brand" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+            <AdminCard>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-pink-100 text-pink-600 rounded-lg">
+                  <FaListAlt className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Quản lý thương hiệu</div>
+                  <div className="text-sm text-gray-500">Thêm và quản lý thương hiệu</div>
                 </div>
               </div>
             </AdminCard>

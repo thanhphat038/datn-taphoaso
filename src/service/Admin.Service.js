@@ -162,3 +162,26 @@ export const deleteBanner = (id) => {
 export const updateBannerStatus = (id) => {
     return axios.patch(`${api}/banners/${id}/toggle-status`, {});
 };
+
+// BRAND API
+export const getAllBrands = () => {
+  return axios.get(`${api}/brands`, { headers: getAuthHeaders() });
+};
+
+export const createBrand = (data) => {
+  return axios.post(`${api}/brands`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const updateBrand = (id, data) => {
+  return axios.put(`${api}/brands/${id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const deleteBrand = (id) => {
+  return axios.delete(`${api}/brands/${id}`, { headers: getAuthHeaders() });
+};
+
+export const toggleBrandStatus = (id, status) => {
+  // status: 'active' or 'inactive'
+  const action = status === 'active' ? 'deactivate' : 'activate';
+  return axios.patch(`${api}/brands/${id}/${action}`, {}, { headers: getAuthHeaders() });
+};
