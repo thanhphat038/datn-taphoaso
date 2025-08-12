@@ -445,10 +445,10 @@ const CartPage = () => {
                     </span>
                   </div>
                   
-                  <div className="flex justify-between items-center">
+                  {/* <div className="flex justify-between items-center">
                     <span className="text-gray-600">Phí vận chuyển:</span>
                     <span className="font-medium text-green-600">Miễn phí</span>
-                  </div>
+                  </div> */}
                   
                   {voucherDiscount > 0 && (
                     <div className="flex justify-between items-center">

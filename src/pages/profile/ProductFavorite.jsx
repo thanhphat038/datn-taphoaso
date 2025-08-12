@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getFavorites } from '../../service/Favorite.service';
 import { dataProductDetail } from '../../service/Product.service';
 import Product from '../../components/Product';
+import EmptyState from '../../components/EmptyState';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -239,25 +240,14 @@ const ProductFavorite = () => {
       </div>
       
       {favorites.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          <p className="mt-2">Chưa có sản phẩm yêu thích nào</p>
-          <p className="text-sm text-gray-400 mb-4">Hãy thêm sản phẩm vào danh sách yêu thích để xem chúng ở đây</p>
-          
-          {!isAuthenticated && (
-            <div className="mt-4">
-              <p className="text-sm text-gray-500 mb-2">Bạn cần đăng nhập để sử dụng tính năng yêu thích</p>
-              <button
-                onClick={() => navigate('/login')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
-              >
-                Đăng nhập ngay
-              </button>
-            </div>
-          )}
-        </div>
+        <EmptyState
+          variant="favorite"
+          title="Chưa có sản phẩm yêu thích nào"
+          description="Hãy thêm sản phẩm vào danh sách yêu thích để xem chúng ở đây"
+          actionText={!isAuthenticated ? "Đăng nhập ngay" : undefined}
+          actionUrl={!isAuthenticated ? "/login" : undefined}
+          showAction={!isAuthenticated}
+        />
       ) : (
         <>
           {/* Grid sản phẩm */}

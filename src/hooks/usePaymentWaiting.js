@@ -77,13 +77,23 @@ export const usePaymentWaiting = () => {
           try {
             await updateOrderStatus(orderId, 'paid');
             setTimeout(() => {
-              navigate('/checkout/payment/success');
+              navigate('/checkout/payment/success', {
+                state: {
+                  paymentMethod: orderInfo?.payment_method || 'vnpay',
+                  orderId: orderId
+                }
+              });
             }, 2000);
           } catch (error) {
             console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
             toast.error('Có lỗi khi cập nhật trạng thái đơn hàng');
             setTimeout(() => {
-              navigate('/checkout/payment/success');
+              navigate('/checkout/payment/success', {
+                state: {
+                  paymentMethod: orderInfo?.payment_method || 'vnpay',
+                  orderId: orderId
+                }
+              });
             }, 3000);
           }
         };
@@ -133,7 +143,12 @@ export const usePaymentWaiting = () => {
 
           if (orderData.order_status === 'paid') {
             toast.success('Thanh toán thành công!');
-            navigate('/checkout/payment/success');
+            navigate('/checkout/payment/success', {
+              state: {
+                paymentMethod: orderData.payment_method || 'vnpay',
+                orderId: orderId
+              }
+            });
             return;
           }
           

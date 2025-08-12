@@ -132,7 +132,7 @@ class OrderService extends DBService {
       total_amount += product.price * item.qty;
     }
     // Luôn cộng phí ship 15000
-    total_amount += 15000;
+    // total_amount += 15000;
     let voucher_id = null;
     if (voucher_code) {
       const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
