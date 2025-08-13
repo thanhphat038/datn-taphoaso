@@ -137,3 +137,51 @@ export const getOrdersByUserId = (userId) => {
 export const getAllProducts = () => {
     return axios.get(`${api}/products`, { headers: getAuthHeaders() });
 };
+
+// BANNER MANAGEMENT - Tất cả đều public không cần authentication
+export const getAllBanners = () => {
+    return axios.get(`${api}/banners`);
+};
+
+export const getBannerById = (id) => {
+    return axios.get(`${api}/banners/${id}`);
+};
+
+export const createBanner = (data) => {
+    return axios.post(`${api}/banners`, data, { headers: { 'Content-Type': 'application/json' } });
+};
+
+export const updateBanner = (id, data) => {
+    return axios.put(`${api}/banners/${id}`, data, { headers: { 'Content-Type': 'application/json' } });
+};
+
+export const deleteBanner = (id) => {
+    return axios.delete(`${api}/banners/${id}`);
+};
+
+export const updateBannerStatus = (id) => {
+    return axios.patch(`${api}/banners/${id}/toggle-status`, {});
+};
+
+// BRAND API
+export const getAllBrands = () => {
+  return axios.get(`${api}/brands`, { headers: getAuthHeaders() });
+};
+
+export const createBrand = (data) => {
+  return axios.post(`${api}/brands`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const updateBrand = (id, data) => {
+  return axios.put(`${api}/brands/${id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const deleteBrand = (id) => {
+  return axios.delete(`${api}/brands/${id}`, { headers: getAuthHeaders() });
+};
+
+export const toggleBrandStatus = (id, status) => {
+  // status: 'active' or 'inactive'
+  const action = status === 'active' ? 'deactivate' : 'activate';
+  return axios.patch(`${api}/brands/${id}/${action}`, {}, { headers: getAuthHeaders() });
+};

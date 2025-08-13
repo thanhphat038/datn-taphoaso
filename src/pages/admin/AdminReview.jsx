@@ -7,7 +7,9 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllReviews, deleteReview, updateReviewStatus } from '../../service/Admin.Service.js';
+import { getAllReviews, deleteReview, updateReviewStatus } from '../../service/Admin.Service.jsx';
+import { getUserById } from '../../service/Admin.Service.jsx';
+import { getProductById } from '../../service/Admin.Service.jsx';
 
 
 const AdminReview = () => {
