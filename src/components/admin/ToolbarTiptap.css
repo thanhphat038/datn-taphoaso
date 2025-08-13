@@ -309,9 +309,9 @@
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .ProseMirror {
-    color: #f9fafb;
-  }
+  /* .ProseMirror {
+    color: #000000;
+  } */
   
   .ProseMirror h1,
   .ProseMirror h2,
