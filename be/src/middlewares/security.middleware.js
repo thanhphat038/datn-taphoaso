@@ -2,8 +2,12 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { sanitizeUserInput } from '../utils/validators.js';
 
+// Global rate limit configuration
+const RATE_LIMIT_MAX = 1000;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
 // Rate limiting configuration
-export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
+export const createRateLimiter = (windowMs = RATE_LIMIT_WINDOW_MS, max = RATE_LIMIT_MAX) => {
   return rateLimit({
     windowMs,
     max,
@@ -18,8 +22,8 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
 
 // Specific rate limiters
 export const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
+  windowMs: RATE_LIMIT_WINDOW_MS, // 15 minutes
+  max: RATE_LIMIT_MAX, // 1000 attempts per window
   message: {
     message: 'Too many authentication attempts, please try again later.',
     code: 'AUTH_RATE_LIMIT_EXCEEDED'
@@ -28,8 +32,8 @@ export const authRateLimiter = rateLimit({
 });
 
 export const apiRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // 1000 requests per window
+  windowMs: RATE_LIMIT_WINDOW_MS, // 15 minutes
+  max: RATE_LIMIT_MAX, // 1000 requests per window
   message: {
     message: 'Too many API requests, please try again later.',
     code: 'API_RATE_LIMIT_EXCEEDED'

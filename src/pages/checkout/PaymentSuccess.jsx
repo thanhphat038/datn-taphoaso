@@ -1,11 +1,27 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaCheckCircle, FaShoppingBag, FaHome, FaGift, FaTruck } from 'react-icons/fa';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
+  
+  // Lấy thông tin phương thức thanh toán từ state
+  const paymentMethod = location.state?.paymentMethod || 'cod';
+  const orderId = location.state?.orderId || Math.random().toString(36).substr(2, 9).toUpperCase();
+  
+  // Xác định trạng thái đơn hàng dựa trên phương thức thanh toán
+  const getOrderStatus = () => {
+    if (paymentMethod === 'cod') {
+      return { text: 'Chờ xử lý', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
+    } else {
+      return { text: 'Đã thanh toán', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+    }
+  };
+  
+  const orderStatus = getOrderStatus();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-blue-50/20 flex items-center justify-center px-4">
@@ -31,16 +47,19 @@ const PaymentSuccess = () => {
         {/* Success Message */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Đặt hàng thành công!
+            {paymentMethod === 'cod' ? 'Đặt hàng thành công!' : 'Thanh toán thành công!'}
           </h1>
           <p className="text-lg text-gray-600 mb-4 max-w-md mx-auto">
             Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng và giao đến bạn sớm nhất có thể.
           </p>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto">
-            <div className="flex items-center justify-center gap-2 text-green-700">
-              <FaCheckCircle className="text-green-500" />
+          <div className={`${orderStatus.bgColor} border ${orderStatus.borderColor} rounded-lg p-4 max-w-md mx-auto`}>
+            <div className={`flex items-center justify-center gap-2 ${orderStatus.color.replace('text-', 'text-').replace('600', '700')}`}>
+              <FaCheckCircle className={orderStatus.color.replace('text-', 'text-').replace('600', '500')} />
               <span className="text-sm font-medium">
-                Đơn hàng đã được xác nhận và đang được xử lý
+                {paymentMethod === 'cod' 
+                  ? 'Đơn hàng đã được xác nhận và đang chờ xử lý'
+                  : 'Đơn hàng đã được xác nhận và đang được xử lý'
+                }
               </span>
             </div>
           </div>
@@ -55,7 +74,7 @@ const PaymentSuccess = () => {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Trạng thái:</span>
-              <span className="font-medium text-green-600">Đã thanh toán</span>
+              <span className={`font-medium ${orderStatus.color}`}>{orderStatus.text}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Thời gian:</span>
@@ -63,7 +82,7 @@ const PaymentSuccess = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Mã đơn hàng:</span>
-              <span className="font-medium text-blue-600">#{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+              <span className="font-medium text-blue-600">#{orderId}</span>
             </div>
           </div>
         </div>
@@ -125,7 +144,10 @@ const PaymentSuccess = () => {
         {/* Additional Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500 mb-2">
-            Bạn sẽ nhận được email xác nhận trong vài phút
+            {paymentMethod === 'cod' 
+              ? 'Bạn sẽ nhận được email xác nhận và thông báo khi đơn hàng được xử lý'
+              : 'Bạn sẽ nhận được email xác nhận trong vài phút'
+            }
           </p>
           <p className="text-xs text-gray-400">
             Nếu có thắc mắc, vui lòng liên hệ hotline: 1900-xxxx
