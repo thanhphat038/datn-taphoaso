@@ -9,7 +9,7 @@
  */
 export const getOrderStatusText = (status) => {
   const statusMap = {
-    'pending': 'Chờ thanh toán',
+    'pending': 'Chờ xử lý',
     'paid': 'Đã thanh toán',
     'cancelled': 'Đã hủy',
     'failed': 'Thanh toán thất bại',

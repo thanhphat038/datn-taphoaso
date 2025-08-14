@@ -1,15 +1,15 @@
-import { userService } from './index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/index.js';
+import { JWT_SECRET, ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from '../config/index.js';
+import { userService } from './index.js';
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
 
 class AuthService {
   async login(username, password) {
     try {
-      // Find user by username
-      const user = await userService.findOne({ username });
+      // Find user with password field
+      const user = await userService.findOne({ username }, { select: '+password' });
       if (!user) {
         return {
           success: false,
@@ -26,6 +26,13 @@ class AuthService {
       }
 
       // Verify password
+      if (!user.password) {
+        return {
+          success: false,
+          message: 'User has no password set'
+        };
+      }
+
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return {
@@ -34,17 +41,17 @@ class AuthService {
         };
       }
 
-      // Generate JWT tokens
+      // Generate JWT tokens using global config
       const accessToken = jwt.sign(
         { id: user._id, role: user.role },
         JWT_SECRET,
-        { expiresIn: '15m' } // Short-lived access token
+        { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
       );
       
       const refreshToken = jwt.sign(
         { id: user._id, type: 'refresh' },
         JWT_SECRET,
-        { expiresIn: '7d' } // Long-lived refresh token
+        { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
       );
 
       return {

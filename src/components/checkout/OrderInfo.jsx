@@ -5,7 +5,7 @@ const OrderInfo = ({ orderInfo }) => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending': return 'Chờ thanh toán';
+      case 'pending': return 'Chờ xử lý';
       case 'paid': return 'Đã thanh toán';
       case 'cancelled': return 'Đã hủy';
       case 'failed': return 'Thanh toán thất bại';
