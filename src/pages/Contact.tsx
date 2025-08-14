@@ -78,7 +78,7 @@ const ContactPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">Địa Chỉ</h3>
-                                        <p className="text-gray-600">123 Đường ABC, Quận 1, TP.HCM</p>
+                                        <p className="text-gray-600">QTSC Building 1, Đ. Quang Trung, Tân Hưng Thuận, Hóc Môn, Hồ Chí Minh, Việt Nam</p>
                                     </div>
                                 </div>
 
@@ -90,7 +90,7 @@ const ContactPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">Điện Thoại</h3>
-                                        <p className="text-gray-600">0123 456 789</p>
+                                        <p className="text-gray-600">0859 499 579</p>
                                     </div>
                                 </div>
 
