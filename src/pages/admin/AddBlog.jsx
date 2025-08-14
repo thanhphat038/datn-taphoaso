@@ -11,6 +11,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Toolbar from '../../components/admin/ToolbarTiptap';
+import Cookies from 'js-cookie';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -71,10 +72,26 @@ const AddBlog = () => {
   useEffect(() => {
     const fetchBlogCategories = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/blogs_categories`);
+        const token = Cookies.get('auth_token');
+        if (!token) {
+          console.error('No authentication token found');
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/blogs_categories`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const result = await response.json();
           setBlogCategories(result.data || []);
+        } else if (response.status === 401) {
+          console.error('Unauthorized: Token may be invalid or expired');
+          navigate('/login');
+          return;
         }
       } catch (error) {
         console.error('Error fetching blog categories:', error);
@@ -82,7 +99,7 @@ const AddBlog = () => {
     };
 
     fetchBlogCategories();
-  }, []);
+  }, [navigate]);
 
   // Fetch blog data if editing
   useEffect(() => {
@@ -90,8 +107,25 @@ const AddBlog = () => {
       const fetchBlog = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/blogs/${id}`);
+          const token = Cookies.get('auth_token');
+          if (!token) {
+            console.error('No authentication token found');
+            navigate('/login');
+            return;
+          }
+
+          const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
           if (!response.ok) {
+            if (response.status === 401) {
+              console.error('Unauthorized: Token may be invalid or expired');
+              navigate('/login');
+              return;
+            }
             throw new Error('Failed to fetch blog');
           }
           const result = await response.json();
@@ -159,8 +193,18 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
       formData.append('image', file);
 
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for upload');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData
       });
 

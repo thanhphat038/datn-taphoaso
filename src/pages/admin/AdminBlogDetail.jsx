@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { ModalButton } from '../../components/admin/AdminModal';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import Cookies from 'js-cookie';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -27,8 +28,25 @@ const AdminBlogDetail = () => {
     const fetchBlog = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/blogs/${id}`);
+        const token = Cookies.get('auth_token');
+        if (!token) {
+          console.error('No authentication token found');
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized: Token may be invalid or expired');
+            navigate('/login');
+            return;
+          }
           throw new Error('Failed to fetch blog');
         }
         const result = await response.json();
@@ -40,7 +58,7 @@ const AdminBlogDetail = () => {
       }
     };
     fetchBlog();
-  }, [id]);
+  }, [id, navigate]);
 
   // Handle delete blog
   const handleDeleteBlog = () => {
@@ -50,8 +68,19 @@ const AdminBlogDetail = () => {
   const handleConfirmDelete = async () => {
     try {
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for deletion');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -88,9 +117,17 @@ const AdminBlogDetail = () => {
 
     try {
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for status change');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/blogs/${id}/status`, {
         method: 'PATCH',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

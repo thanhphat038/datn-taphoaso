@@ -8,6 +8,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import Cookies from 'js-cookie';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -33,8 +34,25 @@ const AdminBlogPage = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/blogs`);
+        const token = Cookies.get('auth_token');
+        if (!token) {
+          console.error('No authentication token found');
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/blogs`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized: Token may be invalid or expired');
+            navigate('/login');
+            return;
+          }
           throw new Error("Failed to fetch blogs");
         }
         const result = await response.json();
@@ -47,7 +65,7 @@ const AdminBlogPage = () => {
       }
     };
     fetchBlogs();
-  }, []);
+  }, [navigate]);
 
   // Calculate statistics
   const allBlogs = blogs.length;
@@ -94,11 +112,27 @@ const AdminBlogPage = () => {
 
     try {
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for deletion');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/blogs/${pendingDelete.blogId}`, {
         method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          console.error('Unauthorized for deletion: Token may be invalid or expired');
+          navigate('/login');
+          return;
+        }
         throw new Error("Failed to delete blog");
       }
 
