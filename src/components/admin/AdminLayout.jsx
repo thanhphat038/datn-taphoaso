@@ -71,7 +71,9 @@ const AdminLayout = ({ children }) => {
       `}>
         {/* Logo */}
         <div className="h-18 flex items-center justify-center border-b border-gray-200 relative">
-          <img src="/images/logo_ngang.png" alt="Logo" className="h-9" />
+          <NavLink to="/" className="hover:opacity-80 transition-opacity">
+            <img src="/images/logo_ngang.png" alt="Logo" className="h-9" />
+          </NavLink>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden absolute right-4 p-2 text-gray-500 hover:text-gray-700"

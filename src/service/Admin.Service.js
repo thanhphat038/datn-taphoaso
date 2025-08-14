@@ -185,3 +185,24 @@ export const toggleBrandStatus = (id, status) => {
   const action = status === 'active' ? 'deactivate' : 'activate';
   return axios.patch(`${api}/brands/${id}/${action}`, {}, { headers: getAuthHeaders() });
 };
+
+// BLOG CATEGORY MANAGEMENT
+export const getAllBlogCategories = () => {
+  return axios.get(`${api}/blogs_categories`, { headers: getAuthHeaders() });
+};
+
+export const createBlogCategory = (data) => {
+  return axios.post(`${api}/blogs_categories`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const updateBlogCategory = (id, data) => {
+  return axios.put(`${api}/blogs_categories/${id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};
+
+export const deleteBlogCategory = (id) => {
+  return axios.delete(`${api}/blogs_categories/${id}`, { headers: getAuthHeaders() });
+};
+
+export const toggleBlogCategoryStatus = (id, status) => {
+  return axios.patch(`${api}/blogs_categories/${id}/toggle-status`, { status }, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+};

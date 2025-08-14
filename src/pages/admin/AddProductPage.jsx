@@ -105,7 +105,19 @@ const AddProductPage = () => {
           try {
             setLoading(true);
             
-            const response = await fetch(`${API_BASE_URL}/products/${id}`);
+            const token = Cookies.get('auth_token');
+            if (!token) {
+              console.error('No authentication token found');
+              navigate('/login');
+              return;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
             
             if (!response.ok) {
               throw new Error("Failed to fetch product");

@@ -17,6 +17,7 @@ import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
 import { getAllCategories, getAllBrands } from '../../service/Admin.Service.js';
+import Cookies from 'js-cookie';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -48,8 +49,25 @@ const AdminProduct = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/products`);
+        const token = Cookies.get('auth_token');
+        if (!token) {
+          console.error('No authentication token found');
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/products`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized: Token may be invalid or expired');
+            navigate('/login');
+            return;
+          }
           throw new Error("Failed to fetch products");
         }
         const result = await response.json();
@@ -62,7 +80,7 @@ const AdminProduct = () => {
       }
     };
     fetchProducts();
-  }, []);
+  }, [navigate]);
 
   // Fetch categories for mapping
   useEffect(() => {
@@ -105,8 +123,18 @@ const AdminProduct = () => {
 
     try {
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for deletion');
+        navigate('/login');
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
         method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -141,10 +169,20 @@ const AdminProduct = () => {
 
     try {
       setLoading(true);
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found for status toggle');
+        navigate('/login');
+        return;
+      }
       const response = await fetch(
         `${API_BASE_URL}/products/${productId}/${action}`,
         {
           method: "PATCH",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
