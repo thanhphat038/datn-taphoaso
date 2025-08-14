@@ -195,7 +195,7 @@ Content-Type: application/json
     "sdt": "string",
     "ten_nguoi_nhan": "string"
   },
-  "order_status": "pending" | "processing" | "shipped" | "delivered" | "cancelled",
+  "order_status": "pending" | "processing" | "delivered" | "cancelled",
   "receiver": "string",
   "sdt": "string",
   "orderDetails": [
@@ -223,9 +223,9 @@ PUT /orders/:id
 Content-Type: application/json
 
 {
-  "status": "pending" | "processing" | "shipped" | "delivered" | "cancelled",
+  "status": "pending" | "processing" | "delivered" | "cancelled",
   "payment_status": "pending" | "paid" | "failed",
-  "shipping_status": "pending" | "shipped" | "delivered"
+  "shipping_status": "processing" | "delivered"
 }
 
 # Delete order

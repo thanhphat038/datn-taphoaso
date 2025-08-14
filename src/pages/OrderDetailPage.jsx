@@ -142,8 +142,6 @@ const OrderDetailPage = () => {
         return 'bg-green-100 text-green-700';
       case 'processing':
         return 'bg-blue-100 text-blue-700';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-700';
       case 'delivered':
         return 'bg-green-100 text-green-700';
       case 'cancelled':
@@ -163,8 +161,6 @@ const OrderDetailPage = () => {
         return 'Đang xử lý';
       case 'failed':
         return 'Thanh toán thất bại';
-      case 'shipped':
-        return 'Đang giao hàng';
       case 'delivered':
         return 'Đã giao hàng';
       case 'cancelled':

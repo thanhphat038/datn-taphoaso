@@ -14,8 +14,7 @@ export const getOrderStatusText = (status) => {
     'cancelled': 'Đã hủy',
     'failed': 'Thanh toán thất bại',
     'processing': 'Đang xử lý',
-    'shipped': 'Đã giao hàng',
-    'delivered': 'Đã nhận hàng',
+    'delivered': 'Đã giao hàng',
     'returned': 'Đã trả hàng'
   };
   
@@ -34,7 +33,6 @@ export const getOrderStatusColor = (status) => {
     'cancelled': 'text-red-600',
     'failed': 'text-red-600',
     'processing': 'text-blue-600',
-    'shipped': 'text-purple-600',
     'delivered': 'text-green-600',
     'returned': 'text-orange-600'
   };
@@ -54,7 +52,6 @@ export const getOrderStatusBgColor = (status) => {
     'cancelled': 'bg-red-50',
     'failed': 'bg-red-50',
     'processing': 'bg-blue-50',
-    'shipped': 'bg-purple-50',
     'delivered': 'bg-green-50',
     'returned': 'bg-orange-50'
   };
@@ -74,7 +71,6 @@ export const getOrderStatusBorderColor = (status) => {
     'cancelled': 'border-red-200',
     'failed': 'border-red-200',
     'processing': 'border-blue-200',
-    'shipped': 'border-purple-200',
     'delivered': 'border-green-200',
     'returned': 'border-orange-200'
   };

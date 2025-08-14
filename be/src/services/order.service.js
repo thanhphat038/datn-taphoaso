@@ -246,7 +246,7 @@ class OrderService extends DBService {
   }
 
   async updateStatus(orderId, status) {
-    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
+    const validStatuses =['pending', 'paid', 'processing', 'delivered', 'cancelled', 'failed'];
 
     if (!validStatuses.includes(status)) {
       throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid order status');
