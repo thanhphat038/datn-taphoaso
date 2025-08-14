@@ -192,14 +192,20 @@ const Footer = () => {
             </form>
 
             <div className="space-y-2 pt-4">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-                <span className="text-gray-300 text-sm">Chính sách khách hàng</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Truck className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-                <span className="text-gray-300 text-sm">Chính sách giao hàng</span>
-              </div>
+              <Link 
+                to="/chinh-sach-khach-hang" 
+                className="flex items-center space-x-2 hover:text-white transition-colors cursor-pointer group"
+              >
+                <Shield className="h-4 w-4 text-yellow-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="text-gray-300 text-sm group-hover:text-white">Chính sách khách hàng</span>
+              </Link>
+              <Link 
+                to="/chinh-sach-giao-hang" 
+                className="flex items-center space-x-2 hover:text-white transition-colors cursor-pointer group"
+              >
+                <Truck className="h-4 w-4 text-yellow-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="text-gray-300 text-sm group-hover:text-white">Chính sách giao hàng</span>
+              </Link>
             </div>
           </div>
         </div>
