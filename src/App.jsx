@@ -6,6 +6,9 @@ import { ToastProvider } from './components/ToastContainer';
 import TokenExpiredNotification from './components/TokenExpiredNotification';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/Contact';
+import ChinhSachKH from './pages/ChinhSachKH';
+import ChinhSachGH from './pages/ChinhSachGH';
 import NotFoundPage from './pages/NotFoundPage';
 import Checkout from './pages/checkout/Checkout';
 import SelectAddress from './pages/checkout/SelectAddress';
@@ -28,7 +31,6 @@ import OrderDetailPage from './pages/OrderDetailPage';
 
 import ProductsPage from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
-import AdminProtected from './pages/admin/AdminProtected';
 import AdminUser from './pages/admin/AdminUser';
 import AdminProduct from './pages/admin/AdminProduct';
 import AdminCategory from './pages/admin/AdminCategory';
@@ -54,6 +56,9 @@ import AddVariantPage from './pages/admin/AddVariantPage';
 import DetailProduct from './pages/admin/DetailProduct';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import AdminProtected from './components/admin/AdminProtected';
+import AdminBanner from './pages/admin/AdminBanner';
+import AddBannerPage from './pages/admin/AddBannerPage';
 import { PaymentRedirectModalTest } from './components/checkout/PaymentRedirectModal';
 
 function Layout() {
@@ -76,6 +81,9 @@ function Layout() {
               <Route path="/search/:value" element={<ProductsSearch />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/chinh-sach-khach-hang" element={<ChinhSachKH />} />
+              <Route path="/chinh-sach-giao-hang" element={<ChinhSachGH />} />
               <Route path="/cart" element={
                 <ProtectedRoute>
                   <CartPage />
@@ -133,6 +141,9 @@ function Layout() {
             <Route path="/admin/addproduct/:id" element={<AddProductPage />} />
             <Route path="/admin/category" element={<AdminCategory />} />
             <Route path="/admin/blogcategory" element={<AdminBlogCategory />} />
+            <Route path="/admin/banner" element={<AdminBanner />} />
+            <Route path="/admin/banner/add" element={<AddBannerPage />} />
+            <Route path="/admin/banner/edit/:id" element={<AddBannerPage />} />
             <Route path="/admin/voucher" element={<VoucherPage />} />
             <Route path="/admin/addvoucher" element={<AddVoucherPage />} />
             <Route path="/admin/addvoucher/:id" element={<AddVoucherPage />} />

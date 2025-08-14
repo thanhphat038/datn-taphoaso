@@ -10,11 +10,14 @@ const ProductsPage = () => {
 
     const location = useLocation();
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedPriceRange, setSelectedPriceRange] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showAllCategories, setShowAllCategories] = useState(false);
     const productsPerPage = 16;
     
     // Thêm state cho notification
@@ -27,6 +30,27 @@ const ProductsPage = () => {
             setSelectedCategoryId(categoryId);
         }
     }, [location.search]);
+
+    // Fetch categories từ API
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                setCategoriesLoading(true);
+                const response = await fetch(`${API_BASE_URL}/categories`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch categories');
+                }
+                const result = await response.json();
+                setCategories(result.data || []);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                // Không set error cho categories vì không ảnh hưởng đến chức năng chính
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Fetch products từ API trực tiếp
     useEffect(() => {
@@ -48,11 +72,6 @@ const ProductsPage = () => {
         };
         fetchProducts();
     }, []);
-
-    const categoryList = [
-        { id: "684697023d545550b38460cd", name: "Mì ăn liền" },
-        { id: "68693d5117edd67c23b67bc1", name: "Nước uống" },
-    ];
 
     // Đếm số sản phẩm theo id danh mục
     const getCategoryCount = (categoryId) => {
@@ -244,54 +263,105 @@ const ProductsPage = () => {
                                     )}
                                 </div>
                                 <div className='space-y-2'>
-                                    {categoryList.map(category => (
-                                        <div
-                                            key={category.id}
-                                            className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
-                                            ${selectedCategoryId === category.id 
-                                                ? 'bg-blue-50 border border-blue-200' 
-                                                : 'hover:bg-gray-50 border border-transparent'}`}
-                                            onClick={() => setSelectedCategoryId(category.id)}
-                                        >
-                                            <div className='flex items-center gap-3'>
-                                                <input
-                                                    type="radio"
-                                                    id={category.id}
-                                                    className='w-4 h-4 text-blue-600'
-                                                    name="category"
-                                                    checked={selectedCategoryId === category.id}
-                                                    onChange={() => setSelectedCategoryId(category.id)}
-                                                />
-                                                <label htmlFor={category.id} className='font-medium text-gray-700'>{category.name}</label>
+                                    {categoriesLoading ? (
+                                        // Loading state cho categories
+                                        Array.from({ length: 3 }, (_, index) => (
+                                            <div key={index} className="animate-pulse">
+                                                <div className="flex items-center gap-3 p-3">
+                                                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                                                    <div className="bg-gray-200 h-4 rounded flex-1"></div>
+                                                </div>
                                             </div>
-                                            {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
-                                                {getCategoryCount(category.id)}
-                                            </span> */}
+                                        ))
+                                    ) : categories.length > 0 ? (
+                                        // Hiển thị categories từ database
+                                        <>
+                                            {/* All Categories */}
+                                            <div
+                                                className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                                ${selectedCategoryId === null 
+                                                    ? 'bg-blue-50 border border-blue-200' 
+                                                    : 'hover:bg-gray-50 border border-transparent'}`}
+                                                onClick={() => setSelectedCategoryId(null)}
+                                            >
+                                                <div className='flex items-center gap-3'>
+                                                    <input
+                                                        type="radio"
+                                                        id="all"
+                                                        className='w-4 h-4 text-blue-600'
+                                                        name="category"
+                                                        checked={selectedCategoryId === null}
+                                                        onChange={() => setSelectedCategoryId(null)}
+                                                    />
+                                                    <label htmlFor="all" className='font-medium text-gray-700'>Tất cả</label>
+                                                </div>
+                                            </div>
+
+                                            {/* 4 newest categories */}
+                                            {categories.slice(0, 4).map(category => (
+                                                <div
+                                                    key={category._id}
+                                                    className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                                    ${selectedCategoryId === category._id 
+                                                        ? 'bg-blue-50 border border-blue-200' 
+                                                        : 'hover:bg-gray-50 border border-transparent'}`}
+                                                    onClick={() => setSelectedCategoryId(category._id)}
+                                                >
+                                                    <div className='flex items-center gap-3'>
+                                                        <input
+                                                            type="radio"
+                                                            id={category._id}
+                                                            className='w-4 h-4 text-blue-600'
+                                                            name="category"
+                                                            checked={selectedCategoryId === category._id}
+                                                            onChange={() => setSelectedCategoryId(category._id)}
+                                                        />
+                                                        <label htmlFor={category._id} className='font-medium text-gray-700'>{category.name}</label>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Show more categories if available */}
+                                            {categories.length > 4 && (
+                                                <>
+                                                    {showAllCategories && categories.slice(4).map(category => (
+                                                        <div
+                                                            key={category._id}
+                                                            className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
+                                                            ${selectedCategoryId === category._id 
+                                                                ? 'bg-blue-50 border border-blue-200' 
+                                                                : 'hover:bg-gray-50 border border-transparent'}`}
+                                                            onClick={() => setSelectedCategoryId(category._id)}
+                                                        >
+                                                            <div className='flex items-center gap-3'>
+                                                                <input
+                                                                    type="radio"
+                                                                    id={category._id}
+                                                                    className='w-4 h-4 text-blue-600'
+                                                                    name="category"
+                                                                    checked={selectedCategoryId === category._id}
+                                                                    onChange={() => setSelectedCategoryId(category._id)}
+                                                                />
+                                                                <label htmlFor={category._id} className='font-medium text-gray-700'>{category.name}</label>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    
+                                                    <button
+                                                        onClick={() => setShowAllCategories(!showAllCategories)}
+                                                        className='w-full text-center py-2 text-sm text-blue-600 hover:text-blue-800 font-medium border border-blue-200 rounded-xl hover:bg-blue-50 transition-all duration-200'
+                                                    >
+                                                        {showAllCategories ? 'Thu gọn' : `Xem thêm (${categories.length - 4})`}
+                                                    </button>
+                                                </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        // Fallback khi không có categories
+                                        <div className="text-center py-4 text-gray-500">
+                                            <p>Không có danh mục nào</p>
                                         </div>
-                                    ))}
-                                    {/* All Categories */}
-                                    <div
-                                        className={`flex items-center justify-between cursor-pointer p-3 rounded-xl transition-all duration-200
-                                        ${selectedCategoryId === null 
-                                            ? 'bg-blue-50 border border-blue-200' 
-                                            : 'hover:bg-gray-50 border border-transparent'}`}
-                                        onClick={() => setSelectedCategoryId(null)}
-                                    >
-                                        <div className='flex items-center gap-3'>
-                                            <input
-                                                type="radio"
-                                                id="all"
-                                                className='w-4 h-4 text-blue-600'
-                                                name="category"
-                                                checked={selectedCategoryId === null}
-                                                onChange={() => setSelectedCategoryId(null)}
-                                            />
-                                            <label htmlFor="all" className='font-medium text-gray-700'>Tất cả</label>
-                                        </div>
-                                        {/* <span className='text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
-                                            {products.length}
-                                        </span> */}
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 

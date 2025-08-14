@@ -11,6 +11,7 @@ import AddressService from './address.service.js';
 import AuthService from './auth.service.js';
 import BlogService from './blog.service.js';
 import BlogCategoryService from './blogCategory.service.js';
+import * as bannerService from './banner.service.js';
 
 // Create instances
 const userService = new UserService();
@@ -41,5 +42,6 @@ export {
   addressService,
   authService,
   blogService,
-  blogCategoryService
+  blogCategoryService,
+  bannerService
 };

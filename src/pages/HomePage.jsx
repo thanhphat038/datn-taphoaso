@@ -138,12 +138,12 @@ const HomePage = () => {
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'>
-            {getProductsByCategory("684697023d545550b38460cd", 5)}
+            {getProductsByCategory("6898c4e1e39ae6724ca30a11", 5)}
           </div>
 
           <div className='mt-8 flex justify-center'>
             <Link
-              to="/product?category=684697023d545550b38460cd"
+              to="/product?category=6898c4e1e39ae6724ca30a11"
               className='inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors'
             >
               <span>Xem thêm</span>
@@ -158,16 +158,16 @@ const HomePage = () => {
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1 h-8 bg-blue-500 rounded-full"></div>
-            <h2 className="text-2xl font-semibold text-gray-800">Nước Uống</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Nước ngọt</h2>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'>
-            {getProductsByCategory("68693d5117edd67c23b67bc1", 5)}
+            {getProductsByCategory("6898c4e1e39ae6724ca30a0a", 5)}
           </div>
 
           <div className='mt-8 flex justify-center'>
             <Link 
-              to="/product?category=68693d5117edd67c23b67bc1" 
+              to="/product?category=6898c4e1e39ae6724ca30a0a" 
               className='inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors'
             >
               <span>Xem thêm</span>
@@ -229,16 +229,16 @@ const HomePage = () => {
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-1 h-8 bg-purple-500 rounded-full"></div>
-                <h2 className="text-2xl font-semibold text-gray-800">Nước Uống</h2>
+                <h2 className="text-2xl font-semibold text-gray-800">Kem</h2>
               </div>
 
               <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                {getProductsByCategory("68693d5117edd67c23b67bc1", 3)}
+                {getProductsByCategory("6898c4e1e39ae6724ca30a12", 3)}
               </div>
 
               <div className='mt-8 flex justify-center'>
                 <Link 
-                  to="/product?category=68693d5117edd67c23b67bc1" 
+                  to="/product?category=6898c4e1e39ae6724ca30a12" 
                   className='inline-flex items-center gap-2 px-6 py-3 bg-purple-500 text-white font-medium rounded-lg hover:bg-purple-600 transition-colors'
                 >
                   <span>Xem thêm</span>

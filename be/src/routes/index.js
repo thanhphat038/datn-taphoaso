@@ -28,6 +28,7 @@ import shippingRouter from './shipping.route.js';
 import productVariantRouter from './productVariant.route.js';
 import recentViewsRouter from './recentViews.route.js';
 
+import bannerRouter from './banner.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -65,6 +66,7 @@ router.use('/variants', variantRouter);
 
 router.use('/upload', uploadRouter);
 
+router.use('/banners', bannerRouter);
 // Shipping routes
 router.use('/shipping', shippingRouter);
 

@@ -16,7 +16,7 @@ import AdminTable from "../../components/admin/AdminTable";
 import AdminSearchFilter from "../../components/admin/AdminSearchFilter";
 import AdminPagination from "../../components/admin/AdminPagination";
 import AdminActionDropdown from "../../components/admin/AdminActionDropdown";
-import { getAllCategories } from '../../service/Admin.Service.js';
+import { getAllCategories, getAllBrands } from '../../service/Admin.Service.js';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -37,6 +37,7 @@ const AdminProduct = () => {
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' | 'error'
 
@@ -74,6 +75,19 @@ const AdminProduct = () => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // Fetch brands for mapping
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await getAllBrands();
+        setBrands(response.data.data || []);
+      } catch (error) {
+        // Không cần setError ở đây, chỉ cần để brands là [] nếu lỗi
+      }
+    };
+    fetchBrands();
   }, []);
 
   // Handle edit product
@@ -299,6 +313,24 @@ const AdminProduct = () => {
         }
         return (
           <div className="text-sm text-gray-600">{categoryName}</div>
+        );
+      },
+    },
+    {
+      title: "Thương hiệu",
+      key: "brand",
+      render: (product) => {
+        let brandName = "Chưa có";
+        if (product.brand_id) {
+          if (typeof product.brand_id === 'object' && product.brand_id.name) {
+            brandName = product.brand_id.name;
+          } else if (typeof product.brand_id === 'string') {
+            const found = brands.find(b => b._id === product.brand_id);
+            if (found) brandName = found.name;
+          }
+        }
+        return (
+          <div className="text-sm text-gray-600">{brandName}</div>
         );
       },
     },
