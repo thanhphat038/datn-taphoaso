@@ -485,7 +485,7 @@ const AdminPage = () => {
               </div>
             </AdminCard>
           </Link>
-          <Link to="/admin/brand" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
+          {/* <Link to="/admin/brand" className="hover:shadow-md transition-shadow cursor-pointer no-underline">
             <AdminCard>
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-pink-100 text-pink-600 rounded-lg">
@@ -497,7 +497,7 @@ const AdminPage = () => {
                 </div>
               </div>
             </AdminCard>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </AdminLayout>
