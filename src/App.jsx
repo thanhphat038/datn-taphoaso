@@ -5,6 +5,7 @@ import { AlertProvider } from './components/AlertProvider';
 import { ToastProvider } from './components/ToastContainer';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/Contact';
 import ChinhSachKH from './pages/ChinhSachKH';
 import ChinhSachGH from './pages/ChinhSachGH';
 import NotFoundPage from './pages/NotFoundPage';
@@ -79,6 +80,7 @@ function Layout() {
               <Route path="/search/:value" element={<ProductsSearch />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/chinh-sach-khach-hang" element={<ChinhSachKH />} />
               <Route path="/chinh-sach-giao-hang" element={<ChinhSachGH />} />
               <Route path="/cart" element={
