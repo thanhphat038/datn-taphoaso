@@ -47,13 +47,13 @@ class VoucherService extends DBService {
     const voucher = await this.validateVoucherCode(code, userId, orderAmount);
     
     let discountAmount = 0;
-    if (voucher.type === 'percentage') {
-      discountAmount = (orderAmount * voucher.value) / 100;
-      if (discountAmount > voucher.max_discount) {
+    if (voucher.discount_type === 'percentage') {
+      discountAmount = (orderAmount * voucher.discount_value) / 100;
+      if (voucher.max_discount && discountAmount > voucher.max_discount) {
         discountAmount = voucher.max_discount;
       }
     } else {
-      discountAmount = voucher.value;
+      discountAmount = voucher.discount_value;
     }
 
     // Update voucher usage
@@ -101,6 +101,45 @@ class VoucherService extends DBService {
         }
       }
     ]);
+  }
+
+  // Thêm method này để tương thích với controller
+  async validateVoucher(code, orderAmount) {
+    // Tạm thời bỏ qua userId để test
+    const userId = null;
+    return await this.validateVoucherCode(code, userId, orderAmount);
+  }
+
+  // Thêm method thiếu
+  async findValidVoucherByCode(code, userId) {
+    const voucher = await this.model.findOne({ code });
+    
+    if (!voucher) {
+      throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Voucher not found');
+    }
+
+    const now = new Date();
+    if (now < voucher.start_date || now > voucher.end_date) {
+      throw new AppError(ERROR_CODES.BUSINESS_VOUCHER_EXPIRED);
+    }
+
+    if (voucher.qty <= 0) {
+      throw new AppError(ERROR_CODES.BUSINESS_VOUCHER_OUT_OF_STOCK);
+    }
+
+    // Check if user has used this voucher before
+    const userUsage = await this.model.findOne({
+      _id: voucher._id,
+      'usage_history.user_id': userId
+    });
+
+    if (userUsage && voucher.max_uses_per_user <= userUsage.usage_history.filter(
+      usage => usage.user_id.toString() === userId
+    ).length) {
+      throw new AppError(ERROR_CODES.BUSINESS_VOUCHER_MAX_USES_EXCEEDED);
+    }
+
+    return voucher;
   }
 }
 

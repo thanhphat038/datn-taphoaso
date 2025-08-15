@@ -34,6 +34,14 @@ const Checkout = () => {
   const productFromState = location.state?.product;
   const productsToDisplay = productFromState ? [productFromState] : cartItems;
 
+  // Thêm state này vào đầu component
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+
+  // Nhận voucher data từ CartPage
+  const cartPageVoucher = location.state?.appliedVoucher;
+  const cartPageVoucherDiscount = location.state?.voucherDiscount;
+  const cartPageVoucherCode = location.state?.voucherCode;
+
   useEffect(() => {
     // Kiểm tra sản phẩm trong giỏ hàng trước khi cho phép thanh toán
     if (productsToDisplay.length === 0) {
@@ -55,6 +63,31 @@ const Checkout = () => {
       // Clear error state
       navigate(location.pathname, { replace: true });
       return;
+    }
+
+    // Khởi tạo voucher state từ CartPage nếu có
+    if (cartPageVoucher && cartPageVoucherCode) {
+      setVoucher(cartPageVoucher);
+      setVoucherCode(cartPageVoucherCode);
+      setVoucherMessage(`Mã giảm giá ${cartPageVoucher.code} đã được áp dụng!`);
+      
+      // Tính toán lại voucher discount
+      const subtotal = productsToDisplay.reduce((total, item) => 
+        total + (item.price || item.product_id?.price || 0) * (item.quantity || item.qty || 0), 0
+      );
+      
+      let calculatedDiscount = 0;
+      if (cartPageVoucher.discount_type === 'percentage') {
+        calculatedDiscount = (subtotal * cartPageVoucher.discount_value) / 100;
+        if (cartPageVoucher.max_discount && calculatedDiscount > cartPageVoucher.max_discount) {
+          calculatedDiscount = cartPageVoucher.max_discount;
+        }
+      } else {
+        calculatedDiscount = Math.min(cartPageVoucher.discount_value, subtotal);
+      }
+      
+      // Cập nhật discount amount
+      setVoucherDiscount(calculatedDiscount);
     }
 
     // Nếu có địa chỉ được chọn từ SelectAddress, ưu tiên hiển thị địa chỉ này
@@ -82,7 +115,7 @@ const Checkout = () => {
       }
     };
     fetchAddress();
-  }, [location.state, navigate, cartItems.length, productFromState]);
+  }, [location.state, navigate, cartItems.length, productFromState, cartPageVoucher, cartPageVoucherCode, productsToDisplay]);
 
 
 
@@ -96,8 +129,8 @@ const Checkout = () => {
 
     try {
       const res = await getVoucherByCode(voucherCode);
-      // Nếu API trả về { data: { ...voucher } }
-      const voucherData = res.data; // tuỳ API trả về
+      const voucherData = res.data;
+      
       // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
       if (total < voucherData.min_order_value) {
         setVoucher(null);
@@ -106,10 +139,24 @@ const Checkout = () => {
         );
         return;
       }
+      
       setVoucher(voucherData);
       setVoucherMessage(
         `Mã giảm giá ${voucherData.code} được áp dụng thành công!`
       );
+      
+      // Tính toán và cập nhật discount
+      let calculatedDiscount = 0;
+      if (voucherData.discount_type === 'percentage') {
+        calculatedDiscount = (total * voucherData.discount_value) / 100;
+        if (voucherData.max_discount && calculatedDiscount > voucherData.max_discount) {
+          calculatedDiscount = voucherData.max_discount;
+        }
+      } else {
+        calculatedDiscount = Math.min(voucherData.discount_value, total);
+      }
+      
+      setVoucherDiscount(calculatedDiscount);
     } catch (error) {
       setVoucher(null);
       setVoucherMessage(
@@ -231,7 +278,14 @@ const Checkout = () => {
     return 0;
   };
 
-  const voucherDiscount = calculateVoucherDiscount();
+  // Cập nhật calculateTotal để bao gồm voucher discount
+  const calculateTotal = () => {
+    const subtotal = productsToDisplay.reduce((total, item) => {
+      return total + (item.price || item.product_id?.price || 0) * (item.quantity || item.qty || 0);
+    }, 0);
+    
+    return subtotal + shippingFee - voucherDiscount;
+  };
 
   // Hàm tính phí vận chuyển
   const calculateShippingFeeForAddress = async (address) => {
@@ -255,10 +309,6 @@ const Checkout = () => {
     } finally {
       setIsCalculatingShipping(false);
     }
-  };
-
-  const calculateTotal = () => {
-    return total + shippingFee - voucherDiscount;
   };
 
   // Hiển thị thông báo giỏ hàng trống
@@ -466,8 +516,8 @@ const Checkout = () => {
                         <div className="font-medium text-green-800">Mã {voucher.code} đã áp dụng!</div>
                         <div className="text-sm text-green-600">
                           {voucher.discount_type === 'percentage'
-                            ? `Giảm ${voucher.discount_value}% tối đa ${voucher.max_discount?.toLocaleString()}đ`
-                            : `Giảm ${voucher.discount_value?.toLocaleString()}đ`}
+                            ? `Giảm ${voucher.discount_value || 0}% tối đa ${(voucher.max_discount || 0).toLocaleString()}đ`
+                            : `Giảm ${(voucher.discount_value || 0).toLocaleString()}đ`}
                         </div>
                       </div>
                       <button
@@ -475,6 +525,7 @@ const Checkout = () => {
                           setVoucher(null);
                           setVoucherCode('');
                           setVoucherMessage('');
+                          setVoucherDiscount(0); // Reset discount
                         }}
                         className="text-green-600 hover:text-green-700"
                       >

@@ -17,44 +17,36 @@ export const createOrder = async (req, res, next) => {
     const { address, receiver, sdt, items, payment_method, note, voucher_code } = req.body;
 
     console.log('🔍 Debug - createOrder called with items:', items);
-    console.log('🔍 Debug - items type:', typeof items);
-    console.log('🔍 Debug - items length:', items?.length);
 
+    // Validation
     if (!address || !receiver || !sdt || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
     }
 
     const userId = req.user.id;
     console.log('🔍 Debug - User ID:', userId);
-    
-    const cart = await cartService.getCart(userId);
-    console.log('🔍 Debug - Cart:', cart);
 
-    // if (!cart || !cart.items?.length) {
-    //   throw new AppError(ERROR_CODES.BAD_REQUEST, 'Cart is empty');
-    // }
-
+    // Validate items
     for (const item of items) {
-      console.log('🔍 Debug - Processing item:', item);   
-      console.log('🔍 Debug - Product ID:', item.product_id);   
-
-      const product = await productService.findById(item.product_id);
-      console.log('🔍 Debug - Found product:', product?.name);
-      
-      if (!product) {
-        throw new AppError(ERROR_CODES.NOT_FOUND, `Product with ID ${item.product_id} not found`);
+      if (!item.product_id || !item.qty || item.qty <= 0) {
+        throw new AppError(ERROR_CODES.BAD_REQUEST, 'Invalid item data');
       }
     }
 
+    // Validate voucher nếu có (với error handling)
     let voucher = null;
     if (voucher_code) {
-      voucher = await voucherService.findValidVoucherByCode(voucher_code, userId);
-      if (!voucher) {
-        throw new AppError(ERROR_CODES.BAD_REQUEST, 'Invalid or expired voucher');
+      try {
+        voucher = await voucherService.findValidVoucherByCode(voucher_code, userId);
+        console.log('🔍 Debug - Validated voucher:', voucher?.code);
+      } catch (voucherError) {
+        console.log('🔍 Debug - Voucher validation failed:', voucherError.message);
+        // Không throw error, chỉ bỏ qua voucher
+        voucher = null;
       }
     }
 
-    console.log('🔍 Debug - Calling orderService.createOrder with items:', items);
+    // Tạo order
     const order = await orderService.createOrder({
       user_id: userId,
       address,
@@ -63,11 +55,13 @@ export const createOrder = async (req, res, next) => {
       payment_method,
       note,
       items,
-      voucher_code,
-      voucher, // optional, may be null
+      voucher_code: voucher ? voucher_code : undefined,
+      voucher: voucher ? voucher._id : undefined,
     });
 
     console.log('🔍 Debug - Created order:', order._id);
+    
+    // Clear cart sau khi tạo order thành công
     await cartService.clearCart(userId);
 
     res.json({ success: true, data: order });

@@ -6,6 +6,7 @@ import { updateCartItem, removeCartItem } from '../service/Cart.service';
 import { CartContext } from '../context/CartContext';
 import { FaShoppingCart, FaTrash, FaGift, FaTruck, FaCreditCard, FaChevronDown } from 'react-icons/fa';
 import { getAllVouchers } from '../service/Admin.Service';
+import { validateVoucherAPI } from '../service/Voucher.service'; // Thêm import cho validateVoucherAPI
 
 const CartPage = () => {
   const { cartItems, setInitialCartItems } = useContext(CartContext);
@@ -81,34 +82,40 @@ const CartPage = () => {
     fetchVouchers();
   }, []);
 
-  // Hàm xử lý áp dụng mã giảm giá
-  const handleApplyVoucher = () => {
-    const subtotal = cartItems.reduce((total, item) => total + item.price * item.qty, 0);
-    
-    // Ví dụ: mã 'GIAM10' giảm 10%, 'GIAM50K' giảm 50k, 'GIAM20K' giảm 20k
-    const voucher = voucherCode.trim().toUpperCase();
-    
-    if (voucher === 'GIAM10') {
-      const discount = Math.floor(subtotal * 0.1);
-      setVoucherDiscount(discount);
-      setVoucherMessage('Áp dụng mã giảm giá 10% thành công!');
-      setIsVoucherApplied(true);
-      setAppliedVoucher({ code: voucher, type: 'percentage', value: 10, discount });
-    } else if (voucher === 'GIAM50K') {
-      const discount = Math.min(50000, subtotal);
-      setVoucherDiscount(discount);
-      setVoucherMessage('Áp dụng mã giảm giá 50.000đ thành công!');
-      setIsVoucherApplied(true);
-      setAppliedVoucher({ code: voucher, type: 'fixed', value: 50000, discount });
-    } else if (voucher === 'GIAM20K') {
-      const discount = Math.min(20000, subtotal);
-      setVoucherDiscount(discount);
-      setVoucherMessage('Áp dụng mã giảm giá 20.000đ thành công!');
-      setIsVoucherApplied(true);
-      setAppliedVoucher({ code: voucher, type: 'fixed', value: 20000, discount });
-    } else {
+  // Thay thế hàm handleApplyVoucher hiện tại
+  const handleApplyVoucher = async () => {
+    try {
+      const subtotal = cartItems.reduce((total, item) => total + item.price * item.qty, 0);
+      
+      if (!voucherCode.trim()) {
+        setVoucherMessage('Vui lòng nhập mã giảm giá!');
+        return;
+      }
+      
+      // Gọi API validate voucher
+      const response = await validateVoucherAPI(voucherCode.trim(), subtotal);
+      
+      if (response.data.success) {
+        const { voucher, discountAmount } = response.data.data;
+        setVoucherDiscount(discountAmount);
+        setVoucherMessage(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
+        setIsVoucherApplied(true);
+        // Cập nhật appliedVoucher với đúng structure từ backend
+        setAppliedVoucher({
+          code: voucher.code,
+          discount_type: voucher.discount_type,
+          discount_value: voucher.discount_value,
+          max_discount: voucher.max_discount,
+          min_order_value: voucher.min_order_value
+        });
+      }
+    } catch (error) {
+      console.error('Lỗi validate voucher:', error);
       setVoucherDiscount(0);
-      setVoucherMessage('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+      setVoucherMessage(
+        error.response?.data?.message || 
+        'Mã giảm giá không hợp lệ hoặc đã hết hạn!'
+      );
       setIsVoucherApplied(false);
       setAppliedVoucher(null);
     }
@@ -350,8 +357,8 @@ const CartPage = () => {
                                       <div className="font-medium text-gray-800">{voucher.code}</div>
                                       <div className="text-sm text-gray-600">
                                         {voucher.discount_type === 'percentage' 
-                                          ? `Giảm ${voucher.discount_value}%` 
-                                          : `Giảm ${voucher.discount_value?.toLocaleString()}đ`
+                                          ? `Giảm ${voucher.discount_value}% tối đa ${(voucher.max_discount || 0).toLocaleString()}đ` 
+                                          : `Giảm ${(voucher.discount_value || 0).toLocaleString()}đ`
                                         }
                                       </div>
                                       {voucher.min_order_value && (
@@ -405,9 +412,9 @@ const CartPage = () => {
                         <div>
                           <div className="font-medium text-green-800">Mã {appliedVoucher.code} đã áp dụng!</div>
                           <div className="text-sm text-green-600">
-                            {appliedVoucher.type === 'percentage' 
-                              ? `Giảm ${appliedVoucher.value}%` 
-                              : `Giảm ${appliedVoucher.value?.toLocaleString()}đ`
+                            {appliedVoucher.discount_type === 'percentage' 
+                              ? `Giảm ${appliedVoucher.discount_value}% tối đa ${(appliedVoucher.max_discount || 0).toLocaleString()}đ` 
+                              : `Giảm ${(appliedVoucher.discount_value || 0).toLocaleString()}đ`
                             }
                           </div>
                         </div>
@@ -467,7 +474,14 @@ const CartPage = () => {
                   </div>
                 </div>
                 
-                <Link to="/checkout">
+                <Link 
+                  to="/checkout" 
+                  state={{ 
+                    appliedVoucher: isVoucherApplied ? appliedVoucher : null,
+                    voucherDiscount: voucherDiscount,
+                    voucherCode: voucherCode
+                  }}
+                >
                   <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2" disabled={cartItems.length === 0}>
                     <FaCreditCard className="w-5 h-5" />
                     Tiến hành thanh toán
