@@ -15,7 +15,7 @@ import SelectAddress from './pages/checkout/SelectAddress';
 import PaymentSuccess from './pages/checkout/PaymentSuccess';
 import PaymentProcessing from './pages/checkout/PaymentProcessing';
 import PaymentWaiting from './pages/checkout/PaymentWaiting';
-import VNPayReturn from './pages/checkout/VNPayReturn';
+// import VNPayReturn from './pages/checkout/VNPayReturn';
 
 import Header from './components/layout/Header';
 import LoginPage from './pages/LoginPage';
@@ -112,7 +112,7 @@ function Layout() {
               <Route path="/checkout/payment/success" element={<PaymentSuccess />} />
               <Route path="/checkout/payment/processing" element={<PaymentProcessing />} />
               <Route path="/checkout/payment/waiting" element={<PaymentWaiting />} />
-              <Route path="/checkout/payment/vnpay_return" element={<VNPayReturn />} />
+              {/* <Route path="/checkout/payment/vnpay_return" element={<VNPayReturn />} /> */}
               <Route path="*" element={<NotFoundPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

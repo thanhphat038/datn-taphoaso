@@ -235,6 +235,7 @@ export const usePaymentWaiting = () => {
       toast.info('Đang tạo thanh toán mới...');
 
       const orderData = {
+        id: orderInfo._id || orderInfo.id, // Thêm ID của đơn hàng
         total_amount: orderInfo.total_amount,
         payment_method: 'vnpay',
         address: orderInfo.address || '',
@@ -245,10 +246,13 @@ export const usePaymentWaiting = () => {
 
       const response = await retryVNPayPayment(orderData);
 
-      if (response?.data?.success && response.data.url) {
+      // Sửa: kiểm tra response.success thay vì response?.data?.success
+      if (response?.success && response.url) {
         toast.success('Đang chuyển đến trang thanh toán...');
-        window.location.href = response.data.url;
+        console.log('Redirecting to VNPAY URL:', response.url);
+        window.location.href = response.url;
       } else {
+        console.log('Response không có success hoặc url:', response);
         toast.error('Không thể tạo thanh toán mới');
       }
     } catch (error) {

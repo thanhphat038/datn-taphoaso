@@ -35,14 +35,14 @@ const PaymentActions = ({
         )}
         
         {/* Hiển thị nút Đổi phương thức nếu đã thất bại */}
-        {isFailed && (
+        {/* {isFailed && (
           <button
             onClick={onChangePaymentMethod}
             className="bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] text-white py-3 px-4 rounded-lg font-medium hover:from-[#70d9ff] hover:to-[#06AEF4] transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg"
           >
             Đổi phương thức thanh toán
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );
