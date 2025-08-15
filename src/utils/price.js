@@ -9,7 +9,7 @@
  * @param {string} quantityField - Tên field chứa số lượng (mặc định: 'quantity')
  * @returns {number} Tổng tiền
  */
-export const calculateTotalPrice = (items, priceField = 'price', quantityField = 'quantity') => {
+export const calculateSubtotal = (items, priceField = 'price', quantityField = 'quantity') => {
   if (!items || !Array.isArray(items)) return 0;
   
   return items.reduce((total, item) => {
@@ -33,7 +33,7 @@ export const calculateVoucherDiscount = (voucher, totalAmount) => {
     return Math.min(discount, voucher.max_discount || discount);
   }
   
-  if (voucher.discount_type === 'amount') {
+  if (voucher.discount_type === 'fixed' || voucher.discount_type === 'amount') {
     return Math.min(voucher.discount_value, totalAmount);
   }
   
@@ -47,7 +47,7 @@ export const calculateVoucherDiscount = (voucher, totalAmount) => {
  * @param {number} voucherDiscount - Giảm giá voucher
  * @returns {number} Tổng tiền cuối cùng
  */
-export const calculateFinalTotal = (subtotal, shippingFee = 0, voucherDiscount = 0) => {
+export const calculateTotal = (subtotal, shippingFee = 0, voucherDiscount = 0) => {
   return subtotal + shippingFee - voucherDiscount;
 };
 
@@ -60,3 +60,7 @@ export const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return '0 đ';
   return `${amount.toLocaleString()} đ`;
 };
+
+// Alias để backward compatibility
+export const calculateTotalPrice = calculateSubtotal;
+export const calculateFinalTotal = calculateTotal;

@@ -1,126 +1,111 @@
-import { useState } from 'react';
-import { getVoucherByCode } from '../service/Voucher.service';
-import { calculateVoucherDiscount } from '../utils/price';
+import { useState, useEffect } from 'react';
+import { getAllVouchers, validateVoucherAPI } from '../service/Voucher.service';
 
-/**
- * Custom hook cho xử lý voucher
- * @param {number} totalAmount - Tổng tiền đơn hàng
- * @returns {Object} Các state và functions liên quan đến voucher
- */
-export const useVoucher = (totalAmount = 0) => {
-  const [voucher, setVoucher] = useState(null);
+export const useVoucher = (subtotal) => {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherMessage, setVoucherMessage] = useState('');
-  const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [voucher, setVoucher] = useState(null);
+  const [showVoucherDropdown, setShowVoucherDropdown] = useState(false);
+  const [availableVouchers, setAvailableVouchers] = useState([]);
+  const [loadingVouchers, setLoadingVouchers] = useState(false);
 
-  /**
-   * Áp dụng mã voucher
-   * @param {string} code - Mã voucher
-   * @returns {Promise<boolean>} True nếu thành công, false nếu thất bại
-   */
-  const applyVoucher = async (code) => {
-    if (!code || !code.trim()) {
+  // Fetch available vouchers
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        setLoadingVouchers(true);
+        const response = await getAllVouchers();
+        const allVouchers = response.data.data || [];
+        const activeVouchers = allVouchers.filter(v => v.status === 'active');
+        setAvailableVouchers(activeVouchers);
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+        setAvailableVouchers([]);
+      } finally {
+        setLoadingVouchers(false);
+      }
+    };
+    fetchVouchers();
+  }, []);
+
+  // Apply voucher
+  const handleApplyVoucher = async (code = null) => {
+    const voucherCodeToUse = code || voucherCode;
+    
+    if (!voucherCodeToUse || !voucherCodeToUse.trim()) {
       setVoucherMessage('Vui lòng nhập mã giảm giá.');
       setVoucher(null);
-      return false;
+      setVoucherDiscount(0);
+      return;
     }
 
-    setIsApplyingVoucher(true);
     try {
-      const res = await getVoucherByCode(code);
-      const voucherData = res.data;
+      const response = await validateVoucherAPI(voucherCodeToUse.trim(), subtotal);
       
-      // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
-      if (totalAmount < voucherData.min_order_value) {
-        setVoucher(null);
-        setVoucherMessage(
-          `Đơn hàng tối thiểu ${voucherData.min_order_value.toLocaleString()}đ mới được áp dụng mã này.`
-        );
-        return false;
+      if (response.data.success) {
+        const { voucher: voucherData, discountAmount } = response.data.data;
+        
+        setVoucher({
+          code: voucherData.code,
+          discount_type: voucherData.discount_type,
+          discount_value: voucherData.discount_value,
+          max_discount: voucherData.max_discount,
+          min_order_value: voucherData.min_order_value
+        });
+        
+        setVoucherCode(voucherData.code);
+        setVoucherMessage(`Mã giảm giá ${voucherData.code} được áp dụng thành công!`);
+        setVoucherDiscount(discountAmount);
       }
-
-      setVoucher(voucherData);
-      setVoucherMessage(
-        `Mã giảm giá ${voucherData.code} được áp dụng thành công!`
-      );
-      return true;
     } catch (error) {
+      console.error('Lỗi apply voucher:', error);
       setVoucher(null);
+      setVoucherDiscount(0);
       setVoucherMessage(
         error.response?.data?.message ||
         'Mã giảm giá không hợp lệ hoặc đã hết hạn.'
       );
-      return false;
-    } finally {
-      setIsApplyingVoucher(false);
     }
   };
 
-  /**
-   * Xóa voucher đã áp dụng
-   */
-  const removeVoucher = () => {
-    setVoucher(null);
+  // Select voucher from dropdown
+  const handleSelectVoucher = (selectedVoucher) => {
+    if (!selectedVoucher || !selectedVoucher.code) return;
+    
+    setVoucherCode(selectedVoucher.code);
+    setShowVoucherDropdown(false);
+    handleApplyVoucher(selectedVoucher.code);
+  };
+
+  // Remove voucher
+  const handleRemoveVoucher = () => {
     setVoucherCode('');
     setVoucherMessage('');
-  };
-
-  /**
-   * Tính số tiền được giảm từ voucher
-   * @returns {number} Số tiền được giảm
-   */
-  const getVoucherDiscount = () => {
-    if (!voucher || !totalAmount) return 0;
-    return calculateVoucherDiscount(voucher, totalAmount);
-  };
-
-  /**
-   * Kiểm tra xem voucher có hợp lệ cho đơn hàng không
-   * @returns {boolean} True nếu hợp lệ
-   */
-  const isVoucherValid = () => {
-    if (!voucher || !totalAmount) return false;
-    return totalAmount >= voucher.min_order_value;
-  };
-
-  /**
-   * Lấy thông tin hiển thị voucher
-   * @returns {Object} Thông tin hiển thị
-   */
-  const getVoucherDisplayInfo = () => {
-    if (!voucher) return null;
-    
-    return {
-      code: voucher.code,
-      discountType: voucher.discount_type,
-      discountValue: voucher.discount_value,
-      maxDiscount: voucher.max_discount,
-      minOrderValue: voucher.min_order_value,
-      description: voucher.discount_type === 'percentage'
-        ? `Giảm ${voucher.discount_value}% tối đa ${voucher.max_discount?.toLocaleString()}đ`
-        : `Giảm ${voucher.discount_value?.toLocaleString()}đ`
-    };
+    setVoucherDiscount(0);
+    setVoucher(null);
   };
 
   return {
-    // State
-    voucher,
+    // States
     voucherCode,
     voucherMessage,
-    isApplyingVoucher,
+    voucherDiscount,
+    voucher,
+    showVoucherDropdown,
+    availableVouchers,
+    loadingVouchers,
     
-    // Actions
+    // Setters
     setVoucherCode,
-    applyVoucher,
-    removeVoucher,
+    setVoucherMessage,
+    setVoucherDiscount,
+    setVoucher,
+    setShowVoucherDropdown,
     
-    // Computed values
-    voucherDiscount: getVoucherDiscount(),
-    isVoucherValid: isVoucherValid(),
-    voucherDisplayInfo: getVoucherDisplayInfo(),
-    
-    // Helpers
-    hasVoucher: !!voucher,
-    canApplyVoucher: voucherCode.trim().length > 0 && !isApplyingVoucher
+    // Functions
+    handleApplyVoucher,
+    handleSelectVoucher,
+    handleRemoveVoucher,
   };
 };
