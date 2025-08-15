@@ -10,3 +10,5 @@ export { useShipping } from './useShipping';
 
 // Address hook
 export { useAddress } from './useAddress';
+
+export { default as useSecureApi } from './useSecureApi';

@@ -156,7 +156,7 @@ const OrderDetailPage = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending':
-        return 'Chờ thanh toán';
+        return 'Chờ xử lý';
       case 'paid':
         return 'Đã thanh toán';
       case 'processing':

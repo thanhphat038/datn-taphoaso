@@ -2,7 +2,13 @@ import axios from 'axios';
 import moment from 'moment';
 import crypto from 'crypto';
 import qs from 'qs';
-import { config } from '../../config/config.js';
+import { 
+  VNP_TMN_CODE,
+  VNP_HASH_SECRET,
+  VNP_URL,
+  VNP_RETURN_URL,
+  VNP_API
+} from '../../config/index.js';
 
 function sortObject(obj) {
   let sorted = {};
@@ -30,10 +36,10 @@ export async function createPaymentUrl({ amount, bankCode, language, ipAddr, ord
   const date = new Date();
   const createDate = moment(date).format('YYYYMMDDHHmmss');
   const txnRef = moment(date).format('DDHHmmss'); // Luôn tạo txnRef ngắn từ timestamp
-  const tmnCode = config.vnpay.tmnCode;
-  const secretKey = config.vnpay.hashSecret;
-  let vnpUrl = config.vnpay.url;
-  const returnUrl = config.vnpay.returnUrl;
+  const tmnCode = VNP_TMN_CODE;
+  const secretKey = VNP_HASH_SECRET;
+  let vnpUrl = VNP_URL;
+  const returnUrl = VNP_RETURN_URL;
   let locale = language || 'vn';
   let currCode = 'VND';
   let vnp_Params = {
@@ -65,7 +71,7 @@ export function verifyReturn(query) {
   const secureHash = vnp_Params['vnp_SecureHash'];
   delete vnp_Params['vnp_SecureHash'];
   delete vnp_Params['vnp_SecureHashType'];
-  const secretKey = config.vnpay.hashSecret;
+  const secretKey = VNP_HASH_SECRET;
   const signStr = qs.stringify(sortObject(vnp_Params), { encode: false });
   const signed = signData(signStr, secretKey);
   return secureHash === signed;
@@ -79,9 +85,9 @@ export function verifyIpn(query) {
 export async function queryDr({ orderId, transDate, ipAddr }) {
   process.env.TZ = 'Asia/Ho_Chi_Minh';
   const date = new Date();
-  const vnp_TmnCode = config.vnpay.tmnCode;
-  const secretKey = config.vnpay.hashSecret;
-  const vnp_Api = config.vnpay.api;
+  const vnp_TmnCode = VNP_TMN_CODE;
+  const secretKey = VNP_HASH_SECRET;
+  const vnp_Api = VNP_API;
   const vnp_RequestId = moment(date).format('HHmmss');
   const vnp_Version = '2.1.0';
   const vnp_Command = 'querydr';
@@ -108,9 +114,9 @@ export async function queryDr({ orderId, transDate, ipAddr }) {
 export async function refund({ orderId, transDate, amount, transType, user, ipAddr }) {
   process.env.TZ = 'Asia/Ho_Chi_Minh';
   const date = new Date();
-  const vnp_TmnCode = config.vnpay.tmnCode;
-  const secretKey = config.vnpay.hashSecret;
-  const vnp_Api = config.vnpay.api;
+  const vnp_TmnCode = VNP_TMN_CODE;
+  const secretKey = VNP_HASH_SECRET;
+  const vnp_Api = VNP_API;
   const vnp_RequestId = moment(date).format('HHmmss');
   const vnp_Version = '2.1.0';
   const vnp_Command = 'refund';

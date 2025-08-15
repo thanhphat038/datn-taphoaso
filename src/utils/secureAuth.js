@@ -14,6 +14,13 @@ const TOKEN_CONFIG = {
   }
 };
 
+// Token refresh configuration - should match backend config
+const REFRESH_CONFIG = {
+  THRESHOLD_MINUTES: 15, // Should match TOKEN_REFRESH_THRESHOLD_MINUTES from backend
+  BUFFER_SECONDS: 300,   // 5 minutes buffer for edge cases
+  CHECK_INTERVAL: 2 * 60 * 1000 // Check every 2 minutes
+};
+
 // Token validation
 export const isTokenValid = (token) => {
   if (!token || typeof token !== 'string') return false;
@@ -23,11 +30,12 @@ export const isTokenValid = (token) => {
     const parts = token.split('.');
     if (parts.length !== 3) return false;
     
-    // Check if token is expired
+    // Check if token is expired with buffer time
     const payload = JSON.parse(atob(parts[1]));
     const currentTime = Date.now() / 1000;
     
-    return payload.exp > currentTime;
+    // Add buffer time to prevent edge cases
+    return payload.exp > (currentTime + REFRESH_CONFIG.BUFFER_SECONDS);
   } catch (error) {
     console.error('Token validation error:', error);
     return false;
@@ -48,6 +56,19 @@ export const getTokenExpiry = (token) => {
     console.error('Error getting token expiry:', error);
     return null;
   }
+};
+
+// Check if token is about to expire (using backend config)
+export const isTokenExpiringSoon = (token) => {
+  if (!token) return false;
+  
+  const expiry = getTokenExpiry(token);
+  if (!expiry) return false;
+  
+  const currentTime = Date.now();
+  const thresholdMs = REFRESH_CONFIG.THRESHOLD_MINUTES * 60 * 1000;
+  
+  return (expiry - currentTime) < thresholdMs;
 };
 
 // Secure token storage
@@ -95,10 +116,24 @@ export const setSecureTokens = (accessToken, _refreshToken = null, userData = nu
 export const getAccessToken = async () => {
   try {
     const token = sessionStorage.getItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY);
-    if (!token || !isTokenValid(token)) {
-      // Token is invalid or expired, try to refresh
+    
+    if (!token) {
+      return null;
+    }
+    
+    // Check if token is valid
+    if (!isTokenValid(token)) {
+      // Token is expired, try to refresh
+      console.log('[getAccessToken] Token expired, attempting refresh');
       return await refreshAccessToken();
     }
+    
+    // Check if token is expiring soon
+    if (isTokenExpiringSoon(token)) {
+      console.log('[getAccessToken] Token expiring soon, refreshing proactively');
+      return await refreshAccessToken();
+    }
+    
     return token;
   } catch (error) {
     console.error('Error getting access token:', error);
@@ -116,9 +151,13 @@ export const getRefreshToken = () => {
   }
 };
 
-// Refresh access token
-export const refreshAccessToken = async () => {
+// Refresh access token with retry mechanism
+export const refreshAccessToken = async (retryCount = 0) => {
+  const MAX_RETRIES = 2;
+  
   try {
+    console.log(`[refreshAccessToken] Attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
+    
     const response = await fetch('http://localhost:3000/api/auth/refresh', {
       method: 'POST',
       credentials: 'include', // Đảm bảo gửi cookie
@@ -126,24 +165,37 @@ export const refreshAccessToken = async () => {
         'Content-Type': 'application/json',
       }
     });
+    
     if (response.ok) {
       const data = await response.json();
-      console.log('[refreshAccessToken] data:', data);
-      // Sửa ở đây: lấy token và user từ data.data
+      console.log('[refreshAccessToken] Success:', data);
+      
       const token = data.data?.token;
       const user = data.data?.user;
+      
       if (token) {
-        console.log('[refreshAccessToken] about to call setSecureTokens');
+        console.log('[refreshAccessToken] Setting new tokens');
         setSecureTokens(token, null, user);
-        console.log('[refreshAccessToken] called setSecureTokens');
         return token;
+      } else {
+        throw new Error('No token received from refresh endpoint');
       }
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Refresh failed with status ${response.status}`);
     }
-    // Refresh failed, clear tokens
-    clearSecureTokens();
-    return null;
   } catch (error) {
-    console.error('Error refreshing token:', error);
+    console.error(`[refreshAccessToken] Attempt ${retryCount + 1} failed:`, error);
+    
+    // Retry logic
+    if (retryCount < MAX_RETRIES) {
+      console.log(`[refreshAccessToken] Retrying in 1 second...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return refreshAccessToken(retryCount + 1);
+    }
+    
+    // All retries failed
+    console.error('[refreshAccessToken] All retry attempts failed');
     clearSecureTokens();
     return null;
   }
@@ -168,6 +220,8 @@ export const clearSecureTokens = () => {
     sessionStorage.removeItem(TOKEN_CONFIG.TOKEN_EXPIRY_KEY);
     Cookies.remove(TOKEN_CONFIG.REFRESH_TOKEN_KEY);
     Cookies.remove('auth_token');
+    
+    console.log('[clearSecureTokens] All tokens cleared');
   } catch (error) {
     console.error('Error clearing secure tokens:', error);
   }
@@ -207,26 +261,72 @@ export const getSecureAuthHeadersAsync = async () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Auto-refresh token before expiry
+// Auto-refresh token before expiry with improved logic
 export const setupTokenRefresh = () => {
+  let refreshInterval;
+  let focusHandler;
+  
   const checkAndRefreshToken = async () => {
-    const token = sessionStorage.getItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY);
-    if (token) {
-      const expiry = getTokenExpiry(token);
-      const currentTime = Date.now();
+    try {
+      const token = sessionStorage.getItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY);
+      if (!token) return;
       
-      // Refresh token 5 minutes before expiry
-      if (expiry && (expiry - currentTime) < 5 * 60 * 1000) {
+      const expiry = getTokenExpiry(token);
+      if (!expiry) return;
+      
+      const currentTime = Date.now();
+      const thresholdMs = REFRESH_CONFIG.THRESHOLD_MINUTES * 60 * 1000;
+      
+      // Refresh token based on backend config threshold
+      if ((expiry - currentTime) < thresholdMs) {
+        console.log(`[setupTokenRefresh] Token expiring soon (within ${REFRESH_CONFIG.THRESHOLD_MINUTES} minutes), refreshing...`);
         await refreshAccessToken();
       }
+    } catch (error) {
+      console.error('[setupTokenRefresh] Error in token refresh check:', error);
     }
   };
   
-  // Check every minute
-  setInterval(checkAndRefreshToken, 60 * 1000);
+  const startRefreshInterval = () => {
+    // Check based on backend config interval
+    refreshInterval = setInterval(checkAndRefreshToken, REFRESH_CONFIG.CHECK_INTERVAL);
+  };
   
-  // Also check on page focus
-  window.addEventListener('focus', checkAndRefreshToken);
+  const stopRefreshInterval = () => {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+  };
+  
+  const handleFocus = () => {
+    // Check token when page gains focus
+    checkAndRefreshToken();
+  };
+  
+  const handleVisibilityChange = () => {
+    if (!document.hidden) {
+      // Page became visible, check token
+      checkAndRefreshToken();
+    }
+  };
+  
+  // Start the refresh mechanism
+  startRefreshInterval();
+  
+  // Add event listeners
+  focusHandler = handleFocus;
+  window.addEventListener('focus', focusHandler);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  // Return cleanup function
+  return () => {
+    stopRefreshInterval();
+    if (focusHandler) {
+      window.removeEventListener('focus', focusHandler);
+    }
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
 };
 
 // Validate and sanitize user input

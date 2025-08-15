@@ -84,7 +84,7 @@ const formattedPrice = formatCurrency(100000); // "100,000 đ"
 Lấy text hiển thị cho trạng thái
 
 ```javascript
-const statusText = getOrderStatusText('pending'); // "Chờ thanh toán"
+const statusText = getOrderStatusText('pending'); 
 ```
 
 #### `getOrderStatusStyles(status)`

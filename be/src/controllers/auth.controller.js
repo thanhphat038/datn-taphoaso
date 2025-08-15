@@ -1,7 +1,15 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
 
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/index.js';
+import { 
+  JWT_SECRET, 
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+  RESET_PASSWORD_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_COOKIE_MAX_AGE,
+  FRONTEND_URL,
+  BASE_URL
+} from '../config/index.js';
 import { userService, authService } from '../services/index.js';
 import { sendForgotPasswordEmail } from '../services/mailler/emailService.js';
 
@@ -20,9 +28,6 @@ import {
   serverError,
   unprocessableEntity 
 } from '../utils/response.js';
-
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'; 
-const FE_BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173'; 
 
 export const register = async (req, res) => {
   try {
@@ -79,17 +84,17 @@ export const register = async (req, res) => {
       status: 'active'
     });
 
-    // Generate JWT tokens
+    // Generate JWT tokens using global config
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       JWT_SECRET,
-      { expiresIn: '15m' } // Short-lived access token
+      { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
     );
     
     const refreshToken = jwt.sign(
       { id: user._id, type: 'refresh' },
       JWT_SECRET,
-      { expiresIn: '7d' } // Long-lived refresh token
+      { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
     );
 
     return created(res, {
@@ -119,13 +124,13 @@ export const login = async (req, res) => {
     if (!result.success) {
       return unauthorized(res, result.message);
     }
-    // Set refresh token vào httpOnly cookie
+    // Set refresh token vào httpOnly cookie using global config
     res.cookie('refresh_token', result.refreshToken, {
       httpOnly: true,
       secure: false, // LUÔN là false khi chạy local (http)
       sameSite: 'lax', // Đảm bảo browser lưu cookie khi chạy http
       path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE
     });
     return ok(res, {
       token: result.accessToken,
@@ -390,7 +395,7 @@ export const refreshToken = async (req, res) => {
       const newAccessToken = jwt.sign(
         { id: user._id, role: user.role },
         JWT_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
       );
       console.log('[refreshToken] Token refreshed successfully for user:', user.username);
       return ok(res, {
@@ -432,16 +437,21 @@ export const forgotPassword = async (req, res) => {
       return notFound(res, 'No user found with this email');
     }
 
-    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
+    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: RESET_PASSWORD_TOKEN_EXPIRES_IN });
 
-    // Lưu token vào DB (tuỳ hệ thống, có thể skip bước này nếu chỉ kiểm tra token trực tiếp)
+    // Calculate expiry time based on token expiration
+    // Convert '15m' to milliseconds
+    const expiryMinutes = parseInt(RESET_PASSWORD_TOKEN_EXPIRES_IN.replace(/[^0-9]/g, ''));
+    const expiryMs = expiryMinutes * 60 * 1000;
+
+    // Lưu token vào DB
     await userService.update(user._id, {
       resetPasswordToken: resetToken,
-      resetPasswordExpires: Date.now() + 15 * 60 * 1000 // 15 phút
+      resetPasswordExpires: Date.now() + expiryMs
     });
 
     // Tạo link reset
-    const resetLink = `${FE_BASE_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     // Gửi email
     await sendForgotPasswordEmail({

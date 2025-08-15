@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import ErrorBoundary from './components/ErrorBoundary';
 import { AlertProvider } from './components/AlertProvider';
 import { ToastProvider } from './components/ToastContainer';
+import TokenExpiredNotification from './components/TokenExpiredNotification';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -154,6 +155,9 @@ function Layout() {
           </Routes>
         </AdminProtected>
       )}
+      
+      {/* Global token expired notification */}
+      <TokenExpiredNotification />
     </div>
   );
 }
