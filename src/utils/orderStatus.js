@@ -100,6 +100,17 @@ export const getPaymentMethodText = (method) => {
 };
 
 /**
+ * Kiểm tra xem trạng thái đơn hàng có thể chỉnh sửa được không
+ * @param {string} status - Trạng thái đơn hàng
+ * @returns {boolean} True nếu có thể chỉnh sửa
+ */
+export const canEditOrderStatus = (status) => {
+  // Chỉ block cancelled, các trạng thái khác đều có thể chỉnh sửa
+  const nonEditableStatuses = ['cancelled'];
+  return !nonEditableStatuses.includes(status);
+};
+
+/**
  * Lấy object chứa tất cả thông tin styling cho trạng thái
  * @param {string} status - Trạng thái đơn hàng
  * @returns {Object} Object chứa các CSS classes
@@ -109,6 +120,7 @@ export const getOrderStatusStyles = (status) => {
     text: getOrderStatusText(status),
     color: getOrderStatusColor(status),
     bgColor: getOrderStatusBgColor(status),
-    borderColor: getOrderStatusBorderColor(status)
+    borderColor: getOrderStatusBorderColor(status),
+    canEdit: canEditOrderStatus(status)
   };
 };

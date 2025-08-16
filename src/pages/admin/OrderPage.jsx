@@ -9,6 +9,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.js';
+import { getOrderStatusText, getOrderStatusColor, getOrderStatusBgColor, getOrderStatusBorderColor, canEditOrderStatus } from '../../utils/orderStatus.js';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -44,43 +45,48 @@ const OrderPage = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  // Status options with beautiful styling
+  // Thêm function canEditOrderStatus vào component
+  const canEditOrderStatus = (status) => {
+    const nonEditableStatuses = ['cancelled', 'delivered'];
+    return !nonEditableStatuses.includes(status);
+  };
+
+  // Cập nhật statusOptions để có đầy đủ các trạng thái
   const statusOptions = [
     { 
       value: 'pending', 
-      label: 'Chờ xử lý', 
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      dotColor: 'bg-yellow-500'
+      label: getOrderStatusText('pending'), 
+      color: `bg-yellow-100 text-yellow-800 border-yellow-200`,
+      dotColor: 'bg-yellow-500',
+      canEdit: canEditOrderStatus('pending')
     },
     { 
       value: 'processing', 
-      label: 'Đang xử lý', 
-      color: 'bg-blue-100 text-blue-800 border-blue-200',
-      dotColor: 'bg-blue-500'
-    },
-    { 
-      value: 'shipped', 
-      label: 'Đã giao hàng', 
-      color: 'bg-purple-100 text-purple-800 border-purple-200',
-      dotColor: 'bg-purple-500'
+      label: getOrderStatusText('processing'), 
+      color: `bg-blue-100 text-blue-800 border-blue-200`,
+      dotColor: 'bg-blue-500',
+      canEdit: canEditOrderStatus('processing')
     },
     { 
       value: 'delivered', 
-      label: 'Hoàn thành', 
-      color: 'bg-green-100 text-green-800 border-green-200',
-      dotColor: 'bg-green-500'
+      label: getOrderStatusText('delivered'), 
+      color: `bg-green-100 text-green-800 border-green-200`,
+      dotColor: 'bg-green-500',
+      canEdit: canEditOrderStatus('delivered')
     },
-    { 
-      value: 'payment_failed', 
-      label: 'Thanh toán thất bại', 
-      color: 'bg-red-100 text-red-800 border-red-200',
-      dotColor: 'bg-red-500'
-    },
+    // { 
+    //   value: 'failed', 
+    //   label: getOrderStatusText('failed'), 
+    //   color: `bg-red-100 text-red-800 border-red-200`,
+    //   dotColor: 'bg-red-500',
+    //   canEdit: canEditOrderStatus('failed')
+    // },
     { 
       value: 'cancelled', 
-      label: 'Đã hủy', 
-      color: 'bg-gray-100 text-gray-800 border-gray-200',
-      dotColor: 'bg-gray-500'
+      label: getOrderStatusText('cancelled'), 
+      color: `bg-red-100 text-red-800 border-red-200`,
+      dotColor: 'bg-red-500',
+      canEdit: canEditOrderStatus('cancelled')
     }
   ];
 
@@ -180,13 +186,12 @@ const OrderPage = () => {
     }
   };
 
-    // Calculate statistics for filter tabs
+    // Cập nhật phần tính toán statistics - đổi 'shipped' thành 'delivered'
   const allOrders = orders.length;
   const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
   const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
-  const shippedOrders = orders.filter(order => (order.order_status || order.status) === 'shipped').length;
   const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
-  const paymentFailedOrders = orders.filter(order => (order.order_status || order.status) === 'payment_failed').length;
+  const failedOrders = orders.filter(order => (order.order_status || order.status) === 'failed').length;
   const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
 
   // Filter and pagination logic
@@ -294,7 +299,8 @@ const OrderPage = () => {
       title: '',
       key: 'actions',
       render: (order) => {
-        const isCompleted = (order.order_status || order.status) === 'delivered';
+        const currentStatus = order.order_status || order.status;
+        const canEdit = canEditOrderStatus(currentStatus);
         return (
           <AdminActionDropdown
             actions={[
@@ -309,26 +315,26 @@ const OrderPage = () => {
               {
                 label: 'Sửa trạng thái',
                 icon: FaEdit,
-                disabled: isCompleted,
+                disabled: !canEdit,
                 onClick: () => {
-                  if (!isCompleted) {
+                  if (canEdit) {
                     setCurrentEditOrder(order);
-                    setEditStatus(order.order_status || order.status);
+                    setEditStatus(currentStatus);
                     setShowEditModal(true);
                   }
                 }
               },
-              {
-                label: 'Xóa đơn hàng',
-                icon: FaTrash,
-                variant: 'danger',
-                disabled: isCompleted,
-                onClick: () => {
-                  if (!isCompleted) {
-                    handleDeleteOrder(order._id);
-                  }
-                }
-              }
+              // {
+              //   label: 'Xóa đơn hàng',
+              //   icon: FaTrash,
+              //   variant: 'danger',
+              //   disabled: !canEdit,
+              //   onClick: () => {
+              //     if (canEdit) {
+              //       handleDeleteOrder(order._id);
+              //     }
+              //   }
+              // }
             ]}
             onActionClick={(action) => action.onClick()}
           />
@@ -337,11 +343,11 @@ const OrderPage = () => {
     }
   ];
 
-  // Filter options for search component
+  // Cập nhật phần filter options
   const filterOptions = [
     {
       key: 'status',
-      label: selectedStatus === 'All' ? 'Tất cả trạng thái' : getStatusInfo(selectedStatus).label,
+      label: selectedStatus === 'All' ? 'Tất cả trạng thái' : getOrderStatusText(selectedStatus),
       value: selectedStatus,
       options: [
         { value: 'All', label: 'Tất cả trạng thái' },
@@ -417,20 +423,20 @@ const OrderPage = () => {
           </div>
           <div className="flex justify-between items-center">
             <span>Trạng thái</span>
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border bg-green-100 text-green-800 border-green-200">
-              {getStatusInfo(order.order_status || order.status).label}
+            <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full border ${getOrderStatusBgColor(order.order_status || order.status)} ${getOrderStatusColor(order.order_status || order.status)} ${getOrderStatusBorderColor(order.order_status || order.status)}`}>
+              {getOrderStatusText(order.order_status || order.status)}
             </span>
           </div>
           <div className="flex gap-3 mt-4">
             <button 
               className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
-                (order.order_status || order.status) === 'delivered'
+                !canEditOrderStatus(order.order_status || order.status)
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-blue-500 text-white hover:bg-blue-600'
               }`}
-              disabled={(order.order_status || order.status) === 'delivered'}
+              disabled={!canEditOrderStatus(order.order_status || order.status)}
               onClick={() => {
-                if ((order.order_status || order.status) !== 'delivered') {
+                if (canEditOrderStatus(order.order_status || order.status)) {
                   setCurrentEditOrder(order);
                   setEditStatus(order.order_status || order.status);
                   setShowEditModal(true);
@@ -441,13 +447,13 @@ const OrderPage = () => {
             </button>
             <button 
               className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
-                (order.order_status || order.status) === 'delivered'
+                !canEditOrderStatus(order.order_status || order.status)
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-red-100 text-red-600 hover:bg-red-200'
               }`}
-              disabled={(order.order_status || order.status) === 'delivered'}
+              disabled={!canEditOrderStatus(order.order_status || order.status)}
               onClick={() => {
-                if ((order.order_status || order.status) !== 'delivered') {
+                if (canEditOrderStatus(order.order_status || order.status)) {
                   handleDeleteOrder(order._id);
                 }
               }}
@@ -515,7 +521,7 @@ const OrderPage = () => {
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >
-             Chờ xử lý ({pendingOrders})
+             {getOrderStatusText('pending')} ({pendingOrders})
            </button>
            <button
              onClick={() => setSelectedStatus('processing')}
@@ -525,17 +531,7 @@ const OrderPage = () => {
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >
-             Đang xử lý ({processingOrders})
-           </button>
-           <button
-             onClick={() => setSelectedStatus('shipped')}
-             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-               selectedStatus === 'shipped'
-                 ? 'bg-purple-500 text-white shadow-lg'
-                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-             }`}
-           >
-             Đã giao hàng ({shippedOrders})
+             {getOrderStatusText('processing')} ({processingOrders})
            </button>
            <button
              onClick={() => setSelectedStatus('delivered')}
@@ -545,27 +541,27 @@ const OrderPage = () => {
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >
-             Hoàn thành ({deliveredOrders})
+             {getOrderStatusText('delivered')} ({deliveredOrders})
            </button>
            <button
-             onClick={() => setSelectedStatus('payment_failed')}
+             onClick={() => setSelectedStatus('failed')}
              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-               selectedStatus === 'payment_failed'
+               selectedStatus === 'failed'
                  ? 'bg-red-500 text-white shadow-lg'
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >
-             Thanh toán thất bại ({paymentFailedOrders})
+             {getOrderStatusText('failed')} ({failedOrders})
            </button>
            <button
              onClick={() => setSelectedStatus('cancelled')}
              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                selectedStatus === 'cancelled'
-                 ? 'bg-gray-500 text-white shadow-lg'
+                 ? 'bg-red-500 text-white shadow-lg'
                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
              }`}
            >
-             Đã hủy ({cancelledOrders})
+             {getOrderStatusText('cancelled')} ({cancelledOrders})
            </button>
          </div>
 
@@ -621,14 +617,14 @@ const OrderPage = () => {
                 onClick={() => {
                   setShowEditModal(false);
                   setCurrentEditOrder(null);
-setEditStatus('');
+                  setEditStatus('');
                 }}
               >
                 Hủy bỏ
               </ModalButton>
               <ModalButton 
                 onClick={handleStatusUpdate}
-                disabled={loading}
+                disabled={loading || !canEditOrderStatus(editStatus)}
               >
                 {loading ? 'Đang lưu...' : 'Cập nhật'}
               </ModalButton>
@@ -642,7 +638,7 @@ setEditStatus('');
               <div className="text-sm text-gray-600 mt-1">
                 Trạng thái hiện tại: 
                 <span className="font-medium text-gray-900 ml-1">
-                  {currentEditOrder ? getStatusInfo(currentEditOrder.order_status || currentEditOrder.status).label : ''}
+                  {currentEditOrder ? getOrderStatusText(currentEditOrder.order_status || currentEditOrder.status) : ''}
                 </span>
               </div>
             </div>
@@ -662,6 +658,11 @@ setEditStatus('');
                   </option>
                 ))}
               </select>
+              {!canEditOrderStatus(editStatus) && (
+                <p className="text-sm text-red-600 mt-1">
+                  Không thể chuyển sang trạng thái này vì đơn hàng shippedhoàn thành hoặc bị hủy
+                </p>
+              )}
             </div>
           </div>
         </AdminModal>
