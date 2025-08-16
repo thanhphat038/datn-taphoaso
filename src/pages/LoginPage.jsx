@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../service/user.service';
 import { requestPasswordReset } from '../service/user.service';
@@ -17,53 +17,9 @@ const LoginPage = () => {
     const [forgotLoading, setForgotLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState(""); // 'success' | 'error'
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const navigate = useNavigate();
-    const { login, isAuthenticated, loading } = useAuth();
-
-    // Kiểm tra và clear authentication status từ storage trực tiếp
-    useEffect(() => {
-        const checkAuthFromStorage = () => {
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('access_token');
-            const userData = localStorage.getItem('user') || sessionStorage.getItem('user_data');
-            
-            if (token && userData) {
-                console.log('🔍 Found auth data in storage, user should be authenticated');
-                // Force clear nếu có data cũ
-                localStorage.clear();
-                sessionStorage.clear();
-                console.log('🔍 Cleared old storage data');
-            } else {
-                console.log('🔍 No auth data found in storage, user should not be authenticated');
-            }
-        };
-        
-        // Force clear tất cả storage khi component mount
-        const forceClearStorage = () => {
-            console.log('🧹 Force clearing all storage on LoginPage mount...');
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Clear cookies
-            document.cookie.split(";").forEach(function(c) { 
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-            });
-            
-            console.log('✅ All storage cleared on LoginPage mount');
-        };
-        
-        forceClearStorage();
-        checkAuthFromStorage();
-    }, []);
-
-    // Chỉ redirect nếu user đã đăng nhập và form trống (không phải đang submit)
-    useEffect(() => {
-        if (!loading && isAuthenticated && !isSubmitting && !formData.username && !formData.password) {
-            console.log('🔍 User authenticated with empty form, redirecting to home...');
-            window.location.href = '/';
-        }
-    }, [isAuthenticated, loading, isSubmitting, formData.username, formData.password]);
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -76,7 +32,6 @@ const LoginPage = () => {
 const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginError(''); // Clear previous errors
-    setIsSubmitting(true);
     
     try {
         console.log('🚀 Attempting login...');
@@ -105,18 +60,14 @@ const handleSubmit = async (e) => {
             setMessage('Đăng nhập thành công! Chào mừng ' + user.username);
             setMessageType('success');
             
-            // Clear form data để tránh redirect không mong muốn
-            setFormData({ username: '', password: '' });
-            
-            // Redirect ngay lập tức
             setTimeout(() => {
                 setMessage("");
                 if (user.role === 'admin') {
-                    window.location.href = '/admin';
+                    navigate('/admin');
                 } else {
-                    window.location.href = '/';
+                    navigate('/');
                 }
-            }, 1000);
+            }, 2000);
         } else {
             console.warn('⚠️ No user found in response');
             setLoginError('Tên đăng nhập hoặc mật khẩu không đúng');
@@ -124,8 +75,6 @@ const handleSubmit = async (e) => {
     } catch (error) {
         console.error('❌ Login error in component:', error);
         setLoginError('Đăng nhập thất bại: ' + error.message);
-    } finally {
-        setIsSubmitting(false);
     }
 };
 
@@ -142,18 +91,6 @@ const handleSubmit = async (e) => {
             setForgotLoading(false);
         }
     };
-
-    // Chỉ hiển thị loading khi thực sự cần thiết
-    if (loading && isAuthenticated) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Đang chuyển hướng...</p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen flex">
@@ -241,20 +178,9 @@ const handleSubmit = async (e) => {
                         <div className="space-y-4">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] hover:from-[#70d9ff] hover:to-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#06AEF4] to-[#70d9ff] hover:from-[#70d9ff] hover:to-[#06AEF4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06AEF4] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
                             >
-                                {isSubmitting ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Đang đăng nhập...
-                                    </>
-                                ) : (
-                                    'Đăng nhập'
-                                )}
+                                Đăng nhập
                             </button>
 
                             <Link 
