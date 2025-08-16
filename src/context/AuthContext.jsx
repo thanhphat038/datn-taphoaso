@@ -15,6 +15,7 @@ import {
 } from '../utils/secureAuth';
 import Cookies from 'js-cookie';
 import { getApiUrl } from '../config/api.js';
+import { clearFavoritesCache, forceClearFavoritesCache } from '../service/Favorite.service';
 
 const AuthContext = createContext();
 
@@ -180,6 +181,9 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Too many login attempts. Please try again later.');
       }
       
+      // Force clear favorites cache khi login user mới
+      forceClearFavoritesCache();
+      
       // Chỉ lưu access token và userData
       if (userData.token) {
         setSecureTokens(userData.token, null, userData);
@@ -193,6 +197,9 @@ export const AuthProvider = ({ children }) => {
       const cleanup = setupTokenRefresh();
       setTokenRefreshCleanup(cleanup);
       
+      // Dispatch event để các component khác biết user đã login
+      window.dispatchEvent(new CustomEvent('user-login', { detail: userData }));
+      
     } catch (error) {
       console.error('[AuthContext] Login error:', error);
       throw error;
@@ -201,26 +208,84 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     try {
+      console.log('🚪 [AuthContext] Starting logout process...');
+      
       // Clear user state
       setUser(null);
       setIsAuthenticated(false);
+      console.log('✅ [AuthContext] User state cleared');
       
-      // Clear tokens
+      // Clear tokens và storage
       clearSecureTokens();
+      console.log('✅ [AuthContext] Secure tokens cleared');
+      
+      // Force clear favorites cache
+      forceClearFavoritesCache();
+      console.log('✅ [AuthContext] Favorites cache cleared');
+      
+      // Clear tất cả storage khác
+      try {
+        // Clear tất cả cookies
+        document.cookie.split(";").forEach(function(c) { 
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+        console.log('✅ [AuthContext] All cookies cleared');
+        
+        // Clear tất cả localStorage và sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('✅ [AuthContext] All localStorage and sessionStorage cleared');
+        
+        // Clear tất cả cache nếu có thể
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              caches.delete(name);
+            });
+            console.log('✅ [AuthContext] All browser caches cleared');
+          });
+        }
+      } catch (error) {
+        console.error('[AuthContext] Error clearing storage:', error);
+      }
       
       // Cleanup token refresh
       if (tokenRefreshCleanup) {
         tokenRefreshCleanup();
         setTokenRefreshCleanup(null);
+        console.log('✅ [AuthContext] Token refresh cleanup completed');
       }
+      
+      // Dispatch logout event để các component khác biết
+      window.dispatchEvent(new CustomEvent('user-logout'));
+      console.log('✅ [AuthContext] Logout event dispatched');
       
       // Gọi API /logout để backend xóa refresh token ở cookie
       fetch('http://localhost:3000/api/auth/logout', { 
         method: 'POST', 
         credentials: 'include' 
+      }).then(() => {
+        console.log('✅ [AuthContext] Backend logout API called successfully');
       }).catch(error => {
         console.error('[AuthContext] Logout API error:', error);
       });
+      
+      // Kiểm tra xem storage đã được clear chưa
+      setTimeout(() => {
+        console.log('🔍 [AuthContext] Checking storage after logout...');
+        const remainingTokens = {
+          localStorage: localStorage.getItem('auth_token') || localStorage.getItem('user'),
+          sessionStorage: sessionStorage.getItem('access_token') || sessionStorage.getItem('user_data'),
+          cookies: document.cookie
+        };
+        console.log('🔍 [AuthContext] Remaining data:', remainingTokens);
+        
+        // Redirect về trang chủ
+        console.log('🔄 [AuthContext] Redirecting to home page...');
+        window.location.href = '/';
+      }, 500);
+      
+      console.log('🎉 [AuthContext] Logout process completed');
       
     } catch (error) {
       console.error('[AuthContext] Logout error:', error);
@@ -229,8 +294,24 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     setUser(userData);
-    // Update secure storage
-    setSecureTokens(null, null, userData);
+    // Chỉ update user data, không clear access token
+    try {
+      const sanitizedUserData = {
+        id: userData.id || userData._id,
+        username: userData.username,
+        email: userData.email,
+        full_name: userData.full_name,
+        role: userData.role,
+        phone: userData.phone,
+        gender: userData.gender,
+        avatar: userData.avatar
+      };
+      
+      sessionStorage.setItem('user_data', JSON.stringify(sanitizedUserData));
+      console.log('✅ [AuthContext] User data updated without clearing access token');
+    } catch (error) {
+      console.error('[AuthContext] Error updating user data:', error);
+    }
   };
 
   // Kiểm tra quyền admin

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Product from '../components/Product';
+import Cookies from 'js-cookie';
 
 import { getApiUrl } from '../config/api.js';
 
@@ -114,9 +115,28 @@ const ProductsPage = () => {
 
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
-    const currentProducts = filteredProducts.slice(startIndex, endIndex).map((element, index) => (
-        <Product key={index} data={element} onAddToCartSuccess={showNotification} />
-    ));
+    const currentProducts = filteredProducts.slice(startIndex, endIndex).map((element, index) => {
+        const userId = (() => {
+            const token = Cookies.get('auth_token');
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.id;
+                } catch (error) {
+                    return 'guest';
+                }
+            }
+            return 'guest';
+        })();
+        
+        return (
+            <Product 
+                key={`${element._id}-${userId}-${index}`} 
+                data={element} 
+                onAddToCartSuccess={showNotification} 
+            />
+        );
+    });
 
     const handlePageChange = (pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);

@@ -74,7 +74,13 @@ export const isTokenExpiringSoon = (token) => {
 // Secure token storage
 export const setSecureTokens = (accessToken, _refreshToken = null, userData = null) => {
   console.log('[setSecureTokens] called with:', { accessToken, userData });
-  if (!accessToken) return false;
+  
+  // Nếu accessToken là null, chỉ clear tokens
+  if (!accessToken) {
+    console.log('[setSecureTokens] accessToken is null, clearing tokens');
+    clearSecureTokens();
+    return false;
+  }
   
   try {
     sessionStorage.setItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY, accessToken);
@@ -215,13 +221,24 @@ export const getSecureUserData = () => {
 // Clear all secure tokens
 export const clearSecureTokens = () => {
   try {
+    // Clear sessionStorage
     sessionStorage.removeItem(TOKEN_CONFIG.ACCESS_TOKEN_KEY);
     sessionStorage.removeItem(TOKEN_CONFIG.USER_DATA_KEY);
     sessionStorage.removeItem(TOKEN_CONFIG.TOKEN_EXPIRY_KEY);
+    
+    // Clear localStorage
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    
+    // Clear cookies
     Cookies.remove(TOKEN_CONFIG.REFRESH_TOKEN_KEY);
     Cookies.remove('auth_token');
     
-    console.log('[clearSecureTokens] All tokens cleared');
+    // Clear all sessionStorage và localStorage nếu cần
+    sessionStorage.clear();
+    localStorage.clear();
+    
+    console.log('[clearSecureTokens] All tokens and storage cleared');
   } catch (error) {
     console.error('Error clearing secure tokens:', error);
   }

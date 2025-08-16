@@ -254,9 +254,22 @@ const ProductFavorite = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
             {currentItems.map((product) => {
               console.log('🔍 Debug - Rendering product:', product);
+              const userId = (() => {
+                const token = Cookies.get('auth_token');
+                if (token) {
+                  try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.id;
+                  } catch (error) {
+                    return 'guest';
+                  }
+                }
+                return 'guest';
+              })();
+              
               return (
-                <div key={product._id} className="w-full">
-                  <Product data={product} isFavorited={true} />
+                <div key={`${product._id}-${userId}`} className="w-full">
+                  <Product data={product} />
                 </div>
               );
             })}
