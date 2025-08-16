@@ -136,9 +136,13 @@ export async function changePassword({ currentPassword, newPassword }) {
 // Reset password request
 export async function requestPasswordReset({ email }) {
   try {
+    console.log('[requestPasswordReset] Requesting password reset for email:', email);
     const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    console.log('[requestPasswordReset] Response received:', response.data);
     return response.data;
   } catch (error) {
+    console.error('[requestPasswordReset] Error:', error);
+    console.error('[requestPasswordReset] Error response:', error.response?.data);
     throw new Error(error.response?.data?.message || "Gửi yêu cầu reset mật khẩu thất bại");
   }
 }
@@ -146,13 +150,45 @@ export async function requestPasswordReset({ email }) {
 // Reset password with token
 export async function resetPassword({ token, newPassword }) {
   try {
+    console.log(token)
+    console.log(newPassword)
     const response = await axios.post(`${API_URL}/reset-password`, {
       token,
       newPassword
-    });
+    },{headers: { Authorization: `Bearer ${token}` }});
+    
+    console.log('[resetPassword] Response received:', response.data);
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Reset mật khẩu thất bại");
+    console.error('[resetPassword] Error:', error);
+    console.error('[resetPassword] Error response:', error.response?.data);
+    console.error('[resetPassword] Error status:', error.response?.status);
+    console.error('[resetPassword] Error message:', error.message);
+    
+    // Xử lý các loại lỗi cụ thể
+    if (error.response?.status === 400) {
+      const errorMessage = error.response.data?.message || 'Dữ liệu không hợp lệ';
+      throw new Error(errorMessage);
+    } else if (error.response?.status === 401) {
+      throw new Error('Token không hợp lệ hoặc đã hết hạn');
+    } else if (error.response?.status === 500) {
+      throw new Error('Lỗi server, vui lòng thử lại sau');
+    } else {
+      throw new Error(error.response?.data?.message || "Reset mật khẩu thất bại");
+    }
+  }
+}
+
+// Clear reset token (để test)
+export async function clearResetToken({ email }) {
+  try {
+    console.log('[clearResetToken] Clearing reset token for email:', email);
+    const response = await axios.post(`${API_URL}/clear-reset-token`, { email });
+    console.log('[clearResetToken] Response received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[clearResetToken] Error:', error);
+    throw new Error(error.response?.data?.message || "Xóa token reset thất bại");
   }
 }
 

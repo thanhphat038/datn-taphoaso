@@ -15,6 +15,7 @@ import AdminModal, { ModalButton } from "../../components/admin/AdminModal";
 import {
   getAllCategories,
   createCategory,
+  getAllBrands,
 } from "../../service/Admin.Service.js";
 import { getVariantsByProduct } from "../../service/Variant.service.js";
 import Cookies from "js-cookie";
@@ -46,6 +47,7 @@ const AddProductPage = () => {
     discount_percent: "", // New discount percentage field
     stock: "0", // Default to '0' for in_stock field
     category_id: "",
+    brand_id: "",
     status: "active",
     images: [],
     created_at: new Date().toISOString().split("T")[0], // Auto-fill today's date
@@ -54,6 +56,10 @@ const AddProductPage = () => {
   // Categories
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+  // Brands
+  const [brands, setBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(false);
 
   // Category modal
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -99,7 +105,19 @@ const AddProductPage = () => {
           try {
             setLoading(true);
             
-            const response = await fetch(`${API_BASE_URL}/products/${id}`);
+            const token = Cookies.get('auth_token');
+            if (!token) {
+              console.error('No authentication token found');
+              navigate('/login');
+              return;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
             
             if (!response.ok) {
               throw new Error("Failed to fetch product");
@@ -117,6 +135,7 @@ const AddProductPage = () => {
                 : "",
               stock: product.in_stock ? product.in_stock.toString() : "0", // Map from in_stock
               category_id: product.category_id?._id || product.category_id || "",
+              brand_id: product.brand_id?._id || product.brand_id || "",
               status: product.status || "active",
               images: product.images || [],
               created_at: toDateInputValue(
@@ -160,6 +179,22 @@ const AddProductPage = () => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // Fetch brands
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setBrandsLoading(true);
+        const response = await getAllBrands();
+        setBrands(response.data.data || []);
+      } catch (error) {
+        // Không cần setError ở đây, chỉ cần để brands là [] nếu lỗi
+      } finally {
+        setBrandsLoading(false);
+      }
+    };
+    fetchBrands();
   }, []);
 
   // Fetch variants for a product
@@ -647,6 +682,11 @@ const AddProductPage = () => {
       return false;
     }
 
+    if (!formData.brand_id) {
+      setError("Vui lòng chọn thương hiệu");
+      return false;
+    }
+
     return true;
   };
 
@@ -671,6 +711,7 @@ const AddProductPage = () => {
             : Number(formData.discount_percent),
         in_stock: Number(formData.stock),
         category_id: formData.category_id,
+        brand_id: formData.brand_id,
         status: formData.status,
         images: imagePreviews, // Use compressed base64 images directly
       };
@@ -1218,6 +1259,30 @@ const AddProductPage = () => {
                     <FaPlus className="w-4 h-4" />
                     Tạo danh mục mới
                   </button>
+                </div>
+              </AdminCard>
+
+              {/* Brand */}
+              <AdminCard title="Thương hiệu">
+                <div className="space-y-3">
+                  {brandsLoading ? (
+                    <div className="text-gray-500">Đang tải thương hiệu...</div>
+                  ) : (
+                    <select
+                      name="brand_id"
+                      value={formData.brand_id || ""}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
+                      required
+                    >
+                      <option value="">Chọn thương hiệu</option>
+                      {brands.map((brand) => (
+                        <option key={brand._id} value={brand._id}>
+                          {brand.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </AdminCard>
 

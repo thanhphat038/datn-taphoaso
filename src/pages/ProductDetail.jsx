@@ -260,7 +260,7 @@ const ProductDetail = () => {
             return;
         }
 
-        if (productData.stock !== undefined && productData.stock <= 0) {
+        if ((productData.in_stock || 0) <= 0) {
             showError('Sản phẩm đã hết hàng!', 'Lỗi');
             return;
         }
@@ -268,8 +268,8 @@ const ProductDetail = () => {
         const finalQuantity = selectedPackage ? selectedPackage.quantity : quantity;
         const finalPrice = selectedPackage ? selectedPackage.unitPrice : productData.price;
 
-        if (productData.stock && finalQuantity > productData.stock) {
-            showError(`Chỉ còn ${productData.stock} sản phẩm trong kho!`, 'Lỗi');
+        if (productData.in_stock && finalQuantity > productData.in_stock) {
+            showError(`Chỉ còn ${productData.in_stock} sản phẩm trong kho!`, 'Lỗi');
             return;
         }
 
@@ -319,7 +319,7 @@ const ProductDetail = () => {
 
         const finalQuantity = selectedPackage ? selectedPackage.quantity : quantity;
 
-        if (productData.stock !== undefined && productData.stock !== null && productData.stock === 0) {
+        if ((productData.in_stock || 0) === 0) {
             showAlert({
                 title: 'Hết hàng',
                 message: 'Sản phẩm hiện tại hết hàng!',

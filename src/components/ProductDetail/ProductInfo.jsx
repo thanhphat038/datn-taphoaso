@@ -69,9 +69,9 @@ const ProductInfo = ({
             <div className="flex items-center gap-2">
                 <span className="text-gray-600 font-medium">Trạng thái:</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    productData.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    (productData.in_stock || 0) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
-                    {productData.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                    {(productData.in_stock || 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
                 </span>
             </div>
 

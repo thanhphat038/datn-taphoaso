@@ -8,6 +8,8 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllReviews, deleteReview, updateReviewStatus } from '../../service/Admin.Service.js';
+import { getUserById } from '../../service/Admin.Service.js';
+import { getProductById } from '../../service/Admin.Service.js';
 
 
 const AdminReview = () => {
@@ -133,7 +135,7 @@ const AdminReview = () => {
 
     try {
       setLoading(true);
-      await updateReviewStatus(reviewId);
+      await updateReviewStatus(reviewId, currentStatus);
       // Toggle the status locally
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       setReviews(reviews.map(r => 
