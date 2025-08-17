@@ -118,8 +118,15 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     setUser(userData);
-    // Update secure storage
-    setSecureTokens(null, null, userData);
+    // Giữ nguyên token hiện tại, chỉ cập nhật user data
+    try {
+      const currentToken = sessionStorage.getItem('access_token');
+      if (currentToken) {
+        setSecureTokens(currentToken, null, userData);
+      }
+    } catch (error) {
+      console.error('Error updating user data:', error);
+    }
   };
 
   // Kiểm tra quyền admin
