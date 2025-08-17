@@ -190,51 +190,63 @@ const CommentSection = ({
                             {/* Replies List */}
                             {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 ? (
                                 <div className="ml-12 mt-3">
-                                    {/* Hiển thị 1 reply đầu tiên nếu chưa mở rộng */}
-                                    {!isRepliesExpanded(comment._id) && comment.replies.length > 1 ? (
-                                        <>
-                                            {/* Hiển thị 1 reply đầu tiên */}
-                                            <div className="space-y-3">
-                                                {comment.replies.slice(0, 1).map((reply, replyIndex) => (
-                                                    <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
-                                                        <div className="bg-gray-50 rounded-lg p-3">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                                                    {reply.user_id?.avatar ? (
-                                                                        <img
-                                                                            src={reply.user_id.avatar}
-                                                                            alt="Avatar"
-                                                                            className="w-full h-full object-cover"
-                                                                        />
-                                                                    ) : (
-                                                                        <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    )}
+                                                                                {/* Hiển thị 1 reply đầu tiên nếu chưa mở rộng */}
+                                            {!isRepliesExpanded(comment._id) && comment.replies.length > 1 ? (
+                                                <>
+                                                    {/* Hiển thị 1 reply đầu tiên */}
+                                                    <div className="space-y-3">
+                                                        {comment.replies.slice(0, 1).map((reply, replyIndex) => (
+                                                            <div key={reply._id || replyIndex} className="border-l-2 border-gray-200 pl-4">
+                                                                <div className="bg-gray-50 rounded-lg p-3">
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                                                            {reply.user_id?.avatar ? (
+                                                                                <img
+                                                                                    src={reply.user_id.avatar}
+                                                                                    alt="Avatar"
+                                                                                    className="w-full h-full object-cover"
+                                                                                />
+                                                                            ) : (
+                                                                                <svg key={`avatar-icon-${reply._id || replyIndex}`} className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                                                </svg>
+                                                                            )}
+                                                                        </div>
+                                                                        <span className="font-medium text-sm">
+                                                                            {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
+                                                                        </span>
+                                                                        <span className="text-xs text-gray-500">
+                                                                            {reply.create_at ?
+                                                                                new Date(reply.create_at).toLocaleString('vi-VN', {
+                                                                                    year: 'numeric',
+                                                                                    month: '2-digit',
+                                                                                    day: '2-digit',
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                }) :
+                                                                                'Vừa xong'
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="text-sm text-gray-800 ml-8">
+                                                                        {reply.reply || 'Nội dung trả lời'}
+                                                                    </div>
+                                                                    {/* Reply actions */}
+                                                                    <div className="flex items-center gap-4 ml-8 mt-2">
+                                                                        <button
+                                                                            onClick={() => handleReply(comment._id, reply.user_id?.full_name || reply.user_id?.username || 'Người dùng')}
+                                                                            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors"
+                                                                        >
+                                                                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+                                                                            </svg>
+                                                                            Trả lời
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                                <span className="font-medium text-sm">
-                                                                    {reply.user_id?.full_name || reply.user_id?.username || 'Người dùng'}
-                                                                </span>
-                                                                <span className="text-xs text-gray-500">
-                                                                    {reply.create_at ?
-                                                                        new Date(reply.create_at).toLocaleString('vi-VN', {
-                                                                            year: 'numeric',
-                                                                            month: '2-digit',
-                                                                            day: '2-digit',
-                                                                            hour: '2-digit',
-                                                                            minute: '2-digit'
-                                                                        }) :
-                                                                        'Vừa xong'
-                                                                    }
-                                                                </span>
                                                             </div>
-                                                            <div className="text-sm text-gray-800 ml-8">
-                                                                {reply.reply || 'Nội dung trả lời'}
-                                                            </div>
-                                                        </div>
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
 
                                             {/* Nút "Xem thêm replies" */}
                                             <div className="mt-2">
@@ -288,6 +300,18 @@ const CommentSection = ({
                                                             </div>
                                                             <div className="text-sm text-gray-800 ml-8">
                                                                 {reply.reply || 'Nội dung trả lời'}
+                                                            </div>
+                                                            {/* Reply actions */}
+                                                            <div className="flex items-center gap-4 ml-8 mt-2">
+                                                                <button
+                                                                    onClick={() => handleReply(comment._id, reply.user_id?.full_name || reply.user_id?.username || 'Người dùng')}
+                                                                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors"
+                                                                >
+                                                                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+                                                                    </svg>
+                                                                    Trả lời
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
