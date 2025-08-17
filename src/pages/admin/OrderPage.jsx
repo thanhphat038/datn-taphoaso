@@ -59,12 +59,6 @@ const OrderPage = () => {
       dotColor: 'bg-blue-500'
     },
     { 
-      value: 'shipped', 
-      label: 'Đã giao hàng', 
-      color: 'bg-purple-100 text-purple-800 border-purple-200',
-      dotColor: 'bg-purple-500'
-    },
-    { 
       value: 'delivered', 
       label: 'Hoàn thành', 
       color: 'bg-green-100 text-green-800 border-green-200',
@@ -184,7 +178,6 @@ const OrderPage = () => {
   const allOrders = orders.length;
   const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
   const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
-  const shippedOrders = orders.filter(order => (order.order_status || order.status) === 'shipped').length;
   const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
   const paymentFailedOrders = orders.filter(order => (order.order_status || order.status) === 'payment_failed').length;
   const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
@@ -527,16 +520,7 @@ const OrderPage = () => {
            >
              Đang xử lý ({processingOrders})
            </button>
-           <button
-             onClick={() => setSelectedStatus('shipped')}
-             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-               selectedStatus === 'shipped'
-                 ? 'bg-purple-500 text-white shadow-lg'
-                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-             }`}
-           >
-             Đã giao hàng ({shippedOrders})
-           </button>
+           
            <button
              onClick={() => setSelectedStatus('delivered')}
              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${

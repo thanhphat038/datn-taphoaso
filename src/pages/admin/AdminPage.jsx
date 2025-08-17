@@ -206,8 +206,6 @@ const AdminPage = () => {
         return { label: 'Chờ xử lý', color: 'text-yellow-600 bg-yellow-100' };
       case 'processing':
         return { label: 'Đang xử lý', color: 'text-blue-600 bg-blue-100' };
-      case 'shipped':
-        return { label: 'Đã giao hàng', color: 'text-purple-600 bg-purple-100' };
       case 'delivered':
         return { label: 'Hoàn thành', color: 'text-green-600 bg-green-100' };
       case 'cancelled':

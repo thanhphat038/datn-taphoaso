@@ -103,10 +103,10 @@ const PaymentWaiting = () => {
                     <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
                     <p>Sử dụng nút "Thử lại thanh toán" để tạo thanh toán mới với VNPAY.</p>
                   </div>
-                  <div className="flex items-start gap-2">
+                  {/* <div className="flex items-start gap-2">
                     <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
                     <p>Hoặc sử dụng "Đổi phương thức thanh toán" để thử cách khác.</p>
-                  </div>
+                  </div> */}
                 </>
               ) : (
                 <>
@@ -120,7 +120,7 @@ const PaymentWaiting = () => {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="bg-blue-200 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
-                    <p>Nếu thanh toán thất bại, bạn có thể thử lại hoặc đổi phương thức thanh toán.</p>
+                    <p>Nếu thanh toán thất bại, bạn có thể thử lại.</p>
                   </div>
                 </>
               )}
@@ -143,7 +143,7 @@ const PaymentWaiting = () => {
                   <>
                     <p>• Thanh toán thất bại, nhưng bạn vẫn có thời gian để thử lại</p>
                     <p>• Sử dụng nút "Thử lại thanh toán" để thanh toán lại</p>
-                    <p>• Hoặc "Đổi phương thức thanh toán" để thử cách khác</p>
+                    {/* <p>• Hoặc "Đổi phương thức thanh toán" để thử cách khác</p> */}
                   </>
                 ) : (
                   <>

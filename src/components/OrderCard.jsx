@@ -19,7 +19,7 @@ import {
   formatPaymentDeadlineRemaining,
   isPaymentDeadlineValid
 } from '../utils';
-import { calculateTotalPrice } from '../utils/price';
+import { calculateSubtotal } from '../utils/price';
 
 const API_BASE_URL = getApiUrl('');
 

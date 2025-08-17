@@ -119,32 +119,58 @@ class OrderService extends DBService {
 
     console.log('🔍 Debug - createOrder called with items:', items);
 
+    // Validation
     if (!user_id || !address?.trim() || !receiver?.trim() || !sdt?.trim() || !Array.isArray(items) || items.length === 0 || !payment_method) {
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing required fields');
     }
 
+    // Validate items và tính total
     let total_amount = 0;
     for (const item of items) {
       console.log('🔍 Debug - Processing item:', item);
+      
+      // Kiểm tra qty
+      if (!item.qty || item.qty <= 0) {
+        throw new AppError(ERROR_CODES.BAD_REQUEST, `Invalid quantity for product ${item.product_id}`);
+      }
+      
       const product = await productService.findById(item.product_id);
       if (!product) throw new AppError(ERROR_CODES.DB_NOT_FOUND, `Product ${item.product_id} not found`);
       if (product.stock < item.qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
+      
       total_amount += product.price * item.qty;
     }
-    // Luôn cộng phí ship 15000
-    // total_amount += 15000;
+
+    // Xử lý voucher với error handling
     let voucher_id = null;
+    let discountAmount = 0;
+    
     if (voucher_code) {
-      const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
-      if (voucher) {
-        voucher_id = voucher._id;
-        const discountAmount = voucher.discount_type === 'percentage'
-          ? (total_amount * voucher.discount_value / 100)
-          : voucher.discount_value;
-        total_amount -= Math.min(discountAmount, voucher.max_discount || discountAmount);
+      try {
+        const voucher = await voucherService.validateVoucherCode(voucher_code, user_id, total_amount);
+        if (voucher) {
+          voucher_id = voucher._id;
+          
+          // Tính discount amount
+          if (voucher.discount_type === 'percentage') {
+            discountAmount = (total_amount * voucher.discount_value) / 100;
+            if (voucher.max_discount && discountAmount > voucher.max_discount) {
+              discountAmount = voucher.max_discount;
+            }
+          } else {
+            discountAmount = Math.min(voucher.discount_value, total_amount);
+          }
+          
+          total_amount -= discountAmount;
+          console.log('🔍 Debug - Applied voucher discount:', discountAmount);
+        }
+      } catch (voucherError) {
+        console.log('🔍 Debug - Voucher validation failed:', voucherError.message);
+        // Không throw error, chỉ bỏ qua voucher để order vẫn được tạo
       }
     }
 
+    // Tạo order
     const order = await this.create({
       user_id,
       voucher_id,
@@ -159,16 +185,18 @@ class OrderService extends DBService {
 
     console.log('🔍 Debug - Created order:', order._id);
 
+    // Tạo order details và update stock
     for (const item of items) {
       console.log('🔍 Debug - Creating OrderDetail for item:', item);
       const product = await productService.findById(item.product_id);
-      const orderDetail = await OrderDetail.create({
+      
+      await OrderDetail.create({
         order_id: order._id,
         product_id: item.product_id,
         qty: item.qty,
         cur_price: product.price
       });
-      console.log('🔍 Debug - Created OrderDetail:', orderDetail);
+      
       await productService.updateStock(item.product_id, item.qty, 'decrease');
     }
 
@@ -246,7 +274,7 @@ class OrderService extends DBService {
   }
 
   async updateStatus(orderId, status) {
-    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
+    const validStatuses =['pending', 'paid', 'processing', 'delivered', 'cancelled', 'failed'];
 
     if (!validStatuses.includes(status)) {
       throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid order status');

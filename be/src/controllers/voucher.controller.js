@@ -49,11 +49,22 @@ export const getVoucherByCode = async (req, res) => {
   try {
     const voucher = await voucherService.findOne({ code: req.params.code });
     if (!voucher) {
-      return res.status(404).json({ message: 'Voucher not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Voucher not found' 
+      });
     }
-    res.json(voucher);
+    
+    // Trả về response format nhất quán
+    res.json({
+      success: true,
+      data: voucher
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 
@@ -86,11 +97,30 @@ export const deleteVoucher = async (req, res, next) => {
 // Validate voucher
 export const validateVoucher = async (req, res, next) => {
   try {
-    const { code } = req.body;
-    const isValid = await voucherService.validateVoucher(code);
+    const { code, orderAmount } = req.body;
+    const userId = req.user?.id; // Lấy user ID từ auth middleware
+    
+    // Gọi đúng method name
+    const voucher = await voucherService.validateVoucherCode(code, userId, orderAmount);
+    
+    // Tính toán discount amount
+    let discountAmount = 0;
+    if (voucher.discount_type === 'percentage') {
+      discountAmount = (orderAmount * voucher.discount_value) / 100;
+      if (voucher.max_discount && discountAmount > voucher.max_discount) {
+        discountAmount = voucher.max_discount;
+      }
+    } else {
+      discountAmount = voucher.discount_value;
+    }
+    
     res.json({
       success: true,
-      data: { isValid }
+      data: { 
+        voucher,
+        discountAmount,
+        isValid: true 
+      }
     });
   } catch (error) {
     next(error);

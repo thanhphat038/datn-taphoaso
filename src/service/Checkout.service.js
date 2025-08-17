@@ -191,7 +191,7 @@ export const getOrderInfo = async (orderId) => {
 };
 
 // Tạo lại payment URL cho VNPAY
-export const retryVNPayPayment = async (orderId, totalAmount) => {
+export const retryVNPayPayment = async (orderData) => {
   try {
     const token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
     
@@ -199,16 +199,19 @@ export const retryVNPayPayment = async (orderId, totalAmount) => {
       throw new Error('No authentication token found');
     }
 
-    console.log('Retrying VNPAY payment for order:', orderId);
+    console.log('Retrying VNPAY payment with order data:', orderData);
 
     const response = await axios.post(`${API_BASE_URL}/payment/create`, {
       method: 'vnpay',
-      amount: totalAmount,
-      orderId: orderId,
+      amount: orderData.total_amount,
+      orderId: orderData.orderId || orderData.id,
       orderData: {
-        orderId: orderId,
-        total_amount: totalAmount,
-        payment_method: 'vnpay'
+        total_amount: orderData.total_amount,
+        payment_method: orderData.payment_method,
+        address: orderData.address,
+        receiver: orderData.receiver,
+        sdt: orderData.sdt,
+        note: orderData.note
       }
     }, {
       headers: {
@@ -216,6 +219,7 @@ export const retryVNPayPayment = async (orderId, totalAmount) => {
         'Content-Type': 'application/json'
       }
     });
+    console.log('VNPAY payment response:', response.data);
 
     return response.data;
   } catch (error) {
