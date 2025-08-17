@@ -15,7 +15,7 @@ const API_CONFIG = {
       REGISTER: '/auth/register',
       PROFILE: '/auth/profile',
       FORGOT_PASSWORD: '/auth/forgot-password',
-      RESET_PASSWORD: '/auth/resET-password',
+      RESET_PASSWORD: '/auth/reset-password',
       CHANGE_PASSWORD: '/auth/change-password',
       REFRESH: '/auth/refresh',
       LOGOUT: '/auth/logout'

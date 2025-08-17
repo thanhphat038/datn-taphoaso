@@ -2,12 +2,12 @@ import axios from "axios";
 import { getAuthToken, setAuthToken, clearAuthData, syncUserData } from "../utils/auth.js";
 import { getApiUrl, getAuthHeaders } from '../config/api.js';
 
-const API_URL = getApiUrl('/auth');
+const AUTH_API_URL = getApiUrl('/auth');
 const BASE_URL = getApiUrl('');
 
 export async function registerUser({ username, email, password }) {
   try {
-    const response = await axios.post(`${API_URL}/register`, { username, email, password }, {
+    const response = await axios.post(`${AUTH_API_URL}/register`, { username, email, password }, {
       withCredentials: true // Đảm bảo gửi và nhận cookies
     });
     const { token } = response.data.data;
@@ -25,7 +25,7 @@ export async function loginUser({ username, password }) {
   try {
     console.log('🔍 Login attempt for:', username);
     
-    const response = await axios.post(`${API_URL}/login`, { username, password }, {
+    const response = await axios.post(`${AUTH_API_URL}/login`, { username, password }, {
       withCredentials: true // Đảm bảo gửi và nhận cookies
     });
     console.log('📥 Login response:', response.data);
@@ -86,7 +86,7 @@ export async function getProfile() {
     const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
-    const response = await axios.get(`${API_URL}/profile`, {
+    const response = await axios.get(`${AUTH_API_URL}/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data.data;
@@ -108,7 +108,7 @@ export async function updateProfile(userData) {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' })
     };
     
-    const response = await axios.patch(`${API_URL}/profile`, userData, { headers });
+    const response = await axios.patch(`${AUTH_API_URL}/profile`, userData, { headers });
     return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Cập nhật profile thất bại");
@@ -116,12 +116,12 @@ export async function updateProfile(userData) {
 }
 
 // Change password
-export async function changePassword({ currentPassword, newPassword }) {
+export async function changePassword(currentPassword, newPassword) {
   try {
     const token = getAuthToken();
     if (!token) throw new Error("No auth token found");
     
-    const response = await axios.patch(`${API_URL}/change-password`, {
+    const response = await axios.put(`${AUTH_API_URL}/change-password`, {
       currentPassword,
       newPassword
     }, {
@@ -137,7 +137,7 @@ export async function changePassword({ currentPassword, newPassword }) {
 export async function requestPasswordReset({ email }) {
   try {
     console.log('[requestPasswordReset] Requesting password reset for email:', email);
-    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    const response = await axios.post(`${AUTH_API_URL}/forgot-password`, { email });
     console.log('[requestPasswordReset] Response received:', response.data);
     return response.data;
   } catch (error) {
@@ -152,7 +152,7 @@ export async function resetPassword({ token, newPassword }) {
   try {
     console.log(token)
     console.log(newPassword)
-    const response = await axios.post(`${API_URL}/reset-password`, {
+    const response = await axios.post(`${AUTH_API_URL}/reset-password`, {
       token,
       newPassword
     },{headers: { Authorization: `Bearer ${token}` }});
@@ -183,7 +183,7 @@ export async function resetPassword({ token, newPassword }) {
 export async function clearResetToken({ email }) {
   try {
     console.log('[clearResetToken] Clearing reset token for email:', email);
-    const response = await axios.post(`${API_URL}/clear-reset-token`, { email });
+    const response = await axios.post(`${AUTH_API_URL}/clear-reset-token`, { email });
     console.log('[clearResetToken] Response received:', response.data);
     return response.data;
   } catch (error) {
@@ -195,7 +195,7 @@ export async function clearResetToken({ email }) {
 // Verify email
 export async function verifyEmail({ token }) {
   try {
-    const response = await axios.post(`${API_URL}/verify-email`, { token });
+    const response = await axios.post(`${AUTH_API_URL}/verify-email`, { token });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Xác thực email thất bại");
@@ -205,7 +205,7 @@ export async function verifyEmail({ token }) {
 // Resend verification email
 export async function resendVerificationEmail({ email }) {
   try {
-    const response = await axios.post(`${API_URL}/resend-verification`, { email });
+    const response = await axios.post(`${AUTH_API_URL}/resend-verification`, { email });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Gửi lại email xác thực thất bại");
