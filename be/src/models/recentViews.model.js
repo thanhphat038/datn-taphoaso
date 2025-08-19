@@ -21,7 +21,7 @@ const recentViewsSchema = new mongoose.Schema({
     min: 1
   }
 }, {
-  timestamps: { createdAt: 'create_at', updatedAt: 'update_at' }
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 // Index để tối ưu truy vấn

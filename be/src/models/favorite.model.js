@@ -12,7 +12,7 @@ const favoriteSchema = new mongoose.Schema({
     required: true
   }
 }, {
-  timestamps: { createdAt: 'create_at', updatedAt: 'update_at' }
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 favoriteSchema.index({ user_id: 1, product_id: 1 }, { unique: true });

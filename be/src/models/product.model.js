@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema({
     count: { type: Number, default: 0 }
   }
 }, {
-  timestamps: { createdAt: 'create_at', updatedAt: 'update_at' }
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 const Product = mongoose.model('Product', productSchema);

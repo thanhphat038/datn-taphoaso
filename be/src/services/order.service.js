@@ -78,7 +78,7 @@ class OrderService extends DBService {
   async getOrderWithDeadline(orderId) {
     const order = await this.model.findById(orderId)
       .populate('user_id')
-      .select('_id total_amount order_status payment_method payment_deadline create_at');
+      .select('_id total_amount order_status payment_method payment_deadline created_at');
     
     if (!order) {
       throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found');
@@ -90,14 +90,14 @@ class OrderService extends DBService {
       order_status: order.order_status,
       payment_method: order.payment_method,
       payment_deadline: order.payment_deadline,
-      created_at: order.create_at
+      created_at: order.created_at
     };
   }
 
   async getOrderByVnpayRef(vnpayTxnRef) {
     const order = await this.model.findOne({ vnpay_txn_ref: vnpayTxnRef })
       .populate('user_id')
-      .select('_id total_amount order_status payment_method payment_deadline create_at vnpay_txn_ref');
+      .select('_id total_amount order_status payment_method payment_deadline created_at vnpay_txn_ref');
     
     if (!order) {
       throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Order not found with this VNPAY reference');
@@ -109,7 +109,7 @@ class OrderService extends DBService {
       order_status: order.order_status,
       payment_method: order.payment_method,
       payment_deadline: order.payment_deadline,
-      created_at: order.create_at,
+      created_at: order.created_at,
       vnpay_txn_ref: order.vnpay_txn_ref
     };
   }
@@ -136,7 +136,7 @@ class OrderService extends DBService {
       
       const product = await productService.findById(item.product_id);
       if (!product) throw new AppError(ERROR_CODES.DB_NOT_FOUND, `Product ${item.product_id} not found`);
-      if (product.stock < item.qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
+      if (product.in_stock < item.qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`);
       
       total_amount += product.price * item.qty;
     }
@@ -210,11 +210,11 @@ class OrderService extends DBService {
   }
 
   async getUserOrders(userId) {
-    return await this.model.find({ user_id: userId }).sort({ create_at: -1 });
+    return await this.model.find({ user_id: userId }).sort({ created_at: -1 });
   }
 
   async getOrdersByUser(userId, options = {}) {
-    const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
+    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
     const skip = (page - 1) * limit;
 
     const query = { user_id: userId };
@@ -290,7 +290,7 @@ class OrderService extends DBService {
   }
 
   async getRecentOrders(limit = 10) {
-    return await this.model.find().sort({ create_at: -1 }).limit(limit).populate('user_id');
+    return await this.model.find().sort({ created_at: -1 }).limit(limit).populate('user_id');
   }
 
   async getOrderStatistics() {

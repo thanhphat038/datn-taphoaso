@@ -212,7 +212,9 @@ const Checkout = () => {
     setIsCalculatingShipping(true);
     try {
       const deliveryAddress = `${address.address_detail}, ${address.ward}, ${address.district}, ${address.city}`;
-      const shippingResponse = await calculateShippingFee(deliveryAddress, 'default');
+      // const shippingResponse = await calculateShippingFee(deliveryAddress, 'default');
+      const shippingResponse = await calculateShippingFee(deliveryAddress, 'vietmap');
+
       
       if (shippingResponse.success && shippingResponse.shippingFee !== undefined) {
         setShippingFee(shippingResponse.shippingFee);

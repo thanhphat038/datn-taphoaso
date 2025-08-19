@@ -18,14 +18,14 @@ const getAuthHeaders = () => {
   let token = sessionStorage.getItem('access_token');
   
   // Fallback: thử từ localStorage
-  if (!token) {
-    token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
-  }
+  // if (!token) {
+  //   token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
+  // }
   
-  // Fallback: thử từ cookies (hệ thống cũ)
-  if (!token) {
-    token = Cookies.get('auth_token');
-  }
+  // // Fallback: thử từ cookies (hệ thống cũ)
+  // if (!token) {
+  //   token = Cookies.get('auth_token');
+  // }
   
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
