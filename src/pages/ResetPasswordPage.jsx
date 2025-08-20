@@ -20,7 +20,7 @@ const ResetPasswordPage = () => {
   useEffect(() => {
     if (!token) {
       setTokenValid(false);
-      setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+      setError('Invalid reset password link or expired.');
     }
   }, [token]);
 
@@ -31,15 +31,15 @@ const ResetPasswordPage = () => {
 
   const validate = () => {
     if (!formData.newPassword || !formData.confirmPassword) {
-      setError('Vui lòng nhập đầy đủ thông tin.');
+      setError('Please fill in all required fields.');
       return false;
     }
     if (formData.newPassword.length < 6) {
-      setError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      setError('New password must be at least 6 characters long.');
       return false;
     }
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp.');
+      setError('Password confirmation does not match.');
       return false;
     }
     setError('');
@@ -51,7 +51,7 @@ const ResetPasswordPage = () => {
     setSuccess('');
     if (!validate()) return;
     if (!token) {
-      setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+      setError('Invalid reset password link or expired.');
       return;
     }
     setLoading(true);
@@ -62,25 +62,25 @@ const ResetPasswordPage = () => {
       await resetPassword({ token, newPassword: formData.newPassword });
       
       console.log('[ResetPasswordPage] Password reset successful');
-      setSuccess('Đặt lại mật khẩu thành công! Đang chuyển về trang đăng nhập...');
+      setSuccess('Password reset successful! Redirecting to login page...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       console.error('[ResetPasswordPage] Reset password error:', err);
       console.error('[ResetPasswordPage] Error message:', err.message);
       
-      // Xử lý các loại lỗi cụ thể
-      if (err.message.includes('Invalid or expired token')) {
-        setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.');
-      } else if (err.message.includes('Token has expired')) {
-        setError('Liên kết đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu liên kết mới.');
-      } else if (err.message.includes('Token không hợp lệ')) {
-        setError('Liên kết đặt lại mật khẩu không hợp lệ. Vui lòng yêu cầu liên kết mới.');
-      } else if (err.message.includes('Dữ liệu không hợp lệ')) {
-        setError('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.');
-      } else if (err.message.includes('Lỗi server')) {
-        setError('Lỗi server, vui lòng thử lại sau.');
+      // Handle specific error types
+      if (err.message.includes('Invalid reset token') || err.message.includes('Token is not valid')) {
+        setError('Invalid reset token. Please request a new link.');
+      } else if (err.message.includes('expired') || err.message.includes('Token has expired')) {
+        setError('Reset token has expired. Please request a new link.');
+      } else if (err.message.includes('Invalid data')) {
+        setError('Invalid data. Please check your input.');
+      } else if (err.message.includes('Server error')) {
+        setError('Server error, please try again later.');
+      } else if (err.message.includes('Request failed with status code 400')) {
+        setError('Invalid reset token or expired. Please request a new link.');
       } else {
-        setError(err.message || 'Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại.');
+        setError(err.message || 'An error occurred while resetting password. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -91,14 +91,27 @@ const ResetPasswordPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 px-4">
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
+          <div className="mb-6">
+            <svg className="mx-auto h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold text-red-600 mb-4">Liên kết không hợp lệ</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="w-full py-2 px-4 bg-[#06AEF4] text-white rounded-md font-medium hover:bg-[#0590d8] transition-colors"
-          >
-            Quay về trang đăng nhập
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full py-2 px-4 bg-[#06AEF4] text-white rounded-md font-medium hover:bg-[#0590d8] transition-colors"
+            >
+              Quay về trang đăng nhập
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full py-2 px-4 border border-[#06AEF4] text-[#06AEF4] rounded-md font-medium hover:bg-[#06AEF4] hover:text-white transition-colors"
+            >
+              Yêu cầu link mới
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -135,7 +148,25 @@ const ResetPasswordPage = () => {
               disabled={loading}
             />
           </div>
-          {error && <div className="text-red-600 text-sm text-center p-3 bg-red-50 border border-red-200 rounded-md">{error}</div>}
+          {error && (
+            <div className="text-red-600 text-sm text-center p-4 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center justify-center mb-2">
+                <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span className="font-medium">Lỗi đặt lại mật khẩu</span>
+              </div>
+              <p className="mb-3">{error}</p>
+              {error.includes('hết hạn') && (
+                <button
+                  onClick={() => navigate('/login')}
+                  className="text-[#06AEF4] hover:underline font-medium"
+                >
+                  Yêu cầu link mới
+                </button>
+              )}
+            </div>
+          )}
           {success && <div className="text-green-600 text-sm text-center p-3 bg-green-50 border border-green-200 rounded-md">{success}</div>}
           <button
             type="submit"

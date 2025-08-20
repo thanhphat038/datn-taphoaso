@@ -513,7 +513,7 @@ const Header = () => {
                                     {category.name}
                                 </Link>
                             ))}
-                            {categories.length > 10 && (
+                            {categories.length > 5 && (
                                 <div className="relative" ref={categoriesDropdownRef}>
                                     <button
                                         onClick={() => setShowAllCategories(!showAllCategories)}
