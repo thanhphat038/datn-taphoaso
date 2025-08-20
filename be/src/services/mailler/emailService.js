@@ -35,11 +35,11 @@ export const sendOrderSuccessEmail = async ({ to, name, orderId, orderDetailLink
   }
 };
 
-export const sendWelcomeEmail = async ({ to, name, loginLink }) => {
+export const sendWelcomeEmail = async ({ to, data, loginLink }) => {
   return sendMail({
     to,
     subject: 'Chào mừng bạn đến với Tạp Hoá Số!',
-    html: welcomeTemplate({ name, loginLink }),
-    text: `Chào mừng ${name || 'bạn'} đến với Tạp Hoá Số! Tài khoản của bạn đã được tạo thành công. Hãy đăng nhập để bắt đầu mua sắm: ${loginLink}`
+    html: welcomeTemplate({ data, loginLink }),
+    text: `Chào mừng ${data.full_name || 'bạn'} đến với Tạp Hoá Số! Tài khoản của bạn đã được tạo thành công. Hãy đăng nhập để bắt đầu mua sắm: ${loginLink}`
   });
 };

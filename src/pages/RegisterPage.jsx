@@ -84,7 +84,7 @@ const RegisterPage = () => {
       setMessageType("success");
       setTimeout(() => {
         setMessage("");
-        // window.location.href = "/login";
+        window.location.href = "/login";
       }, 2000);
     } catch (error) {
       setMessage("Đăng ký thất bại: " + error.message);

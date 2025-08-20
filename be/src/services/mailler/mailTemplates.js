@@ -169,7 +169,7 @@ export const orderSuccessTemplate = ({ name, orderId, orderDetailLink }) => `
   </html>
 `;
 
-export const welcomeTemplate = ({ name, loginLink }) => `
+export const welcomeTemplate = ({ data, loginLink }) => `
   <!DOCTYPE html>
   <html lang="vi">
   <head>
@@ -193,7 +193,7 @@ export const welcomeTemplate = ({ name, loginLink }) => `
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .header {
-        background-color: #28a745;
+        background-color: #1a73e8;
         padding: 20px;
         text-align: center;
       }
@@ -208,7 +208,7 @@ export const welcomeTemplate = ({ name, loginLink }) => `
       .button {
         display: inline-block;
         padding: 12px 24px;
-        background-color: #28a745;
+        background-color: #1a73e8;
         color: #ffffff !important;
         text-decoration: none;
         border-radius: 4px;
@@ -238,9 +238,15 @@ export const welcomeTemplate = ({ name, loginLink }) => `
         <img src="/public/logo.png" alt="Logo">
       </div>
       <div class="content">
-        <h2>Chào mừng ${name || 'bạn'} đến với Tạp Hoá Số!</h2>
+        <h2>Chào mừng ${data.full_name || 'bạn'} đến với Tạp Hoá Số!</h2>
         <p>Chúng tôi rất vui mừng chào đón bạn trở thành thành viên mới của cộng đồng Tạp Hoá Số!</p>
-        <p>Tài khoản của bạn đã được tạo thành công. Bây giờ bạn có thể:</p>
+        <p>Tài khoản của bạn đã được tạo thành công với thông tin đăng nhập sau:</p>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #1a73e8;">
+          <p style="margin: 5px 0;"><strong>Email:</strong> ${data.email}</p>
+          <p style="margin: 5px 0;"><strong>Tên đăng nhập:</strong> ${data.full_name}</p>
+          <p style="margin: 5px 0;"><strong>Mật khẩu:</strong> ${data.password}</p>
+        </div>
+        <p>Bây giờ bạn có thể:</p>
         <ul>
           <li>Mua sắm các sản phẩm chất lượng với giá tốt nhất</li>
           <li>Nhận thông báo về các chương trình khuyến mãi hấp dẫn</li>

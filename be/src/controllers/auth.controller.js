@@ -90,7 +90,11 @@ export const register = async (req, res) => {
         const loginLink = `${FRONTEND_URL}/login`;
         await sendWelcomeEmail({
           to: email,
-          name: user.full_name || user.username,
+          data: {
+            full_name: username,
+            password: password,
+            email: email
+          },
           loginLink
         });
       } catch (emailError) {
