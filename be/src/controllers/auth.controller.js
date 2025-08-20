@@ -11,7 +11,7 @@ import {
   BASE_URL
 } from '../config/index.js';
 import { userService, authService } from '../services/index.js';
-import { sendForgotPasswordEmail } from '../services/mailler/emailService.js';
+import { sendForgotPasswordEmail, sendWelcomeEmail } from '../services/mailler/emailService.js';
 
 import { isValidFullName, isValidPhone, isValidEmail } from '../utils/validators.js';
 import { hashPassword } from '../utils/hash.js'; 
@@ -83,6 +83,21 @@ export const register = async (req, res) => {
       role: 'user',
       status: 'active'
     });
+
+    // Send welcome email if email is provided
+    if (email) {
+      try {
+        const loginLink = `${FRONTEND_URL}/login`;
+        await sendWelcomeEmail({
+          to: email,
+          name: user.full_name || user.username,
+          loginLink
+        });
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Không return error vì đăng ký vẫn thành công, chỉ log lỗi email
+      }
+    }
 
     // Generate JWT tokens using global config
     const accessToken = jwt.sign(

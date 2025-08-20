@@ -168,3 +168,96 @@ export const orderSuccessTemplate = ({ name, orderId, orderDetailLink }) => `
   </body>
   </html>
 `;
+
+export const welcomeTemplate = ({ name, loginLink }) => `
+  <!DOCTYPE html>
+  <html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào Mừng Bạn Đến Với Tạp Hoá Số</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        color: #333333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #28a745;
+        padding: 20px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 150px;
+        height: auto;
+      }
+      .content {
+        padding: 30px;
+        line-height: 1.6;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #28a745;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+      .footer {
+        background-color: #f8f8f8;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #666666;
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+        .content {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="/public/logo.png" alt="Logo">
+      </div>
+      <div class="content">
+        <h2>Chào mừng ${name || 'bạn'} đến với Tạp Hoá Số!</h2>
+        <p>Chúng tôi rất vui mừng chào đón bạn trở thành thành viên mới của cộng đồng Tạp Hoá Số!</p>
+        <p>Tài khoản của bạn đã được tạo thành công. Bây giờ bạn có thể:</p>
+        <ul>
+          <li>Mua sắm các sản phẩm chất lượng với giá tốt nhất</li>
+          <li>Nhận thông báo về các chương trình khuyến mãi hấp dẫn</li>
+          <li>Tích lũy điểm thưởng và nhận các ưu đãi đặc biệt</li>
+          <li>Quản lý đơn hàng và theo dõi vận chuyển dễ dàng</li>
+        </ul>
+        <p>Hãy bắt đầu trải nghiệm mua sắm tuyệt vời cùng chúng tôi:</p>
+        <a href="${loginLink}" class="button">Đăng Nhập Ngay</a>
+        <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+        <p>Trân trọng,</p>
+        <p><strong>Đội ngũ Tạp Hoá Số</strong></p>
+      </div>
+      <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Tạp Hoá Số. Mọi quyền được bảo lưu.</p>
+        <p>Nếu cần hỗ trợ, vui lòng liên hệ qua email: <a href="mailto:taphoaso0@gmail.com">taphoaso0@gmail.com</a></p>
+      </div>
+    </div>
+  </body>
+  </html>
+`;
