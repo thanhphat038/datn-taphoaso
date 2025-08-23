@@ -5,8 +5,8 @@ import { getApiUrl } from '../config/api.js';
 const api = getApiUrl('');
 
 // Lấy tất cả blog
-export const getAllBlogs = (page = 1, limit = 10) => {
-    return axios.get(`${api}/blogs?page=${page}&limit=${limit}`);
+export const getAllBlogs = () => {
+    return axios.get(`${api}/blogs`);
 };
 
 // Lấy blog theo ID
@@ -20,6 +20,6 @@ export const getAllBlogCategories = () => {
 };
 
 // Lấy blog theo danh mục
-export const getBlogsByCategory = (categoryId, page = 1, limit = 10) => {
-    return axios.get(`${api}/blogs/category/${categoryId}?page=${page}&limit=${limit}`);
+export const getBlogsByCategory = (categoryId) => {
+    return axios.get(`${api}/blogs/category/${categoryId}`);
 }; 

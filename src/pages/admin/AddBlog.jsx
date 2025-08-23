@@ -141,7 +141,30 @@ const AddBlog = () => {
           });
 
           if (blog.image) {
-            setImagePreview(blog.image);
+            // If the image is already base64, use it directly
+            if (blog.image.startsWith('data:')) {
+              setImagePreview(blog.image);
+            } else {
+              // Convert URL to base64 if needed
+              try {
+                const response = await fetch(blog.image);
+                const blob = await response.blob();
+                const base64Image = await new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
+                setImagePreview(base64Image);
+                setFormData(prev => ({
+                  ...prev,
+                  image: base64Image
+                }));
+              } catch (error) {
+                console.error('Error converting image to base64:', error);
+                setImagePreview(blog.image);
+              }
+            }
           }
           if (editor && blog.content) {
             editor.commands.setContent(blog.content);
@@ -181,44 +204,25 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
     }
 
     try {
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-
-      // Upload image
-      const formData = new FormData();
-      formData.append('image', file);
-
       setLoading(true);
-      const token = Cookies.get('auth_token');
-      if (!token) {
-        console.error('No authentication token found for upload');
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+      
+      // Convert image to base64
+      const base64Image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-
-      const result = await response.json();
+      // Set preview and form data with base64
+      setImagePreview(base64Image);
       setFormData(prev => ({
         ...prev,
-        image: result.url
+        image: base64Image
       }));
+      
     } catch (error) {
-      setError('Lỗi khi tải lên hình ảnh: ' + error.message);
+      setError('Lỗi khi xử lý hình ảnh: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -270,19 +274,44 @@ setError('Không thể tải thông tin bài viết: ' + error.message);
       setLoading(true);
       setError(null);
 
-      // Lưu trực tiếp vào database với base64 images
+      // Prepare blog data with base64 images
       const blogData = {
         ...formData
       };
 
-      console.log(blogData);
-const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
+      // Ensure the image is in base64 format
+      if (blogData.image && !blogData.image.startsWith('data:')) {
+        try {
+          const response = await fetch(blogData.image);
+          const blob = await response.blob();
+          const base64Image = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          blogData.image = base64Image;
+        } catch (error) {
+          console.error('Error converting image to base64:', error);
+        }
+      }
+
+      console.log('Submitting blog data with base64 images');
+      const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
       const method = id ? 'PUT' : 'POST';
+
+      const token = Cookies.get('auth_token');
+      if (!token) {
+        console.error('No authentication token found');
+        navigate('/login');
+        return;
+      }
 
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(blogData),
       });
@@ -431,7 +460,18 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                     </button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors"
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        const event = { target: { files: [file] } };
+                        handleImageChange(event);
+                      }
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                  >
                     <input
                       type="file"
                       accept="image/*"
@@ -440,7 +480,7 @@ const url = id ? `${API_BASE_URL}/blogs/${id}` : `${API_BASE_URL}/blogs`;
                       id="image-upload"
                     />
                     <label
-htmlFor="image-upload"
+                      htmlFor="image-upload"
                       className="cursor-pointer flex flex-col items-center gap-2"
                     >
                       <FaImage className="w-8 h-8 text-gray-400" />

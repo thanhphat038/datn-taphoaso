@@ -41,7 +41,7 @@ const AdminBlogPage = () => {
           return;
         }
 
-        const response = await fetch(`${API_BASE_URL}/blogs`, {
+        const response = await fetch(`${API_BASE_URL}/blogs?limit=1000`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -82,11 +82,18 @@ const AdminBlogPage = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Apply sorting on filtered result (like AdminProduct.jsx)
+  const sortedBlogs = filteredBlogs.sort((a, b) => {
+    const dateA = new Date(a.create_at || 0);
+    const dateB = new Date(b.create_at || 0);
+    return dateB - dateA; // Mặc định sắp xếp mới nhất
+  });
+
   // Pagination calculations
-  const totalBlogs = filteredBlogs.length;
+  const totalBlogs = sortedBlogs.length;
   const totalPages = Math.ceil(totalBlogs / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedBlogs = filteredBlogs.slice(
+  const paginatedBlogs = sortedBlogs.slice(
     startIndex,
     startIndex + pageSize
   );
@@ -170,6 +177,11 @@ const AdminBlogPage = () => {
       setCurrentPage(1);
     }
   };
+
+  // Reset page when search query changes (like AdminProduct.jsx)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   // Table columns
   const columns = [

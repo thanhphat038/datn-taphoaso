@@ -43,12 +43,19 @@ const AdminBanner = () => {
       }
     }
     
+    // For any other URL, try to convert to base64
     return url;
   }, []);
 
   // Function to fetch base64 image
   const fetchBase64Image = useCallback(async (url) => {
     try {
+      // If it's already a base64 data URL, return as is
+      if (url.startsWith('data:')) {
+        return url;
+      }
+      
+      // If it's a localhost API endpoint for base64
       if (url.includes('/api/upload/base64/')) {
         const response = await fetch(url);
         const result = await response.json();
@@ -56,7 +63,16 @@ const AdminBanner = () => {
           return result.data;
         }
       }
-      return url;
+      
+      // For any other URL, convert to base64
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
     } catch (error) {
       console.error('Error fetching base64 image:', error);
       return url;
@@ -80,12 +96,13 @@ const AdminBanner = () => {
           setIsLoading(true);
           setHasError(false);
 
-          // If it's a base64 API URL, fetch the base64 data
-          if (src.includes('/api/upload/base64/')) {
+          // If it's already base64, use directly
+          if (src.startsWith('data:')) {
+            setImageSrc(src);
+          } else {
+            // Convert any URL to base64
             const base64Data = await fetchBase64Image(src);
             setImageSrc(base64Data);
-          } else {
-            setImageSrc(src);
           }
         } catch (error) {
           console.error('Error loading image:', error);
@@ -133,6 +150,26 @@ const AdminBanner = () => {
     );
   }, [fetchBase64Image]);
 
+  // Convert image to base64
+  const convertImageToBase64 = async (imageUrl) => {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('data:')) return imageUrl;
+    
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      return imageUrl;
+    }
+  };
+
   // Fetch banners
   const fetchBanners = async () => {
     try {
@@ -146,10 +183,19 @@ const AdminBanner = () => {
         bannersArr = result.data.data;
       }
       
-      setBanners(bannersArr.map(banner => ({
-        ...banner,
-        status: banner.is_active ? 'active' : 'inactive'
-      })));
+      // Convert all banner images to base64
+      const bannersWithBase64 = await Promise.all(
+        bannersArr.map(async (banner) => {
+          const base64Image = await convertImageToBase64(banner.image_url);
+          return {
+            ...banner,
+            image_url: base64Image,
+            status: banner.is_active ? 'active' : 'inactive'
+          };
+        })
+      );
+      
+      setBanners(bannersWithBase64);
     } catch (error) {
       setError('Không thể tải danh sách banner: ' + error.message);
       console.error('Error fetching banners:', error);
