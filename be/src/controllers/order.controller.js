@@ -72,11 +72,26 @@ export const createOrder = async (req, res, next) => {
       const user = await userService.findById(userId);
       if (user && user.email) {
         const orderDetailLink = `${process.env.FRONTEND_URL}/order/${order._id}`;
+        
+        // Lấy thông tin đầy đủ của order với items (đã được cải thiện trong service)
+        const fullOrder = await orderService.getOrderById(order._id);
+        const orderItems = fullOrder.items || [];
+        const totalAmount = fullOrder.total_amount || 0;
+        
+        console.log(`[createOrder] Order items for email:`, orderItems.map(item => ({
+          name: item.product_name,
+          qty: item.qty,
+          price: item.price,
+          total: item.total_price
+        })));
+        
         await sendOrderSuccessEmail({
           to: user.email,
           name: user.full_name || receiver,
           orderId: order._id,
-          orderDetailLink
+          orderDetailLink,
+          orderItems,
+          totalAmount
         });
         console.log(`[createOrder] Order confirmation email sent to ${user.email}`);
       }
@@ -115,12 +130,12 @@ export const createbuyNowOrder = async (req, res, next) => {
       sdt,
       payment_method,
       note,
-      items: [
-        {
-          product_id,
-          quantity
-        }
-      ]
+              items: [
+          {
+            product_id,
+            qty: quantity
+          }
+        ]
     });
 
     // Gửi email xác nhận đơn hàng
@@ -128,11 +143,26 @@ export const createbuyNowOrder = async (req, res, next) => {
       const user = await userService.findById(userId);
       if (user && user.email) {
         const orderDetailLink = `${process.env.FRONTEND_URL}/order/${order._id}`;
+        
+        // Lấy thông tin đầy đủ của order với items (đã được cải thiện trong service)
+        const fullOrder = await orderService.getOrderById(order._id);
+        const orderItems = fullOrder.items || [];
+        const totalAmount = fullOrder.total_amount || 0;
+        
+        console.log(`[createbuyNowOrder] Order items for email:`, orderItems.map(item => ({
+          name: item.product_name,
+          qty: item.qty,
+          price: item.price,
+          total: item.total_price
+        })));
+        
         await sendOrderSuccessEmail({
           to: user.email,
           name: user.full_name || receiver,
           orderId: order._id,
-          orderDetailLink
+          orderDetailLink,
+          orderItems,
+          totalAmount
         });
         console.log(`[createbuyNowOrder] Order confirmation email sent to ${user.email}`);
       }

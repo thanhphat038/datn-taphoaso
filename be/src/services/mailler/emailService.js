@@ -18,13 +18,13 @@ export const sendForgotPasswordEmail = async ({ to, name, resetLink }) => {
   }
 };
 
-export const sendOrderSuccessEmail = async ({ to, name, orderId, orderDetailLink }) => {
+export const sendOrderSuccessEmail = async ({ to, name, orderId, orderDetailLink, orderItems, totalAmount }) => {
   try {
     console.log(`[sendOrderSuccessEmail] Sending order confirmation email to: ${to}`);
     const result = await sendMail({
       to,
       subject: `Xác nhận đơn hàng #${orderId}`,
-      html: orderSuccessTemplate({ name, orderId, orderDetailLink }),
+      html: orderSuccessTemplate({ name, orderId, orderDetailLink, orderItems, totalAmount }),
       text: `Đơn hàng #${orderId} của bạn đã đặt thành công. Xem chi tiết tại: ${orderDetailLink}`
     });
     console.log(`[sendOrderSuccessEmail] Email sent successfully to ${to}`);

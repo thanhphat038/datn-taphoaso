@@ -30,8 +30,29 @@ class OrderService extends DBService {
 
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
-        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-        return { ...order, items };
+        const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+          path: 'product_id',
+          select: 'name price image description category_id'
+        });
+        
+        const items = orderDetails.map(detail => ({
+          _id: detail._id,
+          product_id: detail.product_id._id,
+          product_name: detail.product_id.name,
+          product_image: detail.product_id.image,
+          product_description: detail.product_id.description,
+          category_id: detail.product_id.category_id,
+          qty: detail.qty,
+          price: detail.cur_price,
+          total_price: detail.cur_price * detail.qty
+        }));
+        
+        return { 
+          ...order, 
+          items,
+          total_items: items.length,
+          total_quantity: items.reduce((sum, item) => sum + item.qty, 0)
+        };
       })
     );
 
@@ -45,30 +66,39 @@ class OrderService extends DBService {
     console.log('🔍 Debug - getOrderById called with orderId:', orderId);
     const order = await this.model.findById(orderId).populate('user_id');
     console.log('🔍 Debug - Found order:', order);
+    
     if (order) {
-      const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-      console.log('🔍 Debug - Found items:', items);
+      // Lấy order details với thông tin sản phẩm đầy đủ
+      const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+        path: 'product_id',
+        select: 'name price image description category_id'
+      });
       
-      // If no items found, create dummy data for testing
-      if (!items || items.length === 0) {
-        console.log('🔍 Debug - No items found, creating dummy data');
-        const product = await Product.findOne();
-        if (product) {
-          const dummyItems = [{
-            _id: 'dummy_id',
-            order_id: order._id,
-            product_id: product,
-            qty: 2,
-            cur_price: product.price
-          }];
-          console.log('🔍 Debug - Created dummy items:', dummyItems);
-          const result = { ...order.toObject(), items: dummyItems };
-          console.log('🔍 Debug - Final result with dummy data:', result);
-          return result;
-        }
-      }
+      console.log('🔍 Debug - Found orderDetails:', orderDetails);
       
-      const result = { ...order.toObject(), items };
+      // Chuyển đổi dữ liệu để dễ sử dụng
+      const items = orderDetails.map(detail => ({
+        _id: detail._id,
+        product_id: detail.product_id._id,
+        product_name: detail.product_id.name,
+        product_image: detail.product_id.image,
+        product_description: detail.product_id.description,
+        category_id: detail.product_id.category_id,
+        qty: detail.qty,
+        price: detail.cur_price,
+        total_price: detail.cur_price * detail.qty
+      }));
+      
+      console.log('🔍 Debug - Processed items:', items);
+      
+      const result = { 
+        ...order.toObject(), 
+        items,
+        // Thêm thông tin tổng quan
+        total_items: items.length,
+        total_quantity: items.reduce((sum, item) => sum + item.qty, 0)
+      };
+      
       console.log('🔍 Debug - Final result:', result);
       return result;
     }
@@ -229,8 +259,29 @@ class OrderService extends DBService {
 
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
-        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-        return { ...order.toObject(), items };
+        const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+          path: 'product_id',
+          select: 'name price image description category_id'
+        });
+        
+        const items = orderDetails.map(detail => ({
+          _id: detail._id,
+          product_id: detail.product_id._id,
+          product_name: detail.product_id.name,
+          product_image: detail.product_id.image,
+          product_description: detail.product_id.description,
+          category_id: detail.product_id.category_id,
+          qty: detail.qty,
+          price: detail.cur_price,
+          total_price: detail.cur_price * detail.qty
+        }));
+        
+        return { 
+          ...order.toObject(), 
+          items,
+          total_items: items.length,
+          total_quantity: items.reduce((sum, item) => sum + item.qty, 0)
+        };
       })
     );
 
@@ -249,13 +300,51 @@ class OrderService extends DBService {
     const order = await this.model.findById(orderId);
     if (!order) return null;
 
-    const items = await OrderDetail.find({ order_id: orderId }).populate('product_id');
-    return { ...order.toObject(), items };
+    const orderDetails = await OrderDetail.find({ order_id: orderId }).populate({
+      path: 'product_id',
+      select: 'name price image description category_id'
+    });
+    
+    const items = orderDetails.map(detail => ({
+      _id: detail._id,
+      product_id: detail.product_id._id,
+      product_name: detail.product_id.name,
+      product_image: detail.product_id.image,
+      product_description: detail.product_id.description,
+      category_id: detail.product_id.category_id,
+      qty: detail.qty,
+      price: detail.cur_price,
+      total_price: detail.cur_price * detail.qty
+    }));
+    
+    return { 
+      ...order.toObject(), 
+      items,
+      total_items: items.length,
+      total_quantity: items.reduce((sum, item) => sum + item.qty, 0)
+    };
   }
 
   async getProductsInOrder(orderId) {
-    // Lấy tất cả OrderDetail theo orderId và populate product_id
-    return await OrderDetail.find({ order_id: orderId }).populate('product_id');
+    // Lấy tất cả OrderDetail theo orderId và populate product_id với thông tin đầy đủ
+    const orderDetails = await OrderDetail.find({ order_id: orderId }).populate({
+      path: 'product_id',
+      select: 'name price image description category_id stock'
+    });
+    
+    // Chuyển đổi dữ liệu để dễ sử dụng
+    return orderDetails.map(detail => ({
+      _id: detail._id,
+      product_id: detail.product_id._id,
+      product_name: detail.product_id.name,
+      product_image: detail.product_id.image,
+      product_description: detail.product_id.description,
+      category_id: detail.product_id.category_id,
+      stock: detail.product_id.stock,
+      qty: detail.qty,
+      price: detail.cur_price,
+      total_price: detail.cur_price * detail.qty
+    }));
   }
 
   async calculateOrderStats() {
