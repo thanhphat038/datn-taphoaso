@@ -32,6 +32,16 @@ export {
   getOrderDisplayInfo
 } from './order';
 
+// Date utilities
+export {
+  formatDateSafely,
+  formatDateShort,
+  formatDateTime,
+  formatDateCustom,
+  isValidDate,
+  compareDates
+} from './date';
+
 // Payment utilities
 export {
   isPaymentDeadlineValid,

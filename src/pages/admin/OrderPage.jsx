@@ -9,6 +9,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.js';
+import { formatDateShort } from '../../utils';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -113,6 +114,12 @@ const OrderPage = () => {
         const sortedOrders = ordersWithDetails.sort((a, b) => {
           const dateA = new Date(a.created_at || a.create_at || 0);
           const dateB = new Date(b.created_at || b.create_at || 0);
+          
+          // Kiểm tra date hợp lệ
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            return 0; // Giữ nguyên thứ tự nếu date không hợp lệ
+          }
+          
           return dateB - dateA; // Giảm dần (mới nhất trước)
         });
         
@@ -227,7 +234,7 @@ const OrderPage = () => {
           <div>
             <div className="font-semibold text-gray-900">{order._id}</div>
             <div className="text-sm text-gray-500">
-              {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN') : 'N/A'}
+              {order.created_at ? formatDateShort(order.created_at) : (order.create_at ? formatDateShort(order.create_at) : 'N/A')}
             </div>
           </div>
         </div>

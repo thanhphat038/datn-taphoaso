@@ -2,24 +2,26 @@
  * Utility functions cho xử lý đơn hàng
  */
 
+// Import date utilities
+import { formatDateTime, compareDates } from './date';
+
 /**
  * Sắp xếp đơn hàng theo thời gian tạo
  * @param {Array} orders - Danh sách đơn hàng
- * @param {string} sortBy - Trường để sắp xếp (mặc định: 'create_at')
+ * @param {string} sortBy - Trường để sắp xếp (mặc định: 'created_at')
  * @param {string} order - Thứ tự sắp xếp ('asc' hoặc 'desc', mặc định: 'desc')
  * @returns {Array} Danh sách đơn hàng đã sắp xếp
  */
-export const sortOrdersByDate = (orders, sortBy = 'create_at', order = 'desc') => {
+export const sortOrdersByDate = (orders, sortBy = 'created_at', order = 'desc') => {
   if (!orders || !Array.isArray(orders)) return [];
   
   return [...orders].sort((a, b) => {
-    const dateA = new Date(a[sortBy]);
-    const dateB = new Date(b[sortBy]);
+    const result = compareDates(a[sortBy], b[sortBy]);
     
     if (order === 'asc') {
-      return dateA - dateB;
+      return result;
     } else {
-      return dateB - dateA;
+      return -result; // Đảo ngược để sắp xếp giảm dần
     }
   });
 };
@@ -135,7 +137,7 @@ export const getOrderDisplayInfo = (order) => {
   return {
     id: order._id,
     shortId: order._id.slice(-6).toUpperCase(),
-    createDate: new Date(order.create_at).toLocaleString('vi-VN'),
+    createDate: formatDateTime(order.created_at || order.create_at),
     address: order.address,
     status: order.order_status,
     totalAmount: order.total_amount || 0,

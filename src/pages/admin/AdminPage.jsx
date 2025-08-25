@@ -154,7 +154,17 @@ const AdminPage = () => {
         }, 0) : 0;
         
         // Lấy 5 đơn hàng gần nhất (theo ngày tạo mới nhất)
-        const sortedOrders = Array.isArray(orders) ? [...orders].sort((a, b) => new Date(b.create_at || b.created_at) - new Date(a.create_at || a.created_at)) : [];
+        const sortedOrders = Array.isArray(orders) ? [...orders].sort((a, b) => {
+          const dateA = new Date(a.created_at || a.create_at || 0);
+          const dateB = new Date(b.created_at || b.create_at || 0);
+          
+          // Kiểm tra date hợp lệ
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            return 0; // Giữ nguyên thứ tự nếu date không hợp lệ
+          }
+          
+          return dateB - dateA; // Giảm dần (mới nhất trước)
+        }) : [];
         const recentOrders = sortedOrders.slice(0, 5);
         
         setStats({
@@ -385,7 +395,7 @@ const AdminPage = () => {
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-1">
                               <FaCalendarAlt className="w-3 h-3" />
-                              {order.create_at ? new Date(order.create_at).toLocaleDateString('vi-VN', {
+                              {order.created_at ? new Date(order.created_at).toLocaleDateString('vi-VN', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',

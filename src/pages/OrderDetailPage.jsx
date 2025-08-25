@@ -7,6 +7,7 @@ import { useAlertContext } from '../components/AlertProvider';
 import { getApiUrl } from '../config/api.js';
 
 import { ArrowLeft, Calendar, MapPin, User, Phone, Package } from 'lucide-react';
+import { formatDateTime } from '../utils';
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
@@ -225,7 +226,7 @@ const OrderDetailPage = () => {
               </h1>
               <p className="text-gray-500 text-sm flex items-center gap-2 mt-1">
                 <Calendar className="w-4 h-4" />
-                {order.create_at ? new Date(order.create_at).toLocaleString('vi-VN') : order.date}
+                {order.created_at ? formatDateTime(order.created_at) : (order.create_at ? formatDateTime(order.create_at) : (order.date || 'N/A'))}
               </p>
             </div>
           </div>

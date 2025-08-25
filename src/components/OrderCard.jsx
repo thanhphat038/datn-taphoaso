@@ -17,7 +17,8 @@ import {
   getOrderDisplayInfo,
   shouldShowContinuePaymentButton,
   formatPaymentDeadlineRemaining,
-  isPaymentDeadlineValid
+  isPaymentDeadlineValid,
+  formatDateTime
 } from '../utils';
 import { calculateSubtotal } from '../utils/price';
 
@@ -132,7 +133,7 @@ const OrderCard = ({
         <div>
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <span className="font-bold text-lg text-blue-600">#{order._id.slice(-6).toUpperCase()}</span>
-            <span className="text-gray-500 text-sm">{new Date(order.create_at).toLocaleString()}</span>
+            <span className="text-gray-500 text-sm">{formatDateTime(order.created_at || order.create_at)}</span>
             <StatusBadge status={order.order_status} />
           </div>
           <p className="text-gray-700 text-base font-semibold mb-1">Địa chỉ: {order.address}</p>
