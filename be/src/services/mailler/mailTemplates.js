@@ -677,7 +677,7 @@ export const orderSuccessTemplate = ({ name, orderId, orderDetailLink, orderItem
               ${orderItems.map(item => `
                 <tr>
                   <td class="product-name">
-                    <strong>${item.product_name || 'Sản phẩm'}</strong>
+                    <strong>${item.product_name || 'Sản phẩm không xác định'}</strong>
                   </td>
                   <td class="quantity">
                     ${item.qty || item.quantity || 1}
