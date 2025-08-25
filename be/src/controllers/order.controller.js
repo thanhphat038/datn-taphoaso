@@ -130,12 +130,12 @@ export const createbuyNowOrder = async (req, res, next) => {
       sdt,
       payment_method,
       note,
-              items: [
-          {
-            product_id,
-            qty: quantity
-          }
-        ]
+      items: [
+        {
+          product_id,
+          quantity
+        }
+      ]
     });
 
     // Gửi email xác nhận đơn hàng
