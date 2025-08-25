@@ -504,7 +504,7 @@ const Header = () => {
                     <div className="flex justify-between items-center py-2">
                         {/* Categories */}
                         <div className="hidden md:flex items-center space-x-6 text-sm">
-                            {categories.slice(0, 10).map((category) => (
+                            {categories.slice(0, 5).map((category) => (
                                 <Link 
                                     key={category._id}
                                     to={`/product?category=${category._id}`} 
