@@ -1,27 +1,14 @@
 #!/usr/bin/env node
 
-/**
- * Configuration Validation Script
- * 
- * This script validates all required environment variables before starting the server.
- * It ensures that all necessary configurations are present and correctly formatted.
- * 
- * Usage:
- *   node scripts/check-config.js
- *   npm run check-config
- */
-
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Get current directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from .env file
-const envPath = path.join(__dirname, '..', '.env');
-dotenv.config({ path: envPath });
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 console.log('🔍 Validating environment configuration...\n');
 

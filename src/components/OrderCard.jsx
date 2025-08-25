@@ -50,35 +50,49 @@ const StatusBadge = ({ status }) => {
 };
 
 // Component con cho sản phẩm trong đơn hàng
-const OrderProductItem = ({ item, onReview, order_status }) => (
-  <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-200">
-    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-      <img src={item.product_id?.images?.[0]} alt={item.product_id?.name} className="w-full h-full object-cover" />
-    </div>
-    <div className="flex-grow min-w-0">
-      <h4 className="font-medium text-gray-800 mb-1 truncate" title={item.product_id?.name}>
-        {item.product_id?.name}
-      </h4>
-      <p className="text-red-500 font-medium">{formatCurrency(item.cur_price)}</p>
-    </div>
-    {canReviewOrder(order_status) && (
-      <button
-        onClick={() => onReview(item.product_id)}
-        className="mt-2 px-4 py-2 text-sm rounded-md text-white font-medium transition-colors bg-[#fcd34d] hover:bg-[#fbbf24] cursor-pointer"
-      >
-        Đánh giá
-      </button>
-    )}
-    <div className="flex items-center gap-3 flex-shrink-0">
-      <span className="w-8 text-center font-medium">{item.qty}</span>
-    </div>
-    <div className="text-right flex-shrink-0 w-24">
-      <div className="font-semibold text-gray-800">
-        {formatCurrency(item.cur_price * item.qty)}
+const OrderProductItem = ({ item, onReview, order_status }) => {
+  console.log('🔍 Debug - OrderProductItem rendering item:', item);
+  console.log('🔍 Debug - Item product_id:', item.product_id);
+  console.log('🔍 Debug - Item images:', item.product_id?.images);
+  
+  return (
+    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-200">
+      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+        <img 
+          src={item.product_id?.images?.[0] || '/img/pd_img.png'} 
+          alt={item.product_id?.name || 'Sản phẩm'} 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            console.log('🔍 Debug - Image load error, using fallback');
+            e.target.src = '/img/pd_img.png'; // Fallback image
+          }}
+        />
+      </div>
+      <div className="flex-grow min-w-0">
+        <h4 className="font-medium text-gray-800 mb-1 truncate" title={item.product_id?.name || 'Tên sản phẩm'}>
+          {item.product_id?.name || 'Tên sản phẩm không xác định'}
+        </h4>
+        <p className="text-red-500 font-medium">{formatCurrency(item.cur_price || 0)}</p>
+      </div>
+      {canReviewOrder(order_status) && (
+        <button
+          onClick={() => onReview(item.product_id)}
+          className="mt-2 px-4 py-2 text-sm rounded-md text-white font-medium transition-colors bg-[#fcd34d] hover:bg-[#fbbf24] cursor-pointer"
+        >
+          Đánh giá
+        </button>
+      )}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <span className="w-8 text-center font-medium">{item.qty || 0}</span>
+      </div>
+      <div className="text-right flex-shrink-0 w-24">
+        <div className="font-semibold text-gray-800">
+          {formatCurrency((item.cur_price || 0) * (item.qty || 0))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const OrderCard = ({ 
   order, 

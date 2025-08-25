@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// ESLint: process is available in Node.js environment
+/* global process */
+
 // Function to require environment variables
 function requireEnv(name) {
   if (!process.env[name]) {

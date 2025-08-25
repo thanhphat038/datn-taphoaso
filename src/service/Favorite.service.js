@@ -8,6 +8,8 @@ const api = getApiUrl('');
 // Cache để tránh gọi API quá nhiều
 let favoritesCache = null;
 let cacheTimestamp = 0;
+let cachedUserId = null;
+let cacheUserToken = null;
 const CACHE_DURATION = 30000; // 30 giây
 
 function getAuthHeaders() {
@@ -31,28 +33,34 @@ function getUserId() {
 
 export const getFavorites = (userId) => {
     const now = Date.now();
+    const currentUserId = getUserId();
+    const currentToken = Cookies.get('auth_token');
     
     // Kiểm tra authentication trước
-    const token = Cookies.get('auth_token');
-    if (!token) {
+    if (!currentToken) {
         console.log('🔒 No auth token found, skipping favorites fetch');
         return Promise.reject(new Error('No authentication token'));
     }
     
-    // Kiểm tra cache
-    if (favoritesCache && (now - cacheTimestamp) < CACHE_DURATION) {
-        console.log('🔍 Debug - Using cached favorites');
+    // Kiểm tra cache - chỉ sử dụng cache nếu cùng user, cùng token và chưa hết hạn
+    if (favoritesCache && 
+        cachedUserId === currentUserId && 
+        cacheUserToken === currentToken &&
+        (now - cacheTimestamp) < CACHE_DURATION) {
+        console.log('🔍 Debug - Using cached favorites for user:', currentUserId);
         return Promise.resolve(favoritesCache);
     }
     
-    console.log('🔍 Debug - Fetching fresh favorites');
+    console.log('🔍 Debug - Fetching fresh favorites for user:', currentUserId);
     return axios.get(`${api}/favorites`, {
         headers: getAuthHeaders(),
         params: userId ? { user_id: userId } : {}
     }).then(response => {
-        // Lưu vào cache
+        // Lưu vào cache với user ID và token hiện tại
         favoritesCache = response;
         cacheTimestamp = now;
+        cachedUserId = currentUserId;
+        cacheUserToken = currentToken;
         return response;
     }).catch(error => {
         // Xử lý lỗi 401 một cách im lặng
@@ -61,6 +69,8 @@ export const getFavorites = (userId) => {
             // Clear cache khi có lỗi auth
             favoritesCache = null;
             cacheTimestamp = 0;
+            cachedUserId = null;
+            cacheUserToken = null;
         }
         throw error;
     });
@@ -79,6 +89,8 @@ export const addToFavorite = (productId) => {
     // Clear cache khi thêm favorite
     favoritesCache = null;
     cacheTimestamp = 0;
+    cachedUserId = null;
+    cacheUserToken = null;
     
     return axios.post(`${api}/favorites`, { product_id: productId }, { 
         headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } 
@@ -98,6 +110,8 @@ export const removeFromFavorite = (productId) => {
     // Clear cache khi xóa favorite
     favoritesCache = null;
     cacheTimestamp = 0;
+    cachedUserId = null;
+    cacheUserToken = null;
     
     return axios.delete(`${api}/favorites`, { 
         headers: getAuthHeaders(),
@@ -114,5 +128,31 @@ export const isFavorite = (productId) => {
 export const clearFavoritesCache = () => {
     favoritesCache = null;
     cacheTimestamp = 0;
+    cachedUserId = null;
+    cacheUserToken = null;
     console.log('🔍 Debug - Favorites cache cleared');
+};
+
+// Function để force clear cache và invalidate
+export const forceClearFavoritesCache = () => {
+    favoritesCache = null;
+    cacheTimestamp = 0;
+    cachedUserId = null;
+    cacheUserToken = null;
+    // Force clear bằng cách set timestamp về quá khứ
+    cacheTimestamp = Date.now() - (CACHE_DURATION + 1000);
+    
+    // Clear tất cả cache liên quan
+    if (typeof window !== 'undefined') {
+        // Clear browser cache nếu có thể
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+            });
+        }
+    }
+    
+    console.log('🔍 Debug - Favorites cache and browser cache force cleared');
 }; 

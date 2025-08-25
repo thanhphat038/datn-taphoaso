@@ -11,7 +11,7 @@ import {
   BASE_URL
 } from '../config/index.js';
 import { userService, authService } from '../services/index.js';
-import { sendForgotPasswordEmail } from '../services/mailler/emailService.js';
+import { sendForgotPasswordEmail, sendWelcomeEmail } from '../services/mailler/emailService.js';
 
 import { isValidFullName, isValidPhone, isValidEmail } from '../utils/validators.js';
 import { hashPassword } from '../utils/hash.js'; 
@@ -64,12 +64,12 @@ export const register = async (req, res) => {
     // Validate email if provided
     if (email) {
       if (!isValidEmail(email)) {
-        return badRequest(res, 'Invalid email format');
+        return badRequest(res, 'Định dạng email không hợp lệ');
       }
 
       const existingEmail = await userService.findOne({ email });
       if (existingEmail) {
-        return badRequest(res, 'Email is already in use');
+        return badRequest(res, 'Email đã được sử dụng');
       }
     }
 
@@ -83,6 +83,25 @@ export const register = async (req, res) => {
       role: 'user',
       status: 'active'
     });
+
+    // Send welcome email if email is provided
+    if (email) {
+      try {
+        const loginLink = `${FRONTEND_URL}/login`;
+        await sendWelcomeEmail({
+          to: email,
+          data: {
+            full_name: username,
+            password: password,
+            email: email
+          },
+          loginLink
+        });
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Không return error vì đăng ký vẫn thành công, chỉ log lỗi email
+      }
+    }
 
     // Generate JWT tokens using global config
     const accessToken = jwt.sign(
@@ -108,9 +127,9 @@ export const register = async (req, res) => {
       },
       token: accessToken,
       refreshToken
-    }, 'User registered successfully');
+    }, 'Đăng ký tài khoản thành công');
   } catch (error) {
-    return serverError(res, 'Error registering user', error);
+    return serverError(res, 'Lỗi khi đăng ký tài khoản', error);
   }
 };
 
@@ -118,7 +137,7 @@ export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      return badRequest(res, 'Username and password are required');
+      return badRequest(res, 'Tên đăng nhập và mật khẩu là bắt buộc');
     }
     const result = await authService.login(username, password);
     if (!result.success) {
@@ -135,9 +154,9 @@ export const login = async (req, res) => {
     return ok(res, {
       token: result.accessToken,
       user: result.user
-    }, 'Login successful');
+    }, 'Đăng nhập thành công');
   } catch (error) {
-    return serverError(res, 'Error during login', error);
+    return serverError(res, 'Lỗi khi đăng nhập', error);
   }
 };
 
@@ -147,12 +166,12 @@ export const getProfile = async (req, res) => {
     const user = await authService.getProfile(userId);
     
     if (!user) {
-      return notFound(res, 'User profile not found');
+      return notFound(res, 'Không tìm thấy thông tin người dùng');
     }
 
-    return ok(res, user, 'Profile retrieved successfully');
+    return ok(res, user, 'Lấy thông tin hồ sơ thành công');
   } catch (error) {
-    return serverError(res, 'Error retrieving profile', error);
+    return serverError(res, 'Lỗi khi lấy thông tin hồ sơ', error);
   }
 };
 
@@ -217,7 +236,7 @@ export const updateProfile = async (req, res) => {
     if (email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return badRequest(res, 'Invalid email format');
+        return badRequest(res, 'Định dạng email không hợp lệ');
       }
 
       // Check if email is already used by another user
@@ -227,7 +246,7 @@ export const updateProfile = async (req, res) => {
       });
       
       if (existingEmail) {
-        return badRequest(res, 'Email is already in use');
+        return badRequest(res, 'Email đã được sử dụng');
       }
       updateData.email = email;
     }
@@ -237,15 +256,15 @@ export const updateProfile = async (req, res) => {
       const trimmedUsername = username.trim();
       
       if (!trimmedUsername) {
-        return badRequest(res, 'Username cannot be empty');
+        return badRequest(res, 'Tên đăng nhập không được để trống');
       }
 
       if (trimmedUsername.length < 3) {
-        return badRequest(res, 'Username must be at least 3 characters long');
+        return badRequest(res, 'Tên đăng nhập phải có ít nhất 3 ký tự');
       }
 
       if (trimmedUsername.length > 20) {
-        return unprocessableEntity(res, 'Username must not exceed 20 characters');
+        return unprocessableEntity(res, 'Tên đăng nhập không được vượt quá 20 ký tự');
       }
 
       // Check if username is already used by another user
@@ -255,7 +274,7 @@ export const updateProfile = async (req, res) => {
       });
       
       if (existingUsername) {
-        return badRequest(res, 'Username is already in use');
+        return badRequest(res, 'Tên đăng nhập đã được sử dụng');
       }
       updateData.username = trimmedUsername;
     }
@@ -264,7 +283,7 @@ export const updateProfile = async (req, res) => {
     if (gender) {
       const validGenders = ['male', 'female', 'other'];
       if (!validGenders.includes(gender)) {
-        return badRequest(res, 'Invalid gender value');
+        return badRequest(res, 'Giá trị giới tính không hợp lệ');
       }
       updateData.gender = gender;
     }
@@ -274,13 +293,13 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await authService.updateProfile(userId, updateData);
     
     if (!updatedUser) {
-      return notFound(res, 'User not found');
+      return notFound(res, 'Không tìm thấy người dùng');
     }
 
     console.log('🔍 Debug - Updated user:', updatedUser);
-    return ok(res, updatedUser, 'Profile updated successfully');
+    return ok(res, updatedUser, 'Cập nhật hồ sơ thành công');
   } catch (error) {
-    return serverError(res, 'Error updating profile', error);
+    return serverError(res, 'Lỗi khi cập nhật hồ sơ', error);
   }
 };
 
@@ -288,29 +307,29 @@ export const changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
     if (!userId) {
-      return unauthorized(res, 'User not authenticated');
+      return unauthorized(res, 'Người dùng chưa được xác thực');
     }
 
     const { currentPassword, newPassword } = req.body;
 
     // Validate required fields
     if (!currentPassword || !newPassword) {
-      return badRequest(res, 'Current password and new password are required');
+      return badRequest(res, 'Mật khẩu hiện tại và mật khẩu mới là bắt buộc');
     }
 
     // Validate password types
     if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
-      return badRequest(res, 'Passwords must be strings');
+      return badRequest(res, 'Mật khẩu phải là chuỗi ký tự');
     }
 
     // Validate password lengths
     if (currentPassword.length < 6 || newPassword.length < 6) {
-      return badRequest(res, 'Passwords must be at least 6 characters long');
+      return badRequest(res, 'Mật khẩu phải có ít nhất 6 ký tự');
     }
 
     // Validate that passwords are different
     if (currentPassword === newPassword) {
-      return badRequest(res, 'New password must be different from current password');
+      return badRequest(res, 'Mật khẩu mới phải khác với mật khẩu hiện tại');
     }
 
     const result = await authService.changePassword(userId, currentPassword, newPassword);
@@ -320,7 +339,7 @@ export const changePassword = async (req, res) => {
     if (error instanceof AppError) {
       return badRequest(res, error.message);
     }
-    return serverError(res, 'Error changing password', error);
+    return serverError(res, 'Lỗi khi thay đổi mật khẩu', error);
   }
 };
 
@@ -330,43 +349,58 @@ export const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
 
     if (!token || !newPassword) {
-      return badRequest(res, 'Token and new password are required');
+      return badRequest(res, 'Token và mật khẩu mới là bắt buộc');
     }
 
     if (typeof newPassword !== 'string' || newPassword.length < 6) {
-      return badRequest(res, 'New password must be at least 6 characters long');
+      return badRequest(res, 'Mật khẩu mới phải có ít nhất 6 ký tự');
     }
 
+    // Find user by token first
+    const user = await userService.findOne({ resetPasswordToken: token });
+    if (!user) {
+      return badRequest(res, 'Invalid reset token');
+    }
+
+    // Check expiration time
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < Date.now()) {
+      // Clear expired token
+      await userService.update(user._id, {
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      });
+      
+      return badRequest(res, 'Reset token has expired. Please request a new one.');
+    }
+
+    // Verify JWT token
     let payload;
     try {
       payload = jwt.verify(token, JWT_SECRET);
     } catch (error) {
-      return badRequest(res, 'Invalid or expired token');
+      return badRequest(res, 'Token không hợp lệ hoặc đã hết hạn');
     }
 
-    const user = await userService.findById(payload.id);
-    if (!user) {
-      return notFound(res, 'User not found');
+    // Kiểm tra user ID trong token có khớp với user trong database
+    if (payload.id !== user._id.toString()) {
+      return badRequest(res, 'Token không hợp lệ cho người dùng này');
     }
 
-    // Nếu lưu resetPasswordToken vào DB, kiểm tra khớp token:
-    if (user.resetPasswordToken !== token || user.resetPasswordExpires < Date.now()) {
-      return badRequest(res, 'Token is invalid or expired');
-    }
-
+    // Hash new password
     const hashedPassword = hashPassword(newPassword);
 
+    // Update password and clear token
     await userService.update(user._id, {
       password: hashedPassword,
       resetPasswordToken: undefined,
       resetPasswordExpires: undefined
     });
 
-    return ok(res, null, 'Password has been reset successfully');
+    return ok(res, null, 'Đặt lại mật khẩu thành công');
 
   } catch (error) {
     console.error('Error resetting password:', error);
-    return serverError(res, 'Error resetting password', error);
+    return serverError(res, 'Lỗi khi đặt lại mật khẩu', error);
   }
 };
 
@@ -377,20 +411,20 @@ export const refreshToken = async (req, res) => {
     console.log('[refreshToken] refreshToken from cookie:', refreshToken);
     if (!refreshToken) {
       console.log('[refreshToken] No refresh token in cookies');
-      return badRequest(res, 'Refresh token is required');
+      return badRequest(res, 'Refresh token là bắt buộc');
     }
     try {
       const decoded = jwt.verify(refreshToken, JWT_SECRET);
       if (decoded.type !== 'refresh') {
         res.clearCookie('refresh_token', { path: '/' });
         console.log('[refreshToken] Invalid token type');
-        return unauthorized(res, 'Invalid token type');
+        return unauthorized(res, 'Loại token không hợp lệ');
       }
       const user = await userService.findById(decoded.id);
       if (!user || user.status !== 'active') {
         res.clearCookie('refresh_token', { path: '/' });
         console.log('[refreshToken] User not found or inactive');
-        return unauthorized(res, 'User not found or inactive');
+        return unauthorized(res, 'Không tìm thấy người dùng hoặc tài khoản không hoạt động');
       }
       const newAccessToken = jwt.sign(
         { id: user._id, role: user.role },
@@ -408,15 +442,15 @@ export const refreshToken = async (req, res) => {
           phone: user.phone,
           role: user.role
         }
-      }, 'Token refreshed successfully');
+      }, 'Làm mới token thành công');
     } catch (error) {
       console.error('[refreshToken] JWT verify or user lookup error:', error);
       res.clearCookie('refresh_token', { path: '/' });
-      return unauthorized(res, 'Invalid refresh token');
+      return unauthorized(res, 'Refresh token không hợp lệ');
     }
   } catch (error) {
     console.error('[refreshToken] Outer error:', error);
-    return serverError(res, 'Error refreshing token', error);
+    return serverError(res, 'Lỗi khi làm mới token', error);
   }
 };
 
@@ -425,32 +459,28 @@ export const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return badRequest(res, 'Email is required');
+      return badRequest(res, 'Email là bắt buộc');
     }
 
-    if (!isValidEmail(email)) {
-      return badRequest(res, 'Invalid email format');
-    }
+          if (!isValidEmail(email)) {
+        return badRequest(res, 'Định dạng email không hợp lệ');
+      }
 
     const user = await userService.findOne({ email });
     if (!user) {
-      return notFound(res, 'No user found with this email');
+      return notFound(res, 'Không tìm thấy người dùng với email này');
     }
 
-    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: RESET_PASSWORD_TOKEN_EXPIRES_IN });
+    // Create reset token
+    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
 
-    // Calculate expiry time based on token expiration
-    // Convert '15m' to milliseconds
-    const expiryMinutes = parseInt(RESET_PASSWORD_TOKEN_EXPIRES_IN.replace(/[^0-9]/g, ''));
-    const expiryMs = expiryMinutes * 60 * 1000;
-
-    // Lưu token vào DB
+    // Save token to database
     await userService.update(user._id, {
       resetPasswordToken: resetToken,
-      resetPasswordExpires: Date.now() + expiryMs
+      resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
     });
 
-    // Tạo link reset
+    // Create reset link
     const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     // Gửi email
@@ -460,16 +490,16 @@ export const forgotPassword = async (req, res) => {
       resetLink
     });
 
-    return ok(res, null, 'Password reset link has been sent to your email');
+    return ok(res, null, 'Link đặt lại mật khẩu đã được gửi đến email của bạn');
     
   } catch (error) {
     console.error('Forgot password error:', error);
-    return serverError(res, 'Error processing forgot password', error);
+    return serverError(res, 'Lỗi khi xử lý quên mật khẩu', error);
   }
 };
 
 // Thêm endpoint logout
 export const logout = async (req, res) => {
   res.clearCookie('refresh_token', { path: '/' });
-  return ok(res, null, 'Logged out successfully');
+  return ok(res, null, 'Đăng xuất thành công');
 };

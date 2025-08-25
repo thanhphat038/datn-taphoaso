@@ -9,6 +9,8 @@
     "dev": "nodemon server.js",
     "prod": "pm2 start server.js --name taphoaso-backend",
     "check-config": "node scripts/check-config.js",
+    "check-email": "node scripts/check-email-config.js",
+    "test-reset-password": "node scripts/test-reset-password.js",
     "predev": "npm run check-config",
     "prestart": "npm run check-config",
     "check-chroma": "node scripts/check-chroma-status.js",

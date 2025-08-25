@@ -83,10 +83,25 @@ const handleSubmit = async (e) => {
         setForgotMessage('');
         setForgotLoading(true);
         try {
+            console.log('[LoginPage] Requesting password reset for email:', forgotEmail);
             await requestPasswordReset({ email: forgotEmail });
             setForgotMessage('Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.');
+            setForgotEmail(''); // Clear email after success
         } catch (error) {
-            setForgotMessage('Lỗi: ' + (error.response?.data?.message || error.message));
+            console.error('[LoginPage] Forgot password error:', error);
+            let errorMessage = 'Có lỗi xảy ra khi gửi yêu cầu đặt lại mật khẩu.';
+            
+            if (error.response?.status === 404) {
+                errorMessage = 'Không tìm thấy tài khoản với email này.';
+            } else if (error.response?.status === 400) {
+                errorMessage = 'Email không hợp lệ.';
+            } else if (error.response?.status === 500) {
+                errorMessage = 'Lỗi server, vui lòng thử lại sau hoặc liên hệ hỗ trợ.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            setForgotMessage('Lỗi: ' + errorMessage);
         } finally {
             setForgotLoading(false);
         }
@@ -215,17 +230,34 @@ const handleSubmit = async (e) => {
                                     required
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#06AEF4]"
                                     placeholder="Nhập email của bạn"
+                                    disabled={forgotLoading}
                                 />
                             </div>
                             {forgotMessage && (
-                                <div className={`text-sm ${forgotMessage.startsWith('Đã gửi') ? 'text-green-600' : 'text-red-600'}`}>{forgotMessage}</div>
+                                <div className={`text-sm p-3 rounded-md border ${
+                                    forgotMessage.startsWith('Đã gửi') || forgotMessage.startsWith('Password reset initiated') 
+                                        ? 'text-green-700 bg-green-50 border-green-200' 
+                                        : 'text-red-700 bg-red-50 border-red-200'
+                                }`}>
+                                    {forgotMessage}
+                                </div>
                             )}
                             <button
                                 type="submit"
-                                className="w-full py-2 px-4 bg-[#06AEF4] text-white rounded-md font-medium hover:bg-[#0590d8] transition-colors"
+                                className="w-full py-2 px-4 bg-[#06AEF4] text-white rounded-md font-medium hover:bg-[#0590d8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 disabled={forgotLoading}
                             >
-                                {forgotLoading ? 'Đang gửi...' : 'Gửi email đặt lại mật khẩu'}
+                                {forgotLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Đang gửi...
+                                    </>
+                                ) : (
+                                    'Gửi email đặt lại mật khẩu'
+                                )}
                             </button>
                         </form>
                     </div>

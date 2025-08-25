@@ -134,9 +134,22 @@ const ProductsSearch = () => {
     };
 
     // Tạo danh sách sản phẩm hiển thị
+    const userId = (() => {
+        const token = Cookies.get('auth_token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.id;
+            } catch (error) {
+                return 'guest';
+            }
+        }
+        return 'guest';
+    })();
+
     const currentProducts = filteredProducts.map((element, index) => (
         <Product 
-            key={element._id || index} 
+            key={`${element._id}-${userId}-${index}`} 
             data={element} 
             onAddToCartSuccess={handleAddToCartSuccess}
         />
