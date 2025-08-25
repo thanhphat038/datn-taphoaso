@@ -7,7 +7,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllReviews, deleteReview, updateReviewStatus } from '../../service/Admin.Service.js';
+import { getAllReviews, deleteReview } from '../../service/Admin.Service.js';
 import { getUserById } from '../../service/Admin.Service.js';
 import { getProductById } from '../../service/Admin.Service.js';
 
@@ -15,7 +15,6 @@ import { getProductById } from '../../service/Admin.Service.js';
 const AdminReview = () => {
   const [reviews, setReviews] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
   const [ratingFilter, setRatingFilter] = useState('All');
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +79,7 @@ const AdminReview = () => {
             ...r,
             user_id: user,
             product_id: product,
-            status: r.is_hidden ? 'inactive' : 'active',
+            
           });
         }
       }
@@ -123,35 +122,7 @@ const AdminReview = () => {
     }
   };
 
-  // Handle toggle review status
-  const handleToggleStatus = async (reviewId, currentStatus) => {
-    const actionText = currentStatus === 'active' ? 'ẩn' : 'hiện';
-    
-    const confirmMessage = `Bạn có chắc chắn muốn ${actionText} đánh giá này?`;
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
 
-    try {
-      setLoading(true);
-      await updateReviewStatus(reviewId, currentStatus);
-      // Toggle the status locally
-      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      setReviews(reviews.map(r => 
-        r._id === reviewId ? { ...r, status: newStatus } : r
-      ));
-      setMessage(`Đã ${actionText} đánh giá thành công!`);
-      setMessageType('success');
-      setTimeout(() => setMessage(''), 2000);
-    } catch (error) {
-      setMessage(`Lỗi khi ${actionText} đánh giá: ` + error.message);
-      setMessageType('error');
-      setTimeout(() => setMessage(''), 2000);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Filter reviews
   const filteredReviews = reviews.filter(review => {
@@ -159,10 +130,7 @@ const AdminReview = () => {
       (review.user_review && review.user_review.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (review.user_id?.username && review.user_id.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (review.user_id?.full_name && review.user_id.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
-    // Status filtering disabled
-    // const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
     const matchesRating = ratingFilter === 'All' || review.rating === parseInt(ratingFilter);
-    // return matchesSearch && matchesStatus && matchesRating;
     return matchesSearch && matchesRating;
   });
 
@@ -171,22 +139,7 @@ const AdminReview = () => {
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedReviews = filteredReviews.slice(startIndex, startIndex + pageSize);
 
-  // Get review status info
-  const getReviewStatusInfo = (status) => {
-    if (status === 'active') {
-      return {
-        label: 'Hiển thị',
-        color: 'bg-green-100 text-green-800 border-green-200',
-        dotColor: 'bg-green-500'
-      };
-    } else {
-      return {
-        label: 'Đã ẩn',
-        color: 'bg-red-100 text-red-800 border-red-200',
-        dotColor: 'bg-red-500'
-      };
-    }
-  };
+
 
   // Render star rating
   const renderStars = (rating) => {
@@ -317,19 +270,12 @@ const AdminReview = () => {
                 setShowViewModal(true);
               }
             },
-            // Status toggle disabled
-            // {
-            //   label: review.status === 'active' ? 'Ẩn đánh giá' : 'Hiện đánh giá',
-            //   icon: review.status === 'active' ? FaEyeSlash : FaEye,
-            //   variant: review.status === 'active' ? 'warning' : 'success',
-            //   onClick: () => handleToggleStatus(review._id, review.status)
-            // },
-            // {
-            //   label: 'Xóa đánh giá',
-            //   icon: FaTrash,
-            //   variant: 'danger',
-            //   onClick: () => handleDeleteReview(review._id)
-            // }
+            {
+              label: 'Xóa đánh giá',
+              icon: FaTrash,
+              variant: 'danger',
+              onClick: () => handleDeleteReview(review._id)
+            }
           ]}
           onActionClick={(action) => action.onClick()}
         />
@@ -339,20 +285,6 @@ const AdminReview = () => {
 
   // Filter options
   const filterOptions = [
-
-    // Status filter disabled
-    // {
-    //   key: 'status',
-    //   label: statusFilter === 'All' ? 'Tất cả trạng thái' : 
-    //          statusFilter === 'active' ? 'Đang hiển thị' : 'Đã ẩn',
-    //   value: statusFilter,
-    //   options: [
-    //     { value: 'All', label: 'Tất cả trạng thái' },
-    //     { value: 'active', label: 'Đang hiển thị' },
-    //     { value: 'inactive', label: 'Đã ẩn' }
-    //   ]
-    // },
-
     {
       key: 'rating',
       label: ratingFilter === 'All' ? 'Tất cả đánh giá' : `${ratingFilter} sao`,
@@ -369,23 +301,21 @@ const AdminReview = () => {
   ];
 
   const handleFilterChange = (key, value) => {
-    if (key === 'status') {
-      setStatusFilter(value);
-    } else if (key === 'rating') {
+    if (key === 'rating') {
       setRatingFilter(value);
     }
     setCurrentPage(1);
   };
 
   // Calculate statistics
-  // const activeReviews = reviews.filter(r => r.status === 'active').length;
-  // const inactiveReviews = reviews.filter(r => r.status === 'inactive').length;
   const averageRating = reviews.length > 0 
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
   const todayReviews = reviews.filter(r => 
     r.create_at && new Date(r.create_at).toDateString() === new Date().toDateString()
   ).length;
+  const fiveStarReviews = reviews.filter(r => r.rating === 5).length;
+  const oneStarReviews = reviews.filter(r => r.rating === 1).length;
 
   return (
     <AdminLayout>
@@ -399,34 +329,71 @@ const AdminReview = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản lý đánh giá</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Quản lý đánh giá
+            </h1>
             <p className="text-gray-600 mt-1">Quản lý đánh giá sản phẩm từ khách hàng</p>
           </div>
-          <button
-            className="px-4 py-2 bg-[#06AEF4] text-white rounded hover:bg-[#0590d8] transition"
-            onClick={fetchReviews}
-            disabled={loading}
-          >
-            {loading ? 'Đang tải...' : 'Làm mới'}
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="bg-white px-4 py-2 rounded-lg border border-gray-200">
+              <div className="text-sm text-gray-600">Tổng đánh giá</div>
+              <div className="text-2xl font-bold text-[#06AEF4]">{totalReviews}</div>
+            </div>
+            <button
+              className="px-4 py-2 bg-[#06AEF4] text-white rounded-lg hover:bg-[#0590d8] transition-colors duration-200"
+              onClick={fetchReviews}
+              disabled={loading}
+            >
+              {loading ? 'Đang tải...' : 'Làm mới'}
+            </button>
+          </div>
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-[#06AEF4]">{totalReviews}</div>
-            <div className="text-sm text-gray-600">Tổng đánh giá</div>
-          </AdminCard>
-          <AdminCard className="text-center">
-            <div className="flex items-center justify-center gap-1">
-              <div className="text-2xl font-bold text-yellow-600">{averageRating}</div>
-              <FaStar className="w-5 h-5 text-yellow-400" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                <FaStar className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tổng đánh giá</p>
+                <p className="text-2xl font-semibold text-gray-900">{totalReviews}</p>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">Đánh giá trung bình</div>
           </AdminCard>
-          <AdminCard className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{todayReviews}</div>
-            <div className="text-sm text-gray-600">Hôm nay</div>
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <FaStar className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Đánh giá TB</p>
+                <p className="text-2xl font-semibold text-gray-900">{averageRating}</p>
+              </div>
+            </div>
+          </AdminCard>
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600">
+                <FaStar className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">5 sao</p>
+                <p className="text-2xl font-semibold text-gray-900">{fiveStarReviews}</p>
+              </div>
+            </div>
+          </AdminCard>
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                <FaUser className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Hôm nay</p>
+                <p className="text-2xl font-semibold text-gray-900">{todayReviews}</p>
+              </div>
+            </div>
           </AdminCard>
         </div>
 
@@ -440,6 +407,70 @@ const AdminReview = () => {
             onFilterChange={handleFilterChange}
           />
         </AdminCard>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setRatingFilter('All')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === 'All'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Tất cả ({totalReviews})
+          </button>
+          <button
+            onClick={() => setRatingFilter('5')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === '5'
+                ? 'bg-yellow-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            5 sao ({fiveStarReviews})
+          </button>
+          <button
+            onClick={() => setRatingFilter('4')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === '4'
+                ? 'bg-green-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            4 sao ({reviews.filter(r => r.rating === 4).length})
+          </button>
+          <button
+            onClick={() => setRatingFilter('3')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === '3'
+                ? 'bg-orange-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            3 sao ({reviews.filter(r => r.rating === 3).length})
+          </button>
+          <button
+            onClick={() => setRatingFilter('2')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === '2'
+                ? 'bg-red-400 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            2 sao ({reviews.filter(r => r.rating === 2).length})
+          </button>
+          <button
+            onClick={() => setRatingFilter('1')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              ratingFilter === '1'
+                ? 'bg-red-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            1 sao ({oneStarReviews})
+          </button>
+        </div>
 
         {/* Reviews Table */}
         <AdminCard noPadding>
@@ -540,28 +571,28 @@ const AdminReview = () => {
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex justify-end gap-3">
-                <ModalButton
-                  variant="secondary"
-                  onClick={() => {
-                    setShowViewModal(false);
-                    setCurrentReview(null);
-                  }}
-                >
-                  Đóng
-                </ModalButton>
-                {/* <ModalButton
-                  variant={currentReview.status === 'active' ? 'warning' : 'success'}
-                  onClick={() => {
-                    handleToggleStatus(currentReview._id, currentReview.status);
-                    setShowViewModal(false);
-                    setCurrentReview(null);
-                  }}
-                >
-                  {currentReview.status === 'active' ? 'Ẩn đánh giá' : 'Hiện đánh giá'}
-                </ModalButton> */}
-              </div>
+                             {/* Actions */}
+               <div className="flex justify-end gap-3">
+                 <ModalButton
+                   variant="secondary"
+                   onClick={() => {
+                     setShowViewModal(false);
+                     setCurrentReview(null);
+                   }}
+                 >
+                   Đóng
+                 </ModalButton>
+                 <ModalButton
+                   variant="danger"
+                   onClick={() => {
+                     handleDeleteReview(currentReview._id);
+                     setShowViewModal(false);
+                     setCurrentReview(null);
+                   }}
+                 >
+                   Xóa đánh giá
+                 </ModalButton>
+               </div>
             </div>
           )}
         </AdminModal>
