@@ -3,6 +3,8 @@ import OrderService from '../services/order.service.js';
 import CartService from '../services/cart.service.js';
 import VoucherService from '../services/voucher.service.js';
 import ProductService from '../services/product.service.js';
+import UserService from '../services/user.service.js';
+import { sendOrderSuccessEmail } from '../services/mailler/emailService.js';
 
 import { AppError } from '../errors/AppError.js';
 import { ERROR_CODES } from '../errors/errorDefinitions.js';
@@ -11,6 +13,7 @@ const orderService = new OrderService();
 const cartService = new CartService();
 const voucherService = new VoucherService();
 const productService = new ProductService();
+const userService = new UserService();
 
 export const createOrder = async (req, res, next) => {
   try {
@@ -64,6 +67,47 @@ export const createOrder = async (req, res, next) => {
     // Clear cart sau khi tạo order thành công
     await cartService.clearCart(userId);
 
+    // Gửi email xác nhận đơn hàng
+    try {
+      const user = await userService.findById(userId);
+      if (user && user.email) {
+        const orderDetailLink = `${process.env.FRONTEND_URL}/order/${order._id}`;
+        
+        // Lấy thông tin đầy đủ của order với items (đã được cải thiện trong service)
+        const fullOrder = await orderService.getOrderById(order._id);
+        const orderItems = fullOrder.items || [];
+        const totalAmount = fullOrder.total_amount || 0;
+        
+        console.log(`[createOrder] Order items for email:`, orderItems.map(item => ({
+          name: item.product_id?.name,
+          qty: item.qty,
+          price: item.cur_price,
+          total: item.total_price
+        })));
+        
+        // Chuyển đổi dữ liệu để phù hợp với email template
+        const emailOrderItems = orderItems.map(item => ({
+          product_name: item.product_id?.name || 'Sản phẩm không xác định',
+          qty: item.qty || 0,
+          price: item.cur_price || 0,
+          quantity: item.qty || 0
+        }));
+        
+        await sendOrderSuccessEmail({
+          to: user.email,
+          name: user.full_name || receiver,
+          orderId: order._id,
+          orderDetailLink,
+          orderItems: emailOrderItems,
+          totalAmount
+        });
+        console.log(`[createOrder] Order confirmation email sent to ${user.email}`);
+      }
+    } catch (emailError) {
+      console.error('[createOrder] Failed to send order confirmation email:', emailError);
+      // Không throw error vì email không ảnh hưởng đến việc tạo order
+    }
+
     res.json({ success: true, data: order });
   } catch (err) {
     console.error('🔍 Debug - Error in createOrder:', err);
@@ -97,10 +141,51 @@ export const createbuyNowOrder = async (req, res, next) => {
       items: [
         {
           product_id,
-          quantity
+          qty: quantity
         }
       ]
     });
+
+    // Gửi email xác nhận đơn hàng
+    try {
+      const user = await userService.findById(userId);
+      if (user && user.email) {
+        const orderDetailLink = `${process.env.FRONTEND_URL}/order/${order._id}`;
+        
+        // Lấy thông tin đầy đủ của order với items (đã được cải thiện trong service)
+        const fullOrder = await orderService.getOrderById(order._id);
+        const orderItems = fullOrder.items || [];
+        const totalAmount = fullOrder.total_amount || 0;
+        
+        console.log(`[createbuyNowOrder] Order items for email:`, orderItems.map(item => ({
+          name: item.product_id?.name,
+          qty: item.qty,
+          price: item.cur_price,
+          total: item.total_price
+        })));
+        
+        // Chuyển đổi dữ liệu để phù hợp với email template
+        const emailOrderItems = orderItems.map(item => ({
+          product_name: item.product_id?.name || 'Sản phẩm không xác định',
+          qty: item.qty || 0,
+          price: item.cur_price || 0,
+          quantity: item.qty || 0
+        }));
+        
+        await sendOrderSuccessEmail({
+          to: user.email,
+          name: user.full_name || receiver,
+          orderId: order._id,
+          orderDetailLink,
+          orderItems: emailOrderItems,
+          totalAmount
+        });
+        console.log(`[createbuyNowOrder] Order confirmation email sent to ${user.email}`);
+      }
+    } catch (emailError) {
+      console.error('[createbuyNowOrder] Failed to send order confirmation email:', emailError);
+      // Không throw error vì email không ảnh hưởng đến việc tạo order
+    }
 
     res.json({ success: true, data: order });
   } catch (err) {

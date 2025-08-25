@@ -11,10 +11,7 @@ import {
   createPaginationFromResponse
 } from '../../utils';
 
-
-
 // Constants - Sử dụng utility functions thay vì hardcode
-
 const FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả', color: 'blue' },
   { value: 'paid', label: 'Đã thanh toán', color: 'blue' },
@@ -24,8 +21,6 @@ const FILTER_OPTIONS = [
   { value: 'cancelled', label: 'Đã huỷ', color: 'red' },
   { value: 'failed', label: 'Thanh toán thất bại', color: 'red' }
 ];
-
-
 
 // Component con cho nút filter
 const FilterButton = ({ option, isActive, onClick }) => {
@@ -72,8 +67,6 @@ const FilterBar = ({ statusFilter, onFilterChange }) => (
   </div>
 );
 
-
-
 // Component con cho popup đánh giá
 const ReviewPopup = ({ show, product, rating, comment, onRatingChange, onCommentChange, onSubmit, onClose }) => {
   if (!show || !product) return null;
@@ -88,9 +81,16 @@ const ReviewPopup = ({ show, product, rating, comment, onRatingChange, onComment
           &times;
         </button>
         <div className="flex items-center gap-6 mb-6">
-          <img src={product.images?.[0]} alt={product.name} className="w-20 h-20 rounded-xl object-cover" />
+          <img 
+            src={product.images?.[0] || '/img/pd_img.png'} 
+            alt={product.name || 'Sản phẩm'} 
+            className="w-20 h-20 rounded-xl object-cover"
+            onError={(e) => {
+              e.target.src = '/img/pd_img.png'; // Fallback image
+            }}
+          />
           <div>
-            <h3 className="font-semibold text-2xl text-gray-800">{product.name}</h3>
+            <h3 className="font-semibold text-2xl text-gray-800">{product.name || 'Tên sản phẩm không xác định'}</h3>
           </div>
         </div>
         <div className="mb-6">
@@ -212,11 +212,32 @@ const Order = () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('🔍 Debug - Fetching orders for page:', page, 'limit:', limit);
+        
         const ordersData = await getMyOrders(page, limit);
-        console.log('ordersData:', ordersData.data.data);
+        console.log('🔍 Debug - Raw ordersData:', ordersData);
+        console.log('🔍 Debug - ordersData.data:', ordersData.data);
+        console.log('🔍 Debug - ordersData.data.data:', ordersData.data?.data);
+        
+        // Dữ liệu từ backend đã có cấu trúc đúng, không cần xử lý thêm
+        const ordersList = ordersData.data?.data || [];
+        
+        console.log('🔍 Debug - Orders list:', ordersList);
+        console.log('🔍 Debug - Orders list length:', ordersList.length);
+        
+        if (ordersList.length > 0) {
+          console.log('🔍 Debug - First order:', ordersList[0]);
+          console.log('🔍 Debug - First order items:', ordersList[0]?.items);
+          if (ordersList[0]?.items?.length > 0) {
+            console.log('🔍 Debug - First item:', ordersList[0].items[0]);
+            console.log('🔍 Debug - First item product_id:', ordersList[0].items[0]?.product_id);
+            console.log('🔍 Debug - First item product name:', ordersList[0].items[0]?.product_id?.name);
+            console.log('🔍 Debug - First item images:', ordersList[0].items[0]?.product_id?.images);
+          }
+        }
         
         // Sắp xếp đơn hàng từ mới nhất đến cũ nhất
-        const sortedOrders = sortOrdersByDate(ordersData.data.data);
+        const sortedOrders = sortOrdersByDate(ordersList);
         
         setOrders(sortedOrders);
         setPagination(createPaginationFromResponse(ordersData.data));
@@ -233,7 +254,12 @@ const Order = () => {
 
   // Filter orders
   const getFilteredOrders = () => {
-    return filterOrdersByStatus(orders, statusFilter);
+    const filtered = filterOrdersByStatus(orders, statusFilter);
+    
+    // Log để debug
+    console.log('Filtered orders:', filtered);
+    
+    return filtered;
   };
 
   // Toggle order expansion
@@ -248,8 +274,6 @@ const Order = () => {
       return newSet;
     });
   };
-
-
 
   // Handle review popup
   const handleOpenPopup = (product) => {
@@ -278,8 +302,6 @@ const Order = () => {
       page: newPage
     }));
   };
-
-
 
   // Loading state
   if (loading) {
@@ -333,18 +355,19 @@ const Order = () => {
       <FilterBar statusFilter={statusFilter} onFilterChange={setStatusFilter} />
 
       <div className="space-y-8">
-        {filteredOrders.map((order) => (
-          <OrderCard
-            key={order._id}
-            order={order}
-            expandedOrders={expandedOrders}
-            onToggleExpansion={toggleOrderExpansion}
-            onReview={handleOpenPopup}
-            onRefresh={() => window.location.reload()}
-          />
-        ))}
+        {filteredOrders.map((order) => {
+          return (
+            <OrderCard
+              key={order._id}
+              order={order}
+              expandedOrders={expandedOrders}
+              onToggleExpansion={toggleOrderExpansion}
+              onReview={handleOpenPopup}
+              onRefresh={() => window.location.reload()}
+            />
+          );
+        })}
       </div>
-
 
       <Pagination pagination={pagination} onPageChange={handlePageChange} />
 
