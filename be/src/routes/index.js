@@ -28,6 +28,7 @@ import shippingRouter from './shipping.route.js';
 import recentViewsRouter from './recentViews.route.js';
 
 import bannerRouter from './banner.route.js';
+import chatRouter from './chat.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
@@ -71,6 +72,9 @@ router.use('/shipping', shippingRouter);
 
 // Recent Views routes
 router.use('/recent-views', recentViewsRouter);
+
+// Chat routes
+router.use('/chat', chatRouter);
 
 export default router;
 

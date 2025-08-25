@@ -41,4 +41,3 @@ export const getDistricts = (provinceCode) => {
 export const getWards = (districtCode) => {
     return axios.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, { withCredentials: false });
 };
-

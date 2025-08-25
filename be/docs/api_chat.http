@@ -1,0 +1,124 @@
+### Chat API Documentation
+### TapHoaSo Chat Bot API
+@base_url = http://localhost:3000/api
+@access_token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MTI3NDQ0LCJleHAiOjE3NTQ3MzIyNDR9.ITuKGr1FNmggjG6xi523DK7L8GqngWrvYQQymRy9L0U
+@chat_id = 6862d1c32df5d5159cc51ef2
+# Base URL: http://localhost:5000/api/chat
+
+### 1. Khởi tạo hoặc lấy chat hiện tại
+GET {{base_url}}/init
+Authorization: Bearer {{access_token}}
+
+### 2. Gửi tin nhắn
+POST {{base_url}}/send
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "message": "Xin chào, tôi muốn hỏi về sản phẩm"
+}
+
+### 3. Lấy lịch sử chat
+GET {{base_url}}/history?page=1&limit=20
+Authorization: Bearer {{access_token}}
+
+### 4. Lấy thống kê chat
+GET {{base_url}}/stats
+Authorization: Bearer {{access_token}}
+
+### 5. Lấy chat cụ thể
+GET {{base_url}}/{{chat_id}}
+Authorization: Bearer {{access_token}}
+
+### 6. Đóng chat
+PUT {{base_url}}/{{chat_id}}/close
+Authorization: Bearer {{access_token}}
+
+### 7. Xóa chat
+DELETE {{base_url}}/{{chat_id}}
+Authorization: Bearer {{access_token}}
+
+### 8. Lấy tin nhắn mới nhất
+GET {{base_url}}/{{chat_id}}/latest?lastMessageId={{message_id}}
+Authorization: Bearer {{access_token}}
+
+### 9. Tìm kiếm trong chat history
+GET {{base_url}}/search?query={{search_term}}&page=1&limit=20
+Authorization: Bearer {{access_token}}
+
+### Response Format Examples
+
+#### Success Response
+```json
+{
+  "success": true,
+  "message": "Gửi tin nhắn thành công",
+  "data": {
+    "chatId": "64f8a1b2c3d4e5f6a7b8c9d0",
+    "aiResponse": "Xin chào! Tôi có thể giúp gì cho bạn?",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Xin chào",
+        "timestamp": "2024-01-15T10:30:00.000Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Xin chào! Tôi có thể giúp gì cho bạn?",
+        "timestamp": "2024-01-15T10:30:01.000Z"
+      }
+    ]
+  }
+}
+```
+
+#### Error Response
+```json
+{
+  "success": false,
+  "message": "Tin nhắn không được để trống",
+  "error": {
+    "code": 2001,
+    "status": 400,
+    "description": "Tin nhắn không được để trống, vui lòng thử lại sau"
+  }
+}
+```
+
+### Chat Model Structure
+```json
+{
+  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
+  "userId": "64f8a1b2c3d4e5f6a7b8c9d1",
+  "messages": [
+    {
+      "role": "user|assistant",
+      "content": "Nội dung tin nhắn",
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "status": "active|closed",
+  "createdAt": "2024-01-15T10:30:00.000Z",
+  "updatedAt": "2024-01-15T10:30:00.000Z"
+}
+```
+
+### AI Response Examples
+
+#### Greeting
+- User: "Xin chào"
+- AI: "Xin chào! Tôi là trợ lý ảo của TapHoaSo. Tôi có thể giúp gì cho bạn hôm nay?"
+
+#### Product Inquiry
+- User: "Sản phẩm này giá bao nhiêu?"
+- AI: "Để biết chính xác giá sản phẩm, bạn có thể xem trên website hoặc liên hệ hotline của chúng tôi. Bạn đang quan tâm đến sản phẩm nào vậy?"
+
+#### Shipping
+- User: "Giao hàng như thế nào?"
+- AI: "Chúng tôi giao hàng toàn quốc với phí ship từ 15.000đ - 50.000đ tùy khu vực. Thời gian giao hàng từ 2-5 ngày làm việc."
+
+### Notes
+- Tất cả API đều yêu cầu authentication (Bearer token)
+- Tin nhắn có giới hạn 1000 ký tự
+- Chat history được phân trang với limit mặc định là 20
+- AI service hiện tại sử dụng fallback responses, sẽ được thay thế bằng AI thực tế sau

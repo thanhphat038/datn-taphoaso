@@ -7,8 +7,14 @@ const ProductInfo = ({
     isFavorite, 
     loadingFavorite, 
     onToggleFavorite,
+    // Package selector (disabled for now)
     selectedPackage,
     onPackageSelect,
+    // Variant selector
+    variants = [],
+    selectedVariant = null,
+    onSelectVariant = () => {},
+    // Actions
     onAddToCart,
     onBuyNow,
     loadingAddToCart,
@@ -91,12 +97,55 @@ const ProductInfo = ({
                 )}
             </div>
 
-            {/* Product Package Selector - hiển thị cho TẤT CẢ sản phẩm */}
-            <ProductPackageSelector
-                product={productData}
-                onPackageSelect={onPackageSelect}
-                selectedPackage={selectedPackage}
-            />
+            {/* Variant Selector - đặt tại vị trí Package Selector cũ */}
+            {Array.isArray(variants) && variants.length > 0 && (
+                <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-800">Chọn biến thể</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {variants.map((v) => {
+                            const isActive = selectedVariant?._id === v._id;
+                            const img = (v.images && v.images[0]) || productData.images?.[0] || '/placeholder-product.png';
+                            const hasDiscount = v.original_price > v.price;
+                            return (
+                                <button
+                                    key={v._id}
+                                    type="button"
+                                    onClick={() => onSelectVariant(v)}
+                                    className={`flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
+                                        isActive
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 bg-white hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                                        <img src={img} alt={v.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900 truncate">{v.name}</span>
+                                            {v.is_default && (
+                                                <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">Mặc định</span>
+                                            )}
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-0.5">
+                                            {v.unit}{v.quantity_per_unit ? ` • SL/ĐVT: ${v.quantity_per_unit}` : ''}
+                                        </div>
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <span className="text-red-500 font-semibold">{formatCurrency(v.price)}</span>
+                                            {hasDiscount && (
+                                                <span className="text-gray-400 line-through text-sm">{formatCurrency(v.original_price)}</span>
+                                            )}
+                                        </div>
+                                        <div className={`text-xs mt-1 ${v.in_stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {v.in_stock > 0 ? `Còn hàng: ${v.in_stock}` : 'Hết hàng'}
+                                        </div>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Quantity and Actions */}
             <div className="space-y-3">
