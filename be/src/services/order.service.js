@@ -30,8 +30,33 @@ class OrderService extends DBService {
 
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
-        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-        return { ...order, items };
+        const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+          path: 'product_id',
+          select: 'name price images description category_id'
+        });
+        
+        // Chuyển đổi dữ liệu để phù hợp với frontend
+        const items = orderDetails.map(detail => ({
+          _id: detail._id,
+          product_id: {
+            _id: detail.product_id._id,
+            name: detail.product_id.name,
+            images: detail.product_id.images || [],
+            description: detail.product_id.description,
+            category_id: detail.product_id.category_id,
+            price: detail.product_id.price
+          },
+          qty: detail.qty,
+          cur_price: detail.cur_price,
+          total_price: detail.cur_price * detail.qty
+        }));
+        
+        return { 
+          ...order, 
+          items,
+          total_items: items.length,
+          total_quantity: items.reduce((sum, detail) => sum + (detail.qty || 0), 0)
+        };
       })
     );
 
@@ -45,30 +70,42 @@ class OrderService extends DBService {
     console.log('🔍 Debug - getOrderById called with orderId:', orderId);
     const order = await this.model.findById(orderId).populate('user_id');
     console.log('🔍 Debug - Found order:', order);
+    
     if (order) {
-      const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-      console.log('🔍 Debug - Found items:', items);
+      // Lấy order details với thông tin sản phẩm đầy đủ
+      const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+        path: 'product_id',
+        select: 'name price images description category_id'
+      });
       
-      // If no items found, create dummy data for testing
-      if (!items || items.length === 0) {
-        console.log('🔍 Debug - No items found, creating dummy data');
-        const product = await Product.findOne();
-        if (product) {
-          const dummyItems = [{
-            _id: 'dummy_id',
-            order_id: order._id,
-            product_id: product,
-            qty: 2,
-            cur_price: product.price
-          }];
-          console.log('🔍 Debug - Created dummy items:', dummyItems);
-          const result = { ...order.toObject(), items: dummyItems };
-          console.log('🔍 Debug - Final result with dummy data:', result);
-          return result;
-        }
-      }
+      console.log('🔍 Debug - Found orderDetails:', orderDetails);
       
-      const result = { ...order.toObject(), items };
+      // Chuyển đổi dữ liệu để dễ sử dụng và phù hợp với frontend
+      const items = orderDetails.map(detail => ({
+        _id: detail._id,
+        product_id: {
+          _id: detail.product_id._id,
+          name: detail.product_id.name,
+          images: detail.product_id.images || [],
+          description: detail.product_id.description,
+          category_id: detail.product_id.category_id,
+          price: detail.product_id.price
+        },
+        qty: detail.qty,
+        cur_price: detail.cur_price,
+        total_price: detail.cur_price * detail.qty
+      }));
+      
+      console.log('🔍 Debug - Processed items:', items);
+      
+      const result = { 
+        ...order.toObject(), 
+        items,
+        // Thêm thông tin tổng quan
+        total_items: items.length,
+        total_quantity: items.reduce((sum, detail) => sum + (detail.qty || 0), 0)
+      };
+      
       console.log('🔍 Debug - Final result:', result);
       return result;
     }
@@ -219,6 +256,8 @@ class OrderService extends DBService {
 
     const query = { user_id: userId };
 
+    console.log('🔍 Debug - getOrdersByUser called with userId:', userId, 'page:', page, 'limit:', limit);
+
     const [orders, total] = await Promise.all([
       this.model.find(query)
         .sort(sort)
@@ -227,12 +266,79 @@ class OrderService extends DBService {
       this.model.countDocuments(query)
     ]);
 
+    console.log('🔍 Debug - Found orders:', orders.length);
+
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
-        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-        return { ...order.toObject(), items };
+        console.log('🔍 Debug - Processing order:', order._id);
+        
+        // Populate product_id với tất cả thông tin cần thiết
+        const orderDetails = await OrderDetail.find({ order_id: order._id }).populate({
+          path: 'product_id',
+          select: 'name price images description category_id'
+        });
+        
+        console.log('🔍 Debug - OrderDetails after populate:', orderDetails.length);
+        
+        // Chuyển đổi dữ liệu để phù hợp với frontend
+        const items = orderDetails.map(detail => {
+          console.log('🔍 Debug - Processing detail:', detail._id);
+          console.log('🔍 Debug - Product data:', detail.product_id);
+          
+          // Kiểm tra xem product_id có tồn tại không
+          if (!detail.product_id) {
+            console.warn('🔍 Warning - Product not found for detail:', detail._id);
+            return {
+              _id: detail._id,
+              product_id: {
+                _id: 'unknown',
+                name: 'Sản phẩm không xác định',
+                images: [],
+                description: 'Sản phẩm không xác định',
+                category_id: null,
+                price: detail.cur_price || 0
+              },
+              qty: detail.qty || 0,
+              cur_price: detail.cur_price || 0,
+              total_price: (detail.cur_price || 0) * (detail.qty || 0)
+            };
+          }
+          
+          const item = {
+            _id: detail._id,
+            product_id: {
+              _id: detail.product_id._id,
+              name: detail.product_id.name || 'Tên sản phẩm không xác định',
+              images: detail.product_id.images || [],
+              description: detail.product_id.description || '',
+              category_id: detail.product_id.category_id || null,
+              price: detail.product_id.price || detail.cur_price || 0
+            },
+            qty: detail.qty || 0,
+            cur_price: detail.cur_price || 0,
+            total_price: (detail.cur_price || 0) * (detail.qty || 0)
+          };
+          
+          console.log('🔍 Debug - Processed item:', item);
+          return item;
+        });
+        
+        console.log('🔍 Debug - Final items for order:', items.length);
+        
+        const result = { 
+          ...order.toObject(), 
+          items,
+          total_items: items.length,
+          total_quantity: items.reduce((sum, detail) => sum + (detail.qty || 0), 0)
+        };
+        
+        console.log('🔍 Debug - Final result for order:', result._id, 'items count:', result.items.length);
+        
+        return result;
       })
     );
+
+    console.log('🔍 Debug - Returning ordersWithItems:', ordersWithItems.length);
 
     return {
       data: ordersWithItems,
@@ -249,13 +355,58 @@ class OrderService extends DBService {
     const order = await this.model.findById(orderId);
     if (!order) return null;
 
-    const items = await OrderDetail.find({ order_id: orderId }).populate('product_id');
-    return { ...order.toObject(), items };
+    const orderDetails = await OrderDetail.find({ order_id: orderId }).populate({
+      path: 'product_id',
+      select: 'name price images description category_id'
+    });
+    
+    // Chuyển đổi dữ liệu để phù hợp với frontend
+    const items = orderDetails.map(detail => ({
+      _id: detail._id,
+      product_id: {
+        _id: detail.product_id._id,
+        name: detail.product_id.name,
+        images: detail.product_id.images || [],
+        description: detail.product_id.description,
+        category_id: detail.product_id.category_id,
+        price: detail.product_id.price
+      },
+      qty: detail.qty,
+      cur_price: detail.cur_price,
+      total_price: detail.cur_price * detail.qty
+    }));
+    
+    return { 
+      ...order.toObject(), 
+      items,
+      total_items: items.length,
+      total_quantity: items.reduce((sum, detail) => sum + (detail.qty || 0), 0)
+    };
   }
 
   async getProductsInOrder(orderId) {
-    // Lấy tất cả OrderDetail theo orderId và populate product_id
-    return await OrderDetail.find({ order_id: orderId }).populate('product_id');
+    // Lấy tất cả OrderDetail theo orderId và populate product_id với thông tin đầy đủ
+    const orderDetails = await OrderDetail.find({ order_id: orderId }).populate({
+      path: 'product_id',
+      select: 'name price images description category_id stock'
+    });
+    
+    // Chuyển đổi dữ liệu để dễ sử dụng và phù hợp với frontend
+    return orderDetails.map(detail => ({
+      _id: detail._id,
+      product_id: {
+        _id: detail.product_id._id,
+        name: detail.product_id.name,
+        images: detail.product_id.images || [],
+        description: detail.product_id.description,
+        category_id: detail.product_id.category_id,
+        stock: detail.product_id.stock,
+        price: detail.product_id.price
+      },
+      qty: detail.qty,
+      cur_price: detail.cur_price,
+      total_price: detail.cur_price * detail.qty
+    }));
   }
 
   async calculateOrderStats() {
@@ -269,7 +420,8 @@ class OrderService extends DBService {
     
     return items.reduce((total, item) => {
       const price = item.price || (item.product_id?.price || 0); 
-      return total + (price * item.qty);
+      const quantity = item.qty || item.quantity || 0;
+      return total + (price * quantity);
     }, 0);
   }
 

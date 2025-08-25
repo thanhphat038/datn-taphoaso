@@ -15,6 +15,7 @@ export async function registerUser({ username, email, password }) {
     if (token) {
       setAuthToken(token);
     }
+    console.log(response.data)
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Đăng ký thất bại");
