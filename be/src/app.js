@@ -6,7 +6,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import routes from './routes/index.js';
 import { connectDB } from './config/database.js';
-import { validateConfig } from './config/index.js';
 import './models/reply.model.js'; // Import Reply model để đảm bảo nó được register
 import cookieParser from 'cookie-parser';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
@@ -16,9 +15,9 @@ import {
   requestLogger, 
   errorHandler, 
   sanitizeInput,
-  apiRateLimiter,
-  authRateLimiter
+  apiRateLimiter
 } from './middlewares/security.middleware.js';
+import { validateConfig } from './config/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,8 +36,6 @@ try {
   process.exit(1);
 }
 
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 // Connect to MongoDB
 connectDB();
 
@@ -50,14 +47,14 @@ app.use(requestLogger);
 app.use(morgan('dev'));
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use(cookieParser());
+
 // Input sanitization
 app.use(sanitizeInput);
 
 // Rate limiting
-// app.use('/api/auth', authRateLimiter); // Tạm thời tắt rate limit auth khi chạy local
 app.use('/api', apiRateLimiter);
 
 // Static file serving for uploads
@@ -69,13 +66,7 @@ app.use('/api', routes);
 // Error handling middleware
 app.use(errorHandler);
 
-// 404 handler
-// app.use((req, res) => {
-//   res.status(404).json({
-//     message: 'Not Found'
-//   });
-// });
-
+// Global error handler
 app.use(globalErrorHandler);
 
 export default app;

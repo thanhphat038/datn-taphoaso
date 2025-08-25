@@ -30,7 +30,7 @@ export const createAddress = async (req, res, next) => {
     if (!phoneRegex.test(addressData.phone)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid phone number. Please enter exactly 10 digits.'
+        message: 'Số điện thoại không hợp lệ. Vui lòng nhập chính xác 10 chữ số.'
       });
     }
 
@@ -47,13 +47,13 @@ export const createAddress = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: address,
-      message: 'Address added successfully'
+      message: 'Thêm địa chỉ thành công'
     });
   } catch (error) {
     console.error('[Create Address Error]', error);
     res.status(500).json({
       success: false,
-      message: 'Error adding address',
+              message: 'Lỗi khi thêm địa chỉ',
       error: error.message
     });
   }
@@ -121,7 +121,7 @@ export const updateAddress = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid address ID format'
+        message: 'Định dạng ID địa chỉ không hợp lệ'
       });
     }
 
@@ -140,7 +140,7 @@ export const updateAddress = async (req, res, next) => {
       if (!phoneRegex.test(updateData.phone)) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid phone number. Please enter 10 digits'
+          message: 'Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số'
         });
       }
     }
@@ -158,12 +158,12 @@ export const updateAddress = async (req, res, next) => {
     res.json({
       success: true,
       data: updatedAddress,
-      message: 'Address updated successfully'
+      message: 'Cập nhật địa chỉ thành công'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error updating address',
+              message: 'Lỗi khi cập nhật địa chỉ',
       error: error.message
     });
   }
@@ -178,7 +178,7 @@ export const deleteAddress = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid address ID format'
+        message: 'Định dạng ID địa chỉ không hợp lệ'
       });
     }
 

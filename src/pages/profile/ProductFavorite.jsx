@@ -35,10 +35,10 @@ const ProductFavorite = () => {
     setError(null);
     try {
       const userId = getUserId();
-      console.log('🔍 Debug - User ID:', userId);
+      console.log(' Debug - User ID:', userId);
       
       if (!userId) {
-        console.log('🔒 User not authenticated, skipping favorites fetch');
+        console.log(' User not authenticated, skipping favorites fetch');
         setIsAuthenticated(false);
         setFavorites([]);
         return;
@@ -46,7 +46,7 @@ const ProductFavorite = () => {
       
       setIsAuthenticated(true);
       const response = await getFavorites(userId);
-      console.log('🔍 Debug - Favorites response:', response);
+      console.log('Debug - Favorites response:', response);
       if (response.data?.data) {
         // Lấy danh sách sản phẩm từ favorites - kiểm tra xem có thông tin đầy đủ không
         const favoriteProducts = [];
@@ -55,7 +55,7 @@ const ProductFavorite = () => {
         for (const fav of response.data.data) {
           // Nếu fav.product_id chỉ là ID, cần lấy thông tin đầy đủ
           if (typeof fav.product_id === 'string' || (typeof fav.product_id === 'object' && !fav.product_id.name)) {
-            console.log('🔍 Debug - Product ID only:', fav.product_id);
+            console.log('Debug - Product ID only:', fav.product_id);
             const productId = typeof fav.product_id === 'string' ? fav.product_id : fav.product_id._id;
             productIdsToFetch.push(productId);
           } else {
@@ -63,8 +63,8 @@ const ProductFavorite = () => {
           }
         }
         
-        console.log('🔍 Debug - Products with full data:', favoriteProducts);
-        console.log('🔍 Debug - Product IDs to fetch:', productIdsToFetch);
+        console.log('Debug - Products with full data:', favoriteProducts);
+        console.log(' Debug - Product IDs to fetch:', productIdsToFetch);
         
         // Fetch thông tin đầy đủ cho các sản phẩm chỉ có ID
         if (productIdsToFetch.length > 0) {
@@ -254,9 +254,22 @@ const ProductFavorite = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
             {currentItems.map((product) => {
               console.log('🔍 Debug - Rendering product:', product);
+              const userId = (() => {
+                const token = Cookies.get('auth_token');
+                if (token) {
+                  try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.id;
+                  } catch (error) {
+                    return 'guest';
+                  }
+                }
+                return 'guest';
+              })();
+              
               return (
-                <div key={product._id} className="w-full">
-                  <Product data={product} isFavorited={true} />
+                <div key={`${product._id}-${userId}`} className="w-full">
+                  <Product data={product} />
                 </div>
               );
             })}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import Product from '../components/Product';
+import Cookies from 'js-cookie';
 import 'swiper/css';
 
 import { getApiUrl } from '../config/api.js';
@@ -85,9 +86,22 @@ const HomePage = () => {
       }, 3000);
     };
 
+    const userId = (() => {
+      const token = Cookies.get('auth_token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.id;
+        } catch (error) {
+          return 'guest';
+        }
+      }
+      return 'guest';
+    })();
+
     return filteredProducts.slice(0, limit).map((product, index) => (
       <Product 
-        key={product._id || index} 
+        key={`${product._id}-${userId}-${index}`} 
         data={product} 
         onAddToCartSuccess={showNotification}
       />
