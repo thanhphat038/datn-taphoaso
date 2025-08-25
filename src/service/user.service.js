@@ -118,8 +118,14 @@ export async function updateProfile(userData) {
 // Change password
 export async function changePassword(currentPassword, newPassword) {
   try {
+    console.log('🔑 [changePassword] Starting password change...');
     const token = getAuthToken();
+    console.log('🔑 [changePassword] Token found:', !!token);
+    
     if (!token) throw new Error("No auth token found");
+    
+    console.log('📡 [changePassword] Making API request to:', `${AUTH_API_URL}/change-password`);
+    console.log('📡 [changePassword] Request data:', { currentPassword: '***', newPassword: '***' });
     
     const response = await axios.put(`${AUTH_API_URL}/change-password`, {
       currentPassword,
@@ -127,8 +133,13 @@ export async function changePassword(currentPassword, newPassword) {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    
+    console.log('✅ [changePassword] API response received:', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ [changePassword] Error occurred:', error);
+    console.error('❌ [changePassword] Error response:', error.response?.data);
+    console.error('❌ [changePassword] Error status:', error.response?.status);
     throw new Error(error.response?.data?.message || "Đổi mật khẩu thất bại");
   }
 }
