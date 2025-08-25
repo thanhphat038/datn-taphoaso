@@ -246,18 +246,25 @@ class OrderService extends DBService {
   }
 
   async updateStatus(orderId, status) {
-    const validStatuses =['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
+    console.log(' [OrderService] updateStatus called with:', { orderId, status });
+    
+    const validStatuses =['pending', 'paid', 'processing', 'delivering', 'delivered', 'cancelled', 'failed'];
+    console.log(' [OrderService] Valid statuses:', validStatuses);
 
     if (!validStatuses.includes(status)) {
+      console.error(' [OrderService] Invalid status:', status);
       throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Invalid order status');
     }
 
+    console.log(' [OrderService] Status is valid, updating order...');
     const order = await this.update(orderId, { order_status: status });
 
     if (!order) {
+      console.error(' [OrderService] Order not found:', orderId);
       throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Order not found');
     }
 
+    console.log(' [OrderService] Order updated successfully:', order);
     return order;
   }
 
