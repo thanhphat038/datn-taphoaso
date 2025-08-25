@@ -81,6 +81,14 @@ export const SMTP_PASS = requireEnv('SMTP_PASS');
 export const MAX_FILE_SIZE = validateNumber(requireEnv('MAX_FILE_SIZE'), 'MAX_FILE_SIZE', 1024); // Minimum 1KB
 export const UPLOAD_PATH = requireEnv('UPLOAD_PATH');
 
+// ChromaDB Configuration (optional)
+export const CHROMA_URL = 'http://localhost:8000';
+
+// LLM Configuration (optional, OpenAI-compatible)
+export const LLM_BASE_URL = process.env.LLM_BASE_URL || 'https://fleet-toucan-refined.ngrok-free.app/v1';
+export const LLM_MODEL = process.env.LLM_MODEL || 'gpt-3.5-turbo';
+export const LLM_API_KEY = process.env.LLM_API_KEY || ''; // optional for LM Studio
+
 // Validate all configurations on startup
 export function validateConfig() {
   try {
@@ -154,5 +162,13 @@ export const config = {
   upload: {
     maxFileSize: MAX_FILE_SIZE,
     path: UPLOAD_PATH,
+  },
+  chroma: {
+    url: CHROMA_URL,
+  },
+  llm: {
+    baseUrl: LLM_BASE_URL,
+    model: LLM_MODEL,
+    apiKey: LLM_API_KEY,
   },
 };

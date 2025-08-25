@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Chat from '../models/chat.model.js';
-import aiService from './ai.service.js';
+import aiService from './ai/ai.service.js';
 import { AppError } from '../errors/AppError.js';
 
 class ChatService {

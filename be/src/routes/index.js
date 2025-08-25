@@ -28,6 +28,7 @@ import shippingRouter from './shipping.route.js';
 import recentViewsRouter from './recentViews.route.js';
 
 import bannerRouter from './banner.route.js';
+import chromaRouter from './chroma.route.js';
 import chatRouter from './chat.route.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
@@ -75,6 +76,9 @@ router.use('/recent-views', recentViewsRouter);
 
 // Chat routes
 router.use('/chat', chatRouter);
+
+// Vector DB (ChromaDB)
+router.use('/chroma', chromaRouter);
 
 export default router;
 

@@ -1,0 +1,57 @@
+@base_url = http://localhost:3000/api
+@admin_token = YOUR_ADMIN_JWT
+
+### Chroma health
+GET {{base_url}}/chroma/health
+
+### Upsert documents (admin)
+POST {{base_url}}/chroma/upsert
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "collectionName": "taphoaso_knowledge_base",
+  "items": [
+    {
+      "id": "doc_1",
+      "document": "Sữa tươi ít đường Vinamilk 180ml",
+      "metadata": { "type": "product", "sku": "VIN-180-LOW" }
+    },
+    {
+      "id": "doc_2",
+      "document": "Giao hàng toàn quốc từ 2-5 ngày làm việc",
+      "metadata": { "type": "policy", "topic": "shipping" }
+    }
+  ]
+}
+
+### Query documents (user)
+POST {{base_url}}/chroma/query
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "collectionName": "taphoaso_knowledge_base",
+  "query": "vinamilk 180ml",
+  "nResults": 3
+}
+
+### Delete by ids (admin)
+POST {{base_url}}/chroma/delete
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "collectionName": "taphoaso_knowledge_base",
+  "ids": ["doc_1"]
+}
+
+### Sync all products into Chroma (admin)
+POST {{base_url}}/chroma/sync/products
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "collectionName": "taphoaso_products",
+  "batchSize": 200
+}

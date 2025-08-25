@@ -13,6 +13,9 @@ import BlogService from './blog.service.js';
 import BlogCategoryService from './blogCategory.service.js';
 import chatService from './chat.service.js';
 import * as bannerService from './banner.service.js';
+import chromaService from './ai/chroma.service.js';
+import embeddingService from './ai/embedding.service.js';
+import aiService from './ai/ai.service.js';
 
 // Create instances
 const userService = new UserService();
@@ -45,5 +48,8 @@ export {
   blogService,
   blogCategoryService,
   chatService,
-  bannerService
+  bannerService,
+  chromaService,
+  embeddingService,
+  aiService
 };
