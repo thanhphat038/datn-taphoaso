@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import ChatService from '../service/Chat.service.js';
 import { MessageCircle, X, Trash2, Send, Bot } from 'lucide-react';
 
 const ChatBot = () => {
   const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -24,11 +26,8 @@ const ChatBot = () => {
           type: 'bot',
           content: 'Xin chào! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:',
           options: [
-            '🔍 Tìm kiếm sản phẩm',
-            '🛒 Hướng dẫn đặt hàng',
-            '👤 Đăng nhập/Đăng ký',
-            '📞 Liên hệ hỗ trợ',
-            '❓ Câu hỏi thường gặp'
+            { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+            { text: '📞 Liên hệ hỗ trợ', action: 'navigate', path: '/contact' },
           ]
         }
       ]);
@@ -57,12 +56,9 @@ const ChatBot = () => {
             type: 'bot',
             content: `Xin chào ${user.username}! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:`,
             options: [
-              '🔍 Tìm kiếm sản phẩm',
-              '🛒 Đặt hàng ngay',
-              '📦 Theo dõi đơn hàng',
-              '💰 Xem khuyến mãi',
-              '👤 Thông tin tài khoản',
-              '📞 Liên hệ hỗ trợ'
+              { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+              { text: '🛒 Đặt hàng ngay', action: 'navigate', path: '/cart' },
+              { text: '👤 Thông tin tài khoản', action: 'navigate', path: '/profile' }
             ]
           });
         }
@@ -80,12 +76,9 @@ const ChatBot = () => {
           type: 'bot',
           content: `Xin chào ${user.username}! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:`,
           options: [
-            '🔍 Tìm kiếm sản phẩm',
-            '🛒 Đặt hàng ngay',
-            '📦 Theo dõi đơn hàng',
-            '💰 Xem khuyến mãi',
-            '👤 Thông tin tài khoản',
-            '📞 Liên hệ hỗ trợ'
+            { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+            { text: '🛒 Đặt hàng ngay', action: 'navigate', path: '/cart' },
+            { text: '👤 Thông tin tài khoản', action: 'navigate', path: '/profile' }
           ]
         }
       ]);
@@ -140,7 +133,9 @@ const ChatBot = () => {
           id: Date.now() + 1,
           type: 'bot',
           content: response.data.aiResponse,
-          timestamp: new Date()
+          timestamp: new Date(),
+          // Nếu API trả về options, sử dụng chúng, nếu không thì tạo options mặc định
+          options: response.data.options || generateDefaultOptions(message)
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
@@ -160,6 +155,45 @@ const ChatBot = () => {
     }
   };
 
+  const generateDefaultOptions = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Tạo options mặc định dựa trên nội dung tin nhắn
+    if (lowerMessage.includes('tìm') || lowerMessage.includes('search') || lowerMessage.includes('sản phẩm')) {
+      return [
+        { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+        { text: '💰 Xem khuyến mãi', action: 'message', value: 'Khuyến mãi hiện tại' },
+        { text: '📞 Liên hệ hỗ trợ', action: 'navigate', path: '/contact' }
+      ];
+    }
+    
+    if (lowerMessage.includes('đặt hàng') || lowerMessage.includes('mua') || lowerMessage.includes('order')) {
+      if (isAuthenticated) {
+        return [
+          { text: '🛒 Thêm vào giỏ hàng', action: 'navigate', path: '/product' },
+          { text: '📦 Xem giỏ hàng hiện tại', action: 'navigate', path: '/cart' },
+          { text: '💳 Thanh toán ngay', action: 'navigate', path: '/checkout' }
+        ];
+      } else {
+        return [
+          { text: '👤 Đăng nhập trước', action: 'navigate', path: '/login' },
+          { text: '📝 Đăng ký tài khoản', action: 'navigate', path: '/register' }
+        ];
+      }
+    }
+    
+    // Options mặc định cho các trường hợp khác
+    return isAuthenticated ? [
+      { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+      { text: '🛒 Đặt hàng ngay', action: 'navigate', path: '/cart' },
+      { text: '👤 Thông tin tài khoản', action: 'navigate', path: '/profile' }
+    ] : [
+      { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+      { text: '👤 Đăng nhập/Đăng ký', action: 'navigate', path: '/login' },
+      { text: '📞 Liên hệ hỗ trợ', action: 'navigate', path: '/contact' }
+    ];
+  };
+
   const generateBotResponse = (message) => {
     const lowerMessage = message.toLowerCase();
     
@@ -170,11 +204,9 @@ const ChatBot = () => {
         type: 'bot',
         content: 'Bạn muốn tìm sản phẩm gì? Tôi có thể giúp bạn tìm:',
         options: [
-          '🥛 Sữa và đồ uống',
-          '🍪 Bánh kẹo',
-          '🧴 Mỹ phẩm',
-          '🧻 Vệ sinh cá nhân',
-          '🍜 Mì gói và đồ ăn nhanh'
+          { text: '🥛 Sữa và đồ uống', action: 'navigate', path: '/product' },
+          { text: '🍪 Bánh kẹo', action: 'navigate', path: '/product' },
+          { text: '🧴 Mỹ phẩm', action: 'navigate', path: '/product' }
         ]
       };
     }
@@ -186,10 +218,9 @@ const ChatBot = () => {
           type: 'bot',
           content: 'Bạn có thể đặt hàng ngay:',
           options: [
-            '🛒 Thêm vào giỏ hàng',
-            '📦 Xem giỏ hàng hiện tại',
-            '💳 Thanh toán ngay',
-            '📱 Gọi hotline: 1900-xxxx'
+            { text: '🛒 Thêm vào giỏ hàng', action: 'navigate', path: '/product' },
+            { text: '📦 Xem giỏ hàng hiện tại', action: 'navigate', path: '/cart' },
+            { text: '💳 Thanh toán ngay', action: 'navigate', path: '/checkout' }
           ]
         };
       } else {
@@ -198,10 +229,9 @@ const ChatBot = () => {
           type: 'bot',
           content: 'Để đặt hàng, bạn cần:',
           options: [
-            '👤 Đăng nhập trước',
-            '📝 Đăng ký tài khoản',
-            '📱 Gọi hotline: 1900-xxxx',
-            '💬 Chat với nhân viên'
+            { text: '👤 Đăng nhập trước', action: 'navigate', path: '/login' },
+            { text: '📝 Đăng ký tài khoản', action: 'navigate', path: '/register' },
+            { text: '📱 Gọi hotline: 1900-xxxx', action: 'message', value: 'Liên hệ hotline' }
           ]
         };
       }
@@ -213,10 +243,10 @@ const ChatBot = () => {
         type: 'bot',
         content: 'Bạn có thể đăng nhập bằng:',
         options: [
-          '📧 Email',
-          '📱 Số điện thoại',
-          '👤 Tên đăng nhập',
-          '📝 Tạo tài khoản mới'
+          { text: '📧 Email', action: 'navigate', path: '/login' },
+          { text: '📱 Số điện thoại', action: 'navigate', path: '/login' },
+          { text: '👤 Tên đăng nhập', action: 'navigate', path: '/login' },
+          { text: '📝 Tạo tài khoản mới', action: 'navigate', path: '/register' }
         ]
       };
     }
@@ -227,9 +257,8 @@ const ChatBot = () => {
         type: 'bot',
         content: 'Giá sản phẩm được hiển thị trên từng sản phẩm. Bạn có thể xem chi tiết bằng cách click vào sản phẩm.',
         options: [
-          '🔍 Tìm sản phẩm theo giá',
-          '💰 Khuyến mãi hiện tại',
-          '💳 Phương thức thanh toán'
+          { text: '🔍 Tìm sản phẩm theo giá', action: 'navigate', path: '/product' },
+          { text: '💰 Khuyến mãi hiện tại', action: 'message', value: 'Khuyến mãi hiện tại' }
         ]
       };
     }
@@ -240,10 +269,8 @@ const ChatBot = () => {
         type: 'bot',
         content: 'Thông tin giao hàng:',
         options: [
-          '🚚 Phí ship: 15k-55k tùy khoảng cách',
-          '⏰ Thời gian: 2-4 giờ trong nội thành',
-          '📍 Khu vực giao hàng',
-          '📞 Liên hệ shipper'
+          { text: '🚚 Phí ship: 15k-55k tùy khoảng cách', action: 'message', value: 'Chi tiết phí ship' },
+          { text: '⏰ Thời gian: 2-4 giờ trong nội thành', action: 'message', value: 'Thời gian giao hàng' }
         ]
       };
     }
@@ -255,10 +282,8 @@ const ChatBot = () => {
           type: 'bot',
           content: 'Bạn có thể xem đơn hàng:',
           options: [
-            '📦 Đơn hàng gần đây',
-            '🚚 Đang giao hàng',
-            '✅ Đã hoàn thành',
-            '👤 Vào trang cá nhân'
+            { text: '📦 Xem đơn hàng', action: 'navigate', path: '/profile/orders' },
+            { text: '👤 Vào trang cá nhân', action: 'navigate', path: '/profile' }
           ]
         };
       } else {
@@ -266,11 +291,10 @@ const ChatBot = () => {
           id: Date.now(),
           type: 'bot',
           content: 'Để xem đơn hàng, bạn cần đăng nhập trước.',
-          options: [
-            '👤 Đăng nhập ngay',
-            '📝 Đăng ký tài khoản',
-            '📞 Liên hệ hỗ trợ'
-          ]
+                  options: [
+          { text: '👤 Đăng nhập ngay', action: 'navigate', path: '/login' },
+          { text: '📝 Đăng ký tài khoản', action: 'navigate', path: '/register' }
+        ]
         };
       }
     }
@@ -280,21 +304,38 @@ const ChatBot = () => {
       type: 'bot',
       content: 'Tôi không hiểu rõ yêu cầu của bạn. Bạn có thể thử:',
       options: isAuthenticated ? [
-        '🔍 Tìm kiếm sản phẩm',
-        '🛒 Đặt hàng ngay',
-        '📦 Theo dõi đơn hàng',
-        '👤 Thông tin tài khoản'
+        { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+        { text: '🛒 Đặt hàng ngay', action: 'navigate', path: '/cart' },
+        { text: '👤 Thông tin tài khoản', action: 'navigate', path: '/profile' }
       ] : [
-        '🔍 Tìm kiếm sản phẩm',
-        '👤 Đăng nhập/Đăng ký',
-        '📞 Liên hệ hỗ trợ',
-        '❓ Câu hỏi thường gặp'
+        { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+        { text: '👤 Đăng nhập/Đăng ký', action: 'navigate', path: '/login' },
+        { text: '📞 Liên hệ hỗ trợ', action: 'navigate', path: '/contact' }
       ]
     };
   };
 
   const handleOptionClick = (option) => {
-    handleSendMessage(option);
+    if (option.action === 'navigate') {
+      // Điều hướng đến trang cụ thể
+      navigate(option.path);
+      // Đóng chatbot sau khi điều hướng
+      setIsOpen(false);
+      // Thêm tin nhắn thông báo
+      const notificationMessage = {
+        id: Date.now(),
+        type: 'bot',
+        content: `Đang chuyển hướng đến ${option.text}...`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, notificationMessage]);
+    } else if (option.action === 'message') {
+      // Gửi tin nhắn như cũ
+      handleSendMessage(option.value);
+    } else {
+      // Fallback: gửi tin nhắn như cũ (để tương thích ngược)
+      handleSendMessage(option.text || option);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -322,18 +363,13 @@ const ChatBot = () => {
           ? `Xin chào ${user.username}! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:`
           : 'Xin chào! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:',
         options: isAuthenticated ? [
-          '🔍 Tìm kiếm sản phẩm',
-          '🛒 Đặt hàng ngay',
-          '📦 Theo dõi đơn hàng',
-          '💰 Xem khuyến mãi',
-          '👤 Thông tin tài khoản',
-          '📞 Liên hệ hỗ trợ'
+          { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+          { text: '🛒 Đặt hàng ngay', action: 'navigate', path: '/cart' },
+          { text: '👤 Thông tin tài khoản', action: 'navigate', path: '/profile' }
         ] : [
-          '🔍 Tìm kiếm sản phẩm',
-          '🛒 Hướng dẫn đặt hàng',
-          '👤 Đăng nhập/Đăng ký',
-          '📞 Liên hệ hỗ trợ',
-          '❓ Câu hỏi thường gặp'
+          { text: '🔍 Tìm kiếm sản phẩm', action: 'navigate', path: '/product' },
+          { text: '👤 Đăng nhập/Đăng ký', action: 'navigate', path: '/login' },
+          { text: '📞 Liên hệ hỗ trợ', action: 'navigate', path: '/contact' }
         ]
       }
     ]);
@@ -409,7 +445,7 @@ const ChatBot = () => {
                           onClick={() => handleOptionClick(option)}
                           className="block w-full text-left text-xs bg-white/20 hover:bg-white/30 rounded-lg px-3 py-2 transition-colors"
                         >
-                          {option}
+                          {option.text || option}
                         </button>
                       ))}
                     </div>
