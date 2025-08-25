@@ -8,7 +8,7 @@ import AdminSearchFilter from '../../components/admin/AdminSearchFilter';
 import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
-import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.js';
+import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getOrderDetailsByOrderId } from '../../service/Admin.Service.js';
 import { getOrderStatusText, getOrderStatusColor, getOrderStatusBgColor, getOrderStatusBorderColor, canEditOrderStatus, canChangeToStatus, getAvailableStatuses, getNextStatus } from '../../utils/orderStatus.js';
 
 import { getApiUrl } from '../../config/api.js';
@@ -93,34 +93,15 @@ const OrderPage = () => {
         const response = await getAllOrders();
         const ordersData = response.data.data.ordersWithItems || [];
 
-        // Lấy chi tiết user cho từng order (KHÔNG lấy orderdetail nữa)
-        const ordersWithDetails = await Promise.all(
-          ordersData.map(async (order) => {
-            let user = null;
-            try {
-              if (order.user_id && typeof order.user_id === 'string') {
-                const userRes = await getUserById(order.user_id);
-                user = userRes?.data?.data || userRes?.data;
-              } else if (typeof order.user_id === 'object' && order.user_id !== null) {
-                user = order.user_id;
-              }
-            } catch (e) {}
-            return {
-              ...order,
-              user_id: user,
-            };
-          })
-        );
-        
         // Sắp xếp theo thời gian tạo mới nhất đầu tiên
-        const sortedOrders = ordersWithDetails.sort((a, b) => {
+        const sortedOrders = ordersData.sort((a, b) => {
           const dateA = new Date(a.created_at || a.create_at || 0);
           const dateB = new Date(b.created_at || b.create_at || 0);
           return dateB - dateA; // Giảm dần (mới nhất trước)
         });
         
         setOrders(sortedOrders);
-        console.log('All orders with details:', sortedOrders);
+        // console.log('All orders with details:', sortedOrders);
       } catch (error) {
         setError('Không thể tải danh sách đơn hàng: ' + (error.response?.data?.message || error.message));
         console.error('Error fetching orders:', error);

@@ -34,6 +34,9 @@ router.get('/stats', getOrderStats);
 // Get recent orders (Admin)
 router.get('/recent', getRecentOrders);
 
+// Get order by ID (Admin)
+router.get('/:orderId', getOrderById);
+
 // Update order status (Admin)
 router.put('/:orderId/status', updateOrderStatus);
 
@@ -42,9 +45,6 @@ router.patch('/:orderId/cancel', cancelOrder);
 
 // Update VNPAY info for order (admin/debug)
 router.put('/:orderId/vnpay-info', updateOrderVnpayInfo);
-
-// Get order by ID (Admin)
-router.get('/:orderId', getOrderById);
 
 // Get products in an order (Admin/User)
 router.get('/:orderId/products', getOrderProducts);

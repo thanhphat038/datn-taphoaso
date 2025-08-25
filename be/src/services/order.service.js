@@ -20,13 +20,14 @@ class OrderService extends DBService {
   }
 
   async getAllOrders(filter = {}, options = {}) {
-    const { sort = { created_at: -1 } } = options;
+    try {
+      const { sort = { created_at: -1 } } = options;
 
-    const orders = await this.model
-      .find(filter)
-      .sort(sort)
-      .populate('user_id', 'name email') // nếu cần thông tin người dùng
-      .lean();
+      const orders = await this.model
+        .find(filter)
+        .sort(sort)
+        .populate('user_id', 'username email full_name')
+        .lean();
 
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
@@ -60,10 +61,14 @@ class OrderService extends DBService {
       })
     );
 
-    return {
-      ordersWithItems,
-      total: ordersWithItems.length
-    };
+      return {
+        ordersWithItems,
+        total: ordersWithItems.length
+      };
+    } catch (error) {
+      console.error('Error in getAllOrders:', error);
+      throw error;
+    }
   }
 
   async getOrderById(orderId) {
