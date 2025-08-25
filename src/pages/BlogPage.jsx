@@ -86,6 +86,8 @@ const BlogPage = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(12); // 12 blog mỗi trang
 
     useEffect(() => {
         const fetchData = async () => {
@@ -97,7 +99,7 @@ const BlogPage = () => {
                 setCategories(categoriesResponse.data.data || []);
                 
                 // Fetch blogs
-                const blogsResponse = await getAllBlogs(1, 20);
+                const blogsResponse = await getAllBlogs();
                 setBlogPosts(blogsResponse.data.data || []);
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -110,26 +112,48 @@ const BlogPage = () => {
         fetchData();
     }, []);
 
-    const handleCategoryChange = async (category) => {
-        try {
-            setLoading(true);
-            setSelectedCategory(category);
-            
-            if (category) {
-                // Fetch blogs by category
-                const response = await getBlogsByCategory(category._id, 1, 20);
-                setBlogPosts(response.data.data || []);
-            } else {
-                // Fetch all blogs
-                const response = await getAllBlogs(1, 20);
-                setBlogPosts(response.data.data || []);
-            }
-        } catch (err) {
-            console.error('Error fetching blogs by category:', err);
-            setError('Không thể tải dữ liệu cho danh mục này');
-        } finally {
-            setLoading(false);
+    // Filter blogs based on selected category
+    const filteredBlogs = blogPosts.filter(blog => {
+        if (!selectedCategory) return true;
+        return blog.category_id === selectedCategory._id;
+    });
+
+    // Pagination calculations
+    const totalBlogs = filteredBlogs.length;
+    const totalPages = Math.ceil(totalBlogs / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedBlogs = filteredBlogs.slice(startIndex, startIndex + pageSize);
+
+    // Handle page change
+    const handlePageChange = (pageNumber) => {
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
         }
+    };
+
+    // Get page numbers for pagination
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+        } else {
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 5; i++) pageNumbers.push(i);
+            } else if (currentPage >= totalPages - 2) {
+                for (let i = totalPages - 4; i <= totalPages; i++) pageNumbers.push(i);
+            } else {
+                for (let i = currentPage - 2; i <= currentPage + 2; i++) pageNumbers.push(i);
+            }
+        }
+
+        return pageNumbers;
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
+        setCurrentPage(1); // Reset to first page when changing category
     };
 
     if (loading && blogPosts.length === 0) {
@@ -214,7 +238,7 @@ const BlogPage = () => {
                         categories={categories}
                         selectedCategory={selectedCategory}
                         onCategoryChange={handleCategoryChange}
-                        totalPosts={blogPosts.length}
+                        totalPosts={totalBlogs}
                     />
                 )}
 
@@ -231,7 +255,7 @@ const BlogPage = () => {
                 {/* Blog Grid */}
                 {!loading && (
                     <>
-                        {blogPosts.length === 0 ? (
+                        {filteredBlogs.length === 0 ? (
                             <div className="text-center py-16">
                                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,11 +281,65 @@ const BlogPage = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {blogPosts.map((post) => (
-                                    <BlogCard key={post._id} {...post} />
-                                ))}
-                            </div>
+                            <>
+                                {/* Blog Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                                    {paginatedBlogs.map((post) => (
+                                        <BlogCard key={post._id} {...post} />
+                                    ))}
+                                </div>
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex justify-center items-center gap-2 mb-8">
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                            ${currentPage === 1 
+                                                ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                                                : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                            </svg>
+                                        </button>
+
+                                        {getPageNumbers().map((pageNum) => (
+                                            <button
+                                                key={pageNum}
+                                                onClick={() => handlePageChange(pageNum)}
+                                                className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                                ${currentPage === pageNum
+                                                    ? 'bg-blue-500 text-white border-blue-500 shadow-md'
+                                                    : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        ))}
+
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200
+                                            ${currentPage === totalPages 
+                                                ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                                                : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'}`}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Page Info */}
+                                {totalPages > 1 && (
+                                    <div className="text-center text-sm text-gray-500 mb-4">
+                                        Hiển thị {paginatedBlogs.length} trong tổng số {totalBlogs} bài viết (Trang {currentPage} / {totalPages})
+                                    </div>
+                                )}
+                            </>
                         )}
                     </>
                 )}
@@ -288,8 +366,6 @@ const BlogPage = () => {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

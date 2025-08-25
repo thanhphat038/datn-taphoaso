@@ -337,25 +337,50 @@ export const resetPassword = async (req, res) => {
       return badRequest(res, 'New password must be at least 6 characters long');
     }
 
+    // Find user by token first
+    const user = await userService.findOne({ resetPasswordToken: token });
+    if (!user) {
+      return badRequest(res, 'Invalid reset token');
+    }
+
+    // Check expiration time
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < Date.now()) {
+      // Clear expired token
+      await userService.update(user._id, {
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      });
+      
+      return badRequest(res, 'Reset token has expired. Please request a new one.');
+    }
+
+    // Verify JWT token
     let payload;
     try {
       payload = jwt.verify(token, JWT_SECRET);
     } catch (error) {
-      return badRequest(res, 'Invalid or expired token');
+      // Clear invalid token
+      await userService.update(user._id, {
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      });
+      
+      if (error.name === 'TokenExpiredError') {
+        return badRequest(res, 'Reset token has expired. Please request a new one.');
+      } else {
+        return badRequest(res, 'Invalid reset token format.');
+      }
     }
 
-    const user = await userService.findById(payload.id);
-    if (!user) {
-      return notFound(res, 'User not found');
+    // Check if user ID in token matches user in database
+    if (payload.id !== user._id.toString()) {
+      return badRequest(res, 'Token is not valid for this user');
     }
 
-    // Nếu lưu resetPasswordToken vào DB, kiểm tra khớp token:
-    if (user.resetPasswordToken !== token || user.resetPasswordExpires < Date.now()) {
-      return badRequest(res, 'Token is invalid or expired');
-    }
-
+    // Hash new password
     const hashedPassword = hashPassword(newPassword);
 
+    // Update password and clear token
     await userService.update(user._id, {
       password: hashedPassword,
       resetPasswordToken: undefined,
@@ -365,7 +390,7 @@ export const resetPassword = async (req, res) => {
     return ok(res, null, 'Password has been reset successfully');
 
   } catch (error) {
-    console.error('Error resetting password:', error);
+    console.error('[resetPassword] Error:', error);
     return serverError(res, 'Error resetting password', error);
   }
 };
@@ -434,37 +459,38 @@ export const forgotPassword = async (req, res) => {
 
     const user = await userService.findOne({ email });
     if (!user) {
-      return notFound(res, 'No user found with this email');
+      return notFound(res, 'No user found with this email address');
     }
 
-    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: RESET_PASSWORD_TOKEN_EXPIRES_IN });
+    // Create reset token
+    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
 
-    // Calculate expiry time based on token expiration
-    // Convert '15m' to milliseconds
-    const expiryMinutes = parseInt(RESET_PASSWORD_TOKEN_EXPIRES_IN.replace(/[^0-9]/g, ''));
-    const expiryMs = expiryMinutes * 60 * 1000;
-
-    // Lưu token vào DB
+    // Save token to database
     await userService.update(user._id, {
       resetPasswordToken: resetToken,
-      resetPasswordExpires: Date.now() + expiryMs
+      resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
     });
 
-    // Tạo link reset
+    // Create reset link
     const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    // Gửi email
-    await sendForgotPasswordEmail({
-      to: email,
-      name: user.name || '',
-      resetLink
-    });
-
-    return ok(res, null, 'Password reset link has been sent to your email');
+    // Send email
+    try {
+      await sendForgotPasswordEmail({
+        to: email,
+        name: user.full_name || user.username || '',
+        resetLink
+      });
+      
+      return ok(res, null, 'Password reset link has been sent to your email');
+    } catch (emailError) {
+      console.error('[forgotPassword] Email sending failed:', emailError);
+      return serverError(res, 'Error sending email. Please try again later.');
+    }
     
   } catch (error) {
-    console.error('Forgot password error:', error);
-    return serverError(res, 'Error processing forgot password', error);
+    console.error('[forgotPassword] Error:', error);
+    return serverError(res, 'Error processing password reset request', error);
   }
 };
 
