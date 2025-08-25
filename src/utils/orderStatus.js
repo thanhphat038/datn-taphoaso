@@ -105,9 +105,78 @@ export const getPaymentMethodText = (method) => {
  * @returns {boolean} True nếu có thể chỉnh sửa
  */
 export const canEditOrderStatus = (status) => {
-  // Chỉ block cancelled, các trạng thái khác đều có thể chỉnh sửa
-  const nonEditableStatuses = ['cancelled'];
+  // Block delivered và cancelled - không thể chỉnh sửa
+  const nonEditableStatuses = ['delivered', 'cancelled'];
   return !nonEditableStatuses.includes(status);
+};
+
+/**
+ * Lấy trạng thái tiếp theo theo thứ tự
+ * @param {string} currentStatus - Trạng thái hiện tại
+ * @returns {string|null} Trạng thái tiếp theo hoặc null nếu không có
+ */
+export const getNextStatus = (currentStatus) => {
+  const statusSequence = ['pending', 'processing', 'delivered'];
+  const currentIndex = statusSequence.indexOf(currentStatus);
+  
+  if (currentIndex === -1 || currentIndex === statusSequence.length - 1) {
+    return null; // Không có trạng thái tiếp theo
+  }
+  
+  return statusSequence[currentIndex + 1];
+};
+
+/**
+ * Kiểm tra xem có thể chuyển từ trạng thái hiện tại sang trạng thái mới không
+ * @param {string} currentStatus - Trạng thái hiện tại
+ * @param {string} newStatus - Trạng thái mới
+ * @returns {boolean} True nếu có thể chuyển đổi
+ */
+export const canChangeToStatus = (currentStatus, newStatus) => {
+  // Nếu trạng thái hiện tại là delivered hoặc cancelled thì không thể thay đổi
+  if (currentStatus === 'delivered' || currentStatus === 'cancelled') {
+    return false;
+  }
+  
+  // Nếu trạng thái mới là cancelled thì chỉ cho phép khi đang ở trạng thái pending
+  if (newStatus === 'cancelled') {
+    return currentStatus === 'pending';
+  }
+  
+  // Kiểm tra thứ tự trạng thái
+  const statusSequence = ['pending', 'processing', 'delivered'];
+  const currentIndex = statusSequence.indexOf(currentStatus);
+  const newIndex = statusSequence.indexOf(newStatus);
+  
+  // Chỉ cho phép chuyển sang trạng thái tiếp theo
+  return newIndex === currentIndex + 1;
+};
+
+/**
+ * Lấy danh sách trạng thái có thể chuyển đổi từ trạng thái hiện tại
+ * @param {string} currentStatus - Trạng thái hiện tại
+ * @returns {Array} Danh sách các trạng thái có thể chuyển đổi
+ */
+export const getAvailableStatuses = (currentStatus) => {
+  const allStatuses = [
+    { value: 'pending', label: 'Chờ xử lý' },
+    { value: 'processing', label: 'Đang xử lý' },
+    { value: 'delivered', label: 'Đã nhận hàng' },
+    { value: 'cancelled', label: 'Đã hủy' }
+  ];
+  
+  // Nếu trạng thái hiện tại là delivered hoặc cancelled thì không thể chuyển đổi
+  if (currentStatus === 'delivered' || currentStatus === 'cancelled') {
+    return [];
+  }
+  
+  // Lấy trạng thái tiếp theo
+  const nextStatus = getNextStatus(currentStatus);
+  
+  // Trả về trạng thái tiếp theo và cancelled (chỉ khi đang ở pending)
+  return allStatuses.filter(status => 
+    status.value === nextStatus || (status.value === 'cancelled' && currentStatus === 'pending')
+  );
 };
 
 /**

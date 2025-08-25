@@ -9,7 +9,7 @@ import AdminPagination from '../../components/admin/AdminPagination';
 import AdminActionDropdown from '../../components/admin/AdminActionDropdown';
 import AdminModal, { ModalButton } from '../../components/admin/AdminModal';
 import { getAllOrders, updateOrderStatus as updateOrderStatusService, deleteOrder as deleteOrderService, getUserById, getOrderDetailsByOrderId } from '../../service/Admin.Service.js';
-import { getOrderStatusText, getOrderStatusColor, getOrderStatusBgColor, getOrderStatusBorderColor, canEditOrderStatus } from '../../utils/orderStatus.js';
+import { getOrderStatusText, getOrderStatusColor, getOrderStatusBgColor, getOrderStatusBorderColor, canEditOrderStatus, canChangeToStatus, getAvailableStatuses, getNextStatus } from '../../utils/orderStatus.js';
 
 import { getApiUrl } from '../../config/api.js';
 
@@ -45,11 +45,7 @@ const OrderPage = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  // Thêm function canEditOrderStatus vào component
-  const canEditOrderStatus = (status) => {
-    const nonEditableStatuses = ['cancelled', 'delivered'];
-    return !nonEditableStatuses.includes(status);
-  };
+
 
   // Cập nhật statusOptions để có đầy đủ các trạng thái
   const statusOptions = [
@@ -57,36 +53,25 @@ const OrderPage = () => {
       value: 'pending', 
       label: getOrderStatusText('pending'), 
       color: `bg-yellow-100 text-yellow-800 border-yellow-200`,
-      dotColor: 'bg-yellow-500',
-      canEdit: canEditOrderStatus('pending')
+      dotColor: 'bg-yellow-500'
     },
     { 
       value: 'processing', 
       label: getOrderStatusText('processing'), 
       color: `bg-blue-100 text-blue-800 border-blue-200`,
-      dotColor: 'bg-blue-500',
-      canEdit: canEditOrderStatus('processing')
+      dotColor: 'bg-blue-500'
     },
     { 
       value: 'delivered', 
       label: getOrderStatusText('delivered'), 
       color: `bg-green-100 text-green-800 border-green-200`,
-      dotColor: 'bg-green-500',
-      canEdit: canEditOrderStatus('delivered')
+      dotColor: 'bg-green-500'
     },
-    // { 
-    //   value: 'failed', 
-    //   label: getOrderStatusText('failed'), 
-    //   color: `bg-red-100 text-red-800 border-red-200`,
-    //   dotColor: 'bg-red-500',
-    //   canEdit: canEditOrderStatus('failed')
-    // },
     { 
       value: 'cancelled', 
       label: getOrderStatusText('cancelled'), 
       color: `bg-red-100 text-red-800 border-red-200`,
-      dotColor: 'bg-red-500',
-      canEdit: canEditOrderStatus('cancelled')
+      dotColor: 'bg-red-500'
     }
   ];
 
@@ -186,12 +171,11 @@ const OrderPage = () => {
     }
   };
 
-    // Cập nhật phần tính toán statistics - đổi 'shipped' thành 'delivered'
+    // Cập nhật phần tính toán statistics
   const allOrders = orders.length;
   const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
   const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
   const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
-  const failedOrders = orders.filter(order => (order.order_status || order.status) === 'failed').length;
   const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
 
   // Filter and pagination logic
@@ -319,11 +303,26 @@ const OrderPage = () => {
                 onClick: () => {
                   if (canEdit) {
                     setCurrentEditOrder(order);
-                    setEditStatus(currentStatus);
+                    // Tự động chuyển sang trạng thái tiếp theo
+                    const nextStatus = getNextStatus(currentStatus);
+                    setEditStatus(nextStatus || currentStatus);
                     setShowEditModal(true);
                   }
                 }
               },
+              // {
+              //   label: 'Hủy đơn hàng',
+              //   icon: FaTrash,
+              //   variant: 'danger',
+              //   disabled: !canEdit,
+              //   onClick: () => {
+              //     if (canEdit) {
+              //       setCurrentEditOrder(order);
+              //       setEditStatus('cancelled');
+              //       setShowEditModal(true);
+              //     }
+              //   }
+              // },
               // {
               //   label: 'Xóa đơn hàng',
               //   icon: FaTrash,
@@ -438,7 +437,9 @@ const OrderPage = () => {
               onClick={() => {
                 if (canEditOrderStatus(order.order_status || order.status)) {
                   setCurrentEditOrder(order);
-                  setEditStatus(order.order_status || order.status);
+                  // Tự động chuyển sang trạng thái tiếp theo
+                  const nextStatus = getNextStatus(order.order_status || order.status);
+                  setEditStatus(nextStatus || order.order_status || order.status);
                   setShowEditModal(true);
                 }
               }}
@@ -447,18 +448,21 @@ const OrderPage = () => {
             </button>
             <button 
               className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
-                !canEditOrderStatus(order.order_status || order.status)
+                (order.order_status || order.status) !== 'pending'
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-red-100 text-red-600 hover:bg-red-200'
               }`}
-              disabled={!canEditOrderStatus(order.order_status || order.status)}
+              disabled={(order.order_status || order.status) !== 'pending'}
               onClick={() => {
-                if (canEditOrderStatus(order.order_status || order.status)) {
-                  handleDeleteOrder(order._id);
+                if ((order.order_status || order.status) === 'pending') {
+                  // Chỉ cho phép hủy khi đang ở trạng thái pending
+                  setCurrentEditOrder(order);
+                  setEditStatus('cancelled');
+                  setShowEditModal(true);
                 }
               }}
             >
-              Hủy bỏ
+              Hủy đơn hàng
             </button>
           </div>
         </div>
@@ -543,16 +547,7 @@ const OrderPage = () => {
            >
              {getOrderStatusText('delivered')} ({deliveredOrders})
            </button>
-           <button
-             onClick={() => setSelectedStatus('failed')}
-             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-               selectedStatus === 'failed'
-                 ? 'bg-red-500 text-white shadow-lg'
-                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-             }`}
-           >
-             {getOrderStatusText('failed')} ({failedOrders})
-           </button>
+
            <button
              onClick={() => setSelectedStatus('cancelled')}
              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
@@ -624,9 +619,9 @@ const OrderPage = () => {
               </ModalButton>
               <ModalButton 
                 onClick={handleStatusUpdate}
-                disabled={loading || !canEditOrderStatus(editStatus)}
+                disabled={loading || (currentEditOrder && !canChangeToStatus(currentEditOrder.order_status || currentEditOrder.status, editStatus))}
               >
-                {loading ? 'Đang lưu...' : 'Cập nhật'}
+                {loading ? 'Đang lưu...' : editStatus === 'cancelled' ? 'Hủy đơn hàng' : 'Cập nhật'}
               </ModalButton>
             </>
           }
@@ -641,6 +636,14 @@ const OrderPage = () => {
                   {currentEditOrder ? getOrderStatusText(currentEditOrder.order_status || currentEditOrder.status) : ''}
                 </span>
               </div>
+              {currentEditOrder && getNextStatus(currentEditOrder.order_status || currentEditOrder.status) && (
+                <div className="text-sm text-blue-600 mt-1">
+                  Trạng thái tiếp theo: 
+                  <span className="font-medium ml-1">
+                    {getOrderStatusText(getNextStatus(currentEditOrder.order_status || currentEditOrder.status))}
+                  </span>
+                </div>
+              )}
             </div>
             
             <div>
@@ -652,15 +655,18 @@ const OrderPage = () => {
                 onChange={(e) => setEditStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4] focus:border-transparent"
               >
-                {statusOptions.map((status) => (
+                {currentEditOrder && getAvailableStatuses(currentEditOrder.order_status || currentEditOrder.status).map((status) => (
                   <option key={status.value} value={status.value}>
                     {status.label}
                   </option>
                 ))}
               </select>
-              {!canEditOrderStatus(editStatus) && (
+              {currentEditOrder && !canChangeToStatus(currentEditOrder.order_status || currentEditOrder.status, editStatus) && (
                 <p className="text-sm text-red-600 mt-1">
-                  Không thể chuyển sang trạng thái này vì đơn hàng shippedhoàn thành hoặc bị hủy
+                  {editStatus === 'cancelled' 
+                    ? 'Chỉ có thể hủy đơn hàng khi đang ở trạng thái "Chờ xử lý"'
+                    : 'Chỉ có thể chuyển sang trạng thái tiếp theo hoặc hủy đơn hàng (khi đang ở trạng thái "Chờ xử lý")'
+                  }
                 </p>
               )}
             </div>
