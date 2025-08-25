@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { changePassword } from '../../service/user.service';
 import { FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 
@@ -20,16 +20,6 @@ const ChangePassword = () => {
     score: 0,
     feedback: []
   });
-  const isMountedRef = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      setLoading(false);
-      setError('');
-      setSuccess('');
-    };
-  }, []);
 
   // Password strength checker
   const checkPasswordStrength = (password) => {
@@ -109,59 +99,95 @@ const ChangePassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isMountedRef.current) return;
+    console.log('Form submitted');
     
     setLoading(true);
     setError('');
     setSuccess('');
     
-    // Enhanced validation
-    if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
-      setError('Vui lòng nhập đầy đủ các trường!');
-      setLoading(false);
-      return;
-    }
-
-    if (passwords.newPassword.length < 6) {
-      setError('Mật khẩu mới phải có ít nhất 6 ký tự!');
-      setLoading(false);
-      return;
-    }
-
-    if (passwordStrength.score < 3) {
-      setError('Mật khẩu mới không đủ mạnh. Vui lòng cải thiện độ mạnh mật khẩu!');
-      setLoading(false);
-      return;
-    }
-
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp!');
-      setLoading(false);
-      return;
-    }
-
-    if (passwords.currentPassword === passwords.newPassword) {
-      setError('Mật khẩu mới phải khác mật khẩu hiện tại!');
-      setLoading(false);
-      return;
-    }
+    console.log('Form data:', {
+      currentPassword: passwords.currentPassword ? '***' : 'empty',
+      newPassword: passwords.newPassword ? '***' : 'empty',
+      confirmPassword: passwords.confirmPassword ? '***' : 'empty',
+      strength: passwordStrength.score
+    });
     
     try {
-      await changePassword(passwords.currentPassword, passwords.newPassword);
-      if (isMountedRef.current) {
-        setSuccess('Đổi mật khẩu thành công!');
-        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setShowPasswords({ currentPassword: false, newPassword: false, confirmPassword: false });
-        setPasswordStrength({ score: 0, feedback: [] });
-      }
-    } catch (error) {
-      if (isMountedRef.current) {
-        setError(error.message);
-      }
-    } finally {
-      if (isMountedRef.current) {
+      // Enhanced validation
+      console.log('Starting validation...');
+      
+      if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
+        console.log(' Validation failed: Empty fields');
+        setError('Vui lòng nhập đầy đủ các trường!');
         setLoading(false);
+        return;
       }
+
+      // Kiểm tra độ dài mật khẩu hiện tại
+      if (passwords.currentPassword.length < 6) {
+        console.log('Validation failed: Current password too short');
+        setError('Mật khẩu hiện tại phải có ít nhất 6 ký tự!');
+        setLoading(false);
+        return;
+      }
+
+      // Kiểm tra độ dài mật khẩu mới (thống nhất với password strength checker)
+      if (passwords.newPassword.length < 8) {
+        console.log(' Validation failed: New password too short');
+        setError('Mật khẩu mới phải có ít nhất 8 ký tự!');
+        setLoading(false);
+        return;
+      }
+
+      if (passwordStrength.score < 3) {
+        console.log(' Validation failed: Password strength too weak');
+        setError('Mật khẩu mới không đủ mạnh. Vui lòng cải thiện độ mạnh mật khẩu!');
+        setLoading(false);
+        return;
+      }
+
+      if (passwords.newPassword !== passwords.confirmPassword) {
+        console.log('Validation failed: Passwords do not match');
+        setError('Mật khẩu xác nhận không khớp!');
+        setLoading(false);
+        return;
+      }
+
+      if (passwords.currentPassword === passwords.newPassword) {
+        console.log('Validation failed: New password same as current');
+        setError('Mật khẩu mới phải khác mật khẩu hiện tại!');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('All validations passed, calling API...');
+      
+      console.log('Calling changePassword API...');
+      const result = await changePassword(passwords.currentPassword, passwords.newPassword);
+      console.log(' API response:', result);
+      
+      console.log(' Setting success state...');
+      setSuccess('Đổi mật khẩu thành công!');
+      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setShowPasswords({ currentPassword: false, newPassword: false, confirmPassword: false });
+      setPasswordStrength({ score: 0, feedback: [] });
+      console.log(' Success state set');
+      
+    } catch (error) {
+      console.error('Change password error:', error);
+      console.error(' details:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status
+      });
+      
+      // Cải thiện xử lý lỗi
+      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra khi đổi mật khẩu';
+      console.log(' Setting error message:', errorMessage);
+      setError(errorMessage);
+    } finally {
+      console.log('Setting loading to false');
+      setLoading(false);
     }
   };
 
@@ -180,7 +206,7 @@ const ChangePassword = () => {
         <p className="text-gray-600 mt-1 text-sm">Bảo mật tài khoản của bạn</p>
       </div>
 
-      <form key="change-password-form" onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Current Password */}
         <div className="group">
           <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
@@ -191,9 +217,12 @@ const ChangePassword = () => {
           </label>
           <div className="relative">
             <input
-              key="current-password"
               type={showPasswords.currentPassword ? "text" : "password"}
-              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
+              className={`w-full px-3 py-2.5 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm ${
+                passwords.currentPassword && passwords.currentPassword.length < 6 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-200 focus:border-[#06AEF4]'
+              }`}
               placeholder="Nhập mật khẩu hiện tại"
               value={passwords.currentPassword}
               onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
@@ -206,6 +235,13 @@ const ChangePassword = () => {
             </span>
             <div className="absolute inset-0 rounded-lg bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
+          {/* Validation feedback for current password */}
+          {passwords.currentPassword && passwords.currentPassword.length < 6 && (
+            <div className="mt-1 flex items-center gap-1 text-xs text-red-600">
+              <FaTimes className="w-3 h-3" />
+              <span>Mật khẩu hiện tại phải có ít nhất 6 ký tự</span>
+            </div>
+          )}
         </div>
 
         {/* New Password */}
@@ -218,7 +254,6 @@ const ChangePassword = () => {
           </label>
           <div className="relative">
             <input
-              key="new-password"
               type={showPasswords.newPassword ? "text" : "password"}
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
               placeholder="Nhập mật khẩu mới"
@@ -287,9 +322,14 @@ const ChangePassword = () => {
           </label>
           <div className="relative">
             <input
-              key="confirm-password"
               type={showPasswords.confirmPassword ? "text" : "password"}
-              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#06AEF4] focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm"
+              className={`w-full px-3 py-2.5 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06AEF4]/20 transition-all duration-300 bg-white text-sm ${
+                passwords.confirmPassword && passwords.newPassword !== passwords.confirmPassword
+                  ? 'border-red-300 focus:border-red-500' 
+                  : passwords.confirmPassword && passwords.newPassword === passwords.confirmPassword
+                  ? 'border-green-300 focus:border-green-500'
+                  : 'border-gray-200 focus:border-[#06AEF4]'
+              }`}
               placeholder="Nhập lại mật khẩu mới"
               value={passwords.confirmPassword}
               onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
@@ -302,11 +342,24 @@ const ChangePassword = () => {
             </span>
             <div className="absolute inset-0 rounded-lg bg-[#06AEF4]/0 group-hover:bg-[#06AEF4]/5 transition-all duration-300 pointer-events-none"></div>
           </div>
+          {/* Validation feedback for confirm password */}
+          {passwords.confirmPassword && passwords.newPassword !== passwords.confirmPassword && (
+            <div className="mt-1 flex items-center gap-1 text-xs text-red-600">
+              <FaTimes className="w-3 h-3" />
+              <span>Mật khẩu xác nhận không khớp</span>
+            </div>
+          )}
+          {passwords.confirmPassword && passwords.newPassword === passwords.confirmPassword && passwords.newPassword && (
+            <div className="mt-1 flex items-center gap-1 text-xs text-green-600">
+              <FaCheck className="w-3 h-3" />
+              <span>Mật khẩu xác nhận khớp</span>
+            </div>
+          )}
         </div>
 
         {/* Error/Success Messages */}
         {error && (
-          <div key="error-message" className="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg">
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -317,7 +370,7 @@ const ChangePassword = () => {
         )}
         
         {success && (
-          <div key="success-message" className="bg-green-50 border-l-4 border-green-500 p-3 rounded-lg">
+          <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded-lg">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -366,7 +419,7 @@ const ChangePassword = () => {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              {passwordStrength.score < 3 ? 'Đổi mật khẩu' : 'Đổi mật khẩu'}
+              {passwordStrength.score < 3 ? 'Cải thiện mật khẩu trước' : 'Đổi mật khẩu'}
             </div>
           )}
         </button>

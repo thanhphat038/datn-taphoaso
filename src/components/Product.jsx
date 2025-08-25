@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
+import { addToFavorite, removeFromFavorite, getFavorites, clearFavoritesCache, forceClearFavoritesCache } from '../service/Favorite.service';
 import { addToCart } from '../service/Cart.service';
 import Cookies from 'js-cookie';
 import { useToast } from './ToastContainer';
@@ -13,12 +13,13 @@ export const formatCurrency = (value) => {
   }).format(value);
 };
 
-const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => {
+const Product = ({ data: product, onAddToCartSuccess }) => {
   
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(isFavorited);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingAddToCart, setLoadingAddToCart] = useState(false);
+  const [userKey, setUserKey] = useState('');
   const { showSuccess, showError, showWarning } = useToast();
   const { showAlert, hideAlert } = useAlertContext();
   
@@ -37,16 +38,16 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
     return null;
   };
 
-  // Kiểm tra trạng thái yêu thích khi component mount
+  // Kiểm tra trạng thái yêu thích khi component mount hoặc token thay đổi
   useEffect(() => {
-    // Nếu đã được truyền prop isFavorited, không cần kiểm tra
-    if (isFavorited) {
-      setIsFavorite(true);
-      return;
-    }
-    
     // Kiểm tra xem user đã đăng nhập chưa
     const userId = getUserId();
+    const currentToken = Cookies.get('auth_token');
+    const newUserKey = userId ? `${userId}-${currentToken}` : 'guest';
+    
+    // Cập nhật userKey để force re-render
+    setUserKey(newUserKey);
+    
     if (!userId) {
       console.log('🔒 User not logged in, skipping favorite check');
       setIsFavorite(false);
@@ -57,7 +58,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
     
     const checkFavoriteStatus = async () => {
       try {
-        console.log('🔍 Checking favorite status for product:', product._id);
+        console.log('🔍 Checking favorite status for product:', product._id, 'user:', userId);
         const response = await getFavorites();
         if (!isMounted) return;
         
@@ -66,7 +67,7 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
             (fav) => fav.product_id?._id === product._id
           );
           setIsFavorite(isProductFavorite);
-          console.log('✅ Favorite status updated:', isProductFavorite);
+          console.log('✅ Favorite status updated:', isProductFavorite, 'for user:', userId);
         }
       } catch (error) {
         if (!isMounted) return;
@@ -84,7 +85,29 @@ const Product = ({ data: product, isFavorited = false, onAddToCartSuccess }) => 
     return () => {
       isMounted = false;
     };
-  }, [product._id, isFavorited]);
+  }, [product._id, userKey]); // Sử dụng userKey thay vì token trực tiếp
+
+  // Lắng nghe sự kiện logout và login để reset trạng thái yêu thích
+  useEffect(() => {
+    const handleUserLogout = () => {
+      console.log('🚪 User logout detected, resetting favorite status');
+      setIsFavorite(false);
+    };
+
+    const handleUserLogin = () => {
+      console.log('🚪 User login detected, force clearing favorites cache');
+      forceClearFavoritesCache();
+      setIsFavorite(false);
+    };
+
+    window.addEventListener('user-logout', handleUserLogout);
+    window.addEventListener('user-login', handleUserLogin);
+    
+    return () => {
+      window.removeEventListener('user-logout', handleUserLogout);
+      window.removeEventListener('user-login', handleUserLogin);
+    };
+  }, []);
 
   // Kiểm tra dữ liệu sản phẩm
   if (!product || !product._id) {

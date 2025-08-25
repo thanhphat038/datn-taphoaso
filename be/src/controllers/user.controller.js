@@ -20,20 +20,20 @@ export const createUser = async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return badRequest(res, 'Username and password are required');
+      return badRequest(res, 'Tên đăng nhập và mật khẩu là bắt buộc');
     }
 
     if (username !== undefined && !isValidUsername(username)) {
-      return badRequest(res, 'Invalid username');
+      return badRequest(res, 'Tên đăng nhập không hợp lệ');
     }
 
     if (password !== undefined && !isValidPassword(password)) {
-      return badRequest(res, 'Invalid password, must be at least 6 characters long, only letters or numbers');
+      return badRequest(res, 'Mật khẩu không hợp lệ, phải có ít nhất 6 ký tự, chỉ chứa chữ cái hoặc số');
     }
 
     const existingUser = await userService.findAll({ username });
     if (existingUser.length > 0) {
-      return badRequest(res, 'Username already taken');
+      return badRequest(res, 'Tên đăng nhập đã được sử dụng');
     }
 
     const user = await userService.create({
@@ -53,12 +53,12 @@ export const getUsers = async (req, res) => {
     const users = await userService.findAll({}, { select: '-password' });
     
     if (!users || users.length === 0) {
-      return ok(res, [], 'No users found');
+      return ok(res, [], 'Không tìm thấy người dùng nào');
     }
 
-    return ok(res, users, 'Users retrieved successfully');
+    return ok(res, users, 'Lấy danh sách người dùng thành công');
   } catch (error) {
-    return serverError(res, 'Error retrieving users', error);
+    return serverError(res, 'Lỗi khi lấy danh sách người dùng', error);
   }
 };
 
@@ -72,7 +72,7 @@ export const getUserById = async (req, res) => {
     }
 
     const user = await userService.findById(id);
-    return ok(res, user, 'User retrieved successfully');
+    return ok(res, user, 'Lấy thông tin người dùng thành công');
   } catch (error) {
     if (!(error instanceof AppError)) {
       console.error('Server error in getUserById:', {
@@ -87,7 +87,7 @@ export const getUserById = async (req, res) => {
       }
       return badRequest(res, error.message);
     }
-    return serverError(res, 'Error retrieving user', error);
+    return serverError(res, 'Lỗi khi lấy thông tin người dùng', error);
   }
 };
 
@@ -103,33 +103,33 @@ export const updateUser = async (req, res) => {
     const { username, full_name, phone, email, role, status } = req.body;
 
     if (username !== undefined && !isValidUsername(username)) {
-      return badRequest(res, 'Invalid username');
+      return badRequest(res, 'Tên đăng nhập không hợp lệ');
     }
 
     if (full_name !== undefined && !isValidFullName(full_name)) {
-      return badRequest(res, 'Invalid full name, too short or too long');
+      return badRequest(res, 'Họ tên không hợp lệ, quá ngắn hoặc quá dài');
     }
 
     if (phone !== undefined && !isValidPhone(phone)) {
-      return badRequest(res, 'Invalid phone number');
+      return badRequest(res, 'Số điện thoại không hợp lệ');
     }
 
     if (email !== undefined && !isValidEmail(email)) {
-      return badRequest(res, 'Invalid email address');
+      return badRequest(res, 'Địa chỉ email không hợp lệ');
     }
 
     // Validate role if provided
     if (role !== undefined && !['user', 'admin'].includes(role)) {
-      return badRequest(res, 'Invalid role. Role must be either "user" or "admin"');
+      return badRequest(res, 'Vai trò không hợp lệ. Vai trò phải là "user" hoặc "admin"');
     }
 
     // Validate status if provided
     if (status !== undefined && !['active', 'inactive'].includes(status)) {
-      return badRequest(res, 'Invalid status. Status must be either "active" or "inactive"');
+      return badRequest(res, 'Trạng thái không hợp lệ. Trạng thái phải là "active" hoặc "inactive"');
     }
 
     const user = await userService.update(id, req.body);
-    return ok(res, user, 'User updated successfully');
+    return ok(res, user, 'Cập nhật người dùng thành công');
   } catch (error) {
     if (!(error instanceof AppError)) {
       console.error('Server error in updateUser:', {
@@ -144,7 +144,7 @@ export const updateUser = async (req, res) => {
       }
       return badRequest(res, error.message);
     }
-    return serverError(res, 'Error updating user', error);
+    return serverError(res, 'Lỗi khi cập nhật người dùng', error);
   }
 };
 
@@ -173,7 +173,7 @@ export const deleteUser = async (req, res) => {
       }
       return badRequest(res, error.message);
     }
-    return serverError(res, 'Error deleting user', error);
+    return serverError(res, 'Lỗi khi xóa người dùng', error);
   }
 };
 
@@ -187,7 +187,7 @@ export const deactivateUser = async (req, res) => {
     }
 
     const user = await userService.update(id, { status: 'inactive' });
-    return ok(res, user, 'User deactivated successfully');
+    return ok(res, user, 'Vô hiệu hóa người dùng thành công');
   } catch (error) {
     if (!(error instanceof AppError)) {
       console.error('Server error in deactivateUser:', {
@@ -202,6 +202,6 @@ export const deactivateUser = async (req, res) => {
       }
       return badRequest(res, error.message);
     }
-    return serverError(res, 'Error deactivating user', error);
+    return serverError(res, 'Lỗi khi vô hiệu hóa người dùng', error);
   }
 };

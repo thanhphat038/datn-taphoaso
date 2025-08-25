@@ -5,21 +5,24 @@ import { ERROR_CODES } from '../errors/errorDefinitions.js';
 // Get all favorites
 export const getFavorites = async (req, res, next) => {
   try {
-    const { user_id } = req.query;
-    const filters = {};
-    if (user_id) filters.user_id = user_id;
+    const userId = req.user.id; // Lấy từ auth middleware
+    console.log('🔍 Debug - getFavorites for user:', userId);
 
-    const favorites = await favoriteService.find(filters, {
+    const favorites = await favoriteService.find({ user_id: userId }, {
       populate: [
         { path: 'user_id', select: 'name email' },
         { path: 'product_id', select: 'name price images rating' }
       ]
     });
+    
+    console.log('🔍 Debug - Found favorites count:', favorites.length);
+    
     res.json({
       success: true,
       data: favorites
     });
   } catch (error) {
+    console.error('❌ Error - getFavorites:', error);
     next(error);
   }
 };
@@ -109,12 +112,18 @@ export const getUserFavorites = async (req, res, next) => {
 export const checkFavoriteStatus = async (req, res, next) => {
   try {
     const { product_id } = req.params;
-    const isFavorite = await favoriteService.checkFavoriteStatus(req.user.id, product_id);
+    const userId = req.user.id;
+    console.log('🔍 Debug - checkFavoriteStatus:', { userId, product_id });
+    
+    const isFavorite = await favoriteService.isFavorite(userId, product_id);
+    console.log('🔍 Debug - isFavorite result:', isFavorite);
+    
     res.json({
       success: true,
       data: { isFavorite }
     });
   } catch (error) {
+    console.error('❌ Error - checkFavoriteStatus:', error);
     next(error);
   }
 }; 

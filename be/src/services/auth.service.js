@@ -13,7 +13,7 @@ class AuthService {
       if (!user) {
         return {
           success: false,
-          message: 'Invalid username or password'
+          message: 'Tên đăng nhập hoặc mật khẩu không chính xác'
         };
       }
 
@@ -21,7 +21,7 @@ class AuthService {
       if (user.status !== 'active') {
         return {
           success: false,
-          message: 'Account is inactive'
+          message: 'Tài khoản không hoạt động'
         };
       }
 
@@ -29,7 +29,7 @@ class AuthService {
       if (!user.password) {
         return {
           success: false,
-          message: 'User has no password set'
+          message: 'Người dùng chưa thiết lập mật khẩu'
         };
       }
 
@@ -37,7 +37,7 @@ class AuthService {
       if (!isValidPassword) {
         return {
           success: false,
-          message: 'Invalid username or password'
+          message: 'Tên đăng nhập hoặc mật khẩu không chính xác'
         };
       }
 
@@ -68,7 +68,7 @@ class AuthService {
         }
       };
     } catch (error) {
-      throw new Error('Error during login: ' + error.message);
+      throw new Error('Lỗi khi đăng nhập: ' + error.message);
     }
   }
 
@@ -77,7 +77,7 @@ class AuthService {
       const user = await userService.findById(userId, { select: '-password' });
       return user;
     } catch (error) {
-      throw new Error('Error getting profile: ' + error.message);
+      throw new Error('Lỗi khi lấy thông tin hồ sơ: ' + error.message);
     }
   }
 
@@ -85,7 +85,7 @@ class AuthService {
     try {
       const updatedUser = await userService.updateProfile(userId, updateData);
       if (!updatedUser) {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'User not found');
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Không tìm thấy người dùng');
       }
       
       return updatedUser;
@@ -93,7 +93,7 @@ class AuthService {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new Error('Error updating profile: ' + error.message);
+      throw new Error('Lỗi khi cập nhật hồ sơ: ' + error.message);
     }
   }
 
@@ -102,36 +102,36 @@ class AuthService {
       // Find user with password field
       const user = await userService.findById(userId, { select: '+password' });
       if (!user) {
-        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'User not found');
+        throw new AppError(ERROR_CODES.RESOURCE_NOT_FOUND, 'Không tìm thấy người dùng');
       }
 
       // Check if user is active
       if (user.status !== 'active') {
-        throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Account is inactive');
+        throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Tài khoản không hoạt động');
       }
 
       // Verify current password
       if (!user.password) {
-        throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'User has no password set');
+        throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Người dùng chưa thiết lập mật khẩu');
       }
 
       const isValidPassword = await bcrypt.compare(currentPassword, user.password);
       
       if (!isValidPassword) {
-        throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Current password is incorrect');
+        throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, 'Mật khẩu hiện tại không chính xác');
       }
 
       // Validate new password
       if (!newPassword || typeof newPassword !== 'string') {
-        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'New password is required and must be a string');
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'Mật khẩu mới là bắt buộc và phải là chuỗi ký tự');
       }
 
       if (newPassword.length < 6) {
-        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'New password must be at least 6 characters long');
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'Mật khẩu mới phải có ít nhất 6 ký tự');
       }
 
       if (newPassword === currentPassword) {
-        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'New password must be different from current password');
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'Mật khẩu mới phải khác với mật khẩu hiện tại');
       }
 
       // Hash new password
@@ -139,18 +139,18 @@ class AuthService {
       const hashedPassword = await bcrypt.hash(newPassword, salt);
 
       // Update password
-      await userService.update(userId, { password: hashedPassword });
+      await userService.changePassword(userId, currentPassword, newPassword);
 
       return {
         success: true,
-        message: 'Password changed successfully'
+        message: 'Thay đổi mật khẩu thành công'
       };
     } catch (error) {
       console.error('Error in changePassword:', error);
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Error changing password');
+      throw new AppError(ERROR_CODES.BUSINESS_INVALID_OPERATION, 'Lỗi khi thay đổi mật khẩu');
     }
   }
 }

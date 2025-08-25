@@ -47,7 +47,7 @@ const Address = () => {
     setMessage('');
     setError('');
     setPhoneError('');
-    console.log('✅ Address state reset completed');
+    console.log('Address state reset completed');
   };
 
   // Kiểm tra authentication
@@ -76,12 +76,12 @@ const Address = () => {
   // Listen for logout event
   useEffect(() => {
     const handleUserLogout = () => {
-      console.log('🚪 User logout detected, resetting addresses...');
+      console.log(' User logout detected, resetting addresses...');
       resetAllState();
     };
 
     const handleUserLogin = () => {
-      console.log('🚪 User login detected, refreshing addresses...');
+      console.log(' User login detected, refreshing addresses...');
       resetAllState();
       setTimeout(() => {
         if (checkAuth()) {
@@ -108,7 +108,7 @@ const Address = () => {
     }
     
     // Force refresh addresses khi token thay đổi
-    console.log('🔄 Token changed, refreshing addresses...');
+    console.log('Token changed, refreshing addresses...');
     resetAllState();
     setTimeout(() => {
       if (checkAuth()) {
@@ -125,19 +125,19 @@ const Address = () => {
     setLoading(true);
     setError('');
     try {
-      console.log('🔄 Fetching addresses for current user...');
+      console.log(' Fetching addresses for current user...');
       
       const res = await getAllAddress();
       const addresses = res.data.data || [];
       
-      console.log(`📦 Found ${addresses.length} addresses for current user`);
+      console.log(` Found ${addresses.length} addresses for current user`);
       
       // Đảm bảo chỉ set địa chỉ của user hiện tại
       setAddresses(addresses);
       
       // Log để debug
       if (addresses.length > 0) {
-        console.log('📍 Addresses:', addresses.map(addr => ({
+        console.log('Addresses:', addresses.map(addr => ({
           id: addr._id,
           receiver: addr.receiver,
           address: `${addr.address_detail}, ${addr.ward}, ${addr.district}, ${addr.city}`
@@ -145,7 +145,7 @@ const Address = () => {
       }
       
     } catch (err) {
-      console.error('❌ Lỗi fetch addresses:', err);
+      console.error(' Lỗi fetch addresses:', err);
       setAddresses([]);
       setMessage('Không thể tải địa chỉ');
       setMessageType('error');
