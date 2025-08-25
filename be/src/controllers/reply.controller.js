@@ -47,7 +47,7 @@ export const getRepliesByCommentId = async (req, res, next) => {
     const options = {
       page: parseInt(page) || 1,
       limit: parseInt(limit) || 10,
-      sort: sort || { create_at: -1 }
+      sort: sort || { created_at: -1 }
     };
 
     const result = await replyService.getRepliesByCommentId(commentId, options);
@@ -164,7 +164,7 @@ export const testReplies = async (req, res, next) => {
         comment_content: reply.comment_id?.comment,
         reply_content: reply.reply,
         user: reply.user_id?.full_name,
-        created: reply.create_at
+        created: reply.created_at
       });
     });
     
@@ -205,7 +205,7 @@ export const testRepliesCollection = async (req, res, next) => {
         comment_id: reply.comment_id,
         reply: reply.reply,
         user_id: reply.user_id,
-        created: reply.create_at
+        created: reply.created_at
       });
     });
     

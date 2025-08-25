@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema({
     }
   }
 }, {
-  timestamps: { createdAt: 'create_at' }
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 const Order = mongoose.model('Order', orderSchema);

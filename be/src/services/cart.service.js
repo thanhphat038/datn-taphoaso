@@ -25,12 +25,12 @@ class CartService extends DBService {
     if (!productId) throw new AppError(ERROR_CODES.BAD_REQUEST, 'Missing product_id');
     const product = await productService.findById(productId);
     if (!product) throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Product not found');
-    if (product.stock < qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
+    if (product.in_stock < qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
 
     const existingItem = await this.model.findOne({ user_id: userId, product_id: productId });
 
     if (existingItem) {
-      if (product.stock < existingItem.qty + qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
+      if (product.in_stock < existingItem.qty + qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
       existingItem.qty += qty;
       return await existingItem.save();
     }
@@ -49,7 +49,7 @@ class CartService extends DBService {
 
     const product = await productService.findById(productId);
     if (!product) throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Product not found');
-    if (product.stock < qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
+    if (product.in_stock < qty) throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
 
     const item = await this.model.findOne({ user_id: userId, product_id: productId });
     if (!item) throw new AppError(ERROR_CODES.DB_NOT_FOUND, 'Item not found in cart');

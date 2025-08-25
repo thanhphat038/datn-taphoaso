@@ -42,8 +42,8 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date }
 }, {
   timestamps: {
-    createdAt: 'create_at',
-    updatedAt: 'update_at'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   }
 });
 

@@ -29,7 +29,7 @@ class BlogService extends DBService {
   }
 
   async getAllBlogs(options = {}) {
-    const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
+    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
     const skip = (page - 1) * limit;
     return await this.model
       .find({})
@@ -47,7 +47,7 @@ class BlogService extends DBService {
   }
 
   async getBlogsByCategory(categoryId, options = {}) {
-    const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
+    const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
     const skip = (page - 1) * limit;
     return await this.model
       .find({ blog_category_id: categoryId })

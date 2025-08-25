@@ -34,10 +34,27 @@ const voucherSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'inactive'],
     default: 'active'
-  }
+  },
+  qty: { // Số lượng voucher còn lại
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  max_uses_per_user: { // Số lần tối đa một user được dùng
+    type: Number,
+    default: 1,
+    min: 1
+  },
+  usage_history: [{
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    order_amount: { type: Number },
+    discount_amount: { type: Number },
+    used_at: { type: Date, default: Date.now }
+  }]
 }, {
   timestamps: {
-    createdAt: 'create_at'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   }
 });
 

@@ -213,7 +213,7 @@ export const getAllOrdersWithVnpayRef = async (req, res, next) => {
   try {
     const orders = await orderService.model.find({ 
       vnpay_txn_ref: { $exists: true, $ne: null } 
-    }).select('_id vnpay_txn_ref order_status total_amount payment_method create_at');
+    }).select('_id vnpay_txn_ref order_status total_amount payment_method created_at');
     
     res.json({
       success: true,

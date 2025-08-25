@@ -16,7 +16,8 @@ const categorySchema = new mongoose.Schema({
   }
 }, {
   timestamps: {
-    createdAt: 'create_at'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   }
 });
 

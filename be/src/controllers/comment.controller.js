@@ -143,7 +143,7 @@ export const getAllCommentOfProductId = async (req, res, next) => {
     // Lấy comments
     const comments = await commentService.model.find({ product_id: productId })
       .populate('user_id', 'full_name avatar username')
-      .sort({ create_at: -1 });
+      .sort({ created_at: -1 });
     
     console.log('Comments found:', comments.length);
     
@@ -159,7 +159,7 @@ export const getAllCommentOfProductId = async (req, res, next) => {
           comment_id: comment._id,
           is_hidden: false 
         }).populate('user_id', 'full_name username avatar')
-        .sort({ create_at: 1 });
+        .sort({ created_at: 1 });
         
         console.log(`Found ${replies.length} replies for comment ${comment._id}`);
         

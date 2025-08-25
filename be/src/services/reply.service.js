@@ -24,7 +24,7 @@ class ReplyService {
 
   async getRepliesByCommentId(commentId, options = {}) {
     try {
-      const { page = 1, limit = 10, sort = { create_at: -1 } } = options;
+      const { page = 1, limit = 10, sort = { created_at: -1 } } = options;
       const skip = (page - 1) * limit;
 
       const replies = await Reply.find({ comment_id: commentId, is_hidden: false })

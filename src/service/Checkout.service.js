@@ -12,9 +12,21 @@ const API_ENDPOINTS = {
   PAYMENT_RETURN: "/payment/return"
 };
 
-// Auth helper
+// Auth helper - sử dụng đúng token storage
 const getAuthHeaders = () => {
-  const token = Cookies.get('auth_token');
+  // Thử lấy token từ sessionStorage trước (hệ thống mới)
+  let token = sessionStorage.getItem('access_token');
+  
+  // Fallback: thử từ localStorage
+  // if (!token) {
+  //   token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
+  // }
+  
+  // // Fallback: thử từ cookies (hệ thống cũ)
+  // if (!token) {
+  //   token = Cookies.get('auth_token');
+  // }
+  
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -28,7 +40,7 @@ const apiClient = axios.create({
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
-  const token = Cookies.get('auth_token');
+  const token = getAuthHeaders().Authorization?.split(' ')[1];
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -193,9 +205,10 @@ export const getOrderInfo = async (orderId) => {
 // Tạo lại payment URL cho VNPAY
 export const retryVNPayPayment = async (orderData) => {
   try {
-    const token = Cookies.get('auth_token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
+    // Sử dụng getAuthHeaders() thay vì tự lấy token
+    const authHeaders = getAuthHeaders();
     
-    if (!token) {
+    if (!authHeaders.Authorization) {
       throw new Error('No authentication token found');
     }
 
@@ -204,23 +217,17 @@ export const retryVNPayPayment = async (orderData) => {
     const response = await axios.post(`${API_BASE_URL}/payment/create`, {
       method: 'vnpay',
       amount: orderData.total_amount,
-      orderId: orderData.orderId || orderData.id,
-      orderData: {
-        total_amount: orderData.total_amount,
-        payment_method: orderData.payment_method,
-        address: orderData.address,
-        receiver: orderData.receiver,
-        sdt: orderData.sdt,
-        note: orderData.note
-      }
+      orderId: orderData.id,
+      bankCode: '',
+      language: 'vn'
     }, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...authHeaders,
         'Content-Type': 'application/json'
       }
     });
-    console.log('VNPAY payment response:', response.data);
 
+    console.log('VNPAY retry response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error retrying VNPAY payment:', error);

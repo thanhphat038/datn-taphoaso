@@ -5,7 +5,11 @@ import { addToCart } from '../service/Cart.service';
 import { addToFavorite, removeFromFavorite, getFavorites } from '../service/Favorite.service';
 import { getProductComments, postComment, postReply } from '../service/Comment.service';
 import { getReviewsByProductId, getProductsByCategory } from '../service/Product.service';
+import { getVariantsByProduct } from '../service/Variant.service.js';
 import Cookies from 'js-cookie';
+import { useAuth } from '../context/AuthContext.jsx';
+import { addRecentView } from '../service/RecentViews.service.js';
+import RecentlyViewed from '../components/RecentlyViewed.jsx';
 import { useAlertContext } from '../components/AlertProvider';
 import { useToast } from '../components/ToastContainer';
 
@@ -38,6 +42,7 @@ const ProductDetail = () => {
     const pendingAddQtyRef = useRef(0);
     const debounceAddToCart = useRef(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const { isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('comments');
     const [loadingComments, setLoadingComments] = useState(false);
     const [relatedProductsByCategory, setRelatedProductsByCategory] = useState([]);
@@ -49,6 +54,8 @@ const ProductDetail = () => {
 
     // State cho package selection
     const [selectedPackage, setSelectedPackage] = useState(null);
+    const [variants, setVariants] = useState([]);
+    const [selectedVariant, setSelectedVariant] = useState(null);
 
     const COMMENTS_TO_SHOW = 3;
 
@@ -150,6 +157,39 @@ const ProductDetail = () => {
             fetchRelatedProductsByCategory();
         }
     }, [productData._id, productData.category_id]);
+
+    // Load variants for this product
+    useEffect(() => {
+        const fetchVariants = async () => {
+            if (!productData._id) return;
+            try {
+                const res = await getVariantsByProduct(productData._id, { status: 'active' });
+                const list = Array.isArray(res.data) ? res.data : [];
+                setVariants(list);
+                const def = list.find(v => v.is_default) || list[0] || null;
+                setSelectedVariant(def);
+            } catch (e) {
+                console.error('Error fetching variants:', e);
+                setVariants([]);
+                setSelectedVariant(null);
+            }
+        };
+        fetchVariants();
+    }, [productData._id]);
+
+    // Record recent view when user is authenticated and product is loaded
+    useEffect(() => {
+        const recordRecentView = async () => {
+            if (!isAuthenticated || !productData._id) return;
+            try {
+                await addRecentView(productData._id);
+            } catch (e) {
+                console.error('Error recording recent view:', e);
+            }
+        };
+        recordRecentView();
+    }, [isAuthenticated, productData._id]);
+
 
     const fetchReviews = async () => {
         if (!productData._id) return;
@@ -492,12 +532,20 @@ const ProductDetail = () => {
 
                     {/* Product Info */}
                     <ProductInfo
-                        productData={productData}
+                        productData={{
+                            ...productData,
+                            price: selectedVariant?.price ?? productData.price,
+                            original_price: selectedVariant?.original_price ?? productData.original_price,
+                            in_stock: selectedVariant?.in_stock ?? productData.in_stock
+                        }}
                         isFavorite={isFavorite}
                         loadingFavorite={loadingFavorite}
                         onToggleFavorite={handleToggleFavorite}
                         selectedPackage={selectedPackage}
                         onPackageSelect={handlePackageSelect}
+                        variants={variants}
+                        selectedVariant={selectedVariant}
+                        onSelectVariant={setSelectedVariant}
                         onAddToCart={handleAddToCart}
                         onBuyNow={handleBuyNow}
                         loadingAddToCart={loadingAddToCart}
@@ -507,6 +555,29 @@ const ProductDetail = () => {
 
                 {/* Product Description Section */}
                 <ProductDescription productData={productData} />
+
+                {/* Variant Selector */}
+                {variants.length > 0 && (
+                    <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Chọn biến thể</h3>
+                        <div className="flex flex-wrap gap-3">
+                            {variants.map(v => (
+                                <button
+                                    key={v._id}
+                                    onClick={() => setSelectedVariant(v)}
+                                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                                        selectedVariant?._id === v._id
+                                            ? 'bg-blue-50 border-blue-500 text-blue-700'
+                                            : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                    title={`ĐVT: ${v.unit}${v.quantity_per_unit ? ` • SL/ĐVT: ${v.quantity_per_unit}` : ''}`}
+                                >
+                                    {v.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Tab buttons */}
                 <TabButtons 
@@ -552,6 +623,9 @@ const ProductDetail = () => {
                     productData={productData}
                     relatedProducts={relatedProducts}
                 />
+
+                {/* Recently Viewed Section */}
+                <RecentlyViewed limit={10} excludeId={productData._id} className="mt-8" />
 
                 {/* Custom Notification */}
                 <Notification 

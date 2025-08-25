@@ -7,6 +7,8 @@ import Cookies from 'js-cookie';
 import 'swiper/css';
 
 import { getApiUrl } from '../config/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import RecentlyViewed from '../components/RecentlyViewed.jsx';
 
 const API_BASE_URL = getApiUrl('');
 
@@ -15,6 +17,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,6 +38,7 @@ const HomePage = () => {
     };
     fetchProducts();
   }, []);
+
 
   // Hàm lấy danh sách các category_id đang có trong dữ liệu sản phẩm
   const getAllCategoryIds = () => {
@@ -213,6 +217,9 @@ const HomePage = () => {
             </SwiperSlide>
           </Swiper>
         </div>
+
+        {/* Recently Viewed Section */}
+        <RecentlyViewed limit={10} />
 
         {/* Bottom Section */}
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>

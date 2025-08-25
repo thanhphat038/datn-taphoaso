@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ChatService from '../service/Chat.service.js';
+import { MessageCircle, X, Trash2, Send, Bot } from 'lucide-react';
 
 const ChatBot = () => {
   const { isAuthenticated, user } = useAuth();
@@ -8,12 +9,71 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [chatId, setChatId] = useState(null);
+  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Khởi tạo tin nhắn đầu tiên dựa trên trạng thái đăng nhập
-  useEffect(() => {
-    if (isAuthenticated && user) {
+  // Khởi tạo chat khi mở chatbot
+  const initializeChat = async () => {
+    if (!isAuthenticated) {
+      // Nếu chưa đăng nhập, hiển thị tin nhắn mặc định
+      setMessages([
+        {
+          id: 1,
+          type: 'bot',
+          content: 'Xin chào! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:',
+          options: [
+            '🔍 Tìm kiếm sản phẩm',
+            '🛒 Hướng dẫn đặt hàng',
+            '👤 Đăng nhập/Đăng ký',
+            '📞 Liên hệ hỗ trợ',
+            '❓ Câu hỏi thường gặp'
+          ]
+        }
+      ]);
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await ChatService.initChat();
+      
+      if (response.status === 200 && response.data) {
+        setChatId(response.data.chatId);
+        
+        // Chuyển đổi messages từ API format sang component format
+        const convertedMessages = response.data.messages.map((msg, index) => ({
+          id: index + 1,
+          type: msg.role === 'assistant' ? 'bot' : 'user',
+          content: msg.content,
+          timestamp: msg.timestamp
+        }));
+
+        // Nếu chưa có tin nhắn nào, thêm tin nhắn chào mừng
+        if (convertedMessages.length === 0) {
+          convertedMessages.push({
+            id: 1,
+            type: 'bot',
+            content: `Xin chào ${user.username}! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:`,
+            options: [
+              '🔍 Tìm kiếm sản phẩm',
+              '🛒 Đặt hàng ngay',
+              '📦 Theo dõi đơn hàng',
+              '💰 Xem khuyến mãi',
+              '👤 Thông tin tài khoản',
+              '📞 Liên hệ hỗ trợ'
+            ]
+          });
+        }
+
+        setMessages(convertedMessages);
+      }
+    } catch (error) {
+      console.error('Error initializing chat:', error);
+      setError('Không thể kết nối với chatbot. Vui lòng thử lại sau.');
+      
+      // Fallback to default messages
       setMessages([
         {
           id: 1,
@@ -29,23 +89,15 @@ const ChatBot = () => {
           ]
         }
       ]);
-    } else {
-      setMessages([
-        {
-          id: 1,
-          type: 'bot',
-          content: 'Xin chào! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:',
-          options: [
-            '🔍 Tìm kiếm sản phẩm',
-            '🛒 Hướng dẫn đặt hàng',
-            '👤 Đăng nhập/Đăng ký',
-            '📞 Liên hệ hỗ trợ',
-            '❓ Câu hỏi thường gặp'
-          ]
-        }
-      ]);
     }
-  }, [isAuthenticated, user]);
+  };
+
+  // Khởi tạo chat khi mở chatbot
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      initializeChat();
+    }
+  }, [isOpen, isAuthenticated]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,12 +120,44 @@ const ChatBot = () => {
     setInputValue('');
     setIsTyping(true);
 
-    // Giả lập bot response
-    setTimeout(() => {
+    // Nếu chưa đăng nhập, sử dụng fallback response
+    if (!isAuthenticated) {
+      setTimeout(() => {
+        const botResponse = generateBotResponse(message);
+        setMessages(prev => [...prev, botResponse]);
+        setIsTyping(false);
+      }, 1000);
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await ChatService.sendMessage(message);
+      
+      if (response.status === 200 && response.data) {
+        // Thêm phản hồi từ AI
+        const aiMessage = {
+          id: Date.now() + 1,
+          type: 'bot',
+          content: response.data.aiResponse,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        // Nếu API fail, sử dụng fallback
+        const botResponse = generateBotResponse(message);
+        setMessages(prev => [...prev, botResponse]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Không thể gửi tin nhắn. Vui lòng thử lại sau.');
+      
+      // Fallback to local response
       const botResponse = generateBotResponse(message);
       setMessages(prev => [...prev, botResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const generateBotResponse = (message) => {
@@ -220,23 +304,51 @@ const ChatBot = () => {
     }
   };
 
+  // Clear error when opening chat
+  const handleToggleChat = () => {
+    if (!isOpen) {
+      setError(null);
+    }
+    setIsOpen(!isOpen);
+  };
+
+  // Clear chat history (for testing)
+  const clearChat = () => {
+    setMessages([
+      {
+        id: 1,
+        type: 'bot',
+        content: isAuthenticated 
+          ? `Xin chào ${user.username}! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:`
+          : 'Xin chào! Tôi là trợ lý ảo của Tạp Hóa Số. Tôi có thể giúp bạn:',
+        options: isAuthenticated ? [
+          '🔍 Tìm kiếm sản phẩm',
+          '🛒 Đặt hàng ngay',
+          '📦 Theo dõi đơn hàng',
+          '💰 Xem khuyến mãi',
+          '👤 Thông tin tài khoản',
+          '📞 Liên hệ hỗ trợ'
+        ] : [
+          '🔍 Tìm kiếm sản phẩm',
+          '🛒 Hướng dẫn đặt hàng',
+          '👤 Đăng nhập/Đăng ký',
+          '📞 Liên hệ hỗ trợ',
+          '❓ Câu hỏi thường gặp'
+        ]
+      }
+    ]);
+    setChatId(null);
+  };
+
   return (
     <>
       {/* Chat Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggleChat}
         className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
         aria-label="Chat với trợ lý ảo"
       >
-        {isOpen ? (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-        )}
+        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </button>
 
       {/* Chat Window */}
@@ -247,28 +359,44 @@ const ChatBot = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+                  <Bot className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Tạp Hóa Số Bot</h3>
-                  <p className="text-sm opacity-90">Trực tuyến</p>
+                  <p className="text-sm opacity-90">
+                    {isAuthenticated ? 'Đã kết nối API' : 'Chế độ demo'}
+                  </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={clearChat}
+                  className="text-white/80 hover:text-white transition-colors p-1"
+                  title="Xóa lịch sử chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Error message */}
+            {error && (
+              <div className="flex justify-start">
+                <div className="bg-red-100 text-red-800 rounded-2xl px-4 py-2 max-w-[80%]">
+                  <p className="text-sm">⚠️ {error}</p>
+                </div>
+              </div>
+            )}
+
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] ${message.type === 'user' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-800'} rounded-2xl px-4 py-2`}>
@@ -285,6 +413,14 @@ const ChatBot = () => {
                         </button>
                       ))}
                     </div>
+                  )}
+                  {message.timestamp && (
+                    <p className="text-xs opacity-60 mt-1">
+                      {new Date(message.timestamp).toLocaleTimeString('vi-VN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </p>
                   )}
                 </div>
               </div>
@@ -323,9 +459,7 @@ const ChatBot = () => {
                 disabled={!inputValue.trim()}
                 className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-full p-2 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                <Send className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -335,4 +469,4 @@ const ChatBot = () => {
   );
 };
 
-export default ChatBot; 
+export default ChatBot;

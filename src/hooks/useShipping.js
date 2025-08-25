@@ -16,7 +16,9 @@ export const useShipping = () => {
    * @param {string} service - Dịch vụ vận chuyển (mặc định: 'default')
    * @returns {Promise<boolean>} True nếu thành công, false nếu thất bại
    */
-  const calculateShippingFeeForAddress = async (address, service = 'default') => {
+  // const calculateShippingFeeForAddress = async (address, service = 'default') => {
+  const calculateShippingFeeForAddress = async (address, service = 'vietmap') => {
+
     if (!address) {
       setShippingError('Không có địa chỉ để tính phí vận chuyển');
       return false;

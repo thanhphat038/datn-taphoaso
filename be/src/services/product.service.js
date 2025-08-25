@@ -76,15 +76,15 @@ class ProductService extends DBService {
   async updateStock(productId, qty, operation = 'decrease') {
     const product = await this.findById(productId);
     
-    if (operation === 'decrease' && product.stock < qty) {
+    if (operation === 'decrease' && product.in_stock < qty) {
       throw new AppError(ERROR_CODES.BUSINESS_INSUFFICIENT_STOCK);
     }
 
     const newStock = operation === 'decrease' 
-      ? product.stock - qty 
-      : product.stock + qty;
+      ? product.in_stock - qty 
+      : product.in_stock + qty;
 
-    return await this.update(productId, { stock: newStock });
+    return await this.update(productId, { in_stock: newStock });
   }
 
   async getTopRated(limit = 10) {
