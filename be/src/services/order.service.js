@@ -20,25 +20,35 @@ class OrderService extends DBService {
   }
 
   async getAllOrders(filter = {}, options = {}) {
-    const { sort = { created_at: -1 } } = options;
+    try {
+      const { sort = { created_at: -1 } } = options;
 
-    const orders = await this.model
-      .find(filter)
-      .sort(sort)
-      .populate('user_id', 'name email') // nếu cần thông tin người dùng
-      .lean();
+      const orders = await this.model
+        .find(filter)
+        .sort(sort)
+        .populate('user_id', 'username email full_name')
+        .lean();
 
-    const ordersWithItems = await Promise.all(
-      orders.map(async (order) => {
-        const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
-        return { ...order, items };
-      })
-    );
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          try {
+            const items = await OrderDetail.find({ order_id: order._id }).populate('product_id');
+            return { ...order, items };
+          } catch (itemError) {
+            console.error('Error fetching items for order:', order._id, itemError);
+            return { ...order, items: [] };
+          }
+        })
+      );
 
-    return {
-      ordersWithItems,
-      total: ordersWithItems.length
-    };
+      return {
+        ordersWithItems,
+        total: ordersWithItems.length
+      };
+    } catch (error) {
+      console.error('Error in getAllOrders:', error);
+      throw error;
+    }
   }
 
   async getOrderById(orderId) {

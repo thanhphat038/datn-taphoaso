@@ -132,9 +132,14 @@ export const getOrderDetails = async (req, res, next) => {
 
 export const getOrders = async (req, res, next) => {
   try {
+    console.log('🔍 [OrderController] getOrders called');
     const orders = await orderService.getAllOrders();
+    console.log('🔍 [OrderController] Orders fetched successfully:', orders);
     res.json({ success: true, data: orders });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error('❌ [OrderController] Error in getOrders:', err);
+    next(err); 
+  }
 };
 
 export const getUserOrders = async (req, res, next) => {
