@@ -99,13 +99,13 @@ const ChangePassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('🚀 Form submitted');
+    console.log('Form submitted');
     
     setLoading(true);
     setError('');
     setSuccess('');
     
-    console.log('📝 Form data:', {
+    console.log('Form data:', {
       currentPassword: passwords.currentPassword ? '***' : 'empty',
       newPassword: passwords.newPassword ? '***' : 'empty',
       confirmPassword: passwords.confirmPassword ? '***' : 'empty',
@@ -114,10 +114,10 @@ const ChangePassword = () => {
     
     try {
       // Enhanced validation
-      console.log('🔍 Starting validation...');
+      console.log('Starting validation...');
       
       if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
-        console.log('❌ Validation failed: Empty fields');
+        console.log(' Validation failed: Empty fields');
         setError('Vui lòng nhập đầy đủ các trường!');
         setLoading(false);
         return;
@@ -125,7 +125,7 @@ const ChangePassword = () => {
 
       // Kiểm tra độ dài mật khẩu hiện tại
       if (passwords.currentPassword.length < 6) {
-        console.log('❌ Validation failed: Current password too short');
+        console.log('Validation failed: Current password too short');
         setError('Mật khẩu hiện tại phải có ít nhất 6 ký tự!');
         setLoading(false);
         return;
@@ -133,49 +133,49 @@ const ChangePassword = () => {
 
       // Kiểm tra độ dài mật khẩu mới (thống nhất với password strength checker)
       if (passwords.newPassword.length < 8) {
-        console.log('❌ Validation failed: New password too short');
+        console.log(' Validation failed: New password too short');
         setError('Mật khẩu mới phải có ít nhất 8 ký tự!');
         setLoading(false);
         return;
       }
 
       if (passwordStrength.score < 3) {
-        console.log('❌ Validation failed: Password strength too weak');
+        console.log(' Validation failed: Password strength too weak');
         setError('Mật khẩu mới không đủ mạnh. Vui lòng cải thiện độ mạnh mật khẩu!');
         setLoading(false);
         return;
       }
 
       if (passwords.newPassword !== passwords.confirmPassword) {
-        console.log('❌ Validation failed: Passwords do not match');
+        console.log('Validation failed: Passwords do not match');
         setError('Mật khẩu xác nhận không khớp!');
         setLoading(false);
         return;
       }
 
       if (passwords.currentPassword === passwords.newPassword) {
-        console.log('❌ Validation failed: New password same as current');
+        console.log('Validation failed: New password same as current');
         setError('Mật khẩu mới phải khác mật khẩu hiện tại!');
         setLoading(false);
         return;
       }
       
-      console.log('✅ All validations passed, calling API...');
+      console.log('All validations passed, calling API...');
       
-      console.log('📡 Calling changePassword API...');
+      console.log('Calling changePassword API...');
       const result = await changePassword(passwords.currentPassword, passwords.newPassword);
-      console.log('✅ API response:', result);
+      console.log(' API response:', result);
       
-      console.log('✅ Setting success state...');
+      console.log(' Setting success state...');
       setSuccess('Đổi mật khẩu thành công!');
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setShowPasswords({ currentPassword: false, newPassword: false, confirmPassword: false });
       setPasswordStrength({ score: 0, feedback: [] });
-      console.log('✅ Success state set');
+      console.log(' Success state set');
       
     } catch (error) {
-      console.error('❌ Change password error:', error);
-      console.error('❌ Error details:', {
+      console.error('Change password error:', error);
+      console.error(' details:', {
         message: error?.message,
         response: error?.response?.data,
         status: error?.response?.status
@@ -183,10 +183,10 @@ const ChangePassword = () => {
       
       // Cải thiện xử lý lỗi
       const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra khi đổi mật khẩu';
-      console.log('❌ Setting error message:', errorMessage);
+      console.log(' Setting error message:', errorMessage);
       setError(errorMessage);
     } finally {
-      console.log('✅ Setting loading to false');
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
