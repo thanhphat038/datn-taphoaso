@@ -313,6 +313,13 @@ const AdminVariant = () => {
     setCurrentPage(1);
   };
 
+  // Calculate statistics
+  const allVariants = variants.length;
+  const activeVariants = variants.filter(variant => variant.status === 'active').length;
+  const inactiveVariants = variants.filter(variant => variant.status === 'inactive').length;
+  const lowStockVariants = variants.filter(variant => variant.in_stock > 0 && variant.in_stock < 10).length;
+  const outOfStockVariants = variants.filter(variant => variant.in_stock === 0).length;
+
   // Table columns
   const columns = [
     {
@@ -479,234 +486,302 @@ const AdminVariant = () => {
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Biến thể</h1>
-          <p className="text-gray-600">Quản lý các biến thể sản phẩm</p>
-        </div>
-        <NavLink
-          to="/admin/addvariant"
-          className="inline-flex items-center px-4 py-2 bg-[#06AEF4] text-white rounded-lg hover:bg-[#0590d8] transition-colors duration-200"
-        >
-          <FaPlus className="w-4 h-4 mr-2" />
-          Thêm biến thể
-        </NavLink>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-        <AdminCard>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-              <FaCubes className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Tổng biến thể</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.total || 0}</p>
-            </div>
-          </div>
-        </AdminCard>
-
-        <AdminCard>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <FaEye className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đang hoạt động</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.active || 0}</p>
-            </div>
-          </div>
-        </AdminCard>
-
-        <AdminCard>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-red-100 text-red-600">
-              <FaEyeSlash className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Vô hiệu hóa</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.inactive || 0}</p>
-            </div>
-          </div>
-        </AdminCard>
-
-        <AdminCard>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-              <FaWarehouse className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Sắp hết hàng</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.lowStock || 0}</p>
-            </div>
-          </div>
-        </AdminCard>
-
-        <AdminCard>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-red-100 text-red-600">
-              <FaBox className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Hết hàng</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.outOfStock || 0}</p>
-            </div>
-          </div>
-        </AdminCard>
-      </div>
-
-      {/* Search and Filter */}
-      <AdminSearchFilter
-        searchQuery={searchQuery}
-        onSearchChange={(value) => handleFilterChange('search', value)}
-        filterOptions={filterOptions}
-        onFilterChange={handleFilterChange}
-        placeholder="Tìm kiếm biến thể..."
-      />
-
-      {/* Message */}
+      {/* Toast Message */}
       {message && (
-        <div className={`mb-4 p-4 rounded-lg ${
-          messageType === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
-          {message}
+        <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg font-medium flex items-center gap-2 ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+          <span>{message}</span>
+          <button className="ml-2 text-lg" onClick={() => setMessage("")}>×</button>
         </div>
       )}
 
-      {/* Error */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-          {error}
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Quản lý Biến thể
+            </h1>
+            <p className="text-gray-600 mt-1">Quản lý các biến thể sản phẩm</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-white px-4 py-2 rounded-lg border border-gray-200">
+              <div className="text-sm text-gray-600">Tổng biến thể</div>
+              <div className="text-2xl font-bold text-[#06AEF4]">{allVariants}</div>
+            </div>
+            <NavLink
+              to="/admin/addvariant"
+              className="inline-flex items-center px-4 py-2 bg-[#06AEF4] text-white rounded-lg hover:bg-[#0590d8] transition-colors duration-200"
+            >
+              <FaPlus className="w-4 h-4 mr-2" />
+              Thêm biến thể
+            </NavLink>
+          </div>
         </div>
-      )}
 
-      {/* Table */}
-      <AdminCard>
-        <AdminTable
-          data={variants}
-          columns={columns}
-          loading={loading}
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-          onBulkAction={handleBulkAction}
-          bulkActions={[
-            { label: 'Kích hoạt', action: 'kích hoạt' },
-            { label: 'Vô hiệu hóa', action: 'vô hiệu hóa' },
-            { label: 'Xóa', action: 'xóa' }
-          ]}
-        />
-      </AdminCard>
-
-      {/* Pagination */}
-      <div className="mt-6">
-        <AdminPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={handlePageSizeChange}
-        />
-      </div>
-
-      {/* View Modal */}
-      <AdminModal
-        isOpen={showViewModal}
-        onClose={() => {
-          setShowViewModal(false);
-          setCurrentVariant(null);
-        }}
-        title="Chi tiết biến thể"
-        size="lg"
-      >
-        {currentVariant && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cơ bản</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Tên biến thể:</label>
-                    <p className="text-gray-900">{currentVariant.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">SKU:</label>
-                    <p className="font-mono text-gray-900">{currentVariant.sku || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Sản phẩm:</label>
-                    <p className="text-gray-900">{currentVariant.product_id?.name || 'Không xác định'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Mô tả:</label>
-                    <p className="text-gray-900">{currentVariant.description || 'Không có mô tả'}</p>
-                  </div>
-                </div>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                <FaCubes className="w-6 h-6" />
               </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin giá và tồn kho</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Giá hiện tại:</label>
-                    <p className="text-lg font-semibold text-gray-900">{formatCurrency(currentVariant.price)}</p>
-                  </div>
-                  {currentVariant.original_price && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Giá gốc:</label>
-                      <p className="text-gray-900 line-through">{formatCurrency(currentVariant.original_price)}</p>
-                    </div>
-                  )}
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Tồn kho:</label>
-                    <p className="text-gray-900">{currentVariant.stock} sản phẩm</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Trạng thái:</label>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      getVariantStatusInfo(currentVariant.status).color
-                    }`}>
-                      {getVariantStatusInfo(currentVariant.status).label}
-                    </span>
-                  </div>
-                </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tổng biến thể</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.total || 0}</p>
               </div>
             </div>
+          </AdminCard>
 
-            {currentVariant.images && currentVariant.images.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Hình ảnh</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {currentVariant.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`${currentVariant.name} - ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
-                  ))}
-                </div>
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600">
+                <FaEye className="w-6 h-6" />
               </div>
-            )}
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Đang hoạt động</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.active || 0}</p>
+              </div>
+            </div>
+          </AdminCard>
 
-            {currentVariant.attributes && Object.keys(currentVariant.attributes).length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thuộc tính</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {Object.entries(currentVariant.attributes).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-sm font-medium text-gray-600">{key}:</label>
-                      <p className="text-gray-900">{value}</p>
-                    </div>
-                  ))}
-                </div>
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-red-100 text-red-600">
+                <FaEyeSlash className="w-6 h-6" />
               </div>
-            )}
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Vô hiệu hóa</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.inactive || 0}</p>
+              </div>
+            </div>
+          </AdminCard>
+
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <FaWarehouse className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Sắp hết hàng</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.lowStock || 0}</p>
+              </div>
+            </div>
+          </AdminCard>
+
+          <AdminCard>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-red-100 text-red-600">
+                <FaBox className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Hết hàng</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.outOfStock || 0}</p>
+              </div>
+            </div>
+          </AdminCard>
+        </div>
+
+        {/* Search and Filter */}
+        <AdminCard>
+          <AdminSearchFilter
+            searchQuery={searchQuery}
+            onSearchChange={(value) => handleFilterChange('search', value)}
+            filterOptions={filterOptions}
+            onFilterChange={handleFilterChange}
+            placeholder="Tìm kiếm biến thể..."
+          />
+        </AdminCard>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              handleFilterChange('status', 'All');
+              handleFilterChange('stock', 'All');
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              statusFilter === 'All' && stockFilter === 'All'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Tất cả ({allVariants})
+          </button>
+          <button
+            onClick={() => handleFilterChange('status', 'active')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              statusFilter === 'active'
+                ? 'bg-green-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Hoạt động ({activeVariants})
+          </button>
+          <button
+            onClick={() => handleFilterChange('status', 'inactive')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              statusFilter === 'inactive'
+                ? 'bg-red-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Vô hiệu hóa ({inactiveVariants})
+          </button>
+          <button
+            onClick={() => handleFilterChange('stock', 'low_stock')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              stockFilter === 'low_stock'
+                ? 'bg-yellow-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Sắp hết hàng ({lowStockVariants})
+          </button>
+          <button
+            onClick={() => handleFilterChange('stock', 'out_of_stock')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              stockFilter === 'out_of_stock'
+                ? 'bg-red-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Hết hàng ({outOfStockVariants})
+          </button>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="p-4 bg-red-100 text-red-700 rounded-lg">
+            {error}
           </div>
         )}
-      </AdminModal>
+
+        {/* Table */}
+        <AdminCard noPadding>
+          <AdminTable
+            data={variants}
+            columns={columns}
+            loading={loading}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onBulkAction={handleBulkAction}
+            bulkActions={[
+              { label: 'Kích hoạt', action: 'kích hoạt' },
+              { label: 'Vô hiệu hóa', action: 'vô hiệu hóa' },
+              { label: 'Xóa', action: 'xóa' }
+            ]}
+          />
+        </AdminCard>
+
+        {/* Pagination */}
+        <div className="mt-6">
+          <AdminPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </div>
+
+        {/* View Modal */}
+        <AdminModal
+          isOpen={showViewModal}
+          onClose={() => {
+            setShowViewModal(false);
+            setCurrentVariant(null);
+          }}
+          title="Chi tiết biến thể"
+          size="lg"
+        >
+          {currentVariant && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cơ bản</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Tên biến thể:</label>
+                      <p className="text-gray-900">{currentVariant.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">SKU:</label>
+                      <p className="font-mono text-gray-900">{currentVariant.sku || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Sản phẩm:</label>
+                      <p className="text-gray-900">{currentVariant.product_id?.name || 'Không xác định'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Mô tả:</label>
+                      <p className="text-gray-900">{currentVariant.description || 'Không có mô tả'}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin giá và tồn kho</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Giá hiện tại:</label>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(currentVariant.price)}</p>
+                    </div>
+                    {currentVariant.original_price && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Giá gốc:</label>
+                        <p className="text-gray-900 line-through">{formatCurrency(currentVariant.original_price)}</p>
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Tồn kho:</label>
+                      <p className="text-gray-900">{currentVariant.in_stock} sản phẩm</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Trạng thái:</label>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        getVariantStatusInfo(currentVariant.status).color
+                      }`}>
+                        {getVariantStatusInfo(currentVariant.status).label}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {currentVariant.images && currentVariant.images.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Hình ảnh</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {currentVariant.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`${currentVariant.name} - ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentVariant.attributes && Object.keys(currentVariant.attributes).length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thuộc tính</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Object.entries(currentVariant.attributes).map(([key, value]) => (
+                      <div key={key} className="bg-gray-50 p-3 rounded-lg">
+                        <label className="text-sm font-medium text-gray-600">{key}:</label>
+                        <p className="text-gray-900">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </AdminModal>
+      </div>
     </AdminLayout>
   );
 };
