@@ -178,16 +178,27 @@ export const getOrderById = async (req, res, next) => {
 
 export const updateOrderStatus = async (req, res, next) => {
   try {
+    console.log('🔍 [OrderController] updateOrderStatus called');
+    console.log('🔍 [OrderController] Request params:', req.params);
+    console.log('🔍 [OrderController] Request body:', req.body);
+    
     const { orderId } = req.params;
     const { status } = req.body;
 
     if (!status) {
+      console.error('❌ [OrderController] Status is missing');
       throw new AppError(ERROR_CODES.BAD_REQUEST, 'Status is required');
     }
 
+    console.log('✅ [OrderController] Calling orderService.updateStatus...');
     const order = await orderService.updateStatus(orderId, status);
+    console.log('✅ [OrderController] Order updated successfully:', order);
+    
     res.json({ success: true, data: order });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error('❌ [OrderController] Error in updateOrderStatus:', err);
+    next(err); 
+  }
 };
 
 export const getOrderStats = async (req, res, next) => {

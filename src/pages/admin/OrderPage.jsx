@@ -62,6 +62,12 @@ const OrderPage = () => {
       dotColor: 'bg-blue-500'
     },
     { 
+      value: 'delivering', 
+      label: getOrderStatusText('delivering'), 
+      color: `bg-purple-100 text-purple-800 border-purple-200`,
+      dotColor: 'bg-purple-500'
+    },
+    { 
       value: 'delivered', 
       label: getOrderStatusText('delivered'), 
       color: `bg-green-100 text-green-800 border-green-200`,
@@ -129,8 +135,16 @@ const OrderPage = () => {
   const handleStatusUpdate = async () => {
     if (!currentEditOrder || !editStatus) return;
     try {
+      console.log('🔄 Starting status update...');
+      console.log('📝 Order ID:', currentEditOrder._id);
+      console.log('📝 New Status:', editStatus);
+      
       setLoading(true);
-      await updateOrderStatusService(currentEditOrder._id, editStatus);
+      
+      console.log('📡 Calling updateOrderStatusService...');
+      const result = await updateOrderStatusService(currentEditOrder._id, editStatus);
+      console.log('✅ API Response:', result);
+      
       setOrders(orders.map(order => 
         order._id === currentEditOrder._id ? { ...order, order_status: editStatus } : order
       ));
@@ -141,6 +155,11 @@ const OrderPage = () => {
       setMessageType('success');
       setTimeout(() => setMessage(''), 2000);
     } catch (error) {
+      console.error('❌ Error in handleStatusUpdate:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error data:', error.response?.data);
+      
       setMessage('Lỗi khi cập nhật trạng thái: ' + (error.response?.data?.message || error.message));
       setMessageType('error');
       setTimeout(() => setMessage(''), 2000);
@@ -175,6 +194,7 @@ const OrderPage = () => {
   const allOrders = orders.length;
   const pendingOrders = orders.filter(order => (order.order_status || order.status) === 'pending').length;
   const processingOrders = orders.filter(order => (order.order_status || order.status) === 'processing').length;
+  const deliveringOrders = orders.filter(order => (order.order_status || order.status) === 'delivering').length;
   const deliveredOrders = orders.filter(order => (order.order_status || order.status) === 'delivered').length;
   const cancelledOrders = orders.filter(order => (order.order_status || order.status) === 'cancelled').length;
 
@@ -536,6 +556,16 @@ const OrderPage = () => {
              }`}
            >
              {getOrderStatusText('processing')} ({processingOrders})
+           </button>
+           <button
+             onClick={() => setSelectedStatus('delivering')}
+             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+               selectedStatus === 'delivering'
+                 ? 'bg-purple-500 text-white shadow-lg'
+                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+             }`}
+           >
+             {getOrderStatusText('delivering')} ({deliveringOrders})
            </button>
            <button
              onClick={() => setSelectedStatus('delivered')}

@@ -14,7 +14,8 @@ export const getOrderStatusText = (status) => {
     'cancelled': 'Đã hủy',
     'failed': 'Thanh toán thất bại',
     'processing': 'Đang xử lý',
-    'delivered': 'Đã giao hàng',
+    'delivering': 'Đang giao hàng',
+    'delivered': 'Đã nhận hàng',
     'returned': 'Đã trả hàng'
   };
   
@@ -33,6 +34,7 @@ export const getOrderStatusColor = (status) => {
     'cancelled': 'text-red-600',
     'failed': 'text-red-600',
     'processing': 'text-blue-600',
+    'delivering': 'text-purple-600',
     'delivered': 'text-green-600',
     'returned': 'text-orange-600'
   };
@@ -52,6 +54,7 @@ export const getOrderStatusBgColor = (status) => {
     'cancelled': 'bg-red-50',
     'failed': 'bg-red-50',
     'processing': 'bg-blue-50',
+    'delivering': 'bg-purple-50',
     'delivered': 'bg-green-50',
     'returned': 'bg-orange-50'
   };
@@ -71,6 +74,7 @@ export const getOrderStatusBorderColor = (status) => {
     'cancelled': 'border-red-200',
     'failed': 'border-red-200',
     'processing': 'border-blue-200',
+    'delivering': 'border-purple-200',
     'delivered': 'border-green-200',
     'returned': 'border-orange-200'
   };
@@ -112,7 +116,7 @@ export const canEditOrderStatus = (status) => {
  * @returns {string|null} Trạng thái tiếp theo hoặc null nếu không có
  */
 export const getNextStatus = (currentStatus) => {
-  const statusSequence = ['pending', 'processing', 'delivered'];
+  const statusSequence = ['pending', 'processing', 'delivering', 'delivered'];
   const currentIndex = statusSequence.indexOf(currentStatus);
   
   if (currentIndex === -1 || currentIndex === statusSequence.length - 1) {
@@ -140,7 +144,7 @@ export const canChangeToStatus = (currentStatus, newStatus) => {
   }
   
   // Kiểm tra thứ tự trạng thái
-  const statusSequence = ['pending', 'processing', 'delivered'];
+  const statusSequence = ['pending', 'processing', 'delivering', 'delivered'];
   const currentIndex = statusSequence.indexOf(currentStatus);
   const newIndex = statusSequence.indexOf(newStatus);
   
@@ -157,6 +161,7 @@ export const getAvailableStatuses = (currentStatus) => {
   const allStatuses = [
     { value: 'pending', label: 'Chờ xử lý' },
     { value: 'processing', label: 'Đang xử lý' },
+    { value: 'delivering', label: 'Đang giao hàng' },
     { value: 'delivered', label: 'Đã nhận hàng' },
     { value: 'cancelled', label: 'Đã hủy' }
   ];
