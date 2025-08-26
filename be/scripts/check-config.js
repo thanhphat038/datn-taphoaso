@@ -98,6 +98,9 @@ try {
   console.log('✅ MAX_FILE_SIZE:', validateNumber(requireEnv('MAX_FILE_SIZE'), 'MAX_FILE_SIZE', 1024));
   console.log('✅ UPLOAD_PATH:', requireEnv('UPLOAD_PATH'));
 
+  // Vietmap Configuration (optional)
+  console.log('✅ VIETMAP_API_KEY:', process.env.VIETMAP_API_KEY ? '***configured***' : '⚠️  optional (for advanced shipping)');
+
   console.log('\n🎉 All configuration validated successfully!');
   console.log('🚀 Server can start safely.');
   

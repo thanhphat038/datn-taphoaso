@@ -11,6 +11,7 @@ import { createOrder, createVNPayPayment } from '../../service/Checkout.service.
 import { calculateShippingFee } from '../../service/Shipping.service.js';
 import { calculateSubtotal, calculateVoucherDiscount, calculateTotal } from '../../utils/price';
 import { useVoucher } from '../../hooks/useVoucher';
+import { useShipping } from '../../hooks/useShipping';
 
 const Checkout = () => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
@@ -21,8 +22,6 @@ const Checkout = () => {
   const [userAddress, setUserAddress] = useState(null);
   const [note, setNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [shippingFee, setShippingFee] = useState(0);
-  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   
   // State cho payment redirect modal
   const [showRedirectModal, setShowRedirectModal] = useState(false);
@@ -50,6 +49,17 @@ const Checkout = () => {
     handleSelectVoucher,
     handleRemoveVoucher,
   } = useVoucher(subtotal);
+
+  // Sử dụng custom hook cho shipping
+  const {
+    shippingFee,
+    isCalculatingShipping,
+    shippingError,
+    calculateShippingFeeForAddress: calculateShipping,
+    shippingFeeDisplay,
+    shippingFeeColorClass,
+    isFreeShipping
+  } = useShipping();
 
   // Tính toán totals một lần
   const voucherDiscountAmount = calculateVoucherDiscount(voucher, subtotal);
@@ -91,7 +101,7 @@ const Checkout = () => {
     // Nếu có địa chỉ được chọn từ SelectAddress, ưu tiên hiển thị địa chỉ này
     if (location.state && location.state.selectedAddress) {
       setUserAddress(location.state.selectedAddress);
-      calculateShippingFeeForAddress(location.state.selectedAddress);
+      calculateShipping(location.state.selectedAddress);
       return;
     }
 
@@ -104,7 +114,7 @@ const Checkout = () => {
         setUserAddress(mainAddress);
         
         if (mainAddress) {
-          await calculateShippingFeeForAddress(mainAddress);
+          await calculateShipping(mainAddress);
         }
       } catch (err) {
         setUserAddress(null);
@@ -202,31 +212,6 @@ const Checkout = () => {
       );
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  // Hàm tính phí vận chuyển
-  const calculateShippingFeeForAddress = async (address) => {
-    if (!address) return;
-    
-    setIsCalculatingShipping(true);
-    try {
-      const deliveryAddress = `${address.address_detail}, ${address.ward}, ${address.district}, ${address.city}`;
-      // const shippingResponse = await calculateShippingFee(deliveryAddress, 'default');
-      const shippingResponse = await calculateShippingFee(deliveryAddress, 'vietmap');
-
-      
-      if (shippingResponse.success && shippingResponse.shippingFee !== undefined) {
-        setShippingFee(shippingResponse.shippingFee);
-      } else {
-        setShippingFee(0);
-        console.log('Shipping API error, using default free shipping:', shippingResponse.message);
-      }
-    } catch (error) {
-      console.error('Error calculating shipping fee:', error);
-      setShippingFee(0);
-    } finally {
-      setIsCalculatingShipping(false);
     }
   };
 
@@ -434,7 +419,7 @@ const Checkout = () => {
                     <span className="text-gray-600">Phí vận chuyển:</span>
                     {userAddress && (
                       <button
-                        onClick={() => calculateShippingFeeForAddress(userAddress)}
+                        onClick={() => calculateShipping(userAddress)}
                         disabled={isCalculatingShipping}
                         className="text-blue-600 hover:text-blue-700 text-sm disabled:opacity-50"
                         title="Tính lại phí vận chuyển"
@@ -450,12 +435,19 @@ const Checkout = () => {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                       <span className="text-gray-500 text-sm">Đang tính...</span>
                     </div>
-                  ) : shippingFee === 0 ? (
-                    <span className="font-medium text-green-600">Miễn phí</span>
                   ) : (
-                    <span className="font-medium text-gray-800">{shippingFee.toLocaleString()} đ</span>
+                    <span className={`font-medium ${shippingFeeColorClass}`}>
+                      {shippingFeeDisplay}
+                    </span>
                   )}
                 </div>
+
+                {/* Hiển thị lỗi shipping nếu có */}
+                {shippingError && (
+                  <div className="text-sm text-red-500 mt-1">
+                    {shippingError}
+                  </div>
+                )}
 
                 {voucherDiscountAmount > 0 && (
                   <div className="flex justify-between items-center">

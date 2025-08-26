@@ -1,11 +1,10 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { getApiUrl } from '../config/api.js';
 
-const API_BASE_URL = getApiUrl('');
+const API_BASE_URL = 'http://localhost:3000';
 const API_ENDPOINTS = {
-  CALCULATE_SHIPPING: "/shipping/calculate-from-address",
-  STORE_INFO: "/shipping/store-info"
+  CALCULATE_SHIPPING: "/api/shipping/calculate-from-address",
+  STORE_INFO: "/api/shipping/store-info"
 };
 
 // Auth helper

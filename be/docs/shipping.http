@@ -1,7 +1,7 @@
 ### Shipping API Tests
 
 @baseUrl = http://localhost:3000/api/shipping
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWE5ZWE3Njg3NWZjZjhmNDk5ZmE5YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU0MzMyNjk3LCJleHAiOjE3NTQ5Mzc0OTd9.OO7YVYpPU1WnfLcVXIS04bQFc54ZIBiIrhC-kPcPHt8
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4OGM4N2ZiZmM0N2UyNmQxODQ0MGUxZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU2MTYzMjcxLCJleHAiOjE3NTYyNDk2NzF9.FR9bbzHtr_eaROrvpAXrVZbYocaqQVwxb5V3_tdM_xc
 
 
 ### Login
@@ -19,8 +19,8 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "deliveryAddress": "159 Nguyễn Đình Chiểu, Phường 6, Quận 3, Hồ Chí Minh",
-  "service": "default"
+  "deliveryAddress": "337 Hồng Bàng, Phường 11, Quận 5, TP Hồ Chí Minh",
+  "service": "vietmap"
 }
 
 ### 2. Tính phí ship từ địa chỉ - Vietmap Service (với thông tin tuyến đường)
@@ -29,7 +29,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "deliveryAddress": "159 Nguyễn Đình Chiểu, Phường 6, Quận 3, Hồ Chí Minh",
+  "deliveryAddress": "159 Nguyễn Đình Chiểu, Phường 6, Quận 3, TP Hồ Chí Minh",
   "service": "vietmap"
 }
 ### 7. Lấy thông tin cửa hàng

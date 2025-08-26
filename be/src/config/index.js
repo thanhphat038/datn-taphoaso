@@ -92,6 +92,9 @@ export const LLM_BASE_URL = process.env.LLM_BASE_URL || 'https://fleet-toucan-re
 export const LLM_MODEL = process.env.LLM_MODEL || 'gpt-3.5-turbo';
 export const LLM_API_KEY = process.env.LLM_API_KEY || ''; // optional for LM Studio
 
+// Vietmap Configuration (optional)
+export const VIETMAP_API_KEY = process.env.VIETMAP_API_KEY || '';
+
 // Validate all configurations on startup
 export function validateConfig() {
   try {
@@ -173,5 +176,8 @@ export const config = {
     baseUrl: LLM_BASE_URL,
     model: LLM_MODEL,
     apiKey: LLM_API_KEY,
+  },
+  vietmap: {
+    apiKey: VIETMAP_API_KEY,
   },
 };

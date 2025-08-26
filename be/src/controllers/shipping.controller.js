@@ -48,6 +48,11 @@ export const calculateShippingFromAddress = async (req, res, next) => {
         console.log('📊 [SHIPPING] Khoảng cách thực tế:', actualDistance, 'km');
         console.log('⏱️ [SHIPPING] Thời gian di chuyển:', Math.round(routeInfo.time / 60), 'phút');
         
+        // Kiểm tra xem có phải fallback không
+        if (routeInfo.isFallback) {
+          console.log('⚠️ [SHIPPING] Sử dụng khoảng cách đường chim bay (fallback)');
+        }
+        
         // Tính phí ship dựa trên khoảng cách thực tế
         console.log('💰 [SHIPPING] Đang tính phí ship...');
         const shippingFee = vietmapShippingService.calculateShippingFee(actualDistance);
@@ -58,13 +63,15 @@ export const calculateShippingFromAddress = async (req, res, next) => {
           distance: {
             calculated: Math.round(calculatedDistance * 100) / 100,
             actual: Math.round(actualDistance * 100) / 100,
-            difference: Math.round(Math.abs(calculatedDistance - actualDistance) * 100) / 100
+            difference: Math.round(Math.abs(calculatedDistance - actualDistance) * 100) / 100,
+            isFallback: routeInfo.isFallback || false
           },
           coordinates,
           address: deliveryAddress,
           routeInfo: {
             time: Math.round(routeInfo.time / 60), // Chuyển sang phút
-            instructions: routeInfo.instructions
+            instructions: routeInfo.instructions,
+            isFallback: routeInfo.isFallback || false
           }
         };
         

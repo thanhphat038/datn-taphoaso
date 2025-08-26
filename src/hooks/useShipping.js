@@ -13,10 +13,9 @@ export const useShipping = () => {
   /**
    * Tính phí vận chuyển cho địa chỉ
    * @param {Object} address - Địa chỉ giao hàng
-   * @param {string} service - Dịch vụ vận chuyển (mặc định: 'default')
+   * @param {string} service - Dịch vụ vận chuyển (mặc định: 'vietmap')
    * @returns {Promise<boolean>} True nếu thành công, false nếu thất bại
    */
-  // const calculateShippingFeeForAddress = async (address, service = 'default') => {
   const calculateShippingFeeForAddress = async (address, service = 'vietmap') => {
 
     if (!address) {

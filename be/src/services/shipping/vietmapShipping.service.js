@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { AppError } from '../../errors/AppError.js';
 import { ERROR_CODES } from '../../errors/errorDefinitions.js';
+import { VIETMAP_API_KEY } from '../../config/index.js';
 
 class VietmapShippingService {
   constructor() {
     this.baseUrl = 'https://maps.vietmap.vn/api';
-    this.apiKey = process.env.VIETMAP_API_KEY;
-    this.addressCache = new Map(); // Cache đơn giản cho địa chỉ
+    this.apiKey = VIETMAP_API_KEY;
+    this.addressCache = new Map();
 
     if (!this.apiKey) {
       console.warn('VIETMAP_API_KEY not found in environment variables');
@@ -130,8 +131,7 @@ class VietmapShippingService {
         params: {
           'api-version': '1.1',
           apikey: this.apiKey,
-          point: `${originCoords.lat},${originCoords.lon}`,
-          point: `${destinationCoords.lat},${destinationCoords.lon}`,
+          point: [`${originCoords.lat},${originCoords.lon}`, `${destinationCoords.lat},${destinationCoords.lon}`],
           vehicle: vehicle,
           points_encoded: true
         },
@@ -140,12 +140,26 @@ class VietmapShippingService {
 
       console.log('📡 [VIETMAP] Response từ Route API:', response.data);
 
+      // Kiểm tra lỗi từ API
+      if (response.data && response.data.code === 'ERROR') {
+        console.log('⚠️ [VIETMAP] Route API bị lỗi, sử dụng khoảng cách đường chim bay');
+        // Fallback: sử dụng khoảng cách đường chim bay
+        const fallbackDistance = this.calculateDistance(originCoords, destinationCoords);
+        return {
+          distance: fallbackDistance,
+          time: Math.round(fallbackDistance * 2 * 60), // Ước tính thời gian (2 phút/km)
+          instructions: [],
+          routeInfo: { fallback: true },
+          isFallback: true
+        };
+      }
+
       if (response.data && response.data.paths && response.data.paths.length > 0) {
         const path = response.data.paths[0];
         const result = {
           distance: path.distance / 1000, // Chuyển từ mét sang km
           time: path.time / 1000, // Chuyển từ millisecond sang giây
-          instructions: path.instructions,
+          instructions: path.instructions || [],
           routeInfo: path
         };
         

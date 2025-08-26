@@ -124,7 +124,8 @@ const API_CONFIG = {
     // Shipping
     SHIPPING: {
       BASE: '/shipping',
-      CALCULATE: '/shipping/calculate'
+      CALCULATE: '/shipping/calculate-from-address',
+      STORE_INFO: '/shipping/store-info'
     },
     
     // Recent Views
@@ -162,4 +163,6 @@ import axios from 'axios';
 axios.defaults.withCredentials = true; // Đảm bảo tất cả requests đều gửi cookies
 axios.defaults.baseURL = API_CONFIG.BASE_URL;
 
+// Export both named and default
+export { API_CONFIG };
 export default API_CONFIG; 
